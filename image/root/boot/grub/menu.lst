@@ -1,0 +1,10 @@
+default 0
+
+title ImpalaOS current kernel
+	root (fd0)
+	kernel /boot/impala
+
+title ImpalaOS previous kernel
+	root (fd0)
+	kernel /boot/impala.old
+

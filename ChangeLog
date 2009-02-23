@@ -1,0 +1,8 @@
+2008-12-27 Pawel Wieczorek <wieczyk@gmail.com> rev14:
+	* Dodano interfejs kthread do watkow po stronie jadra
+	* Dodano scheduling oparty na round-robin
+
+
+2008-12-25 Pawel Wieczorek <wieczyk@gmail.com> rev1:
+	* Przerobiona Impala :)
+

@@ -1,0 +1,33 @@
+
+_SUBDIR_BUILD?= build
+_SUBDIR_CLEAN?= clean
+_SUBDIR_DEPEND?= depend
+
+
+#
+# GNU Make lubi drukowac do jakiego katalogu aktualnie wchodzi i z jakiego wychodzi.
+# Psuje to troche estetycznosc komunikatow, jakie drukuja te skrypty Makefile, zatem
+# ustawiam zmienna MAKELEVEL na "" za kazdym razem aby zmylic GNU Make (uzywa tej
+# zmiennej srodowiskowej do rozpoznawania, czy jest procesem 'wchodzacym' gdzies,
+# czy jest uruchomionym przez uzytkownika
+#			-- Pawel Wieczorek
+#
+
+${_SUBDIR_BUILD}:
+	@for d in ${SUBDIRS};\
+		do echo "===> ${DIRPRFX}$$d (build)";\
+		   cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} build; cd ..;\
+	done
+
+${_SUBDIR_CLEAN}:
+	@for d in ${SUBDIRS};\
+		do echo "===> ${DIRPRFX}$$d (clean)";\
+			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} clean; cd ..;\
+	done
+
+${_SUBDIR_DEPEND}:
+	@for d in ${SUBDIRS};\
+		do echo "===> ${DIRPRFX}$$d (depend)";\
+			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} depend; cd ..\
+	done
+
