@@ -75,6 +75,8 @@ spinlock_unlock(spinlock_t *sp)
     atomic_change32(&sp->_dlock, SPINLOCK_UNLOCK);
 }
 
+
+
 #endif
 #endif
 
