@@ -42,3 +42,4 @@ thread_enter(thread_t *t_to)
     entry(t_to->thr_entry_arg);
     __asm__ volatile (" jmp .");
 }
+
