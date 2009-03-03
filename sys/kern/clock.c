@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/clock.h>
+#include <sys/list.h>
 #include <sys/sched.h>
 #include <sys/thread.h>
 #include <machine/interrupt.h>

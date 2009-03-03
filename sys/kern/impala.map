@@ -28,6 +28,7 @@ clock_ticks         0x4               clock.o
 stack               0x4000            /home/wieczyk/Workspace/impala/sys/arch/x86//arch/bootstrap.o
 thread_idle         0x4               thread.o
 irq_handlers        0x5c              /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(interrupt.o)
+sched_runq          0x14              sched.o
 sp                  0x4               main.o
 sched_quantum       0x4               sched.o
 curthread           0x4               thread.o
@@ -41,7 +42,7 @@ Linker script and memory map
 
                 0x0000000000100000                . = 0x100000
 
-.text           0x0000000000100000     0x1ef6
+.text           0x0000000000100000     0x1f76
  arch/bootstrap.o(.text)
  .text          0x0000000000100000       0x1e /home/wieczyk/Workspace/impala/sys/arch/x86//arch/bootstrap.o
                 0x000000000010000c                kernel_entrypoint
@@ -64,82 +65,82 @@ Linker script and memory map
                 0x0000000000100680                test
                 0x0000000000100550                kmain
  *fill*         0x000000000010071e        0x2 00
- .text          0x0000000000100720       0xd6 sched.o
-                0x0000000000100760                sched_action
+ .text          0x0000000000100720      0x156 sched.o
+                0x00000000001007e0                sched_action
                 0x0000000000100720                sched_init
-                0x0000000000100790                sched_yield
- *fill*         0x00000000001007f6        0xa 00
- .text          0x0000000000100800       0x27 syscall.o
-                0x0000000000100800                syscall
- *fill*         0x0000000000100827        0x9 00
- .text          0x0000000000100830      0x251 thread.o
-                0x0000000000100a50                thread_exit
-                0x0000000000100830                thread_init
-                0x0000000000100a30                thread_run
-                0x0000000000100a60                thread_suspend
-                0x0000000000100960                thread_create
- *fill*         0x0000000000100a81        0xf 00
- .text          0x0000000000100a90       0x37 sc/exit.o
-                0x0000000000100a90                sc_exit
- *fill*         0x0000000000100ac7        0x9 00
- .text          0x0000000000100ad0       0x54 sc/write.o
-                0x0000000000100ad0                sc_write
- *fill*         0x0000000000100b24        0xc 00
- .text          0x0000000000100b30      0x354 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(init.o)
-                0x0000000000100b30                init_x86
- .text          0x0000000000100e84      0x6ba /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(isr.o)
-                0x0000000000100e84                _unhnd_intrpt
-                0x0000000000101154                _intrpt_syscall
- *fill*         0x000000000010153e        0x2 00
- .text          0x0000000000101540       0xc9 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(thread.o)
-                0x0000000000101580                thread_switch
-                0x00000000001015d0                thread_enter
-                0x0000000000101540                thread_context_init
- *fill*         0x0000000000101609        0x7 00
- .text          0x0000000000101610       0xbe /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(i8254.o)
-                0x0000000000101660                i8254_set_freq
-                0x0000000000101610                i8254_init
- *fill*         0x00000000001016ce        0x2 00
- .text          0x00000000001016d0      0x1f0 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(i8259a.o)
-                0x0000000000101890                i8259a_send_eoi
-                0x00000000001016d0                i8259a_init
-                0x00000000001017f0                i8259a_irq_enable
-                0x00000000001017b0                i8259a_reset_mask
-                0x0000000000101840                i8259a_irq_disable
- .text          0x00000000001018c0      0x35e /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(video.o)
-                0x00000000001018e0                textscreen_disable_forced_attr
-                0x0000000000101950                textscreen_put
-                0x0000000000101a70                textscreen_scroll
-                0x0000000000101a40                textscreen_update_cursor
-                0x0000000000101b30                textscreen_reset
-                0x0000000000101ae0                textscreen_clear
-                0x0000000000101b50                textscreen_draw
-                0x00000000001018f0                textscreen_putat
-                0x00000000001018c0                textscreen_enable_forced_attr
- *fill*         0x0000000000101c1e        0x2 00
- .text          0x0000000000101c20       0xab /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(asmstub.o)
-                0x0000000000101c5a                gdt_load
-                0x0000000000101c20                thread_context_load
-                0x0000000000101caa                far_copy_in
-                0x0000000000101c3d                thread_context_store
-                0x0000000000101c8d                idt_load
-                0x0000000000101c95                tr_load
-                0x0000000000101c9b                jmp_sel
-                0x0000000000101c85                ldt_load
- *fill*         0x0000000000101ccb        0x5 00
- .text          0x0000000000101cd0      0x105 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(interrupt.o)
-                0x0000000000101d10                ISR_irq
-                0x0000000000101dc0                TRAP_gfault
-                0x0000000000101d00                irq_done
-                0x0000000000101cd0                irq_install_handler
-                0x0000000000101db0                TRAP_unhandled
-                0x0000000000101d50                ISR_syscall
- *fill*         0x0000000000101dd5        0xb 00
- .text          0x0000000000101de0      0x116 /home/wieczyk/Workspace/impala/sys/libkutil/libkutil.a(string.o)
-                0x0000000000101e60                mem_cpy
-                0x0000000000101ed0                str_len
-                0x0000000000101ea0                mem_set
-                0x0000000000101de0                mem_move
+                0x0000000000100810                sched_yield
+ *fill*         0x0000000000100876        0xa 00
+ .text          0x0000000000100880       0x27 syscall.o
+                0x0000000000100880                syscall
+ *fill*         0x00000000001008a7        0x9 00
+ .text          0x00000000001008b0      0x251 thread.o
+                0x0000000000100ad0                thread_exit
+                0x00000000001008b0                thread_init
+                0x0000000000100ab0                thread_run
+                0x0000000000100ae0                thread_suspend
+                0x00000000001009e0                thread_create
+ *fill*         0x0000000000100b01        0xf 00
+ .text          0x0000000000100b10       0x37 sc/exit.o
+                0x0000000000100b10                sc_exit
+ *fill*         0x0000000000100b47        0x9 00
+ .text          0x0000000000100b50       0x54 sc/write.o
+                0x0000000000100b50                sc_write
+ *fill*         0x0000000000100ba4        0xc 00
+ .text          0x0000000000100bb0      0x354 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(init.o)
+                0x0000000000100bb0                init_x86
+ .text          0x0000000000100f04      0x6ba /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(isr.o)
+                0x0000000000100f04                _unhnd_intrpt
+                0x00000000001011d4                _intrpt_syscall
+ *fill*         0x00000000001015be        0x2 00
+ .text          0x00000000001015c0       0xc9 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(thread.o)
+                0x0000000000101600                thread_switch
+                0x0000000000101650                thread_enter
+                0x00000000001015c0                thread_context_init
+ *fill*         0x0000000000101689        0x7 00
+ .text          0x0000000000101690       0xbe /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(i8254.o)
+                0x00000000001016e0                i8254_set_freq
+                0x0000000000101690                i8254_init
+ *fill*         0x000000000010174e        0x2 00
+ .text          0x0000000000101750      0x1f0 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(i8259a.o)
+                0x0000000000101910                i8259a_send_eoi
+                0x0000000000101750                i8259a_init
+                0x0000000000101870                i8259a_irq_enable
+                0x0000000000101830                i8259a_reset_mask
+                0x00000000001018c0                i8259a_irq_disable
+ .text          0x0000000000101940      0x35e /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(video.o)
+                0x0000000000101960                textscreen_disable_forced_attr
+                0x00000000001019d0                textscreen_put
+                0x0000000000101af0                textscreen_scroll
+                0x0000000000101ac0                textscreen_update_cursor
+                0x0000000000101bb0                textscreen_reset
+                0x0000000000101b60                textscreen_clear
+                0x0000000000101bd0                textscreen_draw
+                0x0000000000101970                textscreen_putat
+                0x0000000000101940                textscreen_enable_forced_attr
+ *fill*         0x0000000000101c9e        0x2 00
+ .text          0x0000000000101ca0       0xab /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(asmstub.o)
+                0x0000000000101cda                gdt_load
+                0x0000000000101ca0                thread_context_load
+                0x0000000000101d2a                far_copy_in
+                0x0000000000101cbd                thread_context_store
+                0x0000000000101d0d                idt_load
+                0x0000000000101d15                tr_load
+                0x0000000000101d1b                jmp_sel
+                0x0000000000101d05                ldt_load
+ *fill*         0x0000000000101d4b        0x5 00
+ .text          0x0000000000101d50      0x105 /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(interrupt.o)
+                0x0000000000101d90                ISR_irq
+                0x0000000000101e40                TRAP_gfault
+                0x0000000000101d80                irq_done
+                0x0000000000101d50                irq_install_handler
+                0x0000000000101e30                TRAP_unhandled
+                0x0000000000101dd0                ISR_syscall
+ *fill*         0x0000000000101e55        0xb 00
+ .text          0x0000000000101e60      0x116 /home/wieczyk/Workspace/impala/sys/libkutil/libkutil.a(string.o)
+                0x0000000000101ee0                mem_cpy
+                0x0000000000101f50                str_len
+                0x0000000000101f20                mem_set
+                0x0000000000101e60                mem_move
 
 .rodata         0x0000000000102000       0xe6
  *(.rodata)
@@ -189,13 +190,13 @@ Linker script and memory map
                 0x0000000000108fa4                clock_ticks
  COMMON         0x0000000000108fa8        0x4 main.o
                 0x0000000000108fa8                sp
- COMMON         0x0000000000108fac        0x4 sched.o
-                0x0000000000108fac                sched_quantum
- COMMON         0x0000000000108fb0       0x1c thread.o
-                0x0000000000108fb0                threads_list
-                0x0000000000108fc4                thread_idle
-                0x0000000000108fc8                curthread
- *fill*         0x0000000000108fcc       0x14 00
+ COMMON         0x0000000000108fac       0x18 sched.o
+                0x0000000000108fac                sched_runq
+                0x0000000000108fc0                sched_quantum
+ COMMON         0x0000000000108fc4       0x1c thread.o
+                0x0000000000108fc4                threads_list
+                0x0000000000108fd8                thread_idle
+                0x0000000000108fdc                curthread
  COMMON         0x0000000000108fe0       0x5c /home/wieczyk/Workspace/impala/sys/arch/x86//libarch.a(interrupt.o)
                 0x0000000000108fe0                irq_handlers
  *(.bss)
@@ -204,9 +205,9 @@ Linker script and memory map
  .bss           0x000000000010903c        0x0 kprintf.o
  .bss           0x000000000010903c        0x0 kthread.o
  .bss           0x000000000010903c       0x30 main.o
- .bss           0x000000000010906c        0x4 sched.o
- .bss           0x0000000000109070        0x0 syscall.o
- *fill*         0x0000000000109070       0x10 00
+ .bss           0x000000000010906c        0x8 sched.o
+ .bss           0x0000000000109074        0x0 syscall.o
+ *fill*         0x0000000000109074        0xc 00
  .bss           0x0000000000109080    0x403cc thread.o
  .bss           0x000000000014944c        0x0 sc/exit.o
  .bss           0x000000000014944c        0x0 sc/write.o
@@ -337,6 +338,7 @@ sched_action                                      sched.o
 sched_init                                        sched.o
                                                   main.o
 sched_quantum                                     sched.o
+sched_runq                                        sched.o
 sched_yield                                       sched.o
                                                   sc/exit.o
                                                   thread.o
