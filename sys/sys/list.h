@@ -1,5 +1,7 @@
+
 #ifndef __SYS_LIST_H
 #define __SYS_LIST_H
+
 
 // Proste listy, wzorowane na interfejsie z systemu Solaris
 
@@ -29,7 +31,7 @@ struct list {
 
 
 #define LIST_CREATE(ls, str,member,cyclic)\
-    list_create(ls, offsetof(str,member,cyclic)
+    list_create(ls, offsetof(str,member),cyclic)
 
 static inline void
 list_create(list_t *ls, uintptr_t offset, bool cyclic)

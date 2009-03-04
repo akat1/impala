@@ -23,7 +23,6 @@ struct thread {
     int             thr_priv;
     int             thr_flags;
     char            thr_stack[THREAD_STACK_SIZE];
-    thread_t       *runq_next;
     list_node_t     L_run_queue;
     list_node_t     L_threads;
 };
@@ -37,8 +36,10 @@ enum THREAD_STATUS {
 
 
 enum THREAD_FLAGS {
-    THREAD_FRESH    = 1 << 0,
-    THREAD_SYSCALL  = 1 << 1
+    THREAD_FRESH     = 1 << 0,
+    THREAD_PREEMPTED = 1 << 0,
+    THREAD_SYSCALL   = 1 << 1,
+
 };
 
 enum {
@@ -73,6 +74,13 @@ static inline void
 spinlock_unlock(spinlock_t *sp)
 {
     atomic_change32(&sp->_dlock, SPINLOCK_UNLOCK);
+//     sp->_dlock = SPINLOCK_UNLOCK;
+}
+
+static inline bool
+spinlock_trylock(spinlock_t *sp)
+{
+    return atomic_change32(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK;
 }
 
 

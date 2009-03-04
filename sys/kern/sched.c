@@ -5,8 +5,8 @@
 #include <sys/kprintf.h>
 
 int sched_quantum;
-list_t sched_runq;
 
+static list_t run_queue;
 static int end_ticks;
 static spinlock_t sprq; // spinlock run queue
 
@@ -17,9 +17,10 @@ sched_init()
 {
     sched_quantum = 5;
     end_ticks = clock_ticks + sched_quantum;
-    list_create(&sched_runq, offsetof(thread_t, L_threads), TRUE);
+    list_create(&run_queue, offsetof(thread_t, L_run_queue), TRUE);
     spinlock_init(&sprq);
     kprintf("round-robin scheduler with quantum: %u ticks\n", sched_quantum);
+    sched_insert(curthread);
 
 }
 
@@ -35,19 +36,33 @@ sched_action()
 void
 sched_yield()
 {
-    thread_t *n = select_next_thread();
-    if (n == curthread) return;
-    thread_switch(n, curthread);
+    if (spinlock_trylock(&sprq)) {
+        thread_t *n = select_next_thread();
+        spinlock_unlock(&sprq);
+        if (n == curthread) return;
+        thread_switch(n, curthread);
+    }
 }
+
+
+void
+sched_insert(thread_t *thr)
+{
+    spinlock_lock(&sprq);
+    list_insert_tail(&run_queue, thr);
+    spinlock_unlock(&sprq);
+}
+
 
 thread_t *
 select_next_thread()
 {
-    thread_t *c = curthread;
-    do {
-        c = c->runq_next;
-    } while (c->thr_status != THREAD_RUN && !(c->thr_flags & THREAD_SYSCALL));
-    return c;
+    thread_t *p = (thread_t*)list_next(&run_queue, curthread);
+    if (p == NULL) {
+        kprintf("sched: cannot select next thread...\n");
+        while (TRUE);
+    }
+    return p;
 }
 
 

@@ -3,7 +3,6 @@
 
 #ifdef __KERNEL
 extern int sched_quantum;
-extern list_t sched_runq;
 
 void sched_init(void);
 void sched_action(void);

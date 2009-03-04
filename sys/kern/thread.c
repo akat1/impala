@@ -26,13 +26,11 @@ thread_init()
     mem_zero(&thread_table, sizeof(thread_table));
     for (i = 0; i < MAX_THREAD-1; i++) {
         thread_table[i].thr_status = THREAD_SLEEP;
-        thread_table[i].runq_next = &thread_table[i+1];
     }
     thread_table[MAX_THREAD-1].runq_next = 0;
     free_thr = &thread_table[0];
     curthread = thread0 = thread_create(0, 0, 0);
     thread0->thr_status = THREAD_RUN;
-    thread0->runq_next = thread0;
 
     list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
 }
@@ -43,16 +41,14 @@ thread_create(int priv, addr_t entry, addr_t arg)
 {
     if (free_thr) {
         thread_t *t = free_thr;
-        free_thr = free_thr->runq_next;
         t->thr_status = 0;
         t->thr_flags = 0;
         t->thr_tid = last_pid++;
         t->thr_priv = priv;
         t->thr_entry_point = entry;
         t->thr_entry_arg = arg;
-        t->runq_next = curthread->runq_next;
-        curthread->runq_next = t;
         thread_context_init(&t->thr_context, priv, t->thr_stack);
+        list_insert_tail(&threads_list, t);
         return t;
     } else {
         return 0;
@@ -64,6 +60,8 @@ thread_run(thread_t *p)
 {
     p->thr_flags |= THREAD_FRESH;
     p->thr_status = THREAD_RUN;
+    sched_insert(p);
+
 }
 
 void
