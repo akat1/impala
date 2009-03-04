@@ -16,3 +16,6 @@ ${LIBRARY}.a: ${OBJS}
 ${_LIB_CLEAN}:
 	rm -f ${OBJS} ${LIBRARY}.a
 
+${_LIB_DEPEND}:
+	@${CC} ${C_FLAGS} -M ${SRCS} > .depend
+

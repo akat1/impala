@@ -28,6 +28,6 @@ ${_SUBDIR_CLEAN}:
 ${_SUBDIR_DEPEND}:
 	@for d in ${SUBDIRS};\
 		do echo "===> ${DIRPRFX}$$d (depend)";\
-			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} depend; cd ..\
+			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} depend; cd ..;\
 	done
 

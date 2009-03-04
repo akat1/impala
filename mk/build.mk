@@ -20,3 +20,4 @@ OBJS= ${OBJS_2}
 	@${AS} ${AS_FLAGS} -o $@ $<
 
 
+include .depend

@@ -26,3 +26,6 @@ ${KERNEL}: ${LIBDEPS} ${OBJS}
 ${_LIB_CLEAN}:
 	rm -f ${OBJS} ${KERNEL}
 
+${_KERNEL_DEPEND}:
+	@${CC} ${C_FLAGS} -M ${SRCS} > .depend
+
