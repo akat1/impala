@@ -1,7 +1,5 @@
-
 #ifndef __SYS_LIST_H
 #define __SYS_LIST_H
-
 
 // Proste listy, wzorowane na interfejsie z systemu Solaris
 
@@ -165,8 +163,6 @@ list_insert_tail(list_t *ls, void *elem)
     ls->ls_root.prev = elem;
     ls->ls_length++;
 }
-
-#include <sys/kprintf.h>
 
 static inline void
 list_insert_after(list_t *ls, void *xs, void *x)

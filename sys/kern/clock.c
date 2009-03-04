@@ -6,19 +6,15 @@
 #include <machine/interrupt.h>
 #include <machine/atomic.h>
 
-enum {
-    TICK_UNLOCKED,
-    TICK_LOCKED,
-    TICK_DISABLED
-};
 
-static uint entered = TICK_DISABLED;
+static spinlock_t soft_guard = { SPINLOCK_LOCK };
+
 volatile uint clock_ticks;
 
 void
 clock_init()
 {
-    atomic_change32(&entered, TICK_UNLOCKED);
+     spinlock_init(&soft_guard);
 }
 
 /* ,,twarde tykniêcie''
@@ -36,12 +32,14 @@ clock_hardtick()
  * zajêty przez ni± opó¼nia jej kolejne wywo³anie, a nie przerwanie.
  */
 
+#include <sys/kprintf.h>
+
 void
 clock_softtick()
 {
-//     if (atomic_change32(&entered, TICK_LOCKED) != TICK_UNLOCKED) return;
-//     atomic_change32(&entered, TICK_UNLOCKED);
-    sched_action();
-
+    if ( spinlock_trylock(&soft_guard) ) {
+        spinlock_unlock(&soft_guard);
+        sched_action();
+    }
 }
 

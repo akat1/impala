@@ -19,7 +19,7 @@ thread_switch(thread_t *t_to, thread_t *t_from)
     if (thread_context_store(&t_from->thr_context)) {
         // Jestesmy w watku t_from
         curthread = t_to;
-        if (t_to->thr_flags & THREAD_FRESH) {
+        if (t_to->thr_flags & THREAD_NEW) {
             thread_enter(t_to);
         } else {
             thread_context_load(&t_to->thr_context);
@@ -36,10 +36,15 @@ thread_enter(thread_t *t_to)
 
     typedef void (*entry_point)(void*);
     entry_point entry;
-    t_to->thr_flags &= ~THREAD_FRESH;
+    t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
-    __asm__ volatile ("movl %%eax, %%esp" : : "a" (t_to->thr_context.c_esp) : "%esp" );
+    __asm__ volatile (
+        "movl %%eax, %%esp"
+        :
+        : "a" (t_to->thr_context.c_esp)
+        : "%esp" );
     entry(t_to->thr_entry_arg);
+    kprintf("ERROR: should never be here! thread_enter/machine/thread.c\n");
     __asm__ volatile (" jmp .");
 }
 

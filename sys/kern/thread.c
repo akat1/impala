@@ -2,6 +2,7 @@
 #include <sys/thread.h>
 #include <sys/libkutil.h>
 #include <sys/sched.h>
+#include <sys/kprintf.h>
 
 thread_t *curthread;
 thread_t *thread_idle;
@@ -9,40 +10,33 @@ thread_t *thread_idle;
 list_t threads_list;
 
 static thread_t thread_table[MAX_THREAD];
-static thread_t *free_thr;
-static thread_t *thread0;
 static uint last_pid;
 
-/*
- * Gdy sie przekreci last_pid, to nei sprawdzamy czy nie jedzie po pid'ach uzywanych
- * ... ale na razie to nie jest istotne.
- */
+static list_t __free_threads;
 
 void
 thread_init()
 {
-    int i;
     last_pid = 0;
     mem_zero(&thread_table, sizeof(thread_table));
-    for (i = 0; i < MAX_THREAD-1; i++) {
-        thread_table[i].thr_status = THREAD_SLEEP;
-    }
-    thread_table[MAX_THREAD-1].runq_next = 0;
-    free_thr = &thread_table[0];
-    curthread = thread0 = thread_create(0, 0, 0);
-    thread0->thr_status = THREAD_RUN;
-
     list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
+    list_create(&__free_threads, offsetof(thread_t, L_threads), FALSE);
+    for (int i = 0; i < MAX_THREAD; i++) {
+        list_insert_tail(&__free_threads, &thread_table[i]);
+    }
+    curthread = thread_create(0, 0, 0);
+    curthread->thr_flags = THREAD_RUN;
+
 }
 
 
 thread_t *
 thread_create(int priv, addr_t entry, addr_t arg)
 {
+    thread_t *free_thr = list_extract_first(&__free_threads);
     if (free_thr) {
         thread_t *t = free_thr;
-        t->thr_status = 0;
-        t->thr_flags = 0;
+        t->thr_flags = THREAD_NEW;
         t->thr_tid = last_pid++;
         t->thr_priv = priv;
         t->thr_entry_point = entry;
@@ -51,6 +45,7 @@ thread_create(int priv, addr_t entry, addr_t arg)
         list_insert_tail(&threads_list, t);
         return t;
     } else {
+        kprintf("ERROR: no free threads!\n");
         return 0;
     }
 }
@@ -58,22 +53,17 @@ thread_create(int priv, addr_t entry, addr_t arg)
 void
 thread_run(thread_t *p)
 {
-    p->thr_flags |= THREAD_FRESH;
-    p->thr_status = THREAD_RUN;
     sched_insert(p);
-
 }
 
 void
 thread_exit(thread_t *t)
 {
-    t->thr_status = THREAD_DEAD;
 }
 
 void
 thread_suspend(thread_t *t)
 {
-    t->thr_status = THREAD_SLEEP;
     if (t == curthread) sched_yield();
 }
 

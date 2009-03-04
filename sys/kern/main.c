@@ -50,8 +50,10 @@ test()
 {
     static kthread_t t0, t1, t2, t3;
     spinlock_init(&sp);
+    kprintf("creating...\n");
     kthread_create(&t0, k, (void*) 0);
     kthread_create(&t1, k, (void*) 1);
     kthread_create(&t2, k, (void*) 2);
     kthread_create(&t3, k, (void*) 3);
+    kprintf("created\n");
 }

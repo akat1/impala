@@ -19,7 +19,6 @@ struct thread {
     int             thr_tid;
     addr_t          thr_entry_point;
     addr_t          thr_entry_arg;
-    int             thr_status;
     int             thr_priv;
     int             thr_flags;
     char            thr_stack[THREAD_STACK_SIZE];
@@ -28,18 +27,14 @@ struct thread {
 };
 
 
-enum THREAD_STATUS {
-    THREAD_RUN,
-    THREAD_SLEEP,
-    THREAD_DEAD
-};
 
 
 enum THREAD_FLAGS {
-    THREAD_FRESH     = 1 << 0,
-    THREAD_PREEMPTED = 1 << 0,
-    THREAD_SYSCALL   = 1 << 1,
-
+    THREAD_NEW       = 1 << 0, // in-creating
+    THREAD_ZOMBIE    = 1 << 1, // in-destroying
+    THREAD_RUN       = 1 << 2, // are in run_queue
+    THREAD_SYSCALL   = 1 << 3, // are in syscall handler
+    THREAD_SLEEP     = 1 << 4, // sleeped
 };
 
 enum {
@@ -58,6 +53,17 @@ void thread_run(thread_t *p);
 void thread_exit(thread_t *p);
 void thread_suspend(thread_t *t);
 
+void mutex_init(mutex_t *m);
+void mutex_lock(mutex_t *m);
+bool mutex_trylock(mutex_t *m);
+void mutex_unlock(mutex_t *m);
+
+void condvar_init(condvar_t *cv, mutex_t *m);
+void condvar_wait(condvar_t *cv);
+void condvar_notify_one(condvar_t *cv);
+void condvar_notify_all(condvar_t *cv);
+
+
 static inline void
 spinlock_init(spinlock_t *sp)
 {
@@ -73,14 +79,14 @@ spinlock_lock(spinlock_t *sp)
 static inline void
 spinlock_unlock(spinlock_t *sp)
 {
-    atomic_change32(&sp->_dlock, SPINLOCK_UNLOCK);
-//     sp->_dlock = SPINLOCK_UNLOCK;
+//      atomic_change32(&sp->_dlock, SPINLOCK_UNLOCK);
+      sp->_dlock = SPINLOCK_UNLOCK;
 }
 
 static inline bool
 spinlock_trylock(spinlock_t *sp)
 {
-    return atomic_change32(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK;
+    return atomic_change32(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_UNLOCK;
 }
 
 
