@@ -8,7 +8,10 @@ enum {
     PIT_MODE
 };
 
-
+enum {
+	PIT_MAX_FREQ = 1193180
+};
+  
 #ifdef __KERNEL
 
 void i8254_init(void);

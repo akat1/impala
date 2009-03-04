@@ -29,9 +29,10 @@ i8254_set_freq(uint hz)
 {
     kprintf("i8254 interrupt timer: %uhz\n", hz);
     // brakuje chyba wys³ania komendy resetuj±cej chipset
-
+	uint res=PIT_MAX_FREQ/hz;
     //TODO jakies ,,zaawansowane obliczenia'' co do HZ
-    io_out8(PIT_CHAN0, 0xff);
-    io_out8(PIT_CHAN0, 0x40);
+	//io_out8(0x34, PIT_MODE);
+    io_out8(PIT_CHAN0, res&0xff);
+    io_out8(PIT_CHAN0, (res>>8)&0xff);
 }
 
