@@ -26,6 +26,10 @@ ${KERNEL}: ${LIBDEPS} ${OBJS}
 ${_LIB_CLEAN}:
 	rm -f ${OBJS} ${KERNEL}
 
-${_KERNEL_DEPEND}:
-	@${CC} ${C_FLAGS} -M ${SRCS} > .depend
+.depend ${_KERNEL_DEPEND}: ${SRCS}
+	@rm -f .depend
+	@for i in ${SRCS}; do	\
+		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
+	done;
 
+-include .depend

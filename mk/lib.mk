@@ -16,6 +16,10 @@ ${LIBRARY}.a: ${OBJS}
 ${_LIB_CLEAN}:
 	rm -f ${OBJS} ${LIBRARY}.a
 
-${_LIB_DEPEND}:
-	@${CC} ${C_FLAGS} -M ${SRCS} > .depend
+.depend ${_LIB_DEPEND}: ${SRCS}
+	@rm -f .depend
+	@for i in ${SRCS}; do	\
+		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
+	done;
 
+-include .depend

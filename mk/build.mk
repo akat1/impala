@@ -19,5 +19,3 @@ OBJS= ${OBJS_2}
 	@echo "> compiling $@"
 	@${AS} ${AS_FLAGS} -o $@ $<
 
-
-include .depend
