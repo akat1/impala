@@ -22,4 +22,4 @@ ${_LIB_CLEAN}:
 		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
 	done;
 
--include .depend
+include .depend
