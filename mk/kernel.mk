@@ -1,6 +1,7 @@
 _KERNEL_BUILD= build
 _KERNEL_CLEAN= clean
 _KERNEL_DEPEND= depend
+_KERNEL_CLEANDEPEND= cleandepend
 
 C_FLAGS=-D__KERNEL ${C_FLAGS_}
 
@@ -31,5 +32,10 @@ ${_LIB_CLEAN}:
 	@for i in ${SRCS}; do	\
 		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
 	done;
+
+
+${_KERNEL_CLEANDEPEND}:
+	@echo "" > .depend
+
 
 include .depend

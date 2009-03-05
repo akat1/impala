@@ -1,1 +1,107 @@
-
+clock.o: clock.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/clock.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/interrupt.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+kprintf.o: kprintf.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+kthread.o: kthread.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kthread.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+main.o: main.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kthread.h \
+  /home/wieczyk/Workspace/impala/sys/sys/clock.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/syscall.h \
+  /home/wieczyk/Workspace/impala/sys/sys/libkutil.h \
+  /home/wieczyk/Workspace/impala/sys/sys/string.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h
+sched.o: sched.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/clock.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+syscall.o: syscall.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/syscall.h
+thread.o: thread.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/libkutil.h \
+  /home/wieczyk/Workspace/impala/sys/sys/string.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+sc/exit.o: sc/exit.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/sched.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h
+sc/write.o: sc/write.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
+  /home/wieczyk/Workspace/impala/sys/sys/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/thread.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/atomic.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h \
+  /home/wieczyk/Workspace/impala/sys/sys/kprintf.h \
+  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/video.h \
+  /home/wieczyk/Workspace/impala/sys/sys/libkutil.h \
+  /home/wieczyk/Workspace/impala/sys/sys/string.h \
+  /home/wieczyk/Workspace/impala/sys/sys/list.h

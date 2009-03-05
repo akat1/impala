@@ -35,6 +35,7 @@ enum THREAD_FLAGS {
     THREAD_RUN       = 1 << 2, // are in run_queue
     THREAD_SYSCALL   = 1 << 3, // are in syscall handler
     THREAD_SLEEP     = 1 << 4, // sleeped
+    THREAD_INPROC    = 1 << 5  // connected to user process
 };
 
 enum {
