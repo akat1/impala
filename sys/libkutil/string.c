@@ -11,7 +11,7 @@ mem_move(addr_t dst, addr_t src, size_t len)
 {
     size_t i;
 
-    if ( dst != src && len > 0 ) {        
+    if ( dst != src && len > 0 ) {
         if (dst < src) {
             for ( i = 0 ; i < len ; i++ )
                 *((char *)dst+i) = *((char *)src+i);

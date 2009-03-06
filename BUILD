@@ -14,4 +14,4 @@ kompatybilnych z Bourne Shell mozna posluzyc sie poleceniem
 w celu zdefiniowania poprawnego srodowiska.
 
 
-
+Budowanie wymaga zbudowania 

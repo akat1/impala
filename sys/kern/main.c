@@ -25,35 +25,57 @@ kmain()
     }
 }
 
-void k(void *arg);
+void ki(void *arg);
+void ko(void *arg);
+static cqueue_t kolejka;
 
-spinlock_t sp;
+#define ASLEEP() for (int _x = 0; _x < 4999999; _x++)
+
+struct dane {
+    int no;
+    list_node_t L_ioq;
+};
+
+struct dane DANE[1000];
+#define IDX(i) (i%1000)
 
 void
-k(void *arg)
+ki(void *arg)
+{
+    for (int i = 0; i < 100; i++) {  
+        ASLEEP();
+        kprintf("inq %u\n",i);
+        DANE[IDX(i)].no = i;
+        cqueue_insert(&kolejka, &DANE[IDX(i)]);
+    }
+    while (TRUE);
+}
+
+void
+ko(void *arg)
 {
     int id = (int)arg;
-    kprintf("kthr %u started\n", id);
-    while (TRUE) {
-        spinlock_lock(&sp);
-        kprintf("%u: enter\n", id);
-        for (int i = 0; i < 30000000; i++);
-        kprintf("%u: leave\n", id);
-        spinlock_unlock(&sp);
-        for (int i = 0; i < 30000000; i++);
-
+    int i = 0;
+    struct dane *d;
+    kprintf("%u: work\n", id);
+    while (i < 40 && (d = cqueue_extract(&kolejka))) {
+        ASLEEP();
+        kprintf("%u: %u\n", id, d->no);
+        i++;
     }
+    while (TRUE);
 }
+
 
 void
 test()
 {
-    static kthread_t t0, t1, t2, t3;
-    spinlock_init(&sp);
+    static kthread_t t0 , t1, t2, t3;
+    cqueue_init(&kolejka, offsetof(struct dane, L_ioq));
     kprintf("creating...\n");
-    kthread_create(&t0, k, (void*) 0);
-    kthread_create(&t1, k, (void*) 1);
-    kthread_create(&t2, k, (void*) 2);
-    kthread_create(&t3, k, (void*) 3);
+    kthread_create(&t0, ki, (void*) 0);
+    kthread_create(&t1, ko, (void*) 1);
+    kthread_create(&t2, ko, (void*) 2);
+    kthread_create(&t3, ko, (void*) 3);
     kprintf("created\n");
 }

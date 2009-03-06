@@ -11,6 +11,9 @@ void sched_yield(void);
 void sched_insert(thread_t *thr);
 void sched_remove(thread_t *thr);
 
+void sched_wait(void);
+void sched_wakeup(thread_t *n);
+
 #endif
 
 

@@ -6,7 +6,7 @@
 
 // MPSAFE
 static inline uint
-atomic_change32(uint *addr, uint x)
+atomic_change32(int *addr, int x)
 {
   __asm__ volatile(
     "xchgl %0, %1"
