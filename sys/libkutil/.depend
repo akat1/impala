@@ -1,5 +1,1 @@
-string.o: string.c /home/wieczyk/Workspace/impala/sys/sys/types.h \
-  /home/wieczyk/Workspace/impala/sys/sys/cdefs.h \
-  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/cdefs.h \
-  /home/wieczyk/Workspace/impala/sys/arch/x86/machine/types.h \
-  /home/wieczyk/Workspace/impala/sys/sys/string.h
+
