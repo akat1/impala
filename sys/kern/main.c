@@ -59,7 +59,7 @@ ko(void *arg)
     struct dane *d;
     kprintf("%u: work\n", id);
     while (i < 40 && (d = cqueue_extract(&kolejka))) {
-        ASLEEP();
+//         ASLEEP();
         kprintf("%u: %u\n", id, d->no);
         i++;
     }
