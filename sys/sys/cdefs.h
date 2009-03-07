@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.int.pl/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __SYS_CDEFS_H
 #define __SYS_CDEFS_H
 

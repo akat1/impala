@@ -20,5 +20,6 @@ typedef struct kthread kthread_t;
 typedef struct spinlock spinlock_t;
 typedef struct mutex mutex_t;
 typedef struct cqueue cqueue_t;
+typedef struct proc proc_t;
 
 #endif

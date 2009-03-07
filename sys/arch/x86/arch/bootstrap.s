@@ -1,3 +1,10 @@
+# 
+#  ImpalaOS
+#   http://trzask.int.pl/impala/trac/
+# 
+#  $Id$
+#  
+
 .global kernel_entrypoint
 
 .set ALIGN,    1<<0       

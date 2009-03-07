@@ -7,6 +7,7 @@ extern int sched_quantum;
 void sched_init(void);
 void sched_action(void);
 void sched_yield(void);
+void sched_exit(void);
 
 void sched_insert(thread_t *thr);
 void sched_remove(thread_t *thr);

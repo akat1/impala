@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.int.pl/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/sched.h>
@@ -87,6 +94,15 @@ sched_wakeup(thread_t *n)
     spinlock_unlock(&sprq);
 }
 
+void
+sched_exit()
+{
+    spinlock_lock(&sprq);
+    list_remove(&run_queue, curthread);
+    curthread->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
+    __sched_yield();
+}
+
 
 thread_t *
 select_next_thread()
@@ -101,5 +117,4 @@ select_next_thread()
     while (TRUE); kprintf("!!!!!!!\n");
 #undef NEXTTHR
 }
-
 

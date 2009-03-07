@@ -22,18 +22,19 @@ struct thread {
     int             thr_priv;
     int             thr_flags;
     char            thr_stack[THREAD_STACK_SIZE];
+    proc_t         *thr_proc;
     list_node_t     L_run_queue;
     list_node_t     L_threads;
     list_node_t     L_wait;
 };
 
 struct mutex {
-    thread_t       *mtx_owner;
-    int             mtx_locked;
-    int             mtx_flags;
-    spinlock_t      mtx_slock;
-    list_t          mtx_locking; // thread_t.L_wait
-    list_t          mtx_waiting; // thread_t.L_wait
+    thread_t     *mtx_owner;
+    int           mtx_locked;
+    int           mtx_flags;
+    spinlock_t    mtx_slock;
+    list_t        mtx_locking; // thread_t.L_wait
+    list_t        mtx_waiting; // thread_t.L_wait
 };
 
 struct cqueue {
