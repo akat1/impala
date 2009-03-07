@@ -109,7 +109,7 @@ spinlock_init(spinlock_t *sp)
 static inline void
 spinlock_lock(spinlock_t *sp)
 {
-    while (atomic_change32(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK);
+    while (atomic_change_int(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK);
 }
 
 static inline void
@@ -121,7 +121,7 @@ spinlock_unlock(spinlock_t *sp)
 static inline bool
 spinlock_trylock(spinlock_t *sp)
 {
-    return atomic_change32(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_UNLOCK;
+    return atomic_change_int(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_UNLOCK;
 }
 
 #endif

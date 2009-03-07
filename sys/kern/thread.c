@@ -102,7 +102,7 @@ mutex_destroy(mutex_t *m)
 void
 mutex_lock(mutex_t *m)
 {
-    if ( atomic_change32(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
+    if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
 //         kprintf("mutex_lock:%p\n", m->mtx_owner);
     } else {
@@ -160,7 +160,7 @@ _mutex_wakeup(mutex_t *m)
 bool
 mutex_trylock(mutex_t *m)
 {
-    if (atomic_change32(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
+    if (atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
         return TRUE;
     } else {
