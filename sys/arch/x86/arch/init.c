@@ -24,7 +24,11 @@ static descriptor_register p_gdtr;
 static descriptor_register p_idtr;
 
 /**
- * @brief Inicjalizuje obs³ugê architektury x86.
+ * Inicjalizuje obs³ugê architektury x86.
+ *
+ * Procedura jest wywo³ywana przez procedurê wej¶ciow±
+ * j±dra. Jej zadanie to zainicjalizowanie ¶rodowiska
+ * do pracy w systemie operacyjnym.
  */
 void
 init_x86()
@@ -59,7 +63,8 @@ init_x86()
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&_unhnd_intrpt, intrpt_attr);
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&_unhnd_intrpt,
+            intrpt_attr);
     }
 
     for (i = 0; i < 0x20; i++) {
@@ -70,7 +75,8 @@ init_x86()
         setidt(i+0x20, SEL_MK(SEL_CODE, SEL_DPL0), irq_table[i], intrpt_attr);
     }
 
-    setidt(INTRPT_SYSCALL, SEL_MK(SEL_CODE, SEL_DPL3), (uintptr_t)_intrpt_syscall, intrpt_attr);
+    setidt(INTRPT_SYSCALL, SEL_MK(SEL_CODE, SEL_DPL3),
+        (uintptr_t)_intrpt_syscall, intrpt_attr);
 
     mem_zero(&p_idtr, sizeof(p_idtr));
     p_idtr.base = &p_idt;
@@ -82,6 +88,7 @@ init_x86()
 
 }
 
+/// Ustawia wpis w tablicy deskryptorów IDT.
 void
 setidt(int i, uint selector, uintptr_t offset,
     uint access)
@@ -94,7 +101,7 @@ setidt(int i, uint selector, uintptr_t offset,
     entry->access = access;
 }
 
-
+/// Ustawia wpis w tablicy deskryptorów GDT.
 void
 setgdt(int i, uintptr_t base, uint limit,
     uint acc, uint atrib)

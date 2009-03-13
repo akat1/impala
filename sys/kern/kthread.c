@@ -8,10 +8,10 @@
 static void __kthr(kthread_t *arg);
 
 /**
+ * Tworzy nowy w±tek po stronie j±dra.
  * @param thr referencja do deskryptora w±tku.
  * @param f adres procedury wej¶ciowej.
  * @param arg adres przekazany jako argument do procedury wej¶ciowej.
- * @brief tworzy nowy w±tek po stronie j±dra.
  * 
  */
 void

@@ -12,10 +12,7 @@ static spinlock_t soft_guard = { SPINLOCK_LOCK };
 /// Licznik tykniêæ.
 volatile uint clock_ticks;
 
-/**
- * Inicjalizuje obs³ugê tykniêæ zegara systemowego.
- */
-
+/// Inicjalizuje obs³ugê tykniêæ zegara systemowego.
 void
 clock_init()
 {
@@ -24,8 +21,7 @@ clock_init()
 
 
 /**
- * @brief Twarde tykniêcie zegara.
- *
+ * Twarde tykniêcie zegara.
  *
  * Procedura uruchamiana wewn±trz obs³ugi przerwania zegara, nie mo¿e
  * opó¼niæ kolejnego tykniêcia.
@@ -38,7 +34,7 @@ clock_hardtick()
 }
 
 /**
- * @brief Miêkkie tykniêcie.
+ * Miêkkie tykniêcie.
  *
  * Procedura uruchamiana nazewn±trz obs³ugi przerwania zegara. Czas procesora
  * zajêty przez ni± opó¼nia kolejne jej wywo³anie, nie przerwania.

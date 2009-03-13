@@ -4,6 +4,12 @@
 #include <sys/libkutil.h>
 #include <sys/kprintf.h>
 
+/**
+ * Inicjalizuje kontekst.
+ * @param ctx referencja do kontekstu
+ * @param priv poziom uprzywilejowania
+ * @param ustack adres stosu
+ */
 
 void
 thread_context_init(thread_context *ctx, int priv, addr_t ustack)
@@ -13,6 +19,11 @@ thread_context_init(thread_context *ctx, int priv, addr_t ustack)
     ctx->c_esp = (uint32_t) ustack + THREAD_STACK_SIZE-8;
 }
 
+/**
+ * Prze³±cza kontekst.
+ * @param t_to deskryptor w±tku, do którego trzeba siê prze³±czyæ.
+ * @param t_from deskryptor obecnie dzia³aj±cego w±tku.
+ */
 void
 thread_switch(thread_t *t_to, thread_t *t_from)
 {
@@ -29,6 +40,13 @@ thread_switch(thread_t *t_to, thread_t *t_from)
         curthread = t_from;
     }
 }
+
+/**
+ * Uruchamia ¶wie¿y kontekst.
+ * @param t_to deskryptor w±tku.
+ *
+ * Procedura wchodzi w kod w±tku, który nie zosta³ dot±d uruchomiony
+ */
 
 void
 thread_enter(thread_t *t_to)

@@ -34,7 +34,15 @@ thread_init()
 
 }
 
-/// Przydziela nowy w±tek.
+/**
+ * Przydziela deskryptor w±tku.
+ * @param priv Poziom uprzywilejowania.
+ * @param entry Adres procedury wej¶ciowej.
+ * @param arg Adres argumentu przekazywany do procedury wej¶ciowej.
+ *
+ * Procedura przydziela ogólny deskryptor w±tku. W±tek przydzielony
+ * w ten sposób znajduje siê w stanie surowym.
+ */
 thread_t *
 thread_create(int priv, addr_t entry, addr_t arg)
 {
@@ -55,32 +63,13 @@ thread_create(int priv, addr_t entry, addr_t arg)
     }
 }
 
-void
-thread_run(thread_t *p)
-{
-    sched_insert(p);
-}
-
-void
-thread_exit(thread_t *t)
-{
-}
-
-void
-thread_suspend(thread_t *t)
-{
-    if (t == curthread) sched_yield();
-}
-
-
 /*=============================================================================
  * Obsluga mutexow. (FIFO).
  */
 
-
 static void _mutex_wakeup(mutex_t *m);
 
-/// Inicjalizuje mutex.
+/// Inicjalizuje deskryptor zamka mutex.
 void
 mutex_init(mutex_t *m, int flags)
 {
@@ -94,47 +83,52 @@ mutex_init(mutex_t *m, int flags)
     }
 }
 
-/// Niszczy mutex.
+/// Niszczy zamek.
 void
 mutex_destroy(mutex_t *m)
 {
 }
 
-/// Zamyka zamek.
+/**
+ * Zamyka zamek.
+ * @param m zamek do zamkniêcia.
+ *
+ * W przypadku gdy zamek jest zajêty aktualny w±tek
+ * zostaje u¶piony.
+ * W celu zapewnienia nieg³odzenia implementowana jest strategia
+ * wykorzystuj±ca kolejkê FIFO.
+ */
+
 void
 mutex_lock(mutex_t *m)
 {
     if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
-//        kprintf("{%p  lock}", curthread);
-//         kprintf("mutex_lock:%p\n", m->mtx_owner);
     } else {
-        // KASSERT(m->mtx_owner != curthread);
         spinlock_lock(&m->mtx_slock);
-//        kprintf("{%p lock-wait}", curthread);
         list_insert_head(&m->mtx_locking, curthread);
         spinlock_unlock(&m->mtx_slock);
         sched_wait();
-//        kprintf("{%p lock}", curthread);
-
     }
 }
 
-/// Odblokowuje zamek.
+/**
+ * Odblokowuje zamek.
+ * @param m zamek.
+ *
+ */
+
 void
 mutex_unlock(mutex_t *m)
 {
     thread_t *n;
 
-    // KASSERT(m->mtx_owner == curthread)
     spinlock_lock(&m->mtx_slock);
-//     kprintf("mutex_unlock:%p\n", m->mtx_owner);
     _mutex_wakeup(m);
     m->mtx_owner = NULL;
     n = list_extract_first(&m->mtx_locking);
     if (n) {
         m->mtx_owner = n;
-//         kprintf("trying to wakeup cur=%p n=%p\n", curthread, n);
         sched_wakeup(n);
     } else {
         m->mtx_locked = MUTEX_UNLOCKED;
@@ -142,7 +136,10 @@ mutex_unlock(mutex_t *m)
     spinlock_unlock(&m->mtx_slock);
 }
 
-/// Pomocnicza funkcja.
+/**
+ * Budzenie w±tków oczekuj±cych na sygna³.
+ */
+
 void
 _mutex_wakeup(mutex_t *m)
 {
@@ -154,17 +151,20 @@ _mutex_wakeup(mutex_t *m)
         l = (list_length(&m->mtx_waiting)==0)? 0 : 1;
     }
     if (l)
-//     kprintf("trying to wakeup %u\n", l);
     for (int i = 0; i < l; i++) {
         thread_t *n = list_extract_first(&m->mtx_waiting);
-//           kprintf("(%p:%p) waiting + %p\n", curthread, m->mtx_owner, n);
            list_insert_tail(&m->mtx_locking, n);
-//        sched_wakeup(n);
     }
     m->mtx_flags &= ~(MUTEX_WAKEUP_ONE|MUTEX_WAKEUP_ALL);
 }
 
-/// Próbuje zamkn±æ zamek.
+/**
+ * Próbuje zamkn±æ zamek.
+ * @param m zamek.
+ * @return Zwraca prawdê wtedy i tylko wtedy, gdy uda³o siê zamkn±æ zamek.
+ *         w przeciwnym wypadku zwracany jest fa³sz.
+ */
+
 bool
 mutex_trylock(mutex_t *m)
 {
@@ -176,22 +176,38 @@ mutex_trylock(mutex_t *m)
     }
 }
 
-/// Oczekuje na sygna³ na zamku.
+/**
+ * Oczekuje na danym zamku na sygna³.
+ * @param m zamkniêty zamek.
+ *
+ * Je¿eli w±tek jest w³a¶cicielem zamku to mo¿e oczekiwaæ na nim sygna³.
+ * Procedura wychodzi z sekcji krytycznej, a nastêpnie usypia w±tek.
+ * U¶piony w±tek jest dodawany do listy w±tków oczekuj±cych na sygna³.
+ * 
+ * Gdy w±tek zostanie obudzony to zamek zostanie automatycznie mu
+ * przydzielony (powróci do swojej sekcji krytycznej).
+ */
+
 void
 mutex_wait(mutex_t *m)
 {
     spinlock_lock(&m->mtx_slock);
-//     kprintf("mutex_wait:%p\n", m->mtx_owner);
     list_insert_tail(&m->mtx_waiting, curthread);
     spinlock_unlock(&m->mtx_slock);
     mutex_unlock(m);
-//     kprintf("@mutex_wait cur=%p owner=%p going sleep\n",curthread, m->mtx_owner);
     sched_wait();
-//     kprintf("@mutex_wait:%p waked up\n", m->mtx_owner);
-//     mutex_lock(m);
 }
 
-/// Budzi w±tek oczekuj±cy na sygna³.
+/**
+ * Budzi jeden w±tek oczekuj±cy na sygna³.
+ * @param m zamek.
+ * 
+ * Je¿eli w±tek jest w³a¶cicielem zamka, to mo¿e obudziæ oczekuj±cy sygna³u
+ * na tym zamku w±tek. Procedura zaznacza informacjê, ¿e przy odblokowaniu
+ * zamku nale¿y przenie¶æ jeden w±tek oczekuj±cy na sygna³ do listy w±tków
+ * chc±cych wej¶æ do sekcji krytycznej.
+ */
+
 void
 mutex_wakeup(mutex_t *m)
 {
@@ -228,11 +244,26 @@ cqueue_init(cqueue_t *q, int off)
     list_create(&q->q_data, off, FALSE);
 }
 
+/**
+ * Wy³±cza wspo³biezn± kolejkê.
+ * @param q kolejka.
+ *
+ * Niepozwala w±tkom spaæ w oczekiwaniu na kolejne dane. U¿yteczne
+ * przy koñczeniu pracy z dan± kolejk±. NIEZAIMPLEMENTOWANE.
+ */
 void
 cqueue_shutdown(cqueue_t *q)
 {
 }
 
+/**
+ * Wrzuca wska¼nik w kolejkê.
+ * @param q kolejka
+ * @param d wska¼nik do zakolejkowania.
+ *
+ * Procedura po zakolejkowaniu wska¼nika budzi jeden
+ * z w±tków oczekuj±cych na dane.
+ */
 void
 cqueue_insert(cqueue_t *q, void *d)
 {
@@ -243,6 +274,14 @@ cqueue_insert(cqueue_t *q, void *d)
     mutex_unlock(&q->q_mtx);
 }
 
+/**
+ * Pobranie z kolejki wska¼nika.
+ * @param q kolejka
+ *
+ * Procedura usypia w±tek, gdy kolejka jest pusta a kolejka
+ * nie zota³a w³±czona. W przeciwnym wypadku zwraca NULL.
+ */
+ 
 void*
 cqueue_extract(cqueue_t *q)
 {

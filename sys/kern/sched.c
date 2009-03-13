@@ -17,7 +17,8 @@ int sched_quantum;
 /// Kolejka programów dzia³aj±cych.
 static list_t run_queue;
 static int end_ticks;
-static spinlock_t sprq; // spinlock run queue
+/// Zamek zabezpieczaj±cy sekcje krytyczne planisty.
+static spinlock_t sprq;
 
 static inline thread_t * select_next_thread(void);
 static void __sched_yield(void);
@@ -33,6 +34,12 @@ sched_init()
     sched_insert(curthread);
 }
 
+/**
+ * Podprogram planisty.
+ *
+ * Procedura jest uruchamiana przez program obs³ugi przerwania
+ * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
+ */
 
 void
 sched_action()
@@ -45,6 +52,13 @@ sched_action()
     }
 }
 
+/**
+ * Pomocnicza procedura zmieniaj±ca kontekst.
+ *
+ * Powinna byæ uruchamian tylko wewn±trz sekcji krytycznych
+ * chronionych przez wiruj±cy zamek sprq. Jej zadanie to wybranie
+ * kolejnego w±tku, wyj¶cie z sekcji krytycznej i zmiana kontekstu.
+ */
 void
 __sched_yield()
 {
@@ -74,7 +88,7 @@ sched_insert(thread_t *thr)
     spinlock_unlock(&sprq);
 }
 
-/// Usypia kontekst.
+/// Usypia dzia³aj±cy w±tek.
 void
 sched_wait()
 {
@@ -85,7 +99,11 @@ sched_wait()
     __sched_yield();
 }
 
-/// Budzi inny w±tek.
+/**
+ * Budzi w±tek.
+ * @param n Deskryptor w±tku do obudzenia.
+ */
+
 void
 sched_wakeup(thread_t *n)
 {
