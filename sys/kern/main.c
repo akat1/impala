@@ -9,6 +9,11 @@
 
 void kmain(void);
 
+
+/**
+ * G³ówna procedura j±dra.
+ */
+
 void
 kmain()
 {

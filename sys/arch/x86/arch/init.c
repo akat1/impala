@@ -23,7 +23,9 @@ static task_state_segment p_tss0;
 static descriptor_register p_gdtr;
 static descriptor_register p_idtr;
 
-
+/**
+ * @brief Inicjalizuje obs³ugê architektury x86.
+ */
 void
 init_x86()
 {

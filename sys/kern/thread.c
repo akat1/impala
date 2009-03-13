@@ -18,6 +18,7 @@ static list_t __free_threads;
  * Obsluga watkow.
  */
 
+/// Inicjalizuje obs³ugê w±tków.
 void
 thread_init()
 {
@@ -33,7 +34,7 @@ thread_init()
 
 }
 
-
+/// Przydziela nowy w±tek.
 thread_t *
 thread_create(int priv, addr_t entry, addr_t arg)
 {
@@ -79,7 +80,7 @@ thread_suspend(thread_t *t)
 
 static void _mutex_wakeup(mutex_t *m);
 
-
+/// Inicjalizuje mutex.
 void
 mutex_init(mutex_t *m, int flags)
 {
@@ -93,12 +94,13 @@ mutex_init(mutex_t *m, int flags)
     }
 }
 
+/// Niszczy mutex.
 void
 mutex_destroy(mutex_t *m)
 {
 }
 
-
+/// Zamyka zamek.
 void
 mutex_lock(mutex_t *m)
 {
@@ -118,6 +120,7 @@ mutex_lock(mutex_t *m)
     }
 }
 
+/// Odblokowuje zamek.
 void
 mutex_unlock(mutex_t *m)
 {
@@ -139,6 +142,7 @@ mutex_unlock(mutex_t *m)
     spinlock_unlock(&m->mtx_slock);
 }
 
+/// Pomocnicza funkcja.
 void
 _mutex_wakeup(mutex_t *m)
 {
@@ -160,6 +164,7 @@ _mutex_wakeup(mutex_t *m)
     m->mtx_flags &= ~(MUTEX_WAKEUP_ONE|MUTEX_WAKEUP_ALL);
 }
 
+/// Próbuje zamkn±æ zamek.
 bool
 mutex_trylock(mutex_t *m)
 {
@@ -171,6 +176,7 @@ mutex_trylock(mutex_t *m)
     }
 }
 
+/// Oczekuje na sygna³ na zamku.
 void
 mutex_wait(mutex_t *m)
 {
@@ -185,6 +191,7 @@ mutex_wait(mutex_t *m)
 //     mutex_lock(m);
 }
 
+/// Budzi w±tek oczekuj±cy na sygna³.
 void
 mutex_wakeup(mutex_t *m)
 {
@@ -194,6 +201,7 @@ mutex_wakeup(mutex_t *m)
     spinlock_unlock(&m->mtx_slock);
 }
 
+/// Budzi wszystkie w±tki oczekuj±ce na sygna³.
 void
 mutex_wakeup_all(mutex_t *m)
 {
@@ -204,6 +212,13 @@ mutex_wakeup_all(mutex_t *m)
 
 /*=============================================================================
  * Obsluga kolejek
+ */
+
+
+/**
+ * Inicjalizuje wspó³bie¿n± kolejkê.
+ * @param q wska¼nik do deskryptora kolejki.
+ * @param off przesuniêcie uchwytu dla listy.
  */
 
 void

@@ -11,8 +11,10 @@
 #include <sys/clock.h>
 #include <sys/kprintf.h>
 
+/// Kwant czasu przydzialny programom, w tykniêciach zegara.
 int sched_quantum;
 
+/// Kolejka programów dzia³aj±cych.
 static list_t run_queue;
 static int end_ticks;
 static spinlock_t sprq; // spinlock run queue
@@ -20,6 +22,7 @@ static spinlock_t sprq; // spinlock run queue
 static inline thread_t * select_next_thread(void);
 static void __sched_yield(void);
 
+/// Procedura inicjuj±ca program planisty.
 void
 sched_init()
 {
@@ -29,6 +32,7 @@ sched_init()
     spinlock_init(&sprq);
     sched_insert(curthread);
 }
+
 
 void
 sched_action()
@@ -51,6 +55,8 @@ __sched_yield()
     thread_switch(n, curthread);
 }
 
+
+/// Wymusza prze³±czanie kontekstu.
 void
 sched_yield()
 {
@@ -58,6 +64,7 @@ sched_yield()
     __sched_yield();
 }
 
+/// Dodaje w±tek do kolejki programów dzia³aj±cych.
 void
 sched_insert(thread_t *thr)
 {
@@ -67,7 +74,7 @@ sched_insert(thread_t *thr)
     spinlock_unlock(&sprq);
 }
 
-
+/// Usypia kontekst.
 void
 sched_wait()
 {
@@ -78,6 +85,7 @@ sched_wait()
     __sched_yield();
 }
 
+/// Budzi inny w±tek.
 void
 sched_wakeup(thread_t *n)
 {
@@ -94,6 +102,7 @@ sched_wakeup(thread_t *n)
     spinlock_unlock(&sprq);
 }
 
+/// Niszczy aktualny w±tek.
 void
 sched_exit()
 {
@@ -103,7 +112,7 @@ sched_exit()
     __sched_yield();
 }
 
-
+/// Wybiera nastêpny w±tek do obs³ugi.
 thread_t *
 select_next_thread()
 {

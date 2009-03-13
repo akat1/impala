@@ -4,8 +4,16 @@
 #include <sys/sched.h>
 #include <sys/kprintf.h>
 
+/// Wej¶ciowa procedura dla obs³ugi w±tku.
 static void __kthr(kthread_t *arg);
 
+/**
+ * @param thr referencja do deskryptora w±tku.
+ * @param f adres procedury wej¶ciowej.
+ * @param arg adres przekazany jako argument do procedury wej¶ciowej.
+ * @brief tworzy nowy w±tek po stronie j±dra.
+ * 
+ */
 void
 kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
 {
@@ -14,7 +22,6 @@ kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
     kthr->kt_thread = thread_create(0, (void*)__kthr, kthr);
     thread_run(kthr->kt_thread);
 }
-
 
 void
 __kthr(kthread_t *arg)
