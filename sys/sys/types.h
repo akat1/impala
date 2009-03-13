@@ -21,5 +21,5 @@ typedef struct spinlock spinlock_t;
 typedef struct mutex mutex_t;
 typedef struct cqueue cqueue_t;
 typedef struct proc proc_t;
-
+typedef struct vm_map vm_map_t;
 #endif

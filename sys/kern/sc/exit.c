@@ -15,7 +15,6 @@ void
 sc_exit(thread_t *p, sc_exit_args *args)
 {
     kprintf("TID(%u) exit %u\n", p->thr_tid, args->error_code);
-    thread_exit(p);
-    sched_yield();
+    sched_exit();
 }
 

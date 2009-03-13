@@ -14,6 +14,7 @@ struct spinlock {
     int    _dlock;
 };
 
+
 struct thread {
     thread_context  thr_context;
     int             thr_tid;
@@ -82,8 +83,6 @@ void thread_init(void);
 thread_t *thread_create(int priv, addr_t entry, addr_t arg);
 
 // do wywalenia
-void thread_run(thread_t *p);
-void thread_exit(thread_t *p);
 void thread_suspend(thread_t *t);
 
 void mutex_init(mutex_t *m, int flags);
