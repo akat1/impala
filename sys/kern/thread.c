@@ -104,13 +104,16 @@ mutex_lock(mutex_t *m)
 {
     if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
+//        kprintf("{%p  lock}", curthread);
 //         kprintf("mutex_lock:%p\n", m->mtx_owner);
     } else {
         // KASSERT(m->mtx_owner != curthread);
         spinlock_lock(&m->mtx_slock);
+//        kprintf("{%p lock-wait}", curthread);
         list_insert_head(&m->mtx_locking, curthread);
         spinlock_unlock(&m->mtx_slock);
         sched_wait();
+//        kprintf("{%p lock}", curthread);
 
     }
 }
@@ -150,9 +153,9 @@ _mutex_wakeup(mutex_t *m)
 //     kprintf("trying to wakeup %u\n", l);
     for (int i = 0; i < l; i++) {
         thread_t *n = list_extract_first(&m->mtx_waiting);
-//         kprintf("(%p:%p) waiting + %p\n", curthread, m->mtx_owner, n);
-//         list_insert_tail(&m->mtx_locking, n);
-        sched_wakeup(n);
+//           kprintf("(%p:%p) waiting + %p\n", curthread, m->mtx_owner, n);
+           list_insert_tail(&m->mtx_locking, n);
+//        sched_wakeup(n);
     }
     m->mtx_flags &= ~(MUTEX_WAKEUP_ONE|MUTEX_WAKEUP_ALL);
 }
