@@ -10,6 +10,7 @@ SRCS=\
 	sched.c\
 	syscall.c\
 	thread.c\
+	utils.c\
 	sc/exit.c\
 	sc/write.c\
 
