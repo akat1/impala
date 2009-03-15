@@ -9,13 +9,11 @@
 #define __SYS_UTILS_H
 
 
-/**
- * Funkcja wywo³ywana w sytuacjach awaryjnych.
- * Zatrzymuje system, wy¶wietlaj±c podany komunikat.
- */
-
 void
-panic(const char* msg);
+panic(const char* msg, ...);
+
+#define KASSERT(x) if(!(x)) \
+    panic("Assertion ( "  #x  " ) failed in file: " __FILE__ ":%u, in function: %s", __LINE__,  __func__);
 
 #endif
 

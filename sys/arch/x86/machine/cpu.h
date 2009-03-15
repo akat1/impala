@@ -72,6 +72,9 @@ enum CPU_CR4 {
 };
 
 
+#define cli()   __asm__ ("cli");
+#define sti()   __asm__ ("sti");
+
 #endif
 
 

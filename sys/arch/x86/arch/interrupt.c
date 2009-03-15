@@ -1,9 +1,11 @@
 #include <sys/types.h>
+#include <machine/cpu.h>
 #include <machine/interrupt.h>
 #include <machine/i8259a.h>
 #include <sys/kprintf.h>
 #include <sys/thread.h>
 #include <sys/syscall.h>
+#include <sys/utils.h>
 
 void ISR_irq(interrupt_frame f);
 void ISR_syscall(interrupt_frame frame);
@@ -24,7 +26,7 @@ void irq_install_handler(int irq, irq_handler_f *f)
 void
 irq_done()
 {
-    __asm__("sti");
+    sti();
     i8259a_send_eoi();
 }
 
@@ -56,6 +58,5 @@ TRAP_unhandled()
 void
 TRAP_gfault()
 {
-    kprintf("General protection fault\n");
-    __asm__("hlt");
+    panic("General protection fault\n");
 }
