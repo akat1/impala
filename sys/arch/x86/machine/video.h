@@ -1,4 +1,3 @@
-// Mateusz Kocielski 
 #ifndef __MACHINE_VIDEO_H
 #define __MACHINE_VIDEO_H
 

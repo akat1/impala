@@ -71,9 +71,49 @@ enum CPU_CR4 {
     CR4_SMXE= 1 << 14
 };
 
+/** 
+ * Opis mo¿liwo¶ci procesora
+ *
+ * Intel IA-32 ADSM - 2A - 3-192
+ */
+
+enum CPU_EDX_FEATURE {
+    EDX_FEATURE_FPU   = 1 << 0,
+    EDX_FEATURE_VME   = 1 << 1,
+    EDX_FEATURE_DE    = 1 << 2,
+    EDX_FEATURE_PSE   = 1 << 3,
+    EDX_FEATURE_TSC   = 1 << 4,
+    EDX_FEATURE_MSR   = 1 << 5,
+    EDX_FEATURE_PAE   = 1 << 6,
+    EDX_FEATURE_MCE   = 1 << 7,
+    EDX_FEATURE_CX8   = 1 << 8,
+    EDX_FEATURE_APIC  = 1 << 9,
+    EDX_FEATURE_SEP   = 1 << 11,
+    EDX_FEATURE_MTRR  = 1 << 12,
+    EDX_FEATURE_PGE   = 1 << 13,
+    EDX_FEATURE_MCA   = 1 << 14,
+    EDX_FEATURE_CMOV  = 1 << 15,
+    EDX_FEATURE_PAT   = 1 << 16,
+    EDX_FEATURE_PSE36 = 1 << 17,
+    EDX_FEATURE_PSN   = 1 << 18,
+    EDX_FEATURE_CLFSH = 1 << 19,
+    EDX_FEATURE_DS    = 1 << 21,
+    EDX_FEATURE_ACPI  = 1 << 22,
+    EDX_FEATURE_MMX   = 1 << 23,
+    EDX_FEATURE_FXSR  = 1 << 24,
+    EDX_FEATURE_SSE   = 1 << 25,
+    EDX_FEATURE_SSE2  = 1 << 26,
+    EDX_FEATURE_SS    = 1 << 27,
+    EDX_FEATURE_HTT   = 1 << 28,
+    EDX_FEATURE_TM    = 1 << 29,
+    EDX_FEATURE_PBE   = 1 << 31
+};
 
 #define cli()   __asm__ ("cli");
 #define sti()   __asm__ ("sti");
+
+// Vendor
+static char vendor_string[13];
 
 #endif
 
