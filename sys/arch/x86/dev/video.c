@@ -1,6 +1,3 @@
-// Mateusz Kocielski
-
-
 #include <sys/types.h>
 #include <sys/libkutil.h>
 #include <machine/video.h>
@@ -42,7 +39,7 @@ textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
     if ( screen->cursor_x == TEXTSCREEN_WIDTH-1 )
     {
         /* sprawdzamy czy mozna przenisc kursor do nastepnej linii */
-        if ( screen->cursor_y < TEXTSCREEN_WIDTH-1 )
+        if ( screen->cursor_y < TEXTSCREEN_HEIGHT-1 )
             /* przenosimy kursor do nastepnej linii */
             textscreen_update_cursor(screen, 0, screen->cursor_y+1);
         else
