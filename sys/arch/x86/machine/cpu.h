@@ -113,7 +113,7 @@ enum CPU_EDX_FEATURE {
 #define sti()   __asm__ ("sti");
 
 // Vendor
-static char vendor_string[13];
+//static char vendor_string[13];
 
 #endif
 
