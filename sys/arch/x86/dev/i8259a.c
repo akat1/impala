@@ -85,9 +85,9 @@ void
 i8259a_irq_disable(int n)
 {
     if (n < 0x8)
-        pic1_mask ^= 1 << n;
+        pic1_mask &= ~(1 << n);
     else
-        pic2_mask ^= 1 << (n-8);
+        pic2_mask &= ~(1 << (n-8));
     i8259a_reset_mask();
 }
 

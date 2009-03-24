@@ -7,7 +7,7 @@ typedef void kthread_entry_f(void *);
 struct kthread {
     thread_t *kt_thread;
     void     *kt_arg;
-    kthread_entry_f *kt_entry;;
+    kthread_entry_f *kt_entry;
 };
 
 #ifdef __KERNEL

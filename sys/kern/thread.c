@@ -54,6 +54,7 @@ thread_create(int priv, addr_t entry, addr_t arg)
         t->thr_priv = priv;
         t->thr_entry_point = entry;
         t->thr_entry_arg = arg;
+        t->thr_wakeup_time = 0;
         thread_context_init(&t->thr_context, priv, t->thr_stack);
         list_insert_tail(&threads_list, t);
         return t;
@@ -194,8 +195,7 @@ mutex_wait(mutex_t *m)
     spinlock_lock(&m->mtx_slock);
     list_insert_tail(&m->mtx_waiting, curthread);
     spinlock_unlock(&m->mtx_slock);
-    mutex_unlock(m);
-    sched_wait();
+    sched_unlock_and_wait(m);
 }
 
 /**

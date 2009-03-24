@@ -5,6 +5,7 @@
 #include <machine/i8254.h>
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
+#include <machine/pckbd.h>
 #include <sys/libkutil.h>
 #include <sys/thread.h>
 
@@ -84,6 +85,7 @@ init_x86()
     idt_load(&p_idtr);
     i8259a_init();
     i8254_init();
+    pckbd_init();
     __asm__("sti");
 
 }

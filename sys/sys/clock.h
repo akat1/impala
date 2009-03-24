@@ -11,6 +11,7 @@
 #ifdef __KERNEL
 
 extern volatile uint clock_ticks;
+extern const int HZ; //mo¿e siê okazaæ, ¿e tutaj lepiej daæ #define
 
 void clock_init(void);
 void clock_softtick(void);

@@ -12,7 +12,7 @@ static int from_string(int i, char *b);
 
 
 enum {
-	INTERNAL_BUF = 128
+    INTERNAL_BUF = 128
 };
 
 void

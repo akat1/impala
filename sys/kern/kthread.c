@@ -29,6 +29,5 @@ __kthr(kthread_t *arg)
     arg->kt_entry(arg->kt_arg);
 //    thread_exit(arg->kt_thread);
     sched_exit();
-
 }
 

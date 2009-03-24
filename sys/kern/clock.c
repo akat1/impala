@@ -12,6 +12,9 @@ static spinlock_t soft_guard = { SPINLOCK_LOCK };
 /// Licznik tykniêæ.
 volatile uint clock_ticks;
 
+/// Czêstotliwo¶æ zegara systemowego
+const int HZ = 100; 
+
 /// Inicjalizuje obs³ugê tykniêæ zegara systemowego.
 void
 clock_init()

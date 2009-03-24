@@ -14,7 +14,8 @@ void TRAP_gfault(void);
 
 irq_handler_f *irq_handlers[MAX_IRQ];
 
-void irq_install_handler(int irq, irq_handler_f *f)
+void
+irq_install_handler(int irq, irq_handler_f *f)
 {
     if (irq <= MAX_IRQ) {
          irq_handlers[irq] = f;
@@ -22,11 +23,19 @@ void irq_install_handler(int irq, irq_handler_f *f)
     }
 }
 
+void
+irq_free_handler(int irq)
+{
+    if (irq <= MAX_IRQ) {
+         i8259a_irq_disable(irq);
+         irq_handlers[irq] = NULL;
+    }
+}
 
 void
 irq_done()
 {
-    sti();
+    irq_enable();
     i8259a_send_eoi();
 }
 

@@ -60,7 +60,22 @@ struct interrupt_frame {
 
 #ifdef __KERNEL
 void irq_install_handler(int irq, irq_handler_f *h);
+void irq_free_handler(int irq);
 void irq_done(void);
+
+
+/// Wy³±cza obs³ugê przerwañ
+static inline void irq_disable(void)
+{
+    __asm__ ("cli");
+}
+
+/// W³±cza obs³ugê przerwañ przez procesor
+static inline void irq_enable(void)
+{
+    __asm__ ("sti");
+}
+
 #endif
 
 

@@ -11,7 +11,7 @@ enum {
 
 
 struct spinlock {
-    int    _dlock;
+    volatile int    _dlock;
 };
 
 
@@ -22,6 +22,7 @@ struct thread {
     addr_t          thr_entry_arg;
     int             thr_priv;
     int             thr_flags;
+    uint            thr_wakeup_time;
     char            thr_stack[THREAD_STACK_SIZE];
     proc_t         *thr_proc;
     list_node_t     L_run_queue;

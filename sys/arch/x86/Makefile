@@ -8,8 +8,9 @@ SRCS=\
 	arch/interrupt.c\
 	arch/isr.s\
 	arch/thread.c\
-    dev/i8254.c\
+	dev/i8254.c\
 	dev/i8259a.c\
+	dev/pckbd.c\
 	dev/video.c\
 
 

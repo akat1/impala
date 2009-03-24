@@ -1,7 +1,6 @@
-#include <machine/cpu.h>
 #include <sys/utils.h>
 #include <sys/kprintf.h>
-
+#include <machine/interrupt.h>
 
 /**
  * Funkcja wywo³ywana w sytuacjach awaryjnych.
@@ -11,7 +10,7 @@
 void
 panic(const char *msg, ...)
 {
-    cli();
+    irq_disable();
     va_list ap;
     VA_START(ap, msg);
     kprintf("\n\nkernel panic: ");

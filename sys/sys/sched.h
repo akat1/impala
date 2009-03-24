@@ -12,8 +12,12 @@ void sched_exit(void);
 void sched_insert(thread_t *thr);
 void sched_remove(thread_t *thr);
 
+void sched_unlock_and_wait(mutex_t *m);
 void sched_wait(void);
 void sched_wakeup(thread_t *n);
+
+void msleep(uint mtime);
+void ssleep(uint stime);
 
 #endif
 
