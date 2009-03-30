@@ -1,5 +1,9 @@
 SUBDIRS= sys
 
+.PHONY: all build build-image run
+
+all: build-image
+
 build-image: build
 	touch image/root/boot/impala
 	cp image/root/boot/impala image/root/boot/impala.old

@@ -3,6 +3,7 @@
 #include <machine/cpu.h>
 #include <sys/libkutil.h>
 #include <sys/kprintf.h>
+#include <sys/utils.h>
 
 /**
  * Inicjalizuje kontekst.

@@ -67,13 +67,13 @@ void irq_done(void);
 /// Wy³±cza obs³ugê przerwañ
 static inline void irq_disable(void)
 {
-    __asm__ ("cli");
+    __asm__ volatile("cli");
 }
 
 /// W³±cza obs³ugê przerwañ przez procesor
 static inline void irq_enable(void)
 {
-    __asm__ ("sti");
+    __asm__ volatile("sti");
 }
 
 #endif

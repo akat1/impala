@@ -2,6 +2,7 @@
 #include <sys/clock.h>
 #include <sys/list.h>
 #include <sys/sched.h>
+#include <sys/kprintf.h>
 #include <sys/thread.h>
 #include <machine/interrupt.h>
 #include <machine/atomic.h>
@@ -43,8 +44,6 @@ clock_hardtick()
  * zajêty przez ni± opó¼nia kolejne jej wywo³anie, nie przerwania.
  */
 
-
-#include <sys/kprintf.h>
 
 void
 clock_softtick()

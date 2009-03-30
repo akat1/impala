@@ -1,8 +1,6 @@
 #ifndef __MACHINE_ATOMIC_H
 #define __MACHINE_ATOMIC_H
 
-// TODO: sprawdziæ czy dobrze zrobi³em te OUTPUT:INPUT:CLOBBERS 
-// ewentualna zamiana: =rg -> =m
 
 
 // MPSAFE
@@ -11,8 +9,8 @@ atomic_change_int(volatile int *addr, int x)
 {
   __asm__ volatile(
     "xchgl %0, %1"
-    : "=r"(x), "=rg"(*addr)
-    : "r"(x)
+    : "=a"(x), "=m"(*addr)
+    : "a"(x)
     : "memory"
   );
   return x;

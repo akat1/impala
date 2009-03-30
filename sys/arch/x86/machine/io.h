@@ -35,13 +35,12 @@ io_out16(ushort port, uint16_t val)
 }
 
 static inline uint8_t
-io_in8(uint8_t port)
+io_in8(uint16_t port)
 {
     uint8_t val;
     __asm__ volatile("inb %%dx, %%al":"=a" (val):"d" (port));
     return val;
 }
-
 
 static inline void
 io_out8(ushort port, uint8_t val)

@@ -16,8 +16,8 @@ _SUBDIR_CLEANDEPEND?= cleandepend
 ${_SUBDIR_BUILD}:
 	@for d in ${SUBDIRS};\
 		do echo "===> ${DIRPRFX}$$d (build)";\
-		   cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} build; cd ..;\
-	done
+		   cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} build; if [ ! $$? -eq 0 ]; then exit 1; fi; cd ..;\
+	done;
 
 ${_SUBDIR_CLEAN}:
 	@for d in ${SUBDIRS};\

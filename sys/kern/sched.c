@@ -64,9 +64,10 @@ void
 __sched_yield()
 {
     thread_t *n = select_next_thread();
-    if (n == curthread) return;
 //     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
     spinlock_unlock(&sprq);
+    if (n == curthread) 
+        return;
     thread_switch(n, curthread);
 }
 
