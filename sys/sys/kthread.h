@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __SYS_KTHREAD
 #define __SYS_KTHREAD
 

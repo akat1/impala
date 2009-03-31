@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __MACHINE_i8259A_H
 #define __MACHINE_i8259A_H
 

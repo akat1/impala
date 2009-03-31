@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __MACHINE_i8254_H
 #define __MACHINE_i8254_H
 
@@ -9,7 +16,7 @@ enum {
 };
 
 enum {
-    PIT_MAX_FREQ = 1193180
+    PIT_MAX_FREQ = 1193182
 };
 
 #ifdef __KERNEL

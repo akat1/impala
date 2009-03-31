@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/utils.h>
 #include <sys/kprintf.h>
 #include <machine/interrupt.h>

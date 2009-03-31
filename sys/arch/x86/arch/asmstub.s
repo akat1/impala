@@ -1,3 +1,9 @@
+# 
+#  ImpalaOS
+#   http://trzask.codepainters.com/impala/trac/
+# 
+#  $Id$
+#  
 
 .set text_selector, 0x08
 .set data_selector, 0x10

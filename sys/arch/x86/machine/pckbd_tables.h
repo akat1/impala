@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __MACHINE_PCKBD_TABLES_H
 #define __MACHINE_PCKBD_TABLES_H
 

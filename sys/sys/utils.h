@@ -1,6 +1,6 @@
 /*
  * ImpalaOS
- *  http://trzask.int.pl/impala/trac/
+ *  http://trzask.codepainters.com/impala/trac/
  *
  * $Id$
  */
@@ -13,7 +13,7 @@ void
 panic(const char* msg, ...);
 
 #define KASSERT(x) if(!(x)) \
-    panic("Assertion ( "  #x  " ) failed in file: " __FILE__ ":%u, in function: %s", __LINE__,  __func__);
+    panic("Assertion ( %s ) failed in file: %s:%u, in function: %s", #x, __FILE__, __LINE__,  __func__);
 
 #endif
 

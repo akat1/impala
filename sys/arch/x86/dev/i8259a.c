@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <machine/i8259a.h>
 #include <machine/io.h>

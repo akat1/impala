@@ -25,7 +25,7 @@ vga: extension=vbe
 cpu: count=1:1:1, ips=2000000, quantum=5, reset_on_triple_fault=1
 text_snapshot_check: enabled=0
 private_colormap: enabled=0
-clock: sync=none, time0=local
+clock: sync=realtime, time0=local
 # no cmosimage
 ne2k: enabled=0
 pnic: enabled=0

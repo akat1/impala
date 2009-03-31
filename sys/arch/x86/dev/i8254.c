@@ -1,6 +1,6 @@
 /*
  * ImpalaOS
- *  http://trzask.int.pl/impala/trac/
+ *  http://trzask.codepainters.com/impala/trac/
  *
  * $Id$
  */
@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/clock.h>
 #include <sys/kprintf.h>
+#include <sys/utils.h>
 #include <machine/interrupt.h>
 #include <machine/i8254.h>
 #include <machine/i8259a.h>
@@ -32,14 +33,20 @@ i8254_irq0()
     return TRUE;
 }
 
+/**
+ * Ustawia czêstotliwo¶æ z jak± PIT generuje IRQ 0
+ */
+
 void
 i8254_set_freq(uint hz)
 {
     kprintf("i8254 interrupt timer: %uhz\n", hz);
-    // brakuje chyba wys³ania komendy resetuj±cej chipset
+    KASSERT(hz >= 19);  // wymagane, aby wynik mie¶ci³ siê w 2 bajtach
+    
     uint res=PIT_MAX_FREQ/hz;
-    //TODO jakies ,,zaawansowane obliczenia'' co do HZ
-    //io_out8(0x34, PIT_MODE);
+    
+    io_out8(PIT_MODE, 0x34); // licznik zero w trybie 2,
+                             // przesy³ane oba bajty kodowanej binarnie liczby
     io_out8(PIT_CHAN0, res&0xff);
     io_out8(PIT_CHAN0, (res>>8)&0xff);
 }

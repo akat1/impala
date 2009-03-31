@@ -1,3 +1,10 @@
+# 
+#  ImpalaOS
+#   http://trzask.codepainters.com/impala/trac/
+# 
+#  $Id$
+#  
+
 .text
 .global _intrpt_syscall
 

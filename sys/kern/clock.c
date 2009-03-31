@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <sys/clock.h>
 #include <sys/list.h>
@@ -14,7 +21,7 @@ static spinlock_t soft_guard = { SPINLOCK_LOCK };
 volatile uint clock_ticks;
 
 /// Czêstotliwo¶æ zegara systemowego
-const int HZ = 100; 
+const int HZ = 100;
 
 /// Inicjalizuje obs³ugê tykniêæ zegara systemowego.
 void

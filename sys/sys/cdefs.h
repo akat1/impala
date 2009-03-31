@@ -1,6 +1,6 @@
 /*
  * ImpalaOS
- *  http://trzask.int.pl/impala/trac/
+ *  http://trzask.codepainters.com/impala/trac/
  *
  * $Id$
  */
