@@ -7,6 +7,7 @@ SRCS=\
 	arch/init.c\
 	arch/interrupt.c\
 	arch/isr.s\
+    arch/memory.c\
 	arch/thread.c\
 	dev/i8254.c\
 	dev/i8259a.c\

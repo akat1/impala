@@ -57,5 +57,4 @@ vkprintf(const char *fmt, va_list ap)
 
     textscreen_draw(&textscreen);
     
-    return;
 }

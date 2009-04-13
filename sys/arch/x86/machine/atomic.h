@@ -23,12 +23,5 @@ atomic_change_int(volatile int *addr, int x)
   return x;
 }
 
-// To chyba nie jest MPSAFE
-static inline uint
-atomic_fetch32(uint *addr)
-{
-    return *addr;
-}
-
 #endif
 

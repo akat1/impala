@@ -10,7 +10,7 @@ include ${IMPALA_SRCROOT}/mk/build.mk
 ${_LIB_BUILD}: ${LIBRARY}.a
 
 ${LIBRARY}.a: ${OBJS}
-	@echo "> archiving ${LIBRARY}.a"
+	@echo " AR ${LIBRARY}.a"
 	@${AR} r ${LIBRARY}.a ${OBJS}
 	@${RANLIB} ${LIBRARY}.a
 

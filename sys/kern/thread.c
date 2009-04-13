@@ -114,7 +114,7 @@ mutex_lock(mutex_t *m)
         m->mtx_owner = curthread;
     } else {
         spinlock_lock(&m->mtx_slock);
-        list_insert_head(&m->mtx_locking, curthread);
+        list_insert_tail(&m->mtx_locking, curthread);
         spinlock_unlock(&m->mtx_slock);
         sched_wait();
     }

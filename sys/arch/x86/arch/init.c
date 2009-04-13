@@ -6,6 +6,11 @@
  */
 
 #include <sys/types.h>
+#include <sys/kprintf.h>
+#include <sys/libkutil.h>
+#include <sys/thread.h>
+#include <sys/vm.h>
+
 #include <machine/descriptor.h>
 #include <machine/tss.h>
 #include <machine/i8259a.h>
@@ -15,6 +20,7 @@
 #include <machine/pckbd.h>
 #include <sys/libkutil.h>
 #include <sys/thread.h>
+#include <machine/memory.h>
 
 void init_x86(void);
 void _unhnd_intrpt(void);
@@ -25,11 +31,11 @@ extern uintptr_t irq_table[];
 
 static void setgdt(int, uintptr_t, uint, uint, uint);
 static void setidt(int i, uint selector, uintptr_t offset, uint access);
-static descriptor p_gdt[SEL_MAX];
-static descriptor p_idt[0x100];
+static descriptor_t p_gdt[SEL_MAX];
+static descriptor_t p_idt[0x100];
 static task_state_segment p_tss0;
-static descriptor_register p_gdtr;
-static descriptor_register p_idtr;
+static descriptor_register_t p_gdtr;
+static descriptor_register_t p_idtr;
 
 /**
  * Inicjalizuje obs³ugê architektury x86.
@@ -65,9 +71,9 @@ init_x86()
     mem_zero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;
     p_gdtr.limit = sizeof(p_gdt) -1;
-    gdt_load(&p_gdtr);
+    cpu_gdt_load(&p_gdtr);
 
-    tr_load(SEL_MK(SEL_TSS0, SEL_DPL0));
+    cpu_tr_load(SEL_MK(SEL_TSS0, SEL_DPL0));
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
@@ -89,20 +95,22 @@ init_x86()
     mem_zero(&p_idtr, sizeof(p_idtr));
     p_idtr.base = &p_idt;
     p_idtr.limit = sizeof(p_idt)-1;
-    idt_load(&p_idtr);
+    cpu_idt_load(&p_idtr);
     i8259a_init();
     i8254_init();
     pckbd_init();
+    vm_low_init();
     __asm__("sti");
 
 }
+
 
 /// Ustawia wpis w tablicy deskryptorów IDT.
 void
 setidt(int i, uint selector, uintptr_t offset,
     uint access)
 {
-    gate_descr *entry = &p_idt[i].gdescr;
+    gate_descr_t *entry = &p_idt[i].gdescr;
     entry->offset_low = (uint)offset & 0xffff;
     entry->offset_high = ((uint)offset >> 16);
     entry->selector = selector;
@@ -115,7 +123,7 @@ void
 setgdt(int i, uintptr_t base, uint limit,
     uint acc, uint atrib)
 {
-    segment_descr *entry = &p_gdt[i].sdescr;
+    segment_descr_t *entry = &p_gdt[i].sdescr;
     entry->base_low = base & 0xffff;
     entry->base_mid = (base >> 16) & 0xff;
     entry->base_high = (base >> 24);

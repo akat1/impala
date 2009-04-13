@@ -11,43 +11,65 @@
 #include <machine/thread.h>
 #include <machine/atomic.h>
 #include <sys/list.h>
+#include <sys/sched.h>
+
 enum {
     MAX_THREAD = 0x10,
-    THREAD_STACK_SIZE = 0x4000
+    THREAD_STACK_SIZE = 0x100
 };
 
-
+/// wiruj±cy zamek.
 struct spinlock {
     volatile int    _dlock;
 };
 
-
+/// w±tek procesora.
 struct thread {
+    /// stan procesora.
     thread_context  thr_context;
     int             thr_tid;
+    /// adres procedury wej¶ciowej
     addr_t          thr_entry_point;
+    /// adres argumenty procedury wej¶ciowej
     addr_t          thr_entry_arg;
+    /// poziom uprzywilejowania
     int             thr_priv;
+    /// opcje
     int             thr_flags;
     uint            thr_wakeup_time;
+    /// stos (tymczasowo tutaj)
     char            thr_stack[THREAD_STACK_SIZE];
+    /// proceser, do którego w±tek przynale¿y
     proc_t         *thr_proc;
+    /// wêze³ kolejki planisty
     list_node_t     L_run_queue;
+    /// wêze³ listy w±tków
     list_node_t     L_threads;
+    /// wêze³ listy w±tków oczekuj±cych
     list_node_t     L_wait;
 };
 
+/// zamek typu mutex.
 struct mutex {
+    /// w±tek bêd±cy w³a¶cicielem zamka.
     thread_t     *mtx_owner;
+    /// stan zamka.
     int           mtx_locked;
+    /// opcje.
     int           mtx_flags;
+    /// pomocniczy wiruj±cy zamek.
     spinlock_t    mtx_slock;
+    /// lista w±tków oczekuj±cych na wej¶cie
     list_t        mtx_locking; // thread_t.L_wait
+    /// lista w±tków oczekuj±cych na poinformowanie
     list_t        mtx_waiting; // thread_t.L_wait
 };
 
+/// wspó³biezna kolejka
 struct cqueue {
+    /// zamek
     mutex_t     q_mtx;
+    /// lista danych
     list_t      q_data;
 };
 
@@ -107,24 +129,31 @@ void cqueue_insert(cqueue_t *m, void *d);
 void *cqueue_extract(cqueue_t *m);
 void cqueue_shutdown(cqueue_t *m);
 
+
+/// Inicjalizuje wiruj±cy zamek.
 static inline void
 spinlock_init(spinlock_t *sp)
 {
     sp->_dlock = SPINLOCK_UNLOCK;
 }
 
+/// Zamyka zamek.
 static inline void
 spinlock_lock(spinlock_t *sp)
 {
-    while (atomic_change_int(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK);
+    while (atomic_change_int(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_LOCK) {
+        sched_yield();
+    }
 }
 
+/// Odblokowuje zamek.
 static inline void
 spinlock_unlock(spinlock_t *sp)
 {
       sp->_dlock = SPINLOCK_UNLOCK;
 }
 
+/// Próbuje zamkn±æ zamek.
 static inline bool
 spinlock_trylock(spinlock_t *sp)
 {

@@ -8,7 +8,10 @@
 #ifndef __MACHINE_DESCRIPTOR_H
 #define __MACHINE_DESCRIPTOR_H
 
-typedef struct segment_descr segment_descr;
+
+typedef struct segment_descr segment_descr_t;
+
+/// Deskryptor segmentu.
 struct segment_descr {
     uint16_t    limit_low;
     uint16_t    base_low;
@@ -18,7 +21,8 @@ struct segment_descr {
     uint8_t     base_high;
 } __packed;
 
-typedef struct gate_descr gate_descr;
+typedef struct gate_descr gate_descr_t;
+/// Deskryptor bramy
 struct gate_descr {
     uint16_t    offset_low;
     uint16_t    selector;
@@ -27,23 +31,35 @@ struct gate_descr {
     uint16_t    offset_high;
 } __packed;
 
-typedef union descriptor descriptor;
+typedef union descriptor descriptor_t;
+/// Deskryptor.
 union descriptor {
-    segment_descr   sdescr;
-    gate_descr      gdescr;
+    segment_descr_t   sdescr;
+    gate_descr_t      gdescr;
 };
 
+/// Indeksy GDT.
 enum {
-  SEL_NULL,
-  SEL_CODE,
-  SEL_DATA,
-  SEL_UCODE,
-  SEL_UDATA,
-  SEL_TSS0,
-  SEL_MAX
+    SEL_NULL,
+    /// kod j±dra.
+    SEL_CODE,
+    /// dane j±dra.
+    SEL_DATA,
+    /// kod u¿ytkownika.
+    SEL_UCODE,
+    /// dane u¿ytkownika
+    SEL_UDATA,
+    /// zadanie j±dra.
+    SEL_TSS0,
+    /// zadanie u¿ytkownika.
+    SEL_UTSS0,
+    /// bramka do trybu rzeczywistego
+    SEL_VM86,
+    SEL_MAX
 };
 
-typedef struct descriptor_register descriptor_register;
+typedef struct descriptor_register descriptor_register_t;
+/// Opis rejestrów GDT i LDT.
 struct descriptor_register {
   uint16_t  limit;
   addr_t    base;
@@ -99,13 +115,12 @@ enum {
     GATE_TYPE_RWD       = GATE_TYPE_RW | 0x04
 };
 
-
 #ifdef __KERNEL
-void gdt_load(descriptor_register *r);
-void ldt_load(descriptor_register *r);
-void idt_load(descriptor_register *r);
-void tr_load(uint32_t sel);
+void cpu_gdt_load(descriptor_register_t *r);
+void cpu_ldt_load(descriptor_register_t *r);
+void cpu_idt_load(descriptor_register_t *r);
+void cpu_tr_load(uint32_t sel);
+void cpu_jmp_sel(uint32_t sel);
 #endif
-
 
 #endif

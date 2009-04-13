@@ -12,10 +12,10 @@ OBJS= ${OBJS_2}
 
 
 .c.o:
-	@echo "> compiling $@"
+	@echo " CC $<"
 	@${CC} -c ${C_FLAGS} -o $@ $<
 
 .s.o:
-	@echo "> compiling $@"
+	@echo " AS $<"
 	@${AS} ${AS_FLAGS} -o $@ $<
 

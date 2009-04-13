@@ -8,6 +8,8 @@
 #ifndef __MACHINE_CPU_H
 #define __MACHINE_CPU_H
 
+
+/// Opis bitów rejestru EFLAGS
 enum CPU_EFLAGS {
     EFLAGS_CS   = 1,
     EFLAGS_PF   = 1 << 2,
@@ -37,8 +39,9 @@ enum CPU_EFLAGS_IOPL {
 #define EFLAGS_BITS 0x2
 
 
-// rejestry kontrolne
+/// Opis bitów rejestru CR0
 enum CPU_CR0 {
+    /// tryb chroniony (protected mode)
     CR0_PE = 1 << 0,
     CR0_MP = 1 << 1,
     CR0_EM = 1 << 2,
@@ -49,20 +52,25 @@ enum CPU_CR0 {
     CR0_AM = 1 << 18,
     CR0_NW = 1 << 29,
     CR0_CD = 1 << 30,
+    /// stronicowanie (paging)
     CR0_PG = 1 << 31
 };
 
+/// Opis bitów rejestru CR3
 enum CPU_CR3 {
     CR3_PWT = 1 << 3,
     CR3_PCD = 1 << 4
 };
 
+/// Opis bitów rejestru CR4
 enum CPU_CR4 {
     CR4_VME = 1 << 0,
     CR4_PVI = 1 << 1,
     CR4_TSD = 1 << 2,
     CR4_DE  = 1 << 3,
+    /// Page Size Extension
     CR4_PSE = 1 << 4,
+    /// Physical Address Extension
     CR4_PAE = 1 << 5,
     CR4_MCE = 1 << 6,
     CR4_PGE = 1 << 7,
@@ -76,6 +84,9 @@ enum CPU_CR4 {
  *
  * Intel IA-32 ADSM - 2A - 3-192
  */
+
+#define KASSERT(x) if(!(x)) \
+    panic("Assertion ( %s ) failed in file: %s:%u, in function: %s", #x, __FILE__, __LINE__,  __func__);
 
 enum CPU_EDX_FEATURE {
     EDX_FEATURE_FPU   = 1 << 0,
@@ -109,9 +120,18 @@ enum CPU_EDX_FEATURE {
     EDX_FEATURE_PBE   = 1 << 31
 };
 
+#ifdef __KERNEL
+uint32_t cpu_get_cr0(void);
+uint32_t cpu_get_cr2(void);
+uint32_t cpu_get_cr3(void);
+void cpu_set_cr0(uint32_t r);
+void cpu_set_cr2(uint32_t r);
+void cpu_set_cr3(uint32_t r);
 
 // Vendor
 //static char vendor_string[13];
+
+#endif
 
 #endif
 

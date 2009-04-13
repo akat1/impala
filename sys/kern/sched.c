@@ -232,7 +232,8 @@ select_next_thread()
             return p;
         }
     }
-    while (TRUE); kprintf("!!!!!!!\n");
+    kprintf("!!!!!!!\n");
+    while (TRUE); 
 #undef NEXTTHR
 }
 

@@ -40,7 +40,6 @@ i8254_irq0()
 void
 i8254_set_freq(uint hz)
 {
-    kprintf("i8254 interrupt timer: %uhz\n", hz);
     KASSERT(hz >= 19);  // wymagane, aby wynik mie¶ci³ siê w 2 bajtach
     
     uint res=PIT_MAX_FREQ/hz;

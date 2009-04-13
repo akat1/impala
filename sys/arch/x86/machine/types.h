@@ -23,6 +23,7 @@ typedef int32_t  intptr_t;
 
 // adres (wzgledny)
 typedef void* addr_t;
+typedef const void* caddr_t;
 
 typedef uint32_t size_t;
 typedef int32_t  ssize_t;

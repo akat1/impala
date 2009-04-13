@@ -59,8 +59,8 @@ struct interrupt_frame {
     uint32_t f_errno;
     uint32_t f_eip;
     uint32_t f_cs;
-
     uint32_t f_eflags;
+
     uint32_t f_esp;
     uint32_t f_ss;
 } __packed;

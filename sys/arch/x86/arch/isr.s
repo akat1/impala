@@ -4,6 +4,9 @@
 # 
 #  $Id$
 #  
+# isr.s (interrupt service routine)
+#
+# Plik zawiera niskopoziomowe procedury i uchwyty do obslugi przerwañ.
 
 .text
 .global _intrpt_syscall
@@ -88,7 +91,7 @@ TRAP 10, _trap10, TRAP_unhandled
 TRAP 11, _trap11, TRAP_unhandled
 TRAP 12, _trap12, TRAP_unhandled
 TRAP 13, _trap13, TRAP_gfault
-TRAP 14, _trap14, TRAP_unhandled
+TRAP 14, _trap14, TRAP_pfault
 TRAP 15, _trap15, TRAP_unhandled
 TRAP 16, _trap16, TRAP_unhandled
 

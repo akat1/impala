@@ -2,6 +2,7 @@ _KERNEL_BUILD= build
 _KERNEL_CLEAN= clean
 _KERNEL_DEPEND= depend
 _KERNEL_CLEANDEPEND= cleandepend
+.PHONY: ${KERNEL_MAIN}
 
 C_FLAGS=-D__KERNEL ${C_FLAGS_}
 
@@ -20,7 +21,7 @@ ${_KERNEL_CLEAN}:
 
 
 ${KERNEL}: ${LIBDEPS} ${OBJS}
-	@echo "> linking ${KERNEL}"
+	@echo " LD ${KERNEL}"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
 
 

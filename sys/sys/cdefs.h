@@ -18,6 +18,9 @@
 // piekny triczek, rodem z Solarisa
 #define offsetof(str, memb) ((size_t)(&(((str *)0)->memb)))
 
+#define CXX_BEGIN   extern "C" {
+#define CXX_END     }
+
 #include <machine/cdefs.h>
 
 #endif

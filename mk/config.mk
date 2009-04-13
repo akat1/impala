@@ -3,7 +3,7 @@ GCC_PREFIX?=
 BINUTILS_PREFIX?=
 CC=${GCC_PREFIX}gcc
 INCDIR=  -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/
-C_FLAGS_=-m32 -std=c99 -fno-stack-protector -nostdinc -Wall -Wstrict-prototypes -Wmissing-prototypes -Werror ${INCDIR}\
+C_FLAGS_=-m32 -std=c99 -ffreestanding -nostdinc -Wall -Wstrict-prototypes -Wmissing-prototypes -Werror ${INCDIR}\
 	 -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
 C_FLAGS?= ${C_FLAGS_}
 

@@ -9,14 +9,23 @@
 .set data_selector, 0x10
 
 
-.global gdt_load
-.global ldt_load
-.global idt_load
-.global tr_load
-.global tss_save
-.global jmp_sel
+.global cpu_gdt_load
+.global cpu_ldt_load
+.global cpu_idt_load
+.global cpu_tr_load
+.global cpu_tss_save
+.global cpu_jmp_sel
 .global thread_context_store
 .global thread_context_load
+.global cpu_get_cr0
+.global cpu_get_cr2
+.global cpu_get_cr3
+.global cpu_get_cr4
+.global cpu_set_cr0
+.global cpu_set_cr2
+.global cpu_set_cr3
+.global cpu_set_cr4
+
 
 .macro offset32 name, num
 .equ \name, \num*4
@@ -55,8 +64,8 @@ thread_context_store:
     leave
     ret
 
-gdt_load:
-	enter $0,$0
+cpu_gdt_load:
+    enter $0,$0
 	movl 8(%ebp), %eax
 	lgdt (%eax)
 	movl $data_selector, %eax
@@ -73,21 +82,58 @@ gdt_load.1:
 	leave
 	ret
 
-ldt_load:
+cpu_ldt_load:
 	movl 4(%esp), %eax
 	lldt (%eax)
 	ret
 
-idt_load:
+cpu_idt_load:
     movl 4(%esp), %eax
 	lidt (%eax)
 	ret
 
-tr_load:
+cpu_tr_load:
     ltr 4(%esp)
     ret
 
-jmp_sel:
+cpu_get_cr0:
+    movl %cr0, %eax
+    ret
+
+cpu_set_cr0:
+    movl 4(%esp), %eax
+    movl %eax, %cr0
+    ret
+
+cpu_get_cr2:
+    movl %cr2, %eax
+    ret
+
+cpu_set_cr2:
+    movl 4(%esp), %eax
+    movl %eax, %cr2
+    ret
+
+cpu_get_cr3:
+    movl %cr3, %eax
+    ret
+
+cpu_set_cr3:
+    movl 4(%esp), %eax
+    movl %eax, %cr3
+    ret
+
+cpu_get_cr4:
+    movl %cr4, %eax
+    ret
+
+cpu_set_cr4:
+    movl 4(%esp), %eax
+    movl %eax, %cr4
+    ret
+
+
+cpu_jmp_sel:
     movl 4(%esp), %eax
     pushl $0x0
     pushl %eax
