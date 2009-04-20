@@ -15,6 +15,8 @@
 void kprintf(const char *fmt, ...);
 void vkprintf(const char *fmt, va_list ap);
 
+#include <sys/sched.h>
+
 #define TRACE_ATTR COLOR_BRIGHTBLUE
 
 #define TRACE_IN(fmt, args...)\
@@ -23,6 +25,7 @@ void vkprintf(const char *fmt, va_list ap);
         kprintf("@ %s (", __func__);\
         kprintf(fmt, ## args);\
         kprintf(")\n");\
+        for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
         textscreen_disable_forced_attr();\
     } while (0);
     

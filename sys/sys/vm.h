@@ -16,7 +16,6 @@
 
 
 extern list_t vm_free_pages;
-extern list_t vm_unused_regions;
 extern vm_space_t vm_kspace;
 
 void vm_init(void);

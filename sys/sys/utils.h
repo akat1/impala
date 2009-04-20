@@ -18,7 +18,10 @@ void panic(const char* msg, ...);
 
 
 #define KASSERT(x) if(!(x)) \
-    panic("Assertion ( %s ) failed in file: %s:%u, in function: %s", #x, __FILE__, __LINE__,  __func__);
+    panic("Assertion failed\n expr: %s\n in file: %s:%u\n in function: %s", #x,  __FILE__, __LINE__,  __func__);
+
+
+#define DEBUGF(fmt, a...) kprintf("%s: " fmt "\n", __FILE__, ## a )
 
 #endif
 

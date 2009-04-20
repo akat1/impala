@@ -1,12 +1,21 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <sys/list.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_pmap.h>
+#include <sys/vm/vm_lpool.h>
+#include <sys/vm/vm_internal.h>
 #include <sys/thread.h>
 
 /// Globalny zamek pamiêci wirtualnej.
 static spinlock_t vm_sp;
-list_t vm_unused_regions;
+vm_lpool_t vm_unused_regions;
 
 /// Lista wolnych stron.
 list_t vm_free_pages;
@@ -16,7 +25,6 @@ list_t vm_free_pages;
 void
 vm_init()
 {
-//     vm_low_init();
     spinlock_init(&vm_sp);
 }
 

@@ -12,6 +12,8 @@
 
 typedef struct list list_t;
 typedef struct list_node list_node_t;
+typedef bool list_less_f(const void *x, const void *y);
+typedef bool list_pred_f(const void *x, void *arg);
 
 struct list_node {
     void     *prev;
@@ -196,6 +198,36 @@ list_insert_before(list_t *ls, void *xs, void *x)
         __list_insert_before(ls, xs, x);
     }
 }
+
+// Nie u¿ywaæ przy listach cyklicznych!
+static inline void
+list_insert_in_order(list_t *ls, void *x, list_less_f *is_less)
+{
+    void *elem = NULL;
+    // lecimy po liscie dopoki: elem < x
+    while ( (elem = list_next(ls, elem)) && is_less(elem,x) );
+    if (elem == NULL) {
+        list_insert_tail(ls, x);
+    } else {
+        list_insert_before(ls, elem, x);
+    }
+}
+
+static inline void *
+list_find_next(list_t *ls, void *elem, list_pred_f *pred, void *parg)
+{
+    while ( (elem = list_next(ls, elem)) ) {
+        if (pred(elem, parg)) return elem;
+    }
+    return NULL;
+}
+
+static inline void *
+list_find(list_t *ls, list_pred_f *pred, void *parg)
+{
+    return list_find_next(ls, NULL, pred, parg);
+}
+
 
 #undef __elem_node
 #undef __next_node

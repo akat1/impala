@@ -2,6 +2,8 @@
 #include <sys/kprintf.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_pmap.h>
+#include <sys/vm/vm_lpool.h>
+#include <sys/vm/vm_internal.h>
 #include <sys/utils.h>
 #include <sys/string.h>
 #include <machine/memory.h>
@@ -152,20 +154,25 @@ _set_system_vspace()
         vaddr += PAGE_SIZE*1024;
     }
     // przydzielamy miejsce na poczatkowe regiony
-    list_create(&vm_unused_regions, offsetof(vm_region_t, L_regions), FALSE);
     page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
     kdata->size += PAGE_SIZE;
+    vm_pmap_insert(kmap, page, page->kvirt_addr);
+    vm_lpool_create_(&vm_unused_regions, offsetof(vm_region_t,L_regions),
+            sizeof(vm_region_t), VM_LPOOL_NORMAL, (void*)page->kvirt_addr);
+    page = vm_alloc_page();
+    page->kvirt_addr = kdata->base + kdata->size;
+    kdata->size += PAGE_SIZE;
+    vm_pmap_insert(kmap, page, page->kvirt_addr);
+    vm_lpool_insert_empty(&vm_unused_regions, (void*)page->kvirt_addr);
 
-    vm_region_t *regs = (vm_region_t*)page->phys_addr;
-    regs->begin = kdata->base;
-    regs->size = kdata->size;
-    list_insert_tail(&kdata->regions, regs);
-    regs++;
-    for (int i = sizeof(vm_region_t); i < PAGE_SIZE; i+= sizeof(vm_region_t)) {
-        list_insert_tail(&vm_unused_regions, regs);
-        regs++;
-    }
+    vm_region_t *reg = vm_lpool_alloc(&vm_unused_regions);
+
+    reg->begin = kdata->base;
+    reg->size = kdata->size;
+    reg->end = reg->begin + reg->size;
+    list_insert_head(&kdata->regions, reg);
+
     kprintf("VM: available memory: %ukB (%u pages)\n",
         vm_physmem_free*4, vm_physmem_free);
 

@@ -24,15 +24,43 @@ static void print_welcome(void);
 static void init_kernel(void);
 /// G³ówna procedura j±dra.
 
+static void vm_test(void);
+static void kmem_test(void);
+
 void
 kmain()
 {
     print_welcome();
     init_kernel();
-#define TALLOC(size) kprintf("Allocated %u bytes in %p\n", size, kmem_alloc(size, 0))
-    TALLOC(128-1);
-    TALLOC(128-1);
+    DEBUGF("running tests...");
+    vm_test();
+    kmem_test();
     for (;;);
+}
+
+void
+vm_test()
+{
+    vm_segment_t *kdata = &vm_kspace.seg_data;
+    TRACE_IN("start");
+    vm_addr_t a[10];
+    a[0] = vm_segment_alloc(kdata, PAGE_SIZE*5);
+    a[1] = vm_segment_alloc(kdata, PAGE_SIZE*4);
+    kprintf("a0=%p a1=%p\n", a[0], a[1]);
+    vm_segment_free(kdata, a[0]+PAGE_SIZE, PAGE_SIZE*4);
+    a[2] = vm_segment_alloc(kdata, PAGE_SIZE);
+    kprintf("a2=%p\n", a[2]);
+    
+    TRACE_IN("stop");
+}
+
+
+void
+kmem_test()
+{
+    void *a[10];
+    a[0] = kmem_alloc(13, KM_SLEEP);
+    kprintf("a0=%p\n", a[0]);
 }
 
 void

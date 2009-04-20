@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_trap.h>

@@ -1,22 +1,22 @@
 /*
- * Impala Operating System
- * http://trzask.codepainters.com/impala/trac/
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
  *
+ * $Id$
  */
+
 #include <sys/types.h>
 #include <sys/kmem.h>
 #include <sys/vm.h>
+#include <sys/vm/vm_lpool.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
 #include <sys/kprintf.h>
 
-typedef struct cache_slab cache_slab_t;
-typedef struct slab_slab slab_slab_t;
-typedef struct bufctl_slab bufctl_slab_t;
-
 typedef struct kmem_slab kmem_slab_t;
 typedef struct kmem_bufctl kmem_bufctl_t;
 
+/// Cache
 struct kmem_cache {
     size_t          elem_size;
     kmem_ctor_t     *ctor;
@@ -26,9 +26,9 @@ struct kmem_cache {
     list_t          full_slabs;
     mutex_t         mtx;
     list_node_t     L_caches;
-    cache_slab_t   *cslab;
 };
 
+/// P³yta
 struct kmem_slab {
     list_t          free_bufs;
     list_t          used_bufs;
@@ -37,66 +37,55 @@ struct kmem_slab {
     list_node_t     L_slabs;
 };
 
-
+/// Opis buforu.
 struct kmem_bufctl {
     kmem_slab_t     *slab;
     void            *addr;
     list_node_t     L_bufs;
 };
 
+
 enum {
+    /// Ograniczenie na elementy grupowane na stronie.
     LARGE_SIZE  = PAGE_SIZE/4,
-    CACHES_ON_PAGE = (PAGE_SIZE-sizeof(size_t))/sizeof(kmem_cache_t),
-    SLABS_ON_PAGE = (PAGE_SIZE-sizeof(size_t))/sizeof(kmem_slab_t),
-    BUFCTLS_ON_PAGE = (PAGE_SIZE-sizeof(size_t))/sizeof(kmem_bufctl_t)
 };
 
-struct cache_slab {
-    size_t          used;
-    kmem_cache_t    table[CACHES_ON_PAGE];
-};
 
-struct slab_slab {
-    size_t          used;
-    kmem_slab_t     table[SLABS_ON_PAGE];
-};
-
-struct bufctl_slab {
-    size_t          used;
-    kmem_bufctl_t   table[BUFCTLS_ON_PAGE];
-};
-
-static kmem_cache_t *alloc_new_cache(void);
-static kmem_slab_t *alloc_new_slab(void);
-static void create_new_caches(void);
-static void create_new_slabs(void);
-//static void create_new_bufctls(void);
 
 static void cache_init(kmem_cache_t *c);
 static void cache_cleanup(kmem_cache_t *c);
-static void slab_init(kmem_cache_t *c, kmem_slab_t *s);
+static void prepare_slab_for_cache(kmem_cache_t *c, kmem_slab_t *s);
 static void alloc_init(void);
 
-static list_t free_caches;
-static list_t free_slabs;
-static list_t free_bufctls;
+static kmem_slab_t *get_slab_from_cache(kmem_cache_t *c);
+static kmem_bufctl_t *reserve_bufctl(kmem_cache_t *c, kmem_slab_t *s);
+static void check_cache(kmem_cache_t *c);
+
+/// Pula cache.
+static vm_lpool_t lpool_caches;
+/// Pula p³yt.
+static vm_lpool_t lpool_slabs;
+/// Pula opisów buforów.
+static vm_lpool_t lpool_bufctls;
 
 static spinlock_t clock;
 
 /*========================================================================
  * malloc
  */
-typedef struct mem_bucket mem_bucket_t;
 
+/// Kube³ek.
+typedef struct mem_bucket mem_bucket_t;
 struct mem_bucket {
-    int size;
+    size_t size;
     const char *name;
     kmem_cache_t *cache;
 };
 
+/// Obslugiwane kube³ki pamiêci.
 static mem_bucket_t buckets[] = {
     {1 <<  1, "kmem_alloc bucket [2]", NULL},
-    {1 <<  2, "kmem_alloc_bucket [4]", NULL},
+    {1 <<  2, "kmem_alloc bucket [4]", NULL},
     {1 <<  3, "kmem_alloc bucket [8]", NULL},
     {1 <<  4, "kmem_alloc bucket [16]", NULL},
     {1 <<  5, "kmem_alloc bucket [32]", NULL},
@@ -110,6 +99,12 @@ static mem_bucket_t buckets[] = {
     {0, NULL, NULL}
 };
 
+/**
+ * Przydziela pamiêæ j±dra.
+ * @param s wielko¶æ.
+ * @param flags opcje przydzia³u.
+ * @return wska¼nik do przydzielonego elementu.
+ */
 void*
 kmem_alloc(size_t s, int flags)
 {
@@ -117,11 +112,11 @@ kmem_alloc(size_t s, int flags)
     int i;
     for (i = 0; buckets[i].size && buckets[i].size < s; i++);
     if (buckets[i].size == 0)
-        panic("Allocating large regions not possible");
+        panic("Allocating large regions not possible yet");
     return kmem_cache_alloc(buckets[i].cache, flags);
 }
 
-
+/// Inicjalizuje kube³ki.
 void
 alloc_init()
 {
@@ -138,23 +133,31 @@ alloc_init()
  */
 
 
+/**
+ * Tworzy kmem_cache.
+ * @param name nazwa cache.
+ * @param esize wielko¶æ elementu.
+ * @param ctor wska¼nik do konstruktora.
+ * @param dtor wska¼nik do destruktora.
+ */
 kmem_cache_t*
 kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     kmem_dtor_t *dtor)
 {
-/*
-    TRACE_IN("name=\"%s\" esize=%u ctor=%p dtor=%p", name, esize, ctor,
-        dtor);
-*/
     spinlock_lock(&clock);
-    kmem_cache_t *c = alloc_new_cache();
-    c->elem_size = esize;
-    c->ctor = ctor;
-    c->dtor = dtor;
+    kmem_cache_t *cache = vm_lpool_alloc(&lpool_caches);
+    cache_init(cache);
+    cache->elem_size = esize;
+    cache->ctor = ctor;
+    cache->dtor = dtor;
     spinlock_unlock(&clock);
-    return c;
+    return cache;
 }
 
+/**
+ * Niszczy kmem_cache.
+ * @param cache wska¼nik do cache.
+ */
 void
 kmem_cache_destroy(kmem_cache_t *cache)
 {
@@ -164,62 +167,54 @@ kmem_cache_destroy(kmem_cache_t *cache)
     spinlock_lock(&clock);
 }
 
+/**
+ * Przydziela element z danego kmem_cache.
+ * @param cache wska¼nik do cache.
+ * @param flags opcje przydzia³u.
+ * @return wska¼nik do przydzielonego elementu.
+ */
 void *
 kmem_cache_alloc(kmem_cache_t *cache, int flags)
 {
-    TRACE_IN("cache=%p", cache);
     mutex_lock(&cache->mtx);
-    kmem_slab_t *s;
-    TRACE_IN("#empty=%u #part=%u #full=%u",
-        list_length(&cache->empty_slabs),
-        list_length(&cache->part_slabs),
-        list_length(&cache->full_slabs));
-    if (list_length(&cache->part_slabs) == 0) {
-        if (list_length(&cache->empty_slabs) == 0) {
-            s = alloc_new_slab();
-            slab_init(cache, s);
-        } else {
-            s = list_extract_first(&cache->empty_slabs);
-        }
-    } else {
-        s = list_extract_first(&cache->part_slabs);
-    }
-    TRACE_IN("slab=%p", s);   
-    // Mamy gwarancje ze jest jakis bufctl, bo bralismy z part/empty
-    kmem_bufctl_t *b = list_extract_first(&s->free_bufs);
-    list_insert_tail(&s->used_bufs, b);
-    if (list_length(&s->free_bufs) == 0) {
-        list_insert_tail(&cache->full_slabs, s);
-    } else {
-        list_insert_tail(&cache->part_slabs, s);
-    }
+    kmem_slab_t *slab = get_slab_from_cache(cache);
+    kmem_bufctl_t *bufctl = reserve_bufctl(cache, slab);
     mutex_unlock(&cache->mtx);
-    return b->addr;
+    return bufctl->addr;
 }
 
+/**
+ * Zwraca element do schowka.
+ * @param cache schowek.
+ * @param m przydzielony element z danego schowka.
+ */
 void
 kmem_cache_free(kmem_cache_t *cache, void *m)
 {
     TRACE_IN0();
     mutex_lock(&cache->mtx);
+    check_cache(cache);
     mutex_unlock(&cache->mtx);
 }
-
-
 
 
 /*========================================================================
  * maintain
  */
 
-
+/// Inicjalizuje modu³.
 void
 kmem_init()
 {
     TRACE_IN0();
-    list_create(&free_caches, offsetof(kmem_cache_t, L_caches), FALSE);
-    list_create(&free_slabs, offsetof(kmem_slab_t, L_slabs), FALSE);
-    list_create(&free_bufctls, offsetof(kmem_bufctl_t, L_bufs), FALSE);
+
+    vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches), 
+        sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
+    vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
+        sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
+    vm_lpool_create(&lpool_bufctls, offsetof(kmem_bufctl_t, L_bufs),
+        sizeof(kmem_bufctl_t), VM_LPOOL_PREALLOC);
+
     spinlock_init(&clock);
     alloc_init();
 }
@@ -232,40 +227,13 @@ kmem_init()
 static void cache_init(kmem_cache_t *c);
 static void cache_cleanup(kmem_cache_t *c);
 
-void
-create_new_caches()
-{
-    TRACE_IN0();
-    cache_slab_t *cslab = (cache_slab_t*)
-        vm_segment_alloc(&vm_kspace.seg_data,sizeof(cache_slab_t));
-    TRACE_IN("allocated at %p (%u)", cslab, sizeof(cache_slab_t));
-    for (int i = 0; i < CACHES_ON_PAGE; i++) {
-        list_insert_tail(&free_caches, &cslab->table[i]);
-        cache_init(&cslab->table[i]);
-        cslab->table[i].cslab = cslab;
-    }
-}
-
-void
-create_new_slabs()
-{
-    TRACE_IN0();
-    slab_slab_t *sslab = (slab_slab_t*)
-        vm_segment_alloc(&vm_kspace.seg_data,sizeof(slab_slab_t));
-    TRACE_IN("allocated at %p (%u)", sslab, sizeof(slab_slab_t));
-    for (int i = 0; i < SLABS_ON_PAGE; i++) {
-        list_insert_tail(&free_slabs, &sslab->table[i]);
-        list_create(&sslab->table[i].free_bufs, offsetof(kmem_bufctl_t,L_bufs),
-            FALSE);
-        list_create(&sslab->table[i].used_bufs, offsetof(kmem_bufctl_t,L_bufs),
-            FALSE);
-    }
-}
-
+/**
+ * Inicjaluzuje schowek.
+ * @param c wska¼nik do schowka
+ */
 void
 cache_init(kmem_cache_t *c)
 {
-//    TRACE_IN0();
     list_create(&c->empty_slabs, offsetof(kmem_slab_t, L_slabs), FALSE);
     list_create(&c->part_slabs, offsetof(kmem_slab_t, L_slabs), FALSE);
     list_create(&c->full_slabs, offsetof(kmem_slab_t, L_slabs), FALSE);
@@ -273,53 +241,103 @@ cache_init(kmem_cache_t *c)
     c->elem_size = 0;
 }
 
+/**
+ * Sprz±ta po schowku.
+ * @param c wska¼nik do schowka.
+ */
 void
 cache_cleanup(kmem_cache_t *c)
 {
-//    TRACE_IN0();
     c->elem_size = 0;
-    list_insert_head(&free_caches, c);
+    vm_lpool_free(&lpool_caches, c);
 }
 
+/**
+ * Przygotowuje p³ytê dla danego schowka.
+ * @param cache wska¼nik do schowka.
+ * @param slab wska¼nik do p³yty.
+ */
 void
-slab_init(kmem_cache_t *c, kmem_slab_t *s)
+prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
 {
-    TRACE_IN("cache=%p slab=%p", c, s);
-    char *p = (char*)vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE);
-    if (c->elem_size < LARGE_SIZE) {
-        s->addr = p; 
-        s->items = PAGE_SIZE / (sizeof(kmem_bufctl_t) + c->elem_size);
-        for (int i = 0; i < s->items; i++) {
-            kmem_bufctl_t *b = (kmem_bufctl_t*) p;
-            p += sizeof(kmem_bufctl_t);
-            b->addr = p;
-            p += c->elem_size;
-            list_insert_tail(&s->free_bufs, b);
-//            TRACE_IN("buf=%p data=%p", b, b->addr);
+    list_create(&slab->free_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
+    list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
+    char *data = (char*)vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE);
+    KASSERT(data != NULL);
+    if (cache->elem_size < LARGE_SIZE) {
+        slab->addr = data;
+        slab->items = PAGE_SIZE / ( sizeof(kmem_bufctl_t) + cache->elem_size );
+        for (int i = 0; i < slab->items; i++) {
+            kmem_bufctl_t *bctl = (kmem_bufctl_t*) data;
+            bctl->addr = data + sizeof(kmem_bufctl_t);
+            if (cache->ctor) cache->ctor(bctl->addr);
+            list_insert_tail(&slab->free_bufs, bctl);
+            data += cache->elem_size + sizeof(kmem_bufctl_t);
         }
     } else {
         panic("Allocating SLABS for LARGE not supported");
     }
 }
 
-kmem_cache_t *
-alloc_new_cache()
-{
-    if (list_length(&free_caches) == 0) {
-        create_new_caches();
-    }
-    kmem_cache_t *c = list_extract_first(&free_caches);
-    return c;
-}
-
+/**
+ * Pobiera u¿yteczn± p³ytê z schowka.
+ * @param cache wska¼nik do schowka
+ * @return wska¼nik do p³yty.
+ *
+ * Je¿eli nie ma u¿ytecznych p³yt w schowku to przydziela now±.
+ */
 kmem_slab_t *
-alloc_new_slab()
+get_slab_from_cache(kmem_cache_t *cache)
 {
-    if (list_length(&free_slabs) == 0) {
-        create_new_slabs();
+    list_t *ls = NULL;  
+    if (list_length(&cache->part_slabs) > 0) {
+        ls = &cache->part_slabs;
+    } else
+    if (list_length(&cache->empty_slabs) > 0) {
+        ls = &cache->empty_slabs;
     }
-    kmem_slab_t *s = list_extract_first(&free_slabs);
-    s->addr = NULL;
-    return s;
+    if (ls) {
+        return list_extract_first(ls);
+    }
+    kmem_slab_t *slab = vm_lpool_alloc(&lpool_slabs);
+    prepare_slab_for_cache(cache, slab);
+    return slab;
 }
 
+/**
+ * Rezerwuje element z p³yty.
+ * @param cache wska¼nik do schowka.
+ * @param slan wska¼nik do u¿ytecznej p³yty.
+ * @return opis bufora
+ */
+kmem_bufctl_t *
+reserve_bufctl(kmem_cache_t *cache, kmem_slab_t *slab)
+{
+    kmem_bufctl_t *bufctl = list_extract_first(&slab->free_bufs);
+    list_insert_tail(&slab->used_bufs, bufctl);
+    if (list_length(&slab->free_bufs) == 0) {
+        list_insert_tail(&cache->full_slabs, slab);
+    } else {
+        list_insert_tail(&cache->part_slabs, slab);
+    }
+    return bufctl;
+}
+
+/**
+ * Sprawdza poprawno¶æ schowka.
+ * @param cache wska¼nik do schowka.
+ */
+void
+check_cache(kmem_cache_t *cache)
+{
+    while (list_length(&cache->empty_slabs) > 1) {
+        kmem_slab_t *slab = list_extract_first(&cache->empty_slabs);
+        void *x = NULL;
+        if (cache->dtor)
+        while ( (x = list_next(&slab->free_bufs, x)) ) {
+            cache->dtor(x);
+        }
+        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)slab->addr, PAGE_SIZE);
+        vm_lpool_free(&lpool_slabs, slab);
+    }
+}

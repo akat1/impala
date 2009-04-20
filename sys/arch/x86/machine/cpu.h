@@ -85,9 +85,6 @@ enum CPU_CR4 {
  * Intel IA-32 ADSM - 2A - 3-192
  */
 
-#define KASSERT(x) if(!(x)) \
-    panic("Assertion ( %s ) failed in file: %s:%u, in function: %s", #x, __FILE__, __LINE__,  __func__);
-
 enum CPU_EDX_FEATURE {
     EDX_FEATURE_FPU   = 1 << 0,
     EDX_FEATURE_VME   = 1 << 1,

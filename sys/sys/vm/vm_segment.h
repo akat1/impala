@@ -1,9 +1,17 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __SYS_VM_VM_SEG_H
 #define __SYS_VM_VM_SEG_H
 
 struct vm_segment {
     vm_space_t     *space;
     vm_addr_t       base;
+    vm_addr_t       end;
     size_t          size;
     size_t          limit;
     int             flags;
@@ -12,6 +20,7 @@ struct vm_segment {
 
 struct vm_region {
     vm_addr_t       begin;
+    vm_addr_t       end;
     size_t          size;
     list_node_t     L_regions;
     int             flags;

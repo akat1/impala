@@ -14,6 +14,7 @@ SRCS=\
 	thread.c\
 	utils.c\
 	vm.c\
+	vm_lpool.c\
 	vm_segment.c\
 	vm_trap.c\
 	sc/exit.c\

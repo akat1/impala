@@ -1,3 +1,10 @@
+/*
+ * ImpalaOS
+ *  http://trzask.codepainters.com/impala/trac/
+ *
+ * $Id$
+ */
+
 #ifndef __SYS_VM_VM_TYPES_H
 #define __SYS_VM_VM_TYPES_H
 
@@ -11,5 +18,6 @@ typedef struct vm_space vm_space_t;
 typedef struct vm_segment vm_segment_t;
 typedef struct vm_region vm_region_t;
 typedef struct vm_ptable vm_ptable_t;
+typedef struct vm_lpool vm_lpool_t;
 
 #endif

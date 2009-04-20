@@ -20,9 +20,9 @@ panic(const char *msg, ...)
     irq_disable();
     va_list ap;
     VA_START(ap, msg);
-    kprintf("\n\nkernel panic: ");
+    kprintf("\npanic: ");
     vkprintf(msg, ap);
-    kprintf("\n\n");
+    kprintf("\n");
     VA_END(ap);
     while(1);
 }
