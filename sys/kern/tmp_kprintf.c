@@ -21,6 +21,7 @@ enum {
 void
 kprintf(const char *fmt, ...)
 {
+    return;
     va_list ap;
     VA_START(ap, fmt);
     vkprintf(fmt, ap);
@@ -56,6 +57,6 @@ vkprintf(const char *fmt, va_list ap)
         }
     }
 
-    textscreen_draw(&textscreen);
+   textscreen_draw(&textscreen);
     
 }

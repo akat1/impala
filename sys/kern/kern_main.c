@@ -32,22 +32,29 @@ static void dev_test(void);
 void
 kmain()
 {
+    if (0)
     print_welcome();
     init_kernel();
-    DEBUGF("running tests...");
     dev_test();
     for (;;);
 }
 
 void tf0(void *a);
+void incs(void);
+void
+incs()
+{
+    short *s = (short*)(0xb8000);
+    s[0]++;
+}
+
 
 void 
 tf0(void *a)
 {
-    short *s = (short*)(0xb8000);
     for (;;) {
-        s[0]++;
-        ssleep(1);
+        incs();
+//        kprintf("elo");
     }
 }
 
