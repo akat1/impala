@@ -230,7 +230,7 @@ select_next_thread()
         } else
         if( p->thr_flags & THREAD_SLEEP
                 && p->thr_wakeup_time!=0 
-                && p->thr_wakeup_time >= clock_ticks ) {
+                && p->thr_wakeup_time <= clock_ticks ) {
             p->thr_flags |= THREAD_RUN;
             p->thr_flags &= ~THREAD_SLEEP;
             p->thr_wakeup_time = 0;

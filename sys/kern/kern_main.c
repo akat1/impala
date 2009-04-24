@@ -56,6 +56,8 @@ tf1(void *b)
 {
     semaph_wait(&sem);
     kprintf("elo2\n");
+    ssleep(20);
+    kprintf("HAHA\n");
     for (;;);
 }
 
