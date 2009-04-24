@@ -12,6 +12,31 @@
 
 static int8_t forced_attr = 0;
 
+// struct hw_textscreen textscreen;
+
+void
+textscreen_init()
+{
+#if 0
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x9);
+    uint8_t line = io_in8(TEXTSCREEN_VIDPORT_DATA);
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0xa);
+    io_out8(TEXTSCREEN_VIDPORT_DATA, 0);
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0xb);
+    io_out8(TEXTSCREEN_VIDPORT_DATA, line-2);
+
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f);
+    uint8_t cur_pos = io_in8(TEXTSCREEN_VIDPORT_DATA);
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e);
+    cur_pos |= io_in8(TEXTSCREEN_VIDPORT_DATA) << 8;
+
+    textscreen.cursor_x = cur_pos % TEXTSCREEN_WIDTH;
+    textscreen.cursor_y = cur_pos % TEXTSCREEN_HEIGHT;
+    textscreen.cursor_x = 0;
+    textscreen.cursor_y = 0;
+#endif
+}
+
 
 void
 textscreen_enable_forced_attr(int8_t f)
@@ -31,7 +56,6 @@ textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute)
 {
     screen->screen_map[TEXTSCREEN_WIDTH*row+col] = (uint16_t)attribute<<8|c;
-    return;
 }
 
 void
@@ -58,8 +82,6 @@ textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
          * w prawo */
         textscreen_update_cursor(screen, screen->cursor_x+1, 
                 screen->cursor_y);
-
-    return;
 }
 
 void
@@ -68,7 +90,6 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
 {
     screen->cursor_y = row;
     screen->cursor_x = col;
-    return;
 }
 
 void
@@ -84,8 +105,6 @@ textscreen_scroll(struct hw_textscreen *screen)
     
     /* uaktualniamy kursor */
     textscreen_update_cursor(screen, 0, screen->cursor_y);
-
-    return;
 }
 
 void
@@ -99,14 +118,12 @@ textscreen_clear(struct hw_textscreen *screen)
 
     /* ustawiamy kursor na poczatek */
     textscreen_update_cursor(screen, 0, 0);
-    return;
 }
 
 void
 textscreen_reset(struct hw_textscreen *screen)
 {
     textscreen_clear(screen);
-    return;
 }
 
 void
@@ -124,6 +141,4 @@ textscreen_draw(struct hw_textscreen *screen)
     io_out8(TEXTSCREEN_VIDPORT_DATA, (uint8_t)cur_pos);
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e); /* starszy bajt */
     io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos>>8);
-
-    return;
 }

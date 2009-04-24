@@ -39,43 +39,22 @@ kmain()
     for (;;);
 }
 
-semaph_t sem;
 void tf0(void *a);
-void tf1(void *b);
 
 void 
 tf0(void *a)
 {
-    semaph_wait(&sem);
-    kprintf("elo\n");
-    ssleep(10);
-    for (;;);
-}
-
-void
-tf1(void *b)
-{
-    semaph_wait(&sem);
-    kprintf("elo2\n");
     for (;;) {
-        ssleep(5);
-        kprintf("HAHA\n");
+        kprintf("tick\n");
+        ssleep(1);
     }
 }
 
 void
 dev_test()
 {
-    static kthread_t t0, t1;
-    semaph_init(&sem);
+    static kthread_t t0;
     kthread_create(&t0, tf0, NULL);
-    kthread_create(&t1, tf1, NULL);
-    for (int i = 0; i < 0xfffffff; i++ );
-    kprintf("POST\n");
-    semaph_post(&sem);
-    for (int i = 0; i < 0xfffffff; i++ );
-    kprintf("POST2\n");
-    semaph_post(&sem);
 
 }
 

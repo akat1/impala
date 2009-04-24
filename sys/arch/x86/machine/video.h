@@ -23,13 +23,12 @@ struct hw_textscreen {
     int8_t cursor_x;
 };
 
-/* tymczasowo na ekran */
 struct hw_textscreen textscreen;
 
 void textscreen_enable_forced_attr(int8_t f);
 void textscreen_disable_forced_attr(void);
 
-
+void textscreen_init(void);
 void textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute);
 void textscreen_put(struct hw_textscreen *screen, char c, 

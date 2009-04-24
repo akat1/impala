@@ -86,7 +86,7 @@ void
 sched_insert(thread_t *thr)
 {
     spinlock_lock(&sprq);
-    TRACE_IN("thr=%p", thr);
+//    TRACE_IN("thr=%p", thr);
     thr->thr_flags |= THREAD_RUN|THREAD_INRUNQ;
     list_insert_tail(&run_queue, thr);
     spinlock_unlock(&sprq);
@@ -150,7 +150,7 @@ void
 sched_wait()
 {
     spinlock_lock(&sprq);
-    kprintf("sched_wait(%p)\n", curthread);
+//    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     __sched_yield();
@@ -159,7 +159,7 @@ sched_wait()
 static inline void
 _sched_wakeup(thread_t *n)
 {
-    TRACE_IN("cur=%p n=%p", curthread, n);
+//    TRACE_IN("cur=%p n=%p", curthread, n);
     if (!(n->thr_flags & THREAD_INRUNQ)) {
         curthread->thr_flags |= THREAD_INRUNQ;
         list_insert_tail(&run_queue, n);
@@ -177,7 +177,7 @@ _sched_wakeup(thread_t *n)
 void
 sched_wakeup(thread_t *n)
 {
-    TRACE_IN("wakeup=%p", n);
+//    TRACE_IN("wakeup=%p", n);
     spinlock_lock(&sprq);
     _sched_wakeup(n);
     spinlock_unlock(&sprq);

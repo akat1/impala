@@ -4,7 +4,6 @@
  *
  * $Id$
  */
-
 #ifndef __SYS_LIST_H
 #define __SYS_LIST_H
 

@@ -34,9 +34,8 @@ kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
 void
 __kthr(kthread_t *arg)
 {
-    TRACE_IN("arg=%p entry=%p entry_arg=%p", arg, arg->kt_arg, arg->kt_arg);
+    TRACE_IN("arg=%p entry=%p entry_arg=%p", arg, arg->kt_entry, arg->kt_arg);
     arg->kt_entry(arg->kt_arg);
-//    thread_exit(arg->kt_thread);
     sched_exit();
 }
 
