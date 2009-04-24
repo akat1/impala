@@ -13,7 +13,10 @@
 #include <sys/sched.h>
 #include <sys/syscall.h>
 #include <sys/libkutil.h>
+#include <sys/device.h>
+#include <sys/fcntl.h>
 #include <machine/cpu.h>
+#include <sys/uio.h>
 #include <sys/vm.h>
 #include <sys/utils.h>
 #include <sys/errno.h>
@@ -23,9 +26,8 @@ void kmain(void);
 static void print_welcome(void);
 static void init_kernel(void);
 /// G³ówna procedura j±dra.
+static void dev_test(void);
 
-static void vm_test(void);
-static void kmem_test(void);
 
 void
 kmain()
@@ -33,27 +35,44 @@ kmain()
     print_welcome();
     init_kernel();
     DEBUGF("running tests...");
-    vm_test();
-    kmem_test();
+    dev_test();
+    for (;;);
+}
+
+semaph_t sem;
+void tf0(void *a);
+void tf1(void *b);
+
+void 
+tf0(void *a)
+{
+    semaph_wait(&sem);
+    kprintf("elo\n");
     for (;;);
 }
 
 void
-vm_test()
+tf1(void *b)
 {
+    semaph_wait(&sem);
+    kprintf("elo2\n");
+    for (;;);
 }
 
-
 void
-kmem_test()
+dev_test()
 {
-    void *a[10];
-    a[0] = kmem_alloc(13, KM_SLEEP);
-    a[1] = kmem_alloc(13, KM_SLEEP);
-    a[2] = kmem_alloc(13, KM_SLEEP);
-    kmem_free(a[1]);
-    a[3] = kmem_alloc(13, KM_SLEEP);
-    kprintf("a0=%p a1=%p a2=%p a3=%p\n", a[0], a[1], a[2], a[3]);
+    static kthread_t t0, t1;
+    semaph_init(&sem);
+    kthread_create(&t0, tf0, NULL);
+    kthread_create(&t1, tf1, NULL);
+    for (int i = 0; i < 0xfffffff; i++ );
+    kprintf("POST\n");
+    semaph_post(&sem);
+    for (int i = 0; i < 0xfffffff; i++ );
+    kprintf("POST2\n");
+    semaph_post(&sem);
+
 }
 
 void
@@ -82,5 +101,6 @@ init_kernel()
     thread_init();
     sched_init();
     clock_init();
+    dev_init();
     kprintf("kernel initialized\n");
 }

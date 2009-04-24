@@ -65,6 +65,12 @@ struct mutex {
     list_t        mtx_waiting; // thread_t.L_wait
 };
 
+
+struct semaph {
+    mutex_t         mtx;
+    int             count;
+};
+
 /// wspó³biezna kolejka
 struct cqueue {
     /// zamek
@@ -128,6 +134,10 @@ void cqueue_init(cqueue_t *m, int off);
 void cqueue_insert(cqueue_t *m, void *d);
 void *cqueue_extract(cqueue_t *m);
 void cqueue_shutdown(cqueue_t *m);
+
+void semaph_init(semaph_t *s);
+void semaph_post(semaph_t *s);
+void semaph_wait(semaph_t *s);
 
 
 /// Inicjalizuje wiruj±cy zamek.

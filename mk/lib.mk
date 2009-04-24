@@ -1,7 +1,7 @@
-_LIB_BUILD= build
-_LIB_CLEAN= clean
-_LIB_DEPEND= depend
-_LIB_CLEANDEPEND= cleandepend
+_LIB_BUILD?= build
+_LIB_CLEAN?= clean
+_LIB_DEPEND?= depend
+_LIB_CLEANDEPEND?= cleandepend
 
 LIBRARY?= libnoname
 

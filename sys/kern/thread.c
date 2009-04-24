@@ -9,6 +9,7 @@
 #include <sys/thread.h>
 #include <sys/libkutil.h>
 #include <sys/sched.h>
+#include <sys/utils.h>
 #include <sys/kprintf.h>
 
 thread_t *curthread;
@@ -300,5 +301,36 @@ cqueue_extract(cqueue_t *q)
     }
     mutex_unlock(&q->q_mtx);
     return p;
+}
+
+/*============================================================================
+ * Semafory
+ */
+
+void
+semaph_init(semaph_t *sem)
+{
+    mutex_init(&sem->mtx, MUTEX_CONDVAR);
+    sem->count = 0;
+}
+
+void
+semaph_post(semaph_t *sem)
+{
+    mutex_lock(&sem->mtx);
+    sem->count++;
+    mutex_wakeup(&sem->mtx);
+    mutex_unlock(&sem->mtx);
+}
+
+void
+semaph_wait(semaph_t *sem)
+{
+    mutex_lock(&sem->mtx);
+    if (sem->count == 0) {
+        mutex_wait(&sem->mtx);
+    }
+    sem->count--;
+    mutex_unlock(&sem->mtx);
 }
 

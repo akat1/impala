@@ -10,6 +10,7 @@
 #include <sys/sched.h>
 #include <sys/clock.h>
 #include <sys/kprintf.h>
+#include <sys/utils.h>
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
 int sched_quantum;
@@ -85,6 +86,7 @@ void
 sched_insert(thread_t *thr)
 {
     spinlock_lock(&sprq);
+    TRACE_IN("thr=%p", thr);
     thr->thr_flags |= THREAD_RUN|THREAD_INRUNQ;
     list_insert_tail(&run_queue, thr);
     spinlock_unlock(&sprq);
@@ -148,7 +150,7 @@ void
 sched_wait()
 {
     spinlock_lock(&sprq);
-//     kprintf("sched_wait(%p)\n", curthread);
+    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     __sched_yield();
@@ -157,7 +159,7 @@ sched_wait()
 static inline void
 _sched_wakeup(thread_t *n)
 {
-//     kprintf("sched_wakeup(%p) %p\n", curthread, n);
+    TRACE_IN("cur=%p n=%p", curthread, n);
     if (!(n->thr_flags & THREAD_INRUNQ)) {
         curthread->thr_flags |= THREAD_INRUNQ;
         list_insert_tail(&run_queue, n);
@@ -175,6 +177,7 @@ _sched_wakeup(thread_t *n)
 void
 sched_wakeup(thread_t *n)
 {
+    TRACE_IN("wakeup=%p", n);
     spinlock_lock(&sprq);
     _sched_wakeup(n);
     spinlock_unlock(&sprq);
@@ -211,6 +214,7 @@ sched_exit()
     spinlock_lock(&sprq);
     list_remove(&run_queue, curthread);
     curthread->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
+    curthread = NULL;
     __sched_yield();
 }
 
@@ -220,20 +224,21 @@ select_next_thread()
 {
 #define NEXTTHR() (thread_t*)list_next(&run_queue, p)
     thread_t *p = curthread;
-
     while ((p = NEXTTHR())) {
-        if (p->thr_flags & THREAD_RUN)
+        if (p->thr_flags & THREAD_RUN) {
             return p;
-        else if(p->thr_flags & THREAD_SLEEP && p->thr_wakeup_time!=0 
-                && p->thr_wakeup_time >= clock_ticks) {
+        } else
+        if( p->thr_flags & THREAD_SLEEP
+                && p->thr_wakeup_time!=0 
+                && p->thr_wakeup_time >= clock_ticks ) {
             p->thr_flags |= THREAD_RUN;
             p->thr_flags &= ~THREAD_SLEEP;
             p->thr_wakeup_time = 0;
             return p;
         }
     }
-    kprintf("!!!!!!!\n");
-    while (TRUE); 
+    panic("Impossible to get here! runq=%u", list_length(&run_queue));
 #undef NEXTTHR
+    return 0;
 }
 

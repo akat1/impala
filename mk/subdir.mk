@@ -5,11 +5,12 @@ _SUBDIR_DEPEND?= depend
 _SUBDIR_CLEANDEPEND?= cleandepend
 
 #
-# GNU Make lubi drukowac do jakiego katalogu aktualnie wchodzi i z jakiego wychodzi.
-# Psuje to troche estetycznosc komunikatow, jakie drukuja te skrypty Makefile, zatem
-# ustawiam zmienna MAKELEVEL na "" za kazdym razem aby zmylic GNU Make (uzywa tej
-# zmiennej srodowiskowej do rozpoznawania, czy jest procesem 'wchodzacym' gdzies,
-# czy jest uruchomionym przez uzytkownika
+# GNU Make lubi drukowac do jakiego katalogu aktualnie wchodzi i z jakiego
+# wychodzi. Psuje to troche estetycznosc komunikatow, jakie drukuja te
+# skrypty Makefile, zatem ustawiam zmienna MAKELEVEL na "" za kazdym
+# razem aby zmylic GNU Make (uzywa tej zmiennej srodowiskowej
+# do rozpoznawania, czy jest procesem 'wchodzacym' gdzies, czy jest
+# uruchomionym przez uzytkownika
 #			-- Pawel Wieczorek
 #
 

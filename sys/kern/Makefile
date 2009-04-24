@@ -1,12 +1,19 @@
-LIBS=-larch -lkutil 
+LIBS=-larch -lkutil -ldev
 KERNEL=impala
 KERNEL_MAIN= main.c
-LIBDEPS=../arch/${IMPALA_ARCH}/libarch.a ../libkutil/libkutil.a
+LIBDEPS=\
+	../arch/${IMPALA_ARCH}/libarch.a\
+	../libkutil/libkutil.a\
+	../dev/libdev.a\
 
 SRCS=\
 	clock.c\
 	kprintf.c\
+	kern_bio.c\
+	kern_file.c\
+	kern_dev.c\
 	kern_mem.c\
+	kern_uio.c\
 	kthread.c\
 	main.c\
 	sched.c\

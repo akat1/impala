@@ -1,11 +1,10 @@
+LIBRARY= libdev
+C_FLAGS=-D__KERNEL ${C_FLAGS_}
+
+SRCS=\
+	md/md.c\
 
 
-build:
 
-clean:
-
-depend:
-
-cleandepend:
-
+include ${IMPALA_MK}/lib.mk
 

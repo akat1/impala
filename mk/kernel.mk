@@ -10,7 +10,7 @@ LIBS?=
 KERNEL?= kernel
 LD_MAP?= ${KERNEL}.map
 LD_SCRIPT?= ${IMPALA_SRCROOT}/sys/conf/kernel.ld
-LIBDIR= -L ${IMPALA_SRCROOT}/sys/libkutil -L${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/
+LIBDIR= -L ${IMPALA_SRCROOT}/sys/libkutil -L${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ -L ${IMPALA_SRCROOT}/sys/dev
 
 include ${IMPALA_SRCROOT}/mk/build.mk
 ${_KERNEL_BUILD}: ${KERNEL}
