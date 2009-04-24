@@ -44,8 +44,9 @@ void tf0(void *a);
 void 
 tf0(void *a)
 {
+    short *s = (short*)(0xb8000);
     for (;;) {
-        kprintf("tick\n");
+        s[0]++;
         ssleep(1);
     }
 }

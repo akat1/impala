@@ -67,6 +67,7 @@ init_x86()
     setgdt(SEL_UCODE, 0x0, 0xffff, ucode, attr);
     setgdt(SEL_UDATA, 0x0, 0xffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
+    p_tss0.tss_io = sizeof(p_tss0)-1;
 
     mem_zero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;
