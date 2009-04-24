@@ -7,25 +7,25 @@ LIBDEPS=\
 	../dev/libdev.a\
 
 SRCS=\
-	clock.c\
-	kprintf.c\
+	kern_clock.c\
 	kern_bio.c\
-	kern_file.c\
 	kern_dev.c\
+	kern_file.c\
+	kern_kthread.c\
+	kern_main.c\
 	kern_mem.c\
+	kern_sched.c\
+	kern_syscall.c\
+	kern_thread.c\
 	kern_uio.c\
-	kthread.c\
-	main.c\
-	sched.c\
-	syscall.c\
-	thread.c\
-	utils.c\
+	kern_utils.c\
 	vm.c\
 	vm_lpool.c\
 	vm_segment.c\
 	vm_trap.c\
 	sc/exit.c\
 	sc/write.c\
+	tmp_kprintf.c\
 
 
 
