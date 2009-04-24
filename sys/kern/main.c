@@ -41,17 +41,6 @@ kmain()
 void
 vm_test()
 {
-    vm_segment_t *kdata = &vm_kspace.seg_data;
-    TRACE_IN("start");
-    vm_addr_t a[10];
-    a[0] = vm_segment_alloc(kdata, PAGE_SIZE*5);
-    a[1] = vm_segment_alloc(kdata, PAGE_SIZE*4);
-    kprintf("a0=%p a1=%p\n", a[0], a[1]);
-    vm_segment_free(kdata, a[0]+PAGE_SIZE, PAGE_SIZE*4);
-    a[2] = vm_segment_alloc(kdata, PAGE_SIZE);
-    kprintf("a2=%p\n", a[2]);
-    
-    TRACE_IN("stop");
 }
 
 
@@ -60,7 +49,11 @@ kmem_test()
 {
     void *a[10];
     a[0] = kmem_alloc(13, KM_SLEEP);
-    kprintf("a0=%p\n", a[0]);
+    a[1] = kmem_alloc(13, KM_SLEEP);
+    a[2] = kmem_alloc(13, KM_SLEEP);
+    kmem_free(a[1]);
+    a[3] = kmem_alloc(13, KM_SLEEP);
+    kprintf("a0=%p a1=%p a2=%p a3=%p\n", a[0], a[1], a[2], a[3]);
 }
 
 void
