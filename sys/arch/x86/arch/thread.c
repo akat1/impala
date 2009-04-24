@@ -70,7 +70,6 @@ thread_enter(thread_t *t_to)
         : "a" (t_to->thr_context.c_esp)
         : "%esp" );
     entry(t_to->thr_entry_arg);
-    kprintf("ERROR: should never be here! thread_enter/machine/thread.c\n");
-    __asm__ volatile (" jmp .");
+    panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }
 

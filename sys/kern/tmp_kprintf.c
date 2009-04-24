@@ -21,7 +21,6 @@ enum {
 void
 kprintf(const char *fmt, ...)
 {
-    return;
     va_list ap;
     VA_START(ap, fmt);
     vkprintf(fmt, ap);

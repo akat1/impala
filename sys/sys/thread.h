@@ -15,7 +15,7 @@
 
 enum {
     MAX_THREAD = 0x10,
-    THREAD_STACK_SIZE = 0x100
+    THREAD_STACK_SIZE = 0x2000
 };
 
 /// wiruj±cy zamek.

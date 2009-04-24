@@ -53,8 +53,7 @@ void
 tf0(void *a)
 {
     for (;;) {
-        incs();
-//        kprintf("elo");
+        kprintf("elo\n");
     }
 }
 
