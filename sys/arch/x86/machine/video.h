@@ -23,7 +23,7 @@ struct hw_textscreen {
     int8_t cursor_x;
 };
 
-struct hw_textscreen textscreen;
+extern struct hw_textscreen textscreen;
 
 void textscreen_enable_forced_attr(int8_t f);
 void textscreen_disable_forced_attr(void);

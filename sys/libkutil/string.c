@@ -69,7 +69,7 @@ mem_set(addr_t s, char c, size_t len)
 size_t
 str_len(const char *s)
 {
-    size_t len;
+    ssize_t len;
     for (len = 0; *s != 0; s++, len++);
     return len;
 }

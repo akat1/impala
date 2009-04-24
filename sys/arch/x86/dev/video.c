@@ -12,12 +12,13 @@
 
 static int8_t forced_attr = 0;
 
-// struct hw_textscreen textscreen;
+struct hw_textscreen textscreen;
 
 void
 textscreen_init()
 {
-#if 0
+//    mem_zero(&textscreen, sizeof(textscreen));
+
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0x9);
     uint8_t line = io_in8(TEXTSCREEN_VIDPORT_DATA);
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0xa);
@@ -31,10 +32,7 @@ textscreen_init()
     cur_pos |= io_in8(TEXTSCREEN_VIDPORT_DATA) << 8;
 
     textscreen.cursor_x = cur_pos % TEXTSCREEN_WIDTH;
-    textscreen.cursor_y = cur_pos % TEXTSCREEN_HEIGHT;
-    textscreen.cursor_x = 0;
-    textscreen.cursor_y = 0;
-#endif
+    textscreen.cursor_y = cur_pos / TEXTSCREEN_WIDTH;
 }
 
 
@@ -55,6 +53,14 @@ void
 textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row, 
         char c, int8_t attribute)
 {
+/*
+    if (TEXTSCREEN_WIDTH*row+col > TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT) {
+        char *x = (char*) 0xb8000;
+        x[0] = 'A';
+        x[1] = '0';
+        for (;;);
+    }
+*/
     screen->screen_map[TEXTSCREEN_WIDTH*row+col] = (uint16_t)attribute<<8|c;
 }
 
@@ -62,6 +68,7 @@ void
 textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
 {
     if (forced_attr) attr = forced_attr;
+
     textscreen_putat(screen, screen->cursor_x, screen->cursor_y, c, attr);
 
     /* uaktualniamy pozycje kursora */
@@ -133,7 +140,7 @@ textscreen_draw(struct hw_textscreen *screen)
         screen->cursor_x; /* cursor position */
 
     /* kopiowanie screen_map na ekran */
-    mem_move(TEXTSCREEN_VIDEO, screen->screen_map,
+    mem_cpy(TEXTSCREEN_VIDEO, screen->screen_map,
             TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT*sizeof(uint16_t));
 
     /* uaktualnienie pozycji kursora */

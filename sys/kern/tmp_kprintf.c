@@ -32,6 +32,7 @@ vkprintf(const char *fmt, va_list ap)
 {
     char big_buf[KPRINTF_BUF];
     char *ptr=big_buf;
+    mem_zero(big_buf, KPRINTF_BUF);
     vsnprintf(big_buf, KPRINTF_BUF, fmt, ap);
     
     
