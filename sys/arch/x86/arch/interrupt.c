@@ -82,7 +82,7 @@ TRAP_unhandled(interrupt_frame f)
 void
 TRAP_gfault(interrupt_frame f)
 {
-    panic("General protection fault\n");
+    //panic("General protection fault\n");
     print_frame("general protection fault", &f);
     __asm__("hlt");
 }

@@ -51,7 +51,7 @@ __enqueue_keycode(int kc)
         panic("OH NOOOO..... you pressed Q .... u r stupitt!!!\n");
     KASSERT(c!='W');
     
-    kprintf("%c", c);
+    //kprintf("%c", c);
     //put_to_console_queue(c);  //czy co¶ ko³o - jak kto¶ potrzebuje
 }
 

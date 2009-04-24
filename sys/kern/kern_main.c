@@ -48,6 +48,7 @@ tf0(void *a)
 {
     semaph_wait(&sem);
     kprintf("elo\n");
+    ssleep(10);
     for (;;);
 }
 
@@ -56,9 +57,10 @@ tf1(void *b)
 {
     semaph_wait(&sem);
     kprintf("elo2\n");
-    ssleep(20);
-    kprintf("HAHA\n");
-    for (;;);
+    for (;;) {
+        ssleep(5);
+        kprintf("HAHA\n");
+    }
 }
 
 void
