@@ -57,44 +57,27 @@ vm_disable_paging()
  */
 
 static size_t _avail_physmem(void);
-static void _set_system_vspace(void);
+static void create_kernel_space(void);
+static void create_kernel_data(void);
+static void initialize_internal(void);
 static void _collect_free_pages(void);
-
-#if 0
-static void _check(uintptr_t p);
-
-void
-_check(uintptr_t p)
-{
-    bool b = vm_pmap_is_avail(&vm_kspace.pmap, p);
-    if (b) {
-        vm_addr_t v = vm_pmap_phys(&vm_kspace.pmap, p);
-        vm_paddr_t pp = vm_ptov(v);
-        kprintf("%p -> %p -> %p\n", p, v, pp);
-    } else {
-        kprintf("%p is invalid\n", p);
-    }
-}
-
-#endif
 
 void
 vm_low_init()
 {
     vm_physmem_max = _avail_physmem();
     _collect_free_pages();
-    _set_system_vspace();
-#if 0
-    vm_page_t *p = vm_kernel_alloc_page();
-    _check(p->kvirt_addr);
-#endif
+    create_kernel_space();
+    create_kernel_data();
+    initialize_internal();
+
 }
 
 vm_page_t *page;
 
 /// Inicjalizuje przestrzeñ adresow± j±dra.
 void
-_set_system_vspace()
+create_kernel_space()
 {
     // ustaw segmenty.
     vm_segment_create(&vm_kspace.seg_code, &vm_kspace, VM_SPACE_CODE_BEGIN,
@@ -129,16 +112,22 @@ _set_system_vspace()
     // W³±czamy stronicowanie.
     vm_pmap_switch(kmap);
     vm_enable_paging();
+}
 
+void
+create_kernel_data()
+{
+   
     // Tworzymy tablice stron dla pamiêci j±dra, i rêcznie rozszerzamy
     // stertê j±dra.
+    vm_pmap_t *kmap = &vm_kspace.pmap;
     vm_segment_t *kdata = &vm_kspace.seg_data;
     vm_addr_t vaddr = kdata->base;
 
     // przydzielamy pamiêæ na pierwsz± tablicê stron.
-    page = vm_alloc_page();
+    vm_page_t *page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
-    table = (uintptr_t*) page->phys_addr;
+    uintptr_t *table = (uintptr_t*) page->phys_addr;
     table[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_US;
     _pmap_insert_pte(kmap, page, vaddr);
     kdata->size += PAGE_SIZE;
@@ -153,8 +142,16 @@ _set_system_vspace()
         vm_pmap_insert(kmap, page, page->kvirt_addr);
         vaddr += PAGE_SIZE*1024;
     }
+}
+
+void
+initialize_internal()
+{
+    vm_pmap_t *kmap = &vm_kspace.pmap;
+    vm_segment_t *kdata = &vm_kspace.seg_data;
+
     // przydzielamy miejsce na poczatkowe regiony
-    page = vm_alloc_page();
+    vm_page_t *page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
     kdata->size += PAGE_SIZE;
     vm_pmap_insert(kmap, page, page->kvirt_addr);
@@ -172,10 +169,6 @@ _set_system_vspace()
     reg->size = kdata->size;
     reg->end = reg->begin + reg->size;
     list_insert_head(&kdata->regions, reg);
-
-    kprintf("VM: available memory: %ukB (%u pages)\n",
-        vm_physmem_free*4, vm_physmem_free);
-
 }
 
 /// Wykrywa ilo¶æ zainstalowanej pamiêci RAM.
@@ -228,8 +221,6 @@ _collect_free_pages()
             vm_pages[i].flags = 0;
         }
     }
-    kprintf("VM: page administration region: %p+%u kB (%u pages)\n", vm_pages,
-            vm_pages_size*4, vm_pages_size);
 }
 
 
@@ -270,7 +261,6 @@ bool
 vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 {
     list_insert_tail(&vpm->pages, p);
-//     kprintf("adding %p as %p\n", va, p->phys_addr);
     return vm_pmap_insert_(vpm, p->phys_addr, va);
 }
 
@@ -290,19 +280,14 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 bool
 vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
 {
-//     int pde = PAGE_DIR(va);
     int pte = PAGE_TBL(va);
     vm_ptable_t *pt = _pmap_pde(vpm, va); //(vm_ptable_t*) PTE_ADDR(vpm->pdir->table[pde]);
-//     kprintf("[%p as %p] pde=%p pte=%u\n", va, pa, pt, pte);
     if (pt == NULL) {
-//         kprintf("[need new pte]\n");
-        // Je¿eli dana tablica stron nie istnieje, to przydziel j±.
         pt = _alloc_ptable();
         if (pt == NULL) return FALSE;
         _pmap_insert_pte_(vpm, pt, va);
     }
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | PTE_US;
-//     kprintf("pt->table[%u] = %p\n", pt->table[pte]);
     return TRUE;
 
 }
@@ -368,9 +353,6 @@ _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va)
     int pde = PAGE_DIR(va);
     vm_ptable_t *pdir = _pmap_dir(vpm, va);
     pdir->table[pde] = PTE_ADDR(pt) | PDE_PRESENT | PDE_RW | PDE_US;
-//     kprintf("pdir->table[%u] = %p\n", pde, pdir->table[pde]);
-//     kprintf("inserted pdir=%p pde=%u pt=%p <- %p\n",pdir, pde, pt,
-//         PTE_ADDR(pdir->table[pde]));
 }
 
 /**
@@ -382,8 +364,16 @@ vm_addr_t
 vm_ptov(vm_paddr_t pa)
 {
     int n = BASE_ADDR(pa);
-//     kprintf("QUERY n=%u(0x%x) %p - %p \n", n, n, pa, &vm_pages[n]);
     return vm_pages[n].kvirt_addr + PAGE_OFF(pa);
+}
+
+/**
+ * Kasowanie strony z katalogu.
+ */
+vm_page_t *
+vm_pmap_remove(vm_pmap_t *vpm, vm_addr_t addr)
+{
+    return 0;
 }
 
 

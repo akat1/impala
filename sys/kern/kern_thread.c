@@ -96,6 +96,10 @@ mutex_init(mutex_t *m, int flags)
 void
 mutex_destroy(mutex_t *m)
 {
+    KASSERT( list_length(&m->mtx_locking) == 0 );
+    if (m->mtx_flags & MUTEX_CONDVAR)
+        KASSERT( list_length(&m->mtx_waiting) == 0 );
+    spinlock_destroy(&m->mtx_slock);
 }
 
 /**
@@ -220,7 +224,6 @@ void
 mutex_wakeup(mutex_t *m)
 {
     spinlock_lock(&m->mtx_slock);
-//     kprintf("mutex_wakeup:%p\n", m->mtx_owner);
     m->mtx_flags |= MUTEX_WAKEUP_ONE;
     spinlock_unlock(&m->mtx_slock);
 }
@@ -262,6 +265,7 @@ cqueue_init(cqueue_t *q, int off)
 void
 cqueue_shutdown(cqueue_t *q)
 {
+    mutex_destroy(&q->q_mtx);
 }
 
 /**
@@ -334,3 +338,8 @@ semaph_wait(semaph_t *sem)
     mutex_unlock(&sem->mtx);
 }
 
+void
+semaph_destroy(semaph_t *sem)
+{
+    mutex_destroy(&sem->mtx);
+}

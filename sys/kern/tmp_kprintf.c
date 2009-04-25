@@ -35,27 +35,21 @@ vkprintf(const char *fmt, va_list ap)
     mem_zero(big_buf, KPRINTF_BUF);
     vsnprintf(big_buf, KPRINTF_BUF, fmt, ap);
     
-    
     for (; *ptr; ptr++) {
         switch (*ptr) {
             case '\n':
-                if ( textscreen.cursor_y < TEXTSCREEN_HEIGHT-1 )
-                    textscreen_update_cursor(&textscreen, 0, 
-                        textscreen.cursor_y+1);
-                else
-                    textscreen_scroll(&textscreen);
+                textscreen_next_line(NULL);
                 break;
             case '\t':
                 for(int j=0; j<6; j++)
-                    textscreen_put(&textscreen, ' ', DEFAULT_ATTRIBUTE);
+                    textscreen_put(NULL, ' ', DEFAULT_ATTRIBUTE);
                 break;
 
             default:
-                textscreen_put(&textscreen, *ptr, DEFAULT_ATTRIBUTE);
+                textscreen_put(NULL, *ptr, DEFAULT_ATTRIBUTE);
                 break;
         }
     }
 
-   textscreen_draw(&textscreen);
-    
+//   textscreen_draw(NULL);
 }

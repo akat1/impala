@@ -15,6 +15,7 @@
 addr_t
 mem_move(addr_t dst, addr_t src, size_t len)
 {
+    addr_t org = dst;
     size_t i;
 
     if ( dst != src && len > 0 ) {
@@ -26,7 +27,7 @@ mem_move(addr_t dst, addr_t src, size_t len)
                 *((char *)dst+i) = *((char *)src+i);
         }
     }
-    return dst;
+    return org;
 }
 
 /*
@@ -37,12 +38,13 @@ mem_move(addr_t dst, addr_t src, size_t len)
 addr_t
 mem_cpy(addr_t _dst, addr_t _src, size_t len)
 {
+    addr_t org = _dst;
     char *dst = (char*)_dst;
     char *src = (char*)_src;
     for (; len > 0; src++,dst++, len--) {
         *dst = *src;
     }
-    return dst;
+    return org;
 }
 
 /*
@@ -53,14 +55,26 @@ mem_cpy(addr_t _dst, addr_t _src, size_t len)
 addr_t
 mem_set(addr_t s, char c, size_t len)
 {
+    addr_t org = s;
     while(len > 0) {
         len--;
         *((char *)s+len) = c;
     }
-    return s;
-
+    return org;
 }
 
+addr_t
+mem_set16(addr_t s, uint16_t o, size_t len)
+{
+    addr_t org = s;
+    uint16_t *dst = (uint16_t*)s;
+    len /= 2;
+    while (len-- > 0) {
+        *dst = o;
+        dst++;
+    }
+    return org;
+}
 /*
  * str_len()
  * zwraca dlugosc napisu s nie liczac znaku '\0'

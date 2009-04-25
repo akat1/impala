@@ -138,6 +138,7 @@ void cqueue_shutdown(cqueue_t *m);
 void semaph_init(semaph_t *s);
 void semaph_post(semaph_t *s);
 void semaph_wait(semaph_t *s);
+void semaph_destroy(semaph_t *s);
 
 
 /// Inicjalizuje wiruj±cy zamek.
@@ -168,6 +169,11 @@ static inline bool
 spinlock_trylock(spinlock_t *sp)
 {
     return atomic_change_int(&sp->_dlock, SPINLOCK_LOCK) == SPINLOCK_UNLOCK;
+}
+
+static inline void
+spinlock_destroy(spinlock_t *sp)
+{
 }
 
 #endif

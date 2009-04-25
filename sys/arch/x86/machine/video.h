@@ -19,11 +19,10 @@
 
 struct hw_textscreen {
     uint16_t screen_map[TEXTSCREEN_SIZE];
+    uint16_t *screen_buf;
     int8_t cursor_y;
     int8_t cursor_x;
 };
-
-extern struct hw_textscreen textscreen;
 
 void textscreen_enable_forced_attr(int8_t f);
 void textscreen_disable_forced_attr(void);
@@ -36,9 +35,12 @@ void textscreen_put(struct hw_textscreen *screen, char c,
 void textscreen_scroll(struct hw_textscreen *screen);
 void textscreen_update_cursor(struct hw_textscreen *screen, int8_t col, 
         int8_t row);
+void textscreen_next_line(struct hw_textscreen *screen);
 void textscreen_reset(struct hw_textscreen *screen);
 void textscreen_clear(struct hw_textscreen *screen);
 void textscreen_draw(struct hw_textscreen *screen);
+// void textscreen_switch(struct hw_textscreen *screen);
+// hw_textscreen *textscreen_clone(struct hw_textscreen *screen)
 
 enum {
     COLOR_BLACK,

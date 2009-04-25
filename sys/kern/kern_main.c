@@ -39,19 +39,13 @@ kmain()
 }
 
 void tf0(void *a);
-void incs(void);
-void
-incs()
-{
-    short *s = (short*)(0xb8000);
-    s[0]++;
-}
 
 
 void 
 tf0(void *a)
 {
     for (;;) {
+        ssleep(1);
     }
 }
 

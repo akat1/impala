@@ -193,8 +193,11 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
 void
 kmem_cache_destroy(kmem_cache_t *cache)
 {
-    TRACE_IN0();
+    // Nigdy nie zamykamy zamków w odwrotnej kolejno¶ci!
+    // Gdyby najpierw zamkn±æ zamek globalny, to móg³oby powstaæ
+    // zakleszczenie !
     mutex_lock(&cache->mtx);
+    mutex_lock(&global_lock);
     KASSERT( list_length(&cache->full_slabs) == 0 );
     KASSERT( list_length(&cache->part_slabs) == 0 );
     while ( list_length(&cache->empty_slabs) > 0 ) {
@@ -202,8 +205,7 @@ kmem_cache_destroy(kmem_cache_t *cache)
         vm_lpool_free(&lpool_slabs, slab);
     }
     mutex_unlock(&cache->mtx);
-
-    mutex_lock(&global_lock);
+    mutex_destroy(&cache->mtx);
     vm_lpool_free(&lpool_caches, cache);
     mutex_unlock(&global_lock);
 }
