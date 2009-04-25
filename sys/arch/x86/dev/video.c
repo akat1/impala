@@ -147,7 +147,7 @@ textscreen_scroll(struct hw_textscreen *screen)
     mem_move(map, &map[TEXTSCREEN_WIDTH],
                 24*TEXTSCREEN_WIDTH*sizeof(uint16_t));
     
-    mem_set16(&map[24*TEXTSCREEN_WIDTH], COLOR_WHITE<<8,
+    mem_set16(&map[24*TEXTSCREEN_WIDTH], COLOR_WHITE<<8 | ' ',
             TEXTSCREEN_WIDTH*sizeof(uint16_t));
     
     textscreen_update_cursor(screen, 0, screen->cursor_y);
