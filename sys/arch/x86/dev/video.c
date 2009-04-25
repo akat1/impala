@@ -140,12 +140,17 @@ textscreen_draw(struct hw_textscreen *screen)
         screen->cursor_x; /* cursor position */
 
     /* kopiowanie screen_map na ekran */
+
+    screen->screen_map[cur_pos] = (COLOR_WHITE<<8)|219;
+
     mem_cpy(TEXTSCREEN_VIDEO, screen->screen_map,
             TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT*sizeof(uint16_t));
 
     /* uaktualnienie pozycji kursora */
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f); /* mlodszy bajt */
+
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f); 
     io_out8(TEXTSCREEN_VIDPORT_DATA, (uint8_t)cur_pos);
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e); /* starszy bajt */
+    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e); 
     io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos>>8);
+
 }

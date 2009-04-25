@@ -32,7 +32,6 @@ static void dev_test(void);
 void
 kmain()
 {
-    if (0)
     print_welcome();
     init_kernel();
     dev_test();
@@ -53,7 +52,6 @@ void
 tf0(void *a)
 {
     for (;;) {
-        kprintf("elo\n");
     }
 }
 

@@ -34,8 +34,9 @@ typedef struct kmem_bufctl kmem_bufctl_t;
 /// Cache
 struct kmem_cache {
     size_t          elem_size;
-    kmem_ctor_t     *ctor;
-    kmem_dtor_t     *dtor;
+    const char     *name;
+    kmem_ctor_t    *ctor;
+    kmem_dtor_t    *dtor;
     list_t          empty_slabs;
     list_t          part_slabs;
     list_t          full_slabs;
@@ -72,7 +73,6 @@ enum {
 
 
 static void cache_init(kmem_cache_t *c);
-static void cache_cleanup(kmem_cache_t *c);
 static void prepare_slab_for_cache(kmem_cache_t *c, kmem_slab_t *s);
 static void alloc_init(void);
 
@@ -179,6 +179,7 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     kmem_cache_t *cache = vm_lpool_alloc(&lpool_caches);
     cache_init(cache);
     cache->elem_size = esize;
+    cache->name = name;
     cache->ctor = ctor;
     cache->dtor = dtor;
     mutex_unlock(&global_lock);
@@ -193,8 +194,17 @@ void
 kmem_cache_destroy(kmem_cache_t *cache)
 {
     TRACE_IN0();
+    mutex_lock(&cache->mtx);
+    KASSERT( list_length(&cache->full_slabs) == 0 );
+    KASSERT( list_length(&cache->part_slabs) == 0 );
+    while ( list_length(&cache->empty_slabs) > 0 ) {
+        kmem_slab_t *slab = list_extract_first(&cache->empty_slabs);
+        vm_lpool_free(&lpool_slabs, slab);
+    }
+    mutex_unlock(&cache->mtx);
+
     mutex_lock(&global_lock);
-    cache_cleanup(cache);
+    vm_lpool_free(&lpool_caches, cache);
     mutex_unlock(&global_lock);
 }
 
@@ -269,7 +279,6 @@ kmem_init()
  */
 
 static void cache_init(kmem_cache_t *c);
-static void cache_cleanup(kmem_cache_t *c);
 
 /**
  * Inicjaluzuje schowek.
@@ -285,16 +294,6 @@ cache_init(kmem_cache_t *c)
     c->elem_size = 0;
 }
 
-/**
- * Sprz±ta po schowku.
- * @param c wska¼nik do schowka.
- */
-void
-cache_cleanup(kmem_cache_t *c)
-{
-    c->elem_size = 0;
-    vm_lpool_free(&lpool_caches, c);
-}
 
 /**
  * Przygotowuje p³ytê dla danego schowka.
