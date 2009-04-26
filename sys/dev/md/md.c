@@ -37,7 +37,7 @@
 #include <sys/errno.h>
 #include <sys/thread.h>
 #include <sys/kprintf.h>
-#include <sys/uio.h>
+#include <sys/string.h>
 #include <sys/bio.h>
 #include <dev/md/md.h>
 #include <dev/md/md_priv.h>
@@ -80,27 +80,15 @@ mdclose(devd_t *d)
 int
 mdread(devd_t *d, uio_t *uio)
 {
-    memdisk_t *md = d->priv;
-    TRACE_IN("d=%p md=%p uio=%p", d, md, uio);
-    if (md->size < uio->offset ) return -EFAULT;
-    size_t rlen = MIN(uio->size, md->size - uio->offset);
-    if (uio_copy((char*)md->data + uio->offset, uio, rlen) == -1) {
-        return -EIO;
-    }
-    return rlen;
+    TRACE_IN("dev=%p uio=%p", d,uio);
+    return physio(d, uio, 0);
 }
 
 int
 mdwrite(devd_t *d, uio_t *uio)
 {
-    memdisk_t *md = d->priv;
-    TRACE_IN("d=%p md=%p uio=%p", d, md, uio);
-    if (md->size < uio->offset ) return -EFAULT;
-    size_t rlen = MIN(uio->size, md->size - uio->offset);
-    if (uio_copy((char*)md->data + uio->offset, uio, rlen) == -1) {
-        return -EIO;
-    }
-    return rlen;
+    TRACE_IN("dev=%p uio=%p", d, uio);
+    return physio(d, uio, 0);
 }
 
 int
@@ -112,28 +100,24 @@ mdioctl(devd_t *dev, int cmd, uintptr_t arg)
 int
 mdstrategy(devd_t *dev, iobuf_t *b)
 {
-    // Przepisaæ!: to ma dzia³aæ tak, ¿e:
-    // mdwrite,mdread -> physio -> mdstrategy
-    // a nie mdstrategy -> mdwrite/mdread :))
     TRACE_IN("dev=%p buf=%p", dev, b);
-    uio_t u;
-    iovec_t io;
-    io.iov_base = b->addr;
-    io.iov_len = b->bcount * 512;
-    u.iovs = &io;
-    u.iovcnt = 1;
-    u.space = UIO_SYSSPACE;
-    u.offset = b->blkno * 512;
-    u.size = io.iov_len;
-    if (b->oper == BIO_READ) {
-        u.oper = UIO_READ;
-        if (mdread(dev, &u) == -1) b->flags |= IOB_ERROR;
-        bio_done(b);
-    } else { 
-        u.oper = UIO_WRITE;
-        if (mdwrite(dev, &u) == -1) b->flags |= IOB_ERROR;
-        bio_done(b);
+    memdisk_t *md = dev->priv;
+
+    off_t off = b->blkno*512;
+    size_t len = MIN(b->bcount*512, md->size - off);
+    if (len < 0) {
+        b->flags |= IOB_ERROR;
     }
+    if (b->oper == BIO_READ) {
+        DEBUGF("memory disk read (%p -> %p) %u bytes",
+            md->data+off, b->addr, len);
+        mem_cpy(b->addr, md->data + off, len);
+    } else {
+        DEBUGF("memory disk write (%p -> %p) %u bytes",
+            b->addr, md->data+off, len);
+        mem_cpy(md->data + off, b->addr, len);
+    }
+    bio_done(b);
     return 0;
 }
 

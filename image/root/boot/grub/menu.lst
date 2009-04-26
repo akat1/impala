@@ -1,7 +1,10 @@
 default 0
 color yellow/blue black/light-gray
 
-title ImpalaOS current kernel
+title ImpalaOS (/boot/impala)
 	root (fd0)
 	kernel /boot/impala
 
+title ImpalaOS (/boot/impala.old)
+    root (fd0)
+    kernel /boot/impala.old

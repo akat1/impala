@@ -42,26 +42,49 @@ static struct hw_textscreen *current;
 
 #define SELECT_SCREEN(ptr) (((ptr)==NULL)? current : ptr)
 #define SELECT_MAP(ptr) ((ptr->screen_buf)? ptr->screen_buf : ptr->screen_map)
+#define TS_VIDEO   (addr_t)0xb8000
+
+#define _TS_BG(attr) (((attr) >> 12) & 0x7)
+#define _TS_FG(attr) (((attr)>>8)  & 0xf)
+
+#define TS_BG(attr) (((attr) & 0xf) << 12)
+#define TS_FG(attr) (((attr) & 0x7) << 8)
+enum {
+    VGA_PORT = 0x3d4
+};
+
+enum {
+    REG_MAX_SCANLINE = 0x9,
+    REG_CUR_START = 0x0a,
+    REG_CUR_END = 0x0b,
+    REG_CUR_POS_HI = 0x0e,
+    REG_CUR_POS_LO = 0x0f
+};
 
 void
 textscreen_init()
 {   
-//    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x9);
-    uint8_t line = io_in8(TEXTSCREEN_VIDPORT_DATA);
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0xa);
-    io_out8(TEXTSCREEN_VIDPORT_DATA, 0);
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0xb);
-    io_out8(TEXTSCREEN_VIDPORT_DATA, line-2);
+#if 0
+    io_out8(VGA_PORT, REG_MAX_SCANLINE);
+    uint8_t line = io_in8(VGA_PORT+1);
+#endif
+    io_out8(VGA_PORT, REG_CUR_START);
+    io_out8(VGA_PORT+1, 1 << 5);
+#if 0
+    io_out8(VGA_PORT, REG_CUR_END);
+    io_out8(VGA_PORT+1, 0x1f & line);
+#endif
+    io_out8(VGA_PORT, REG_CUR_POS_HI);
+    uint16_t cur_pos = io_in8(VGA_PORT+1) << 8;
+    io_out8(VGA_PORT, REG_CUR_POS_LO);
+    cur_pos |=  io_in8(VGA_PORT+1);
 
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e);
-    uint16_t cur_pos = io_in8(TEXTSCREEN_VIDPORT_DATA) << 8;
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f);
-    cur_pos |=  io_in8(TEXTSCREEN_VIDPORT_DATA);
-    defscreen.cursor_x = cur_pos % TEXTSCREEN_WIDTH;
-    defscreen.cursor_y = cur_pos / TEXTSCREEN_WIDTH;
-    defscreen.screen_buf = (uint16_t*) TEXTSCREEN_VIDEO;
-//    mem_set16(defscreen.screen_buf, COLOR_GREEN<<8 | ' ', TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT*2);
+    defscreen.cursor_x = cur_pos % TS_WIDTH;
+    defscreen.cursor_y = cur_pos / TS_WIDTH;
+    defscreen.screen_buf = (uint16_t*) TS_VIDEO;
+    defscreen.cursor_hack = 0;
     current = &defscreen;
+    defscreen.cursor_hack = defscreen.screen_buf[cur_pos];
 }
 
 
@@ -81,7 +104,13 @@ void
 textscreen_next_line(struct hw_textscreen *screen)
 {
     screen = SELECT_SCREEN(screen);
-    if ( screen->cursor_y < TEXTSCREEN_HEIGHT-1 )
+    if (screen->screen_buf) {
+        uint16_t *map = screen->screen_buf;
+        int cur_pos = screen->cursor_y*TS_WIDTH + screen->cursor_x;
+        map[cur_pos] = screen->cursor_hack;
+    }
+
+    if ( screen->cursor_y < TS_HEIGHT-1 )
         textscreen_update_cursor(screen, 0, screen->cursor_y+1);
     else
         textscreen_scroll(screen);
@@ -95,7 +124,8 @@ textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
 {
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
-    map[TEXTSCREEN_WIDTH*row+col] = (uint16_t)attribute<<8|c;
+
+    map[TS_WIDTH*row+col] = (uint16_t)attribute<<8|c;
 }
 
 void
@@ -106,9 +136,9 @@ textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
 
     textscreen_putat(screen, screen->cursor_x, screen->cursor_y, c, attr);
 
-    if ( screen->cursor_x == TEXTSCREEN_WIDTH-1 )
+    if ( screen->cursor_x == TS_WIDTH-1 )
     {
-        if ( screen->cursor_y < TEXTSCREEN_HEIGHT-1 )
+        if ( screen->cursor_y < TS_HEIGHT-1 )
             textscreen_update_cursor(screen, 0, screen->cursor_y+1);
         else
             textscreen_scroll(screen);
@@ -124,17 +154,32 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
 {
     screen = SELECT_SCREEN(screen);
 
+    // zapamietujemy poprzednia pozycje
+    int cur_pos = (screen->cursor_y) * TS_WIDTH +
+        screen->cursor_x;
+
+
+
     screen->cursor_y = row;
     screen->cursor_x = col;
 
     if (screen->screen_buf) {
-        uint16_t cur_pos = (screen->cursor_y) * TEXTSCREEN_WIDTH +
+        // cursor_hack:  strasznie mnie wnerwia jak mi
+        // kursor mruga na terminalu. Chipset VGA nie pozwala tego zmieniæ, zatem sam
+        // robiê efekt "braku mrugania" rysuj±c kursor recznie.
+        //      -- wieczyk
+//        screen->screen_buf[cur_pos] = screen->cursor_hack;
+        cur_pos = (screen->cursor_y) * TS_WIDTH +
             screen->cursor_x;
-
-        io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f);
-        io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos & 0xff);
-        io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e);
-        io_out8(TEXTSCREEN_VIDPORT_DATA, (cur_pos>>8) & 0xff);
+#if 0
+        io_out8(VGA_PORT, REG_CUR_POS_HI);
+        io_out8(VGA_PORT+1, cur_pos>>8 );
+        io_out8(VGA_PORT, REG_CUR_POS_LO);
+        io_out8(VGA_PORT+1, cur_pos & 0x00ff);
+#endif
+        screen->cursor_hack = screen->screen_buf[cur_pos];
+        screen->screen_buf[cur_pos] = (screen->cursor_hack) |
+            TS_FG(COLOR_WHITE) | TS_BG(COLOR_BRIGHTGRAY);
     }
 }
 
@@ -144,11 +189,11 @@ textscreen_scroll(struct hw_textscreen *screen)
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
 
-    mem_move(map, &map[TEXTSCREEN_WIDTH],
-                24*TEXTSCREEN_WIDTH*sizeof(uint16_t));
+    mem_move(map, &map[TS_WIDTH],
+                24*TS_WIDTH*sizeof(uint16_t));
     
-    mem_set16(&map[24*TEXTSCREEN_WIDTH], COLOR_WHITE<<8 | ' ',
-            TEXTSCREEN_WIDTH*sizeof(uint16_t));
+    mem_set16(&map[24*TS_WIDTH], COLOR_WHITE<<8 | ' ',
+            TS_WIDTH*sizeof(uint16_t));
     
     textscreen_update_cursor(screen, 0, screen->cursor_y);
 
@@ -161,7 +206,7 @@ textscreen_clear(struct hw_textscreen *screen)
     uint16_t *map = SELECT_MAP(screen);
     uint16_t i;
 
-    for ( i = 0 ; i < TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT ; i++ )
+    for ( i = 0 ; i < TS_SIZE ; i++ )
         map[i] = COLOR_WHITE<<8;
     textscreen_update_cursor(screen, 0, 0);
 }
@@ -178,17 +223,10 @@ textscreen_draw(struct hw_textscreen *screen)
 {
     current = screen;
     if (screen->screen_buf) return;
-    uint16_t cur_pos = (screen->cursor_y) * TEXTSCREEN_WIDTH + 
-        screen->cursor_x; 
 
-//     screen->screen_map[cur_pos] = (COLOR_WHITE<<8)|219;
+    mem_cpy(TS_VIDEO, screen->screen_map,
+            TS_SIZE*sizeof(uint16_t));
 
-    mem_cpy(TEXTSCREEN_VIDEO, screen->screen_map,
-            TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT*sizeof(uint16_t));
-
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f); 
-    io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos & 0xff);
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e); 
-    io_out8(TEXTSCREEN_VIDPORT_DATA, (cur_pos>>8) & 0xff);
-    screen->screen_buf = (uint16_t*) TEXTSCREEN_VIDEO;
+    screen->screen_buf = (uint16_t*) TS_VIDEO;
+    textscreen_update_cursor(screen, screen->cursor_x, screen->cursor_y);
 }

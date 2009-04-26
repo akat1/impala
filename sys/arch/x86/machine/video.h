@@ -35,18 +35,18 @@
 
 #include <sys/types.h>
 
-#define TEXTSCREEN_VIDEO   (addr_t)0xb8000
-#define TEXTSCREEN_VIDPORT_IDX  0x3d4
-#define TEXTSCREEN_VIDPORT_DATA 0x3d5
-#define TEXTSCREEN_WIDTH   80
-#define TEXTSCREEN_HEIGHT  25
-#define TEXTSCREEN_SIZE (TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT)
+enum {
+    TS_WIDTH = 80,
+    TS_HEIGHT = 25,
+    TS_SIZE =  (TS_WIDTH*TS_HEIGHT)
+};
 
 struct hw_textscreen {
-    uint16_t screen_map[TEXTSCREEN_SIZE];
+    uint16_t screen_map[TS_SIZE];
     uint16_t *screen_buf;
     int8_t cursor_y;
     int8_t cursor_x;
+    uint16_t cursor_hack;
 };
 
 void textscreen_enable_forced_attr(int8_t f);

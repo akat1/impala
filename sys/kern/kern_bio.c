@@ -195,6 +195,7 @@ physbuf_init(iobuf_t *bp, uio_t *uio)
     bp->flags = IOB_NOCACHE;
     bp->bcount = 1;
     bp->addr = uio->iovs[0].iov_base;
+    bp->oper = (uio->oper == UIO_READ)? BIO_READ: BIO_WRITE;
     return 0;
 }
 
@@ -204,6 +205,7 @@ physio(devd_t *dev, uio_t *uio, int bioflags)
     iobuf_t *bp = kmem_cache_alloc(physbuf_cache, KM_SLEEP);
     int e = physbuf_init(bp, uio);
     if (e != -1) {
+        bp->flags |= bioflags;
         e = -1;
     }
     kmem_cache_free(physbuf_cache, bp); 
