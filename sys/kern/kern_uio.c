@@ -52,6 +52,8 @@ uio_copy(void *buf, uio_t *uio, size_t len)
 int
 kernel_copy(char *buf, uio_t *uio, size_t len)
 {
+    DEBUGF("Kernel memory transfer: (%p+%u) (%p+%u)",
+            buf, len, uio->iovs[0].iov_base, uio->size);
     for (int i = 0; i < uio->iovcnt; i++) {
         size_t clen = uio->iovs[i].iov_len;
         if (clen < len) {

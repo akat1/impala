@@ -153,7 +153,6 @@ static mem_bucket_t buckets[] = {
 void*
 kmem_alloc(size_t s, int flags)
 {
-    TRACE_IN0();
     int i;
     for (i = 0; buckets[i].size && buckets[i].size < s; i++);
     if (buckets[i].size == 0)
@@ -176,7 +175,6 @@ kmem_free(void *ptr)
 void
 alloc_init()
 {
-    TRACE_IN0();
     for (int i = 0; buckets[i].size != 0; i++) {
         buckets[i].cache = kmem_cache_create(buckets[i].name,  buckets[i].size,
             NULL, NULL);
@@ -259,7 +257,6 @@ kmem_cache_alloc(kmem_cache_t *cache, int flags)
 void
 kmem_cache_free(kmem_cache_t *cache, void *m)
 {
-    TRACE_IN0();
     mutex_lock(&cache->mtx);
     kmem_bufctl_t *bctl = get_bufctl_from_ptr(m);
     // sprawdzamy czy dan± p³ytê nie trzeba przepi±æ.
@@ -287,7 +284,6 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
 void
 kmem_init()
 {
-    TRACE_IN0();
 
     vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches), 
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);

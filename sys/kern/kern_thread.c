@@ -306,7 +306,6 @@ cqueue_insert(cqueue_t *q, void *d)
 {
     mutex_lock(&q->q_mtx);
     list_insert_tail(&q->q_data, d);
-//     kprintf("cqI: wakeup\n");
     mutex_wakeup(&q->q_mtx);
     mutex_unlock(&q->q_mtx);
 }
@@ -325,7 +324,6 @@ cqueue_extract(cqueue_t *q)
     void *p;
     mutex_lock(&q->q_mtx);
     while ( (p = list_extract_first(&q->q_data)) == NULL ) {
-//         kprintf("cqE: wait\n");
         mutex_wait(&q->q_mtx);
     }
     mutex_unlock(&q->q_mtx);

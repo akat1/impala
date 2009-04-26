@@ -43,6 +43,7 @@ void vkprintf(const char *fmt, va_list ap);
 #include <sys/sched.h>
 
 #define TRACE_ATTR COLOR_BRIGHTBLUE
+#define DEBUG_ATTR COLOR_DARKGRAY
 
 #define TRACE_IN(fmt, args...)\
     do { \
@@ -53,6 +54,12 @@ void vkprintf(const char *fmt, va_list ap);
         for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
         textscreen_disable_forced_attr();\
     } while (0);
+
+#define DEBUGF(fmt, a...) do {\
+    textscreen_enable_forced_attr(DEBUG_ATTR);\
+    kprintf("%s: " fmt "\n", __FILE__, ## a );\
+    textscreen_disable_forced_attr();\
+    } while (0)
     
 #define TRACE_IN0() TRACE_IN("");
 

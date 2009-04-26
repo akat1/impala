@@ -1,6 +1,7 @@
 SUBDIRS= sys
 IMAGE_FILE=image/floppy.img
 IMAGE_FILE_=image/_floppy.img
+FLOPPY_DEV?=/dev/fd0
 .PHONY: all build build-image run
 
 all: build-image
@@ -21,5 +22,8 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 commit: cleandepend
 	svn commit
 	make depend
+
+burn: build-image
+	sudo dd if=image/floppy.img of=${FLOPPY_DEV}
 
 include ${IMPALA_MK}/subdir.mk

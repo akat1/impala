@@ -43,7 +43,7 @@
 typedef struct iovec iovec_t;
 enum UIO_SPACE {
     UIO_USERSPACE,
-    UIO_KERNELSPACE
+    UIO_SYSSPACE
 };
 
 enum UIO_OPER {

@@ -39,28 +39,43 @@
  *  
  */
 
-struct biobuf {
+struct iobuf {
     void        *addr;
-    size_t       totalsize;
-    size_t       size;
-    size_t       remaining;
-    size_t       used;
+    int          oper;
+    blkno_t      blkno;
+    size_t       bcount;
     int          flags;
-    devd_t      *devd;
+    devd_t      *dev;
+    semaph_t     sem;
     list_node_t  L_bioq;
     list_node_t  L_bufs;
 };
 
 enum BUF_FLAGS {
-    B_BUSY      = 0x00001,
-    B_DONE      = 0x00002,
-    B_WRITE     = 0x00004,
-    B_READ      = 0x00008,
-    B_EINTR     = 0x00010,
-    B_ERROR     = 0x00020,
-    B_DIRTY     = 0x00040,
-    B_CACHE     = 0x00080
+    IOB_BUSY      = 0x00001,
+    IOB_DONE      = 0x00002,
+    IOB_WRITE     = 0x00004,
+    IOB_READ      = 0x00008,
+    IOB_ERROR     = 0x00020,
+    IOB_DIRTY     = 0x00040,
+    IOB_CACHE     = 0x00080,
+    IOB_NOCACHE   = 0x00100
 };
+
+enum {
+    BIO_READ,
+    BIO_WRITE
+};
+
+void bio_init(void);
+
+iobuf_t *bio_getblk(vnode_t *v, blkno_t blkno, size_t count);
+iobuf_t *bio_read(vnode_t *v, blkno_t blkno, size_t count);
+void bio_wait(iobuf_t *b);
+void bio_wakeup(iobuf_t *b);
+void bio_done(iobuf_t *b);
+
+size_t physio(devd_t *dev, uio_t *uio, int bioflags);
 
 #endif
 #endif

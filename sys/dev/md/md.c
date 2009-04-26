@@ -38,6 +38,7 @@
 #include <sys/thread.h>
 #include <sys/kprintf.h>
 #include <sys/uio.h>
+#include <sys/bio.h>
 #include <dev/md/md.h>
 #include <dev/md/md_priv.h>
 
@@ -46,6 +47,7 @@ static d_close_t mdclose;
 static d_ioctl_t mdioctl;
 static d_read_t mdread;
 static d_write_t mdwrite;
+static d_strategy_t mdstrategy;
 
 static devsw_t md_devsw = {
     mdopen,
@@ -53,7 +55,7 @@ static devsw_t md_devsw = {
     mdioctl,
     mdread,
     mdwrite,
-    nostrategy,
+    mdstrategy,
     "md"
 };
 
@@ -105,6 +107,34 @@ int
 mdioctl(devd_t *dev, int cmd, uintptr_t arg)
 {
     return -ENOTTY;
+}
+
+int
+mdstrategy(devd_t *dev, iobuf_t *b)
+{
+    // Przepisaæ!: to ma dzia³aæ tak, ¿e:
+    // mdwrite,mdread -> physio -> mdstrategy
+    // a nie mdstrategy -> mdwrite/mdread :))
+    TRACE_IN("dev=%p buf=%p", dev, b);
+    uio_t u;
+    iovec_t io;
+    io.iov_base = b->addr;
+    io.iov_len = b->bcount * 512;
+    u.iovs = &io;
+    u.iovcnt = 1;
+    u.space = UIO_SYSSPACE;
+    u.offset = b->blkno * 512;
+    u.size = io.iov_len;
+    if (b->oper == BIO_READ) {
+        u.oper = UIO_READ;
+        if (mdread(dev, &u) == -1) b->flags |= IOB_ERROR;
+        bio_done(b);
+    } else { 
+        u.oper = UIO_WRITE;
+        if (mdwrite(dev, &u) == -1) b->flags |= IOB_ERROR;
+        bio_done(b);
+    }
+    return 0;
 }
 
 /*=========================================================================

@@ -44,7 +44,7 @@ typedef int d_read_t(devd_t *d, uio_t *u);
 typedef int d_write_t(devd_t *d, uio_t *u);
 typedef int d_close_t(devd_t *d);
 typedef int d_ioctl_t(devd_t *d, int cmd, uintptr_t param);
-typedef int d_strategy_t(devd_t *d);
+typedef int d_strategy_t(devd_t *d, iobuf_t *b);
 
 struct devsw {
     d_open_t        *d_open;
@@ -83,6 +83,7 @@ int devd_open(devd_t *d, int flags);
 int devd_close(devd_t *d);
 int devd_read(devd_t *d, uio_t *u);
 int devd_write(devd_t *d, uio_t *u);
+int devd_strategy(devd_t *d, iobuf_t *bp);
 
 #endif
 

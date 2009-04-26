@@ -30,8 +30,11 @@
  * $Id$
  */
 
+#include <sys/thread.h>
+
 #ifndef __SYS_KTHREAD
 #define __SYS_KTHREAD
+
 
 
 typedef void kthread_entry_f(void *);

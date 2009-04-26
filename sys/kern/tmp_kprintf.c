@@ -33,10 +33,12 @@
 #include <sys/types.h>
 #include <sys/string.h>
 #include <sys/kprintf.h>
+#include <sys/thread.h>
 #include <machine/video.h>
 
 #define DEFAULT_ATTRIBUTE (COLOR_WHITE)
 
+static mutex_t plock;
 
 
 enum {
@@ -55,6 +57,12 @@ kprintf(const char *fmt, ...)
 void
 vkprintf(const char *fmt, va_list ap)
 {
+    static bool init = FALSE;
+    if (!init) {
+        mutex_init(&plock, MUTEX_NORMAL);
+        init = TRUE;
+    }
+    mutex_lock(&plock);
     char big_buf[KPRINTF_BUF];
     char *ptr=big_buf;
     mem_zero(big_buf, KPRINTF_BUF);
@@ -75,6 +83,6 @@ vkprintf(const char *fmt, va_list ap)
                 break;
         }
     }
-
+    mutex_unlock(&plock);
 //   textscreen_draw(NULL);
 }

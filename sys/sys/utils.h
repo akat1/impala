@@ -46,8 +46,6 @@ void panic(const char* msg, ...);
     panic("Assertion failed\n expr: %s\n in file: %s:%u\n in function: %s", #x,  __FILE__, __LINE__,  __func__);
 
 
-#define DEBUGF(fmt, a...) kprintf("%s: " fmt "\n", __FILE__, ## a )
-
 #define MIN(a,b) ( (a) < (b) )? (a) : (b)
 #define MAX(a,b) ( (a) < (b) )? (b) : (a)
 

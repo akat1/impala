@@ -46,7 +46,7 @@ static struct hw_textscreen *current;
 void
 textscreen_init()
 {   
-    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x9);
+//    io_out8(TEXTSCREEN_VIDPORT_IDX, 0x9);
     uint8_t line = io_in8(TEXTSCREEN_VIDPORT_DATA);
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0xa);
     io_out8(TEXTSCREEN_VIDPORT_DATA, 0);
@@ -132,9 +132,9 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
             screen->cursor_x;
 
         io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f);
-        io_out8(TEXTSCREEN_VIDPORT_DATA, (uint8_t)cur_pos);
+        io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos & 0xff);
         io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e);
-        io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos>>8);
+        io_out8(TEXTSCREEN_VIDPORT_DATA, (cur_pos>>8) & 0xff);
     }
 }
 
@@ -187,8 +187,8 @@ textscreen_draw(struct hw_textscreen *screen)
             TEXTSCREEN_WIDTH*TEXTSCREEN_HEIGHT*sizeof(uint16_t));
 
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0f); 
-    io_out8(TEXTSCREEN_VIDPORT_DATA, (uint8_t)cur_pos);
+    io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos & 0xff);
     io_out8(TEXTSCREEN_VIDPORT_IDX, 0x0e); 
-    io_out8(TEXTSCREEN_VIDPORT_DATA, cur_pos>>8);
+    io_out8(TEXTSCREEN_VIDPORT_DATA, (cur_pos>>8) & 0xff);
     screen->screen_buf = (uint16_t*) TEXTSCREEN_VIDEO;
 }

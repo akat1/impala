@@ -37,7 +37,7 @@
 typedef struct list list_t;
 typedef struct list_node list_node_t;
 typedef bool list_less_f(const void *x, const void *y);
-typedef bool list_pred_f(const void *x, void *arg);
+typedef bool list_pred_f(const void *x, const void *arg);
 
 struct list_node {
     void     *prev;
@@ -238,7 +238,7 @@ list_insert_in_order(list_t *ls, void *x, list_less_f *is_less)
 }
 
 static inline void *
-list_find_next(list_t *ls, void *elem, list_pred_f *pred, void *parg)
+list_find_next(list_t *ls, void *elem, list_pred_f *pred, const void *parg)
 {
     while ( (elem = list_next(ls, elem)) ) {
         if (pred(elem, parg)) return elem;
@@ -247,7 +247,7 @@ list_find_next(list_t *ls, void *elem, list_pred_f *pred, void *parg)
 }
 
 static inline void *
-list_find(list_t *ls, list_pred_f *pred, void *parg)
+list_find(list_t *ls, list_pred_f *pred, const void *parg)
 {
     return list_find_next(ls, NULL, pred, parg);
 }

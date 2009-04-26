@@ -10,7 +10,7 @@ LIBS?=
 KERNEL?= kernel
 LD_MAP?= ${KERNEL}.map
 LD_SCRIPT?= ${IMPALA_SRCROOT}/sys/conf/kernel.ld
-LIBDIR= -L ${IMPALA_SRCROOT}/sys/libkutil -L${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ -L ${IMPALA_SRCROOT}/sys/dev
+LIBDIR= -L ${IMPALA_SRCROOT}/sys/libkutil -L${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ -L ${IMPALA_SRCROOT}/sys/dev -L ${IMPALA_SRCROOT}/sys/fs
 
 include ${IMPALA_SRCROOT}/mk/build.mk
 ${_KERNEL_BUILD}: ${KERNEL}
@@ -20,7 +20,10 @@ ${_KERNEL_CLEAN}:
 	rm -f ${OBJS} ${KERNEL}
 
 
-${KERNEL}: ${LIBDEPS} ${OBJS}
+tmp_rootimage.c:
+	cp _tmp_rootimage.c tmp_rootimage.c
+
+${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS}
 	@echo " LD ${KERNEL}"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
 

@@ -29,53 +29,48 @@
  *
  * $Id$
  */
-#ifndef __SYS_FS_MFS_H
-#define __SYS_FS_MFS_H
 
-typedef struct mfs_header mfs_header_t;
-typedef struct mfs_data_entry mfs_data_entry_t;
-
-enum {
-    MFS_MAGIC0          = 0x43214321,
-    MFS_MAGIC1          = 0x76576576
-};
+#ifndef __SYS_VFS_VFS_CONF_H
+#define __SYS_VFS_VFS_CONF_H
+#ifdef __KERNEL
 
 enum {
-    MFS_MAX_PATH        = 256,
-    MFS_MAX_FILENAME    = 100
-};
-
-enum {
-    MFS_TYPE_REG    = 0,
-    MFS_TYPE_DIR    = 1,
-    MFS_TYPE_LNK    = 2,
-    MFS_TYPE_XXX    = 3
-};
-
-enum {
-    MFS_ATTR_OWNER_R  = 0400,
-    MFS_ATTR_OWNER_W  = 0200,
-    MFS_ATTR_OWNER_X  = 0100,
-    MFS_ATTR_GROUP_R  =  040,
-    MFS_ATTR_GROUP_W  =  020,
-    MFS_ATTR_GROUP_X  =  010,
-    MFS_ATTR_OTHER_R  =   04,
-    MFS_ATTR_OTHER_W  =   02,
-    MFS_ATTR_OTHER_X  =   01
-};
-
-struct mfs_header {
-    uint32_t    magic0;
-    uint32_t    magic1;
-    uint16_t    items;
-};
-
-struct mfs_data_entry {
-    char    name[MFS_MAX_PATH];
-    size_t  size;
-    int     type;
-    int     attr;
+    VFS_MP_MAXPATH  = 255,
+    VFS_MP_MAXDEVPATH = 32
 };
 
 
+struct vfs_conf {
+    const char  *name;
+    vfs_ops_t   *ops;
+    list_node_t  L_confs;
+};
+
+struct vfs_mp {
+    const char  mount_path[VFS_MP_MAXPATH];
+    const char  dev_path[VFS_MP_MAXDEVPATH];
+    vnode_t    *dev_node;
+    vfs_conf_t *vfs_conf;
+};
+
+typedef int vfs_mount_t(vfs_mp_t *vmp);
+typedef int vfs_unmount_t(vfs_mp_t *vmp);
+
+struct vfs_ops {
+    vfs_mount_t     *vfs_mount;
+    vfs_unmount_t   *vfs_unmount;
+};
+
+#define VFS_MOUNT(m) (m)->vfs_conf->ops->vfs_mount(m)
+#define VFS_UNMOUNT(m) (m)->vfs_conf->ops->vfs_unmount(m)
+
+void vfs_register(const char *name, vfs_ops_t *ops);
+vfs_conf_t *vfs_byname(const char *name);
+
+vfs_mp_t *vfs_mp_create(vnode_t *devn, const char *fstype, const char *mp);
+void vfs_mp_destroy(vfs_mp_t *vmp);
+
+
+
+#endif
 #endif

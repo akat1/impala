@@ -31,54 +31,47 @@
 
 #include <sys/types.h>
 #include <sys/kprintf.h>
-#include <sys/thread.h>
 #include <sys/kthread.h>
 #include <sys/clock.h>
 #include <sys/sched.h>
-#include <sys/syscall.h>
-#include <sys/libkutil.h>
 #include <sys/device.h>
-#include <sys/fcntl.h>
-#include <machine/cpu.h>
-#include <sys/uio.h>
+#include <sys/bio.h>
 #include <sys/vm.h>
 #include <sys/utils.h>
-#include <sys/errno.h>
 #include <sys/kmem.h>
+#include <sys/vfs.h>
+#include <dev/md/md.h>
 
 void kmain(void);
 static void print_welcome(void);
 static void init_kernel(void);
-/// G³ówna procedura j±dra.
-static void dev_test(void);
-
+static void prepare_root(void);
+static void start_init_process(void);
 
 void
 kmain()
 {
     print_welcome();
     init_kernel();
-    dev_test();
-    for (;;);
-}
-
-void tf0(void *a);
-
-
-void 
-tf0(void *a)
-{
-    for (;;) {
-        ssleep(1);
-    }
+    prepare_root();
+    start_init_process();
 }
 
 void
-dev_test()
+prepare_root()
 {
-    static kthread_t t0;
-    kthread_create(&t0, tf0, NULL);
+    extern char kern_root_image[];
+    extern size_t kern_root_image_size;
+    DEBUGF("preparing root device on memory disk /dev/md0");
+    md_create(0, kern_root_image, kern_root_image_size);
+    vfs_mountroot();
+}
 
+void
+start_init_process()
+{
+    kprintf("[infinite loop]");
+    for (;;);
 }
 
 void
@@ -108,5 +101,8 @@ init_kernel()
     sched_init();
     clock_init();
     dev_init();
+    bio_init();
+    vfs_init();
+    ssleep(1);
     kprintf("kernel initialized\n");
 }

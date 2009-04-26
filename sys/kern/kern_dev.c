@@ -51,6 +51,7 @@ dnotsupported(devd_t *d)
 void
 dev_init()
 {
+    DEBUGF("initializing device sub-system");
     list_create(&devs, offsetof(devd_t, L_devs), FALSE);
     md_init();
 }
@@ -60,6 +61,7 @@ static bool find_this_dev(const devd_t *d, const char *name);
 devd_t *
 devd_create(devsw_t *dsw, int unit, void *priv, const char *fmt, ...)
 {
+    DEBUGF("registering new device node %s", dsw->name);
     devd_t *dev = kmem_alloc( sizeof(devd_t), KM_SLEEP );   
     if (unit == -1) {
         snprintf(dev->name, DEVD_MAXNAME, "%s", dsw->name);
@@ -81,7 +83,6 @@ devd_find(const char *name)
 {
     uintptr_t u = (uintptr_t)name;
     devd_t *d = list_find(&devs, (list_pred_f*)find_this_dev, (void*)u);
-    TRACE_IN("d=%p", d);
     return d;
 }
 
@@ -113,5 +114,11 @@ bool
 find_this_dev(const devd_t *d, const char *name)
 {
     return (str_cmp(d->name, name)==0);
+}
+
+int
+devd_strategy(devd_t *d, iobuf_t *b)
+{
+    return d->devsw->d_strategy(d, b);
 }
 
