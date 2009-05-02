@@ -37,9 +37,16 @@
 #include <sys/string.h>
 #include <machine/video.h>
 
+enum {
+    PARSER_MAX_BUF = 10
+};
+
 typedef struct vt_parser vt_parser_t;
 struct vt_parser {
-    int state;
+    int     state;
+    char    buf[PARSER_MAX_BUF];
+    int     bufidx;
+    int     substate;
 };
 
 
@@ -143,38 +150,38 @@ static void vt_parser_reset(vt_parser_t *vtprs);
  *      \033c           resetuje terminal
  *      \033[0m         resetuje atrybuty
  *      \033[31m        ustawia kolor czcionki na czerwony
- *      \033[30;42m     ustaiwa kolor czciocnki na czarny, a t³a na zielony
+ *      \033[32;47m     ustaiwa kolor czciocnki na zielony, a t³a na szary
  */
 enum {
-    ESC_RESET,      // c    (#)
-    ESC_LWRAPON,    // 7h 
-    ESC_LWRAPOFF,   // 71 
-    ESC_G0,         // ( 
-    ESC_G1,         // ) 
+    ESC_RESET,      // c (#)
+    ESC_LWRAPON,    // [7h 
+    ESC_LWRAPOFF,   // [71 
+    ESC_G0,         // ( (#)
+    ESC_G1,         // ) (#)
     ESC_CURHOME,    // [{ROW=0};{COL=0}H 
     ESC_CURUP,      // [{COUNT=1}A 
     ESC_CURDOWN,    // [{COUNT=1}B  
     ESC_CURFORW,    // [{COUNT=1}C
     ESC_CURBACK,    // [{COUNT=1}D
     ESC_CURFORCE,   // [{ROW=-};{COL=0}f 
-    ESC_CURSAVE,    // [s 
-    ESC_CURLOAD,    // [u
-    ESC_CURSAVEA,   // 7
-    ESC_CURLOADA,   // 8
-    ESC_SCROLLE,    // [r
+    ESC_CURSAVE,    // [s (#)
+    ESC_CURLOAD,    // [u (#)
+    ESC_CURSAVEA,   // 7 (#)
+    ESC_CURLOADA,   // 8 (#)
+    ESC_SCROLLE,    // [r (#)
     ESC_SCROLL,     // [{start};{end}r
-    ESC_SCROLLD,    // D
-    ESC_SCROLLU,    // M
-    ESC_TABSET,     // H
-    ESC_TABCLR,     // [g
+    ESC_SCROLLD,    // D (#)
+    ESC_SCROLLU,    // M (#)
+    ESC_TABSET,     // H (#)
+    ESC_TABCLR,     // [g (#)
     ESC_TABCLRA,    // [3g
-    ESC_ERASEE,     // [K
+    ESC_ERASEE,     // [K (#)
     ESC_ERASEB,     // [1K
     ESC_ERASEL,     // [2K
-    ESC_ERASED,     // [J
+    ESC_ERASED,     // [J (#)
     ESC_ERASEU,     // [1J
     ESC_ERASES,     // [2J
-    ESC_PRINTS,     // [i
+    ESC_PRINTS,     // [i (#)
     ESC_PRINTL,     // [1i
     ESC_LOGS,       // [4i
     ESC_LOGE,       // [5i
@@ -251,10 +258,10 @@ vtty_put(vtty_t *vt, char c)
 }
 
 enum {
-    P_FIRST,            // czekamy na pierwszy znak
-    P_FILLINT,          // uzupe³niamy bufor na INT'a
-    P_CHAR,             // czekamy na znaczek
-    P_DUMMY,            // g³upawy stan
+    P_DUMMY,
+    P_FIRST,         // czekamy na pierwszy znak
+    P_INT,           // uzupe³niamy bufor na INT'a
+    P_LONG           // czekamy na znaczki po '['
 
 };
 
@@ -277,7 +284,67 @@ vt_parser_put(vt_parser_t *vtprs, char c)
             case 'c':
                 ret = ESC_RESET;
                 break;
+            case '(':
+                ret = ESC_G0;
+                break;
+            case ')':
+                ret = ESC_G1;
+                break;
+            case '7':
+                ret = ESC_CURSAVEA;
+                break;
+            case '8':
+                ret = ESC_CURLOADA;
+                break;
+            case 'D':
+                ret = ESC_SCROLLD;
+                break;
+            case 'M':
+                ret = ESC_SCROLLU;
+                break;
+            case 'H':
+                ret = ESC_TABSET;
+                break;
+            case '[':
+                nexts = P_LONG;
+                break;
+            default:
+                ret = PARSER_ERROR;
+                break;
         }
+    } else
+    if (vtprs->state == P_LONG) {
+        if ( '0' <= c && c <= '9') {
+            vtprs->buf[vtprs->bufidx] = c - '0';
+            vtprs->bufidx++;
+        } else
+        switch (c) {
+            case 's':
+                ret = ESC_CURSAVE;
+                break;
+            case 'u':
+                ret = ESC_CURLOAD;
+                break;
+            case 'r':
+                ret = ESC_SCROLLE;
+                break;
+            case 'g':
+                ret = ESC_TABCLR;
+                break;
+            case 'K':
+                ret = ESC_ERASEE;
+                break;
+            case 'J':
+                ret = ESC_ERASED;
+                break;
+            case 'i':
+                ret = ESC_PRINTS;
+                break;
+        }
+    }
+    if (vtprs->bufidx == PARSER_MAX_BUF) {
+        vtprs->bufidx = 0;
+        return PARSER_ERROR;
     }
     vtprs->state = nexts;
     return ret;
