@@ -36,6 +36,7 @@
 #include <sys/sched.h>
 #include <sys/device.h>
 #include <sys/bio.h>
+#include <sys/console.h>
 #include <sys/vm.h>
 #include <sys/utils.h>
 #include <sys/kmem.h>
@@ -97,6 +98,7 @@ init_kernel()
 {
     vm_init();
     kmem_init();
+    cons_init();
     thread_init();
     sched_init();
     clock_init();

@@ -41,6 +41,15 @@ enum {
     TS_SIZE =  (TS_WIDTH*TS_HEIGHT)
 };
 
+#define _TS_BG(attr) (((attr) >> 12) & 0x7)
+#define _TS_FG(attr) (((attr)>>8)  & 0xf)
+#define _TS_BOLD(attr) (attr & 0x8)
+
+#define TS_BG(attr) (((attr) & 0xf) << 12)
+#define TS_FG(attr) (((attr) & 0x7) << 8)
+#define TS_BOLD(attr) (attr | 0x8)
+
+
 struct hw_textscreen {
     uint16_t screen_map[TS_SIZE];
     uint16_t *screen_buf;
@@ -52,7 +61,9 @@ struct hw_textscreen {
 void textscreen_enable_forced_attr(int8_t f);
 void textscreen_disable_forced_attr(void);
 
-void textscreen_init(void);
+void video_init(void);
+void textscreen_init(struct hw_textscreen *ts);
+
 void textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute);
 void textscreen_put(struct hw_textscreen *screen, char c, 
@@ -64,8 +75,8 @@ void textscreen_next_line(struct hw_textscreen *screen);
 void textscreen_reset(struct hw_textscreen *screen);
 void textscreen_clear(struct hw_textscreen *screen);
 void textscreen_draw(struct hw_textscreen *screen);
-// void textscreen_switch(struct hw_textscreen *screen);
-// hw_textscreen *textscreen_clone(struct hw_textscreen *screen)
+void textscreen_switch(struct hw_textscreen *screen);
+void textscreen_clone(struct hw_textscreen *screen);
 
 enum {
     COLOR_BLACK,

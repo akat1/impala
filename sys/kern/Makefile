@@ -10,6 +10,7 @@ LIBDEPS=\
 SRCS=\
 	kern_clock.c\
 	kern_bio.c\
+	kern_console.c\
 	kern_dev.c\
 	kern_file.c\
 	kern_kthread.c\

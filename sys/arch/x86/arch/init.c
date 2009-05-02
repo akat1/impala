@@ -126,7 +126,7 @@ init_x86()
     i8254_init();
     pckbd_init();
     vm_low_init();
-    textscreen_init();
+    video_init();
     __asm__("sti");
 }
 

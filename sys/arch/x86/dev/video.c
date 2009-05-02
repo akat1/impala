@@ -44,11 +44,7 @@ static struct hw_textscreen *current;
 #define SELECT_MAP(ptr) ((ptr->screen_buf)? ptr->screen_buf : ptr->screen_map)
 #define TS_VIDEO   (addr_t)0xb8000
 
-#define _TS_BG(attr) (((attr) >> 12) & 0x7)
-#define _TS_FG(attr) (((attr)>>8)  & 0xf)
 
-#define TS_BG(attr) (((attr) & 0xf) << 12)
-#define TS_FG(attr) (((attr) & 0x7) << 8)
 enum {
     VGA_PORT = 0x3d4
 };
@@ -62,7 +58,7 @@ enum {
 };
 
 void
-textscreen_init()
+video_init()
 {   
 #if 0
     io_out8(VGA_PORT, REG_MAX_SCANLINE);
@@ -85,6 +81,13 @@ textscreen_init()
     defscreen.cursor_hack = 0;
     current = &defscreen;
     defscreen.cursor_hack = defscreen.screen_buf[cur_pos];
+}
+
+void
+textscreen_init(struct hw_textscreen *ts)
+{
+    ts->screen_buf = NULL;
+    textscreen_clear(ts);
 }
 
 
@@ -230,3 +233,23 @@ textscreen_draw(struct hw_textscreen *screen)
     screen->screen_buf = (uint16_t*) TS_VIDEO;
     textscreen_update_cursor(screen, screen->cursor_x, screen->cursor_y);
 }
+
+void
+textscreen_switch(struct hw_textscreen *screen)
+{
+    screen->screen_buf = current->screen_buf;
+    current->screen_buf = NULL;
+    current = screen;
+    textscreen_draw(screen);
+}
+
+void
+textscreen_clone(struct hw_textscreen *screen)
+{
+    mem_cpy(screen, current, sizeof(*screen));
+    mem_cpy(screen->screen_map, current->screen_map, TS_SIZE*2);
+    screen->screen_buf = NULL;
+    screen->cursor_x = 10;
+    screen->cursor_y = 10;
+}
+
