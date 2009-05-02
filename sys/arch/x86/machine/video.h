@@ -41,12 +41,12 @@ enum {
     TS_SIZE =  (TS_WIDTH*TS_HEIGHT)
 };
 
-#define _TS_BG(attr) (((attr) >> 12) & 0x7)
-#define _TS_FG(attr) (((attr)>>8)  & 0xf)
+#define _TS_BG(attr) (((attr) >> 4) & 0x7)
+#define _TS_FG(attr) ((attr) & 0xf)
 #define _TS_BOLD(attr) (attr & 0x8)
 
-#define TS_BG(attr) (((attr) & 0xf) << 12)
-#define TS_FG(attr) (((attr) & 0x7) << 8)
+#define TS_BG(attr) (((attr) & 0xf) << 4)
+#define TS_FG(attr) ((attr) & 0x7)
 #define TS_BOLD(attr) (attr | 0x8)
 
 typedef struct hw_textscreen textscreen_t;

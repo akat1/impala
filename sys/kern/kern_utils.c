@@ -32,6 +32,8 @@
 
 #include <sys/utils.h>
 #include <sys/kprintf.h>
+#include <sys/string.h>
+#include <sys/console.h>
 #include <machine/interrupt.h>
 
 /**
@@ -50,4 +52,27 @@ panic(const char *msg, ...)
     kprintf("\n");
     VA_END(ap);
     while(1);
+}
+
+
+void
+kprintf(const char *fmt, ...)
+{
+    va_list ap;
+    VA_START(ap, fmt);
+    vkprintf(fmt, ap);
+    VA_END(ap);
+}
+
+void
+vkprintf(const char *fmt, va_list ap)
+{
+    enum {
+        KPRINTF_BUF = 512
+    };
+    char big_buf[KPRINTF_BUF];
+    char *ptr = big_buf; // str_cpy(big_buf, "\033[s");
+    vsnprintf(ptr, KPRINTF_BUF, fmt, ap);
+//    str_cat(big_buf,"\033[u");
+    cons_out(big_buf);
 }

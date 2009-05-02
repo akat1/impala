@@ -61,7 +61,6 @@ static bool find_this_dev(const devd_t *d, const char *name);
 devd_t *
 devd_create(devsw_t *dsw, int unit, void *priv, const char *fmt, ...)
 {
-    DEBUGF("registering new device node %s", dsw->name);
     devd_t *dev = kmem_alloc( sizeof(devd_t), KM_SLEEP );   
     if (unit == -1) {
         snprintf(dev->name, DEVD_MAXNAME, "%s", dsw->name);

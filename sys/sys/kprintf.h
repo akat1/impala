@@ -47,18 +47,14 @@ void vkprintf(const char *fmt, va_list ap);
 
 #define TRACE_IN(fmt, args...)\
     do { \
-        textscreen_enable_forced_attr(TRACE_ATTR);\
         kprintf("@ %s (", __func__);\
         kprintf(fmt, ## args);\
         kprintf(")\n");\
         for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
-        textscreen_disable_forced_attr();\
     } while (0);
 
 #define DEBUGF(fmt, a...) do {\
-    textscreen_enable_forced_attr(DEBUG_ATTR);\
     kprintf("%s: " fmt "\n", __FILE__, ## a );\
-    textscreen_disable_forced_attr();\
     } while (0)
     
 #define TRACE_IN0() TRACE_IN("");

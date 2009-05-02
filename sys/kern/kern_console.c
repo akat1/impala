@@ -37,6 +37,7 @@
 #include <sys/string.h>
 #include <sys/thread.h>
 #include <sys/errno.h>
+#include <sys/utils.h>
 #include <machine/video.h>
 
 enum {
@@ -57,6 +58,7 @@ struct vtty {
     int             num;
     int             bold;
     int             sattr;
+    int             sattr2;
     textscreen_t    screen;
     vt_parser_t     parser;
     mutex_t         mtx;
@@ -64,12 +66,12 @@ struct vtty {
 };
 
 enum {
-    VTTY_MAX
+    VTTY_MAX = 3
 };
 
 static void vtty_put(vtty_t *t, char c);
 static void vtty_out(vtty_t *t, const char *c);
-static vtty_t *vttys[VTTY_MAX];
+static vtty_t vttys[VTTY_MAX];
 static vtty_t *current_vtty = NULL;
 static devd_t *consdev;
 
@@ -80,9 +82,8 @@ enum {
     HIDDEN = COLOR_DARKGRAY
 };
 
-#if 0
 // Odwzorowanie kolorów czcionki z sekwencji steruj±cych na kolory VGA
-static int tty2video_fgattr_map[10] = {
+static int tty_fgattr_map[10] = {
     TS_FG(DEFAULT_FG),
     TS_FG(COLOR_RED),
     TS_FG(COLOR_GREEN),
@@ -96,7 +97,7 @@ static int tty2video_fgattr_map[10] = {
 };
 
 // Odwzorowanie kolorów t³a z sekwencji steruj±cych na kolory VGA
-static int tty2video_bgattr_map[10] = {
+static int tty_bgattr_map[10] = {
     TS_BG(DEFAULT_BG),
     TS_BG(COLOR_RED),
     TS_BG(COLOR_GREEN),
@@ -108,7 +109,6 @@ static int tty2video_bgattr_map[10] = {
     TS_BG(COLOR_BLACK),
     TS_BG(COLOR_BLACK)
 };
-#endif
 
 static d_open_t ttyv_open;
 static d_close_t ttyv_close;
@@ -154,33 +154,37 @@ cons_init()
 {
     consdev = devd_create(&conssw, -1, NULL, "system console");
     for (int i = 0; i < VTTY_MAX; i++) {
-        vttys[i] = kmem_alloc(sizeof(vtty_t), KM_SLEEP);
-        textscreen_clone(&vttys[i]->screen);
-        mutex_init(&vttys[i]->mtx, MUTEX_NORMAL);
-        if (i>0)
-            textscreen_clear(&vttys[i]->screen);
-        vttys[i]->dev = devd_create(&ttyvsw, i, vttys[i],  "virtual terminal");
+        mutex_init(&vttys[i].mtx, MUTEX_NORMAL);
+        vttys[i].dev = devd_create(&ttyvsw, i, &vttys[i],  "virtual terminal");
+        vttys[i].sattr = COLOR_BRIGHTGRAY;
+        if (i > 0) {
+            textscreen_clone(&vttys[i].screen);
+            textscreen_clear(&vttys[i].screen);
+        }
     }
-    textscreen_switch(&vttys[0]->screen);
-    current_vtty = vttys[0];
+    textscreen_clone(&vttys[0].screen);
+    textscreen_switch(&vttys[0].screen);
+    current_vtty = &vttys[0];
 }
 
 #define isprint(c) ( 31 < c && c < 127 )
 void
 cons_out(const char *c)
 {
-    if (current_vtty == NULL) {
+    if (current_vtty) {
         vtty_out(current_vtty, c);
     } else {
         for (; *c; c++) {
             if (isprint(*c)) textscreen_put(NULL, *c, COLOR_WHITE);
+            if (*c == '\n') textscreen_next_line(NULL);
         }
     }
 }
 
 /*========================================================================
- * Sterownik pliku urzadzenia.
+ * Plik urz±dzenia: /dev/console
  */
+
 int
 cons_open(devd_t *d, int flags)
 {
@@ -220,7 +224,7 @@ static int vt_parser_put(vt_parser_t *vtprs, char c);
 static void vt_parser_reset(vt_parser_t *vtprs);
 
 /*
- * Sekwencji steruj±cy terminalu VT100.
+ * Sekwencje steruj±cy terminalu VT100.
  * Wszystkie zaczynaj± siê od znaku ESCAPE, klamrami {}
  * s± oznaczone zmienne. Zapis {X=y} oznacza, ¿e parametr
  * X mo¿e nie zostaæ podany, i wtedy przyjmuje domy¶ln± warto¶æ y.
@@ -230,14 +234,9 @@ static void vt_parser_reset(vt_parser_t *vtprs);
  * Dodatkowe oznaczenia:
  *  #   - kod jest rozpoznawany przez sterownik
  *  @   - kod jest rozpoznawany i obs³ugiwany przez sterownik
- * Przyk³adowe kody emulacji VT100:
- *      \033c           resetuje terminal
- *      \033[0m         resetuje atrybuty
- *      \033[31m        ustawia kolor czcionki na czerwony
- *      \033[32;47m     ustaiwa kolor czciocnki na zielony, a t³a na szary
  */
 enum {
-    ESC_RESET,      // c (#)
+    ESC_RESET,      // c (@)
     ESC_LWRAPON,    // [7h 
     ESC_LWRAPOFF,   // [71 
     ESC_G0,         // ( (#)
@@ -248,8 +247,8 @@ enum {
     ESC_CURFORW,    // [{COUNT=1}C (#)
     ESC_CURBACK,    // [{COUNT=1}D (#)
     ESC_CURFORCE,   // [{ROW=-};{COL=0}f (#)
-    ESC_CURSAVE,    // [s (#)
-    ESC_CURLOAD,    // [u (#)
+    ESC_CURSAVE,    // [s (@)
+    ESC_CURLOAD,    // [u (@)
     ESC_CURSAVEA,   // 7 (#)
     ESC_CURLOADA,   // 8 (#)
     ESC_SCROLLE,    // [r (#)
@@ -264,13 +263,13 @@ enum {
     ESC_ERASEL,     // [2K
     ESC_ERASED,     // [J (#)
     ESC_ERASEU,     // [1J (#)
-    ESC_ERASES,     // [2J (#)
+    ESC_ERASES,     // [2J (@)
     ESC_PRINTS,     // [i (#)
     ESC_PRINTL,     // [1i (#)
     ESC_LOGS,       // [4i (#)
-    ESC_LOGE,       // [5i (#)
+    ESC_LOGE,       // [7i (#)
     ESC_DEFKEY,     // [{key};"{string}"p
-    ESC_ATTR,       // [{attr1};...;{attrn}m (#)
+    ESC_ATTR,       // [{attr1};...;{attrn}m (@)
 };
 
 // atrybuty ESC_ATTR
@@ -311,6 +310,7 @@ vtty_out(vtty_t *vt, const char *c)
             } else
             if (code != PARSER_CONT) {
                 vtty_code(vt, code);
+                escape = FALSE;
             }
         } else {
             if (*c == CODE_ESC) {
@@ -328,9 +328,41 @@ void
 vtty_code(vtty_t *vt, int c)
 {
     switch (c) {
+        case ESC_CURSAVE:
+            vt->sattr2 = vt->sattr;
+            break;
+        case ESC_CURLOAD:
+            vt->sattr = vt->sattr2;
+            break;
         case ESC_RESET:
+            textscreen_clear(&vt->screen);
+            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+            break;
+        case ESC_ERASES:
+            textscreen_clear(&vt->screen);
             break;
         case ESC_ATTR:
+            for (int i = 0; i <= vt->parser.attr_i; i++) {
+                int a = vt->parser.attr[i];
+                if (a < 10) {
+                    switch (a) {
+                        case 0:
+                            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+                            break;
+                        case 1:
+                            vt->sattr = TS_BOLD(vt->sattr);
+                            break;
+                    }
+                } else
+                if (30 <= a && a < 40) {
+                    vt->sattr = _TS_BG(vt->sattr) | _TS_BOLD(vt->sattr)
+                        | tty_fgattr_map[a-30];
+                } else
+                if (40 <= a && a < 50) {
+                    vt->sattr = _TS_FG(vt->sattr) | _TS_BOLD(vt->sattr)
+                        | tty_bgattr_map[a-40];
+                }
+            }
             break;
     }
 }
@@ -339,7 +371,14 @@ vtty_code(vtty_t *vt, int c)
 void
 vtty_put(vtty_t *vt, char c)
 {
-    textscreen_put(&vt->screen, c, vt->sattr);
+    if (isprint(c)) {
+        textscreen_put(&vt->screen, c, vt->sattr);
+    } else 
+    if (c == '\n') {
+        textscreen_next_line(&vt->screen);
+    } else {
+        textscreen_put(&vt->screen, '?', vt->sattr);
+    }
 }
 
 enum {
@@ -462,6 +501,7 @@ vt_parser_put(vt_parser_t *vtprs, char c)
             case ';':
                 nexts = P_LONG_ATTR;
                 vtprs->attr_i++;
+                vtprs->attr[vtprs->attr_i] = 0;
                 break;
             case 'm':
                 ret = ESC_ATTR;
@@ -525,7 +565,7 @@ vt_parser_put(vt_parser_t *vtprs, char c)
 }
 
 /*========================================================================
- * Obsluga pliku urzadzenia wirtualnych terminali
+ * Plik urz±dzenia: /dev/ttyvXX
  */
 
 int

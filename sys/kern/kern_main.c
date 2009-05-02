@@ -61,17 +61,19 @@ kmain()
 void
 prepare_root()
 {
-    extern char kern_root_image[];
-    extern size_t kern_root_image_size;
-    DEBUGF("preparing root device on memory disk /dev/md0");
-    md_create(0, kern_root_image, kern_root_image_size);
-    vfs_mountroot();
 }
 
 void
 start_init_process()
-{
-    kprintf("[infinite loop]");
+{   
+    kprintf("VT100 test\n");
+    kprintf("\033[1mPogrubienie\033[0m\n");
+    kprintf("\033[32mKolor\033[0m\n");
+    kprintf("\033[32;44mKolor i tlo\033[0m\n");
+    kprintf("\033[32;1mKolor i pogrubienie\033[0m\n");
+    kprintf("\033[32;1m\033[sZapisanie\033[0m i \033[uOdtwarzanie kursora\033[0m\n");
+    kprintf("[infinite loop]\n");
+    panic("test");
     for (;;);
 }
 
@@ -98,11 +100,11 @@ init_kernel()
 {
     vm_init();
     kmem_init();
-    cons_init();
     thread_init();
     sched_init();
     clock_init();
     dev_init();
+    cons_init();
     bio_init();
     vfs_init();
     ssleep(1);

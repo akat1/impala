@@ -78,7 +78,6 @@ bio_init()
         sizeof(iobuf_t), (kmem_ctor_t*) physbuf_ctor,
         (kmem_dtor_t*)physbuf_dtor);
 
-    DEBUGF("starting biodaemon");
     kthread_create(&biodaemon_thread, biodaemon_main, NULL);
  
 }

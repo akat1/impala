@@ -41,6 +41,9 @@ addr_t mem_set(addr_t s, char c, size_t len);
 addr_t mem_set16(addr_t s, uint16_t c, size_t len);
 size_t str_len(const char *s);
 int str_cmp(const char *a, const char *b);
+char * str_cat(char *str, const char *s);
+char * str_cpy(char *str, const char *s);
+
 int snprintf(char *dst, size_t size, const char *fmt, ...);
 int vsnprintf(char *dst, size_t size, const char *fmt, va_list ap);
 

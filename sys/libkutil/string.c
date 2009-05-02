@@ -125,6 +125,26 @@ str_cmp(const char *a, const char *b)
 
 }
 
+char *
+str_cpy(char *str, const char *s)
+{
+    while (*s) {
+        *str = *s;
+        str++;
+        s++;
+    }
+    *str = 0;
+    return str;
+}
+
+
+char *
+str_cat(char *str, const char *s)
+{
+    while (*str) str++;
+    return str_cpy(str, s);
+}
+
 ///////////////////////////////////////////////////////
 
 

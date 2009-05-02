@@ -161,8 +161,6 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
     int cur_pos = (screen->cursor_y) * TS_WIDTH +
         screen->cursor_x;
 
-
-
     screen->cursor_y = row;
     screen->cursor_x = col;
 
@@ -182,7 +180,7 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
 #endif
         screen->cursor_hack = screen->screen_buf[cur_pos];
         screen->screen_buf[cur_pos] = (screen->cursor_hack) |
-            TS_FG(COLOR_WHITE) | TS_BG(COLOR_BRIGHTGRAY);
+            (TS_FG(COLOR_WHITE) | TS_BG(COLOR_BRIGHTGRAY)) << 8;
     }
 }
 
@@ -207,9 +205,7 @@ textscreen_clear(struct hw_textscreen *screen)
 {
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
-    uint16_t i;
-
-    for ( i = 0 ; i < TS_SIZE ; i++ )
+    for ( int i = 0 ; i < TS_SIZE ; i++ )
         map[i] = COLOR_WHITE<<8;
     textscreen_update_cursor(screen, 0, 0);
 }
@@ -225,11 +221,8 @@ void
 textscreen_draw(struct hw_textscreen *screen)
 {
     current = screen;
-    if (screen->screen_buf) return;
-
     mem_cpy(TS_VIDEO, screen->screen_map,
             TS_SIZE*sizeof(uint16_t));
-
     screen->screen_buf = (uint16_t*) TS_VIDEO;
     textscreen_update_cursor(screen, screen->cursor_x, screen->cursor_y);
 }
@@ -237,9 +230,7 @@ textscreen_draw(struct hw_textscreen *screen)
 void
 textscreen_switch(struct hw_textscreen *screen)
 {
-    screen->screen_buf = current->screen_buf;
-    current->screen_buf = NULL;
-    current = screen;
+    current->screen_buf = 0;
     textscreen_draw(screen);
 }
 
@@ -247,9 +238,7 @@ void
 textscreen_clone(struct hw_textscreen *screen)
 {
     mem_cpy(screen, current, sizeof(*screen));
-    mem_cpy(screen->screen_map, current->screen_map, TS_SIZE*2);
+    mem_cpy(screen->screen_map, current->screen_buf, TS_SIZE*2);
     screen->screen_buf = NULL;
-    screen->cursor_x = 10;
-    screen->cursor_y = 10;
 }
 

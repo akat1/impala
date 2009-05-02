@@ -63,7 +63,7 @@ int
 mdopen(devd_t *d, int flags)
 {
     memdisk_t *md = d->priv;
-    TRACE_IN("d=%p md=%p owner=%p", d, md, md->owner);
+//    TRACE_IN("d=%p md=%p owner=%p", d, md, md->owner);
     if (md->owner) return -EBUSY;
     md->owner = curthread;
     return 0;
@@ -80,14 +80,14 @@ mdclose(devd_t *d)
 int
 mdread(devd_t *d, uio_t *uio)
 {
-    TRACE_IN("dev=%p uio=%p", d,uio);
+//    TRACE_IN("dev=%p uio=%p", d,uio);
     return physio(d, uio, 0);
 }
 
 int
 mdwrite(devd_t *d, uio_t *uio)
 {
-    TRACE_IN("dev=%p uio=%p", d, uio);
+//    TRACE_IN("dev=%p uio=%p", d, uio);
     return physio(d, uio, 0);
 }
 
@@ -100,7 +100,7 @@ mdioctl(devd_t *dev, int cmd, uintptr_t arg)
 int
 mdstrategy(devd_t *dev, iobuf_t *b)
 {
-    TRACE_IN("dev=%p buf=%p", dev, b);
+//    TRACE_IN("dev=%p buf=%p", dev, b);
     memdisk_t *md = dev->priv;
 
     off_t off = b->blkno*512;
@@ -109,12 +109,16 @@ mdstrategy(devd_t *dev, iobuf_t *b)
         b->flags |= IOB_ERROR;
     }
     if (b->oper == BIO_READ) {
+/*
         DEBUGF("memory disk read (%p -> %p) %u bytes",
             md->data+off, b->addr, len);
+*/
         mem_cpy(b->addr, md->data + off, len);
     } else {
+/*
         DEBUGF("memory disk write (%p -> %p) %u bytes",
             b->addr, md->data+off, len);
+*/
         mem_cpy(md->data + off, b->addr, len);
     }
     bio_done(b);
