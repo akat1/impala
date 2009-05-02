@@ -36,6 +36,7 @@
 #include <sys/device.h>
 #include <sys/string.h>
 #include <sys/thread.h>
+#include <sys/errno.h>
 #include <machine/video.h>
 
 enum {
@@ -59,6 +60,7 @@ struct vtty {
     textscreen_t    screen;
     vt_parser_t     parser;
     mutex_t         mtx;
+    devd_t         *dev;
 };
 
 enum {
@@ -69,6 +71,7 @@ static void vtty_put(vtty_t *t, char c);
 static void vtty_out(vtty_t *t, const char *c);
 static vtty_t *vttys[VTTY_MAX];
 static vtty_t *current_vtty = NULL;
+static devd_t *consdev;
 
 // domy¶lne atrybuty
 enum {
@@ -107,27 +110,105 @@ static int tty2video_bgattr_map[10] = {
 };
 #endif
 
+static d_open_t ttyv_open;
+static d_close_t ttyv_close;
+static d_write_t ttyv_write;
+static d_read_t ttyv_read;
+static d_close_t ttyv_close;
+static d_ioctl_t ttyv_ioctl;
+
+static d_open_t cons_open;
+static d_close_t cons_close;
+static d_write_t cons_write;
+static d_read_t cons_read;
+static d_close_t cons_close;
+static d_ioctl_t cons_ioctl;
+
+static devsw_t ttyvsw = {
+    ttyv_open,
+    ttyv_close,
+    ttyv_ioctl,
+    ttyv_read,
+    ttyv_write,
+    nostrategy,
+    "ttyv"
+};
+
+static devsw_t conssw = {
+    cons_open,
+    cons_close,
+    cons_ioctl,
+    cons_read,
+    cons_write,
+    nostrategy,
+    "console"
+};
+
+
 /*========================================================================
  * Konsola
  */
+
 void
 cons_init()
 {
+    consdev = devd_create(&conssw, -1, NULL, "system console");
     for (int i = 0; i < VTTY_MAX; i++) {
         vttys[i] = kmem_alloc(sizeof(vtty_t), KM_SLEEP);
         textscreen_clone(&vttys[i]->screen);
         mutex_init(&vttys[i]->mtx, MUTEX_NORMAL);
         if (i>0)
             textscreen_clear(&vttys[i]->screen);
+        vttys[i]->dev = devd_create(&ttyvsw, i, vttys[i],  "virtual terminal");
     }
     textscreen_switch(&vttys[0]->screen);
     current_vtty = vttys[0];
 }
 
+#define isprint(c) ( 31 < c && c < 127 )
 void
 cons_out(const char *c)
 {
-    vtty_out(current_vtty, c);
+    if (current_vtty == NULL) {
+        vtty_out(current_vtty, c);
+    } else {
+        for (; *c; c++) {
+            if (isprint(*c)) textscreen_put(NULL, *c, COLOR_WHITE);
+        }
+    }
+}
+
+/*========================================================================
+ * Sterownik pliku urzadzenia.
+ */
+int
+cons_open(devd_t *d, int flags)
+{
+    return -ENOTSUP;
+}
+
+int
+cons_read(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
+
+int
+cons_write(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
+
+int
+cons_close(devd_t *d)
+{
+    return -ENOTSUP;
+}
+
+int
+cons_ioctl(devd_t *d, int cmd, uintptr_t param)
+{
+    return -ENOTSUP;
 }
 
 /*========================================================================
@@ -261,16 +342,13 @@ vtty_put(vtty_t *vt, char c)
     textscreen_put(&vt->screen, c, vt->sattr);
 }
 
-
 enum {
     P_DUMMY,
     P_FIRST,         // czekamy na pierwszy znak
-    P_INT,           // uzupe³niamy bufor na INT'a
     P_LONG,          // czekamy na znaczki po '['
     P_LONG_ATTR      // czekamy na atrybut po '['
 
 };
-
 
 void
 vt_parser_reset(vt_parser_t *vtprs)
@@ -279,6 +357,9 @@ vt_parser_reset(vt_parser_t *vtprs)
     vtprs->state = P_FIRST;
 }
 
+/*
+ * Zastanawiam siê czy nie przepisaæ tego na jaki¶ DFA.
+ */
 int
 vt_parser_put(vt_parser_t *vtprs, char c)
 {
@@ -349,6 +430,22 @@ vt_parser_put(vt_parser_t *vtprs, char c)
             case 'f':
             case 'H':
                 ret = ESC_CURHOME;
+                break;
+            case 'A':
+                ret = ESC_CURUP;
+                vtprs->attr[0] = 1;
+                break;
+            case 'B':
+                ret = ESC_CURDOWN;
+                vtprs->attr[0] = 1;
+                break;
+            case 'C':
+                ret = ESC_CURFORW;
+                vtprs->attr[0] = 1;
+                break;
+            case 'D':
+                ret = ESC_CURBACK;
+                vtprs->attr[0] = 1;
                 break;
             default:
                 ret = PARSER_ERROR;
@@ -425,5 +522,39 @@ vt_parser_put(vt_parser_t *vtprs, char c)
     }
     vtprs->state = nexts;
     return ret;
+}
+
+/*========================================================================
+ * Obsluga pliku urzadzenia wirtualnych terminali
+ */
+
+int
+ttyv_open(devd_t *d, int flags)
+{
+    return -ENOTSUP;
+}
+
+int
+ttyv_read(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
+
+int
+ttyv_write(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
+
+int
+ttyv_ioctl(devd_t *d, int cmd, uintptr_t param)
+{
+    return -ENOTSUP;
+}
+
+int
+ttyv_close(devd_t *d)
+{
+    return -ENOTSUP;
 }
 
