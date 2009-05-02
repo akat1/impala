@@ -49,7 +49,7 @@ enum {
 #define TS_FG(attr) (((attr) & 0x7) << 8)
 #define TS_BOLD(attr) (attr | 0x8)
 
-
+typedef struct hw_textscreen textscreen_t;
 struct hw_textscreen {
     uint16_t screen_map[TS_SIZE];
     uint16_t *screen_buf;
