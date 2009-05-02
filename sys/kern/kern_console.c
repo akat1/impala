@@ -35,18 +35,19 @@
 #include <sys/kmem.h>
 #include <sys/device.h>
 #include <sys/string.h>
+#include <sys/thread.h>
 #include <machine/video.h>
 
 enum {
-    PARSER_MAX_BUF = 10
+    PARSER_MAX_ATTRS = 10
 };
 
 typedef struct vt_parser vt_parser_t;
 struct vt_parser {
     int     state;
-    char    buf[PARSER_MAX_BUF];
-    int     bufidx;
-    int     substate;
+    int     value;
+    int     attr[PARSER_MAX_ATTRS];
+    int     attr_i;
 };
 
 
@@ -57,6 +58,7 @@ struct vtty {
     int             sattr;
     textscreen_t    screen;
     vt_parser_t     parser;
+    mutex_t         mtx;
 };
 
 enum {
@@ -114,6 +116,7 @@ cons_init()
     for (int i = 0; i < VTTY_MAX; i++) {
         vttys[i] = kmem_alloc(sizeof(vtty_t), KM_SLEEP);
         textscreen_clone(&vttys[i]->screen);
+        mutex_init(&vttys[i]->mtx, MUTEX_NORMAL);
         if (i>0)
             textscreen_clear(&vttys[i]->screen);
     }
@@ -158,18 +161,18 @@ enum {
     ESC_LWRAPOFF,   // [71 
     ESC_G0,         // ( (#)
     ESC_G1,         // ) (#)
-    ESC_CURHOME,    // [{ROW=0};{COL=0}H 
-    ESC_CURUP,      // [{COUNT=1}A 
-    ESC_CURDOWN,    // [{COUNT=1}B  
-    ESC_CURFORW,    // [{COUNT=1}C
-    ESC_CURBACK,    // [{COUNT=1}D
-    ESC_CURFORCE,   // [{ROW=-};{COL=0}f 
+    ESC_CURHOME,    // [{ROW=0};{COL=0}H (#)
+    ESC_CURUP,      // [{COUNT=1}A (#)
+    ESC_CURDOWN,    // [{COUNT=1}B (#)
+    ESC_CURFORW,    // [{COUNT=1}C (#)
+    ESC_CURBACK,    // [{COUNT=1}D (#)
+    ESC_CURFORCE,   // [{ROW=-};{COL=0}f (#)
     ESC_CURSAVE,    // [s (#)
     ESC_CURLOAD,    // [u (#)
     ESC_CURSAVEA,   // 7 (#)
     ESC_CURLOADA,   // 8 (#)
     ESC_SCROLLE,    // [r (#)
-    ESC_SCROLL,     // [{start};{end}r
+    ESC_SCROLL,     // [{start};{end}r (#)
     ESC_SCROLLD,    // D (#)
     ESC_SCROLLU,    // M (#)
     ESC_TABSET,     // H (#)
@@ -179,14 +182,14 @@ enum {
     ESC_ERASEB,     // [1K
     ESC_ERASEL,     // [2K
     ESC_ERASED,     // [J (#)
-    ESC_ERASEU,     // [1J
-    ESC_ERASES,     // [2J
+    ESC_ERASEU,     // [1J (#)
+    ESC_ERASES,     // [2J (#)
     ESC_PRINTS,     // [i (#)
-    ESC_PRINTL,     // [1i
-    ESC_LOGS,       // [4i
-    ESC_LOGE,       // [5i
+    ESC_PRINTL,     // [1i (#)
+    ESC_LOGS,       // [4i (#)
+    ESC_LOGE,       // [5i (#)
     ESC_DEFKEY,     // [{key};"{string}"p
-    ESC_ATTR,       // [{attr1};...;{attrn}m
+    ESC_ATTR,       // [{attr1};...;{attrn}m (#)
 };
 
 // atrybuty ESC_ATTR
@@ -218,7 +221,7 @@ vtty_out(vtty_t *vt, const char *c)
         CODE_ESC = 033
     };
     bool escape = FALSE;
-
+    mutex_lock(&vt->mtx);
     for (; *c; c++) {
         if (escape) {
             int code = vt_parser_put(&vt->parser, *c); 
@@ -237,6 +240,7 @@ vtty_out(vtty_t *vt, const char *c)
             }
         }
     }
+    mutex_unlock(&vt->mtx);
 }
 
 void
@@ -257,11 +261,13 @@ vtty_put(vtty_t *vt, char c)
     textscreen_put(&vt->screen, c, vt->sattr);
 }
 
+
 enum {
     P_DUMMY,
     P_FIRST,         // czekamy na pierwszy znak
     P_INT,           // uzupe³niamy bufor na INT'a
-    P_LONG           // czekamy na znaczki po '['
+    P_LONG,          // czekamy na znaczki po '['
+    P_LONG_ATTR      // czekamy na atrybut po '['
 
 };
 
@@ -271,7 +277,6 @@ vt_parser_reset(vt_parser_t *vtprs)
 {
     mem_zero(vtprs, sizeof(*vtprs));
     vtprs->state = P_FIRST;
-    
 }
 
 int
@@ -315,8 +320,9 @@ vt_parser_put(vt_parser_t *vtprs, char c)
     } else
     if (vtprs->state == P_LONG) {
         if ( '0' <= c && c <= '9') {
-            vtprs->buf[vtprs->bufidx] = c - '0';
-            vtprs->bufidx++;
+            vtprs->attr[0] = c - '0';
+            vtprs->attr_i = 0;
+            nexts = P_LONG_ATTR;
         } else
         switch (c) {
             case 's':
@@ -340,11 +346,82 @@ vt_parser_put(vt_parser_t *vtprs, char c)
             case 'i':
                 ret = ESC_PRINTS;
                 break;
+            case 'f':
+            case 'H':
+                ret = ESC_CURHOME;
+                break;
+            default:
+                ret = PARSER_ERROR;
+                break;
+        }
+    } else
+    if (vtprs->state == P_LONG_ATTR) {
+        if ('0' <= c && c <= '9') {
+            vtprs->attr[vtprs->attr_i] *= 10;
+            vtprs->attr[vtprs->attr_i] += c - '0';
+            nexts = P_LONG_ATTR;
+        } else
+        switch (c) {
+            case ';':
+                nexts = P_LONG_ATTR;
+                vtprs->attr_i++;
+                break;
+            case 'm':
+                ret = ESC_ATTR;
+                break;
+            case 'f':
+            case 'H':
+                ret = ESC_CURHOME;
+                break;
+            case 'A':
+                ret = ESC_CURUP;
+                break;
+            case 'B':
+                ret = ESC_CURDOWN;
+                break;
+            case 'C':
+                ret = ESC_CURFORW;
+                break;
+            case 'D':
+                ret = ESC_CURBACK;
+                break;
+            case 'r':
+                ret = ESC_SCROLL;
+                break;
+            case 'J':
+                switch (vtprs->attr[0]) {
+                    case 1:
+                        ret = ESC_ERASEU;
+                        break;
+                    case 2:
+                        ret = ESC_ERASES;
+                        break;
+                    default:
+                        ret = PARSER_ERROR;
+                        break;
+                }
+                break;
+            case 'i':
+                switch (vtprs->attr[0]) {
+                    case 1:
+                        ret = ESC_PRINTL;
+                        break;
+                    case 4:
+                        ret = ESC_LOGS;
+                        break;
+                    case 5:
+                        ret = ESC_LOGE;
+                        break;
+                }
+                break;
+            default:
+                ret = PARSER_ERROR;
+                break;
         }
     }
-    if (vtprs->bufidx == PARSER_MAX_BUF) {
-        vtprs->bufidx = 0;
-        return PARSER_ERROR;
+    if (vtprs->attr_i == PARSER_MAX_ATTRS) {
+        vtprs->attr_i = 0;
+        ret = PARSER_ERROR;
     }
     vtprs->state = nexts;
     return ret;
