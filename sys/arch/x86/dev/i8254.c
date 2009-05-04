@@ -46,7 +46,7 @@ void
 i8254_init()
 {
     i8254_set_freq(HZ);
-    irq_install_handler(IRQ0, i8254_irq0);
+    irq_install_handler(IRQ0, i8254_irq0, IPL_CLOCK);
 }
 
 bool

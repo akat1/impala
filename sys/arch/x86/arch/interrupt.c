@@ -52,11 +52,14 @@ static void print_frame(const char *s, interrupt_frame *f);
 
 irq_handler_f *irq_handlers[MAX_IRQ];
 
+
 void
-irq_install_handler(int irq, irq_handler_f *f)
+irq_install_handler(int irq, irq_handler_f *f, int ipl)
 {
-    if (irq <= MAX_IRQ) {
+    if (irq < MAX_IRQ) {
          irq_handlers[irq] = f;
+//         assert(ipl < MAX_IPL)
+         i8259a_set_irq_priority(irq, ipl);
          i8259a_irq_enable(irq);
     }
 }
@@ -64,7 +67,7 @@ irq_install_handler(int irq, irq_handler_f *f)
 void
 irq_free_handler(int irq)
 {
-    if (irq <= MAX_IRQ) {
+    if (irq < MAX_IRQ) {
          i8259a_irq_disable(irq);
          irq_handlers[irq] = NULL;
     }
@@ -81,7 +84,7 @@ void
 ISR_irq(interrupt_frame frame)
 {
     bool eoi = FALSE;
-    if (frame.f_n <= MAX_IRQ) {
+    if (frame.f_n < MAX_IRQ) {
         eoi = irq_handlers[frame.f_n]();
     }
     if (!eoi) i8259a_send_eoi();
@@ -149,4 +152,64 @@ print_frame(const char *name, interrupt_frame *f)
     kprintf("   %%esp = %p ", f->f_esp);
     kprintf("   %%ebp = %p\n", f->f_ebp);
 }
+
+int splhigh()
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    i8259a_raiseipl(IPL_HIGH);
+    irq_enable();
+    return opl;
+}
+
+int splclock()
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    if(opl < IPL_CLOCK)
+        i8259a_raiseipl(IPL_CLOCK);
+    irq_enable();
+    return opl;
+}
+
+int spldisk()
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    if(opl < IPL_DISK)
+        i8259a_raiseipl(IPL_DISK);
+    irq_enable();
+    return opl;
+}
+
+int spltty()
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    if(opl < IPL_TTY)
+        i8259a_raiseipl(IPL_TTY);
+    irq_enable();
+    return opl;
+}
+
+int spl0()
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    i8259a_loweripl(IPL_NONE);
+    irq_enable();
+    return opl;
+}
+
+void splx(int pl)
+{
+    irq_disable();
+    int opl=i8259a_getipl();
+    if(opl > pl)
+        i8259a_loweripl(pl);
+    else
+        i8259a_raiseipl(pl);
+    irq_enable();
+}
+
 

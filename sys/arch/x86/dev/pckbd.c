@@ -93,7 +93,7 @@ set_modifiers()
 void
 pckbd_init()
 {
-    irq_install_handler(IRQ1, i8042_irq1);
+    irq_install_handler(IRQ1, i8042_irq1, IPL_TTY);
 }
 
 bool

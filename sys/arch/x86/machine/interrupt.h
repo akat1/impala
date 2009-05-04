@@ -59,6 +59,16 @@ enum {
     // ...
 };
 
+enum {
+    IPL_NONE=0,
+    IPL_0=0,
+    IPL_TTY=1,
+    IPL_NET=2,
+    IPL_DISK=3,
+    IPL_CLOCK=4,
+    IPL_HIGH=5,
+    MAX_IPL
+};
 
 typedef bool irq_handler_f(void);
 
@@ -90,10 +100,18 @@ struct interrupt_frame {
     uint32_t f_ss;
 } __packed;
 
+
 #ifdef __KERNEL
-void irq_install_handler(int irq, irq_handler_f *h);
+void irq_install_handler(int irq, irq_handler_f *h, int ipl);
 void irq_free_handler(int irq);
 void irq_done(void);
+
+int splhigh(void);
+int splclock(void);
+int spldisk(void);
+int spltty(void);
+int spl0(void);
+void splx(int pl);
 
 
 /// Wy³±cza obs³ugê przerwañ

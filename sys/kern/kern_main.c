@@ -42,6 +42,7 @@
 #include <sys/kmem.h>
 #include <sys/vfs.h>
 #include <dev/md/md.h>
+#include <machine/interrupt.h>
 
 void kmain(void);
 static void print_welcome(void);
@@ -73,8 +74,10 @@ start_init_process()
     kprintf("\033[32;1mKolor i pogrubienie\033[0m\n");
     kprintf("\033[32;1m\033[sZapisanie\033[0m i \033[uOdtwarzanie kursora\033[0m\n");
     kprintf("[infinite loop]\n");
-    panic("test");
+    //panic("test");
+    int x=spltty();
     for (;;);
+    splx(x);
 }
 
 void

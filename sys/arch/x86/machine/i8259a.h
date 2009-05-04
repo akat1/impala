@@ -62,6 +62,10 @@ void i8259a_send_eoi(void);
 void i8259a_reset_mask(void);
 void i8259a_irq_enable(int n);
 void i8259a_irq_disable(int n);
+void i8259a_set_irq_priority(int n, int ipl);
+void i8259a_raiseipl(int pl);
+void i8259a_loweripl(int pl);
+int  i8259a_getipl(void);
 
 #endif
 
