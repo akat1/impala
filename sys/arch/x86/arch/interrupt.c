@@ -172,12 +172,12 @@ int splclock()
     return opl;
 }
 
-int spldisk()
+int splbio()
 {
     irq_disable();
     int opl=i8259a_getipl();
-    if(opl < IPL_DISK)
-        i8259a_raiseipl(IPL_DISK);
+    if(opl < IPL_BIO)
+        i8259a_raiseipl(IPL_BIO);
     irq_enable();
     return opl;
 }

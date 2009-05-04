@@ -36,7 +36,6 @@
 
 enum {
     INTERRUPT_VECTOR = 0x20,
-    MAX_IRQ = 23,
     INTRPT_SCHED = 0x70,
     INTRPT_SYSCALL = 0x80
 };
@@ -55,8 +54,10 @@ enum {
     IRQ10,
     IRQ11,
     IRQ12,
-    IRQ13
-    // ...
+    IRQ13,
+    IRQ14,
+    IRQ15,
+    MAX_IRQ
 };
 
 enum {
@@ -64,7 +65,7 @@ enum {
     IPL_0=0,
     IPL_TTY=1,
     IPL_NET=2,
-    IPL_DISK=3,
+    IPL_BIO=3,
     IPL_CLOCK=4,
     IPL_HIGH=5,
     MAX_IPL
@@ -108,7 +109,7 @@ void irq_done(void);
 
 int splhigh(void);
 int splclock(void);
-int spldisk(void);
+int splbio(void);
 int spltty(void);
 int spl0(void);
 void splx(int pl);
