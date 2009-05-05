@@ -75,9 +75,9 @@ start_init_process()
     kprintf("\033[32;1m\033[sZapisanie\033[0m i \033[uOdtwarzanie kursora\033[0m\n");
     kprintf("[infinite loop]\n");
     //panic("test");
-    int x=spltty();
-    for (;;);
-    splx(x);
+
+    for (;;)
+        ssleep(60); // jak kto¶ ma lepszy pomys³ co tu daæ, to niech to zmieni
 }
 
 void
