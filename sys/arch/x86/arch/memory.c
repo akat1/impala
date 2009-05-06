@@ -31,7 +31,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/kprintf.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_pmap.h>
 #include <sys/vm/vm_lpool.h>

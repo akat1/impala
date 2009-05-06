@@ -34,7 +34,6 @@
 #include <sys/vm.h>
 #include <sys/vm/vm_trap.h>
 #include <sys/thread.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
 
 

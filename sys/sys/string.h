@@ -47,6 +47,10 @@ char * str_cpy(char *str, const char *s);
 int snprintf(char *dst, size_t size, const char *fmt, ...);
 int vsnprintf(char *dst, size_t size, const char *fmt, va_list ap);
 
+enum {
+    SPRINTF_BUFSIZE = 512
+};
+
 
 #define mem_zero(s, l) mem_set(s, 0, l)
 

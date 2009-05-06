@@ -34,7 +34,6 @@
 #include <sys/utils.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_lpool.h>
-#include <sys/kprintf.h>
 
 /// Wewnêtrzna pula (na stronie).
 typedef struct _pool _pool_t;

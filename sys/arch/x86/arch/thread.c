@@ -32,10 +32,10 @@
 
 #include <sys/types.h>
 #include <sys/thread.h>
-#include <machine/cpu.h>
-#include <sys/libkutil.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
+#include <sys/string.h>
+#include <machine/cpu.h>
+
 
 /**
  * Inicjalizuje kontekst.

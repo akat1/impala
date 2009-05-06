@@ -41,6 +41,7 @@ extern int key_down[256];
 void pckbd_init(void);
 void set_kbd_repeat_rate(uint rate);
 void set_kbd_delay(uint delay);
+char pckbd_get_char(void);
 
 #endif
 #endif

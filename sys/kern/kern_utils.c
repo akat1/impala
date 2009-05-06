@@ -30,8 +30,8 @@
  * $Id$
  */
 
+#include <sys/types.h>
 #include <sys/utils.h>
-#include <sys/kprintf.h>
 #include <sys/string.h>
 #include <sys/console.h>
 #include <machine/interrupt.h>
@@ -40,6 +40,8 @@
  * Funkcja wywo³ywana w sytuacjach awaryjnych.
  * Zatrzymuje system, wy¶wietlaj±c podany komunikat.
  */
+
+bool SYSTEM_DEBUG = FALSE;
 
 void
 panic(const char *msg, ...)
@@ -71,8 +73,6 @@ vkprintf(const char *fmt, va_list ap)
         KPRINTF_BUF = 512
     };
     char big_buf[KPRINTF_BUF];
-    char *ptr = big_buf; // str_cpy(big_buf, "\033[s");
-    vsnprintf(ptr, KPRINTF_BUF, fmt, ap);
-//    str_cat(big_buf,"\033[u");
-    cons_out(big_buf);
+    vsnprintf(big_buf, KPRINTF_BUF, fmt, ap);
+    cons_msg(big_buf);
 }

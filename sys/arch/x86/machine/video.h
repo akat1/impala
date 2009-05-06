@@ -77,6 +77,7 @@ void textscreen_clear(struct hw_textscreen *screen);
 void textscreen_draw(struct hw_textscreen *screen);
 void textscreen_switch(struct hw_textscreen *screen);
 void textscreen_clone(struct hw_textscreen *screen);
+void textscreen_get_cursor(struct hw_textscreen *screen, int *cx, int *cy);
 
 enum {
     COLOR_BLACK,

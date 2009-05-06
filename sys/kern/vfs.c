@@ -34,7 +34,6 @@
 #include <sys/thread.h>
 #include <sys/vfs.h>
 #include <sys/kmem.h>
-#include <sys/kprintf.h>
 #include <sys/string.h>
 #include <sys/utils.h>
 #include <sys/fcntl.h>

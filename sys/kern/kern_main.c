@@ -30,7 +30,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/kprintf.h>
 #include <sys/kthread.h>
 #include <sys/clock.h>
 #include <sys/sched.h>
@@ -43,6 +42,7 @@
 #include <sys/vfs.h>
 #include <dev/md/md.h>
 #include <machine/interrupt.h>
+#include <machine/pckbd.h>
 
 void kmain(void);
 static void print_welcome(void);
@@ -67,17 +67,14 @@ prepare_root()
 void
 start_init_process()
 {   
-    kprintf("VT100 test\n");
-    kprintf("\033[1mPogrubienie\033[0m\n");
-    kprintf("\033[32mKolor\033[0m\n");
-    kprintf("\033[32;44mKolor i tlo\033[0m\n");
-    kprintf("\033[32;1mKolor i pogrubienie\033[0m\n");
-    kprintf("\033[32;1m\033[sZapisanie\033[0m i \033[uOdtwarzanie kursora\033[0m\n");
+    kprintf("VT100\033[Atest\n");
     kprintf("[infinite loop]\n");
-    //panic("test");
-
-    for (;;)
-        ssleep(60); // jak kto¶ ma lepszy pomys³ co tu daæ, to niech to zmieni
+    char c;
+    while (TRUE) {
+        while ( (c = pckbd_get_char()) == -1 );
+        kprintf("char: %c\n", c);
+    }
+    for (;;);
 }
 
 void
@@ -107,9 +104,9 @@ init_kernel()
     sched_init();
     clock_init();
     dev_init();
-    cons_init();
     bio_init();
     vfs_init();
+    cons_init();
     ssleep(1);
     kprintf("kernel initialized\n");
 }

@@ -34,20 +34,34 @@
 #define __SYS_UTILS_H
 
 #ifdef __KERNEL
-/**
- * Funkcja wywo³ywana w sytuacjach awaryjnych.
- * Zatrzymuje system, wy¶wietlaj±c podany komunikat.
- */
-
 void panic(const char* msg, ...);
-
+extern bool SYSTEM_DEBUG;
 
 #define KASSERT(x) if(!(x)) \
-    panic("Assertion failed\n expr: %s\n in file: %s:%u\n in function: %s", #x,  __FILE__, __LINE__,  __func__);
+    panic("Assertion failed\n expr: %s\n in file: %s:%u\n in function: %s",\
+        #x , __FILE__, __LINE__,  __func__);
 
 
 #define MIN(a,b) ( (a) < (b) )? (a) : (b)
 #define MAX(a,b) ( (a) < (b) )? (b) : (a)
+
+void kprintf(const char *fmt, ...);
+void vkprintf(const char *fmt, va_list ap);
+
+#define TRACE_IN(fmt, args...)\
+    do { \
+        if (!SYSTEM_DEBUG) break;\
+        kprintf("@ %s (", __func__);\
+        kprintf(fmt, ## args);\
+        kprintf(")\n");\
+        for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
+    } while (0);
+
+#define DEBUGF(fmt, a...) do {\
+    kprintf("%s: " fmt "\n", __FILE__, ## a );\
+    } while (0)
+
+#define TRACE_IN0() TRACE_IN("");
 
 
 #endif

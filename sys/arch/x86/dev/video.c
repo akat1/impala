@@ -31,10 +31,10 @@
  */
 
 #include <sys/types.h>
-#include <sys/libkutil.h>
+#include <sys/utils.h>
+#include <sys/string.h>
 #include <machine/video.h>
 #include <machine/io.h>
-#include <sys/kprintf.h>
 static int8_t forced_attr = 0;
 
 static struct hw_textscreen  defscreen;
@@ -157,6 +157,10 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
 {
     screen = SELECT_SCREEN(screen);
 
+    if (col < 0) col = 0;
+    if (row < 0) row = 0;
+    if (col > TS_WIDTH-1) col = TS_WIDTH-1;
+    if (row > TS_HEIGHT-1) col = TS_HEIGHT-1;
     // zapamietujemy poprzednia pozycje
     int cur_pos = (screen->cursor_y) * TS_WIDTH +
         screen->cursor_x;
@@ -182,6 +186,14 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
         screen->screen_buf[cur_pos] = (screen->cursor_hack) |
             (TS_FG(COLOR_WHITE) | TS_BG(COLOR_BRIGHTGRAY)) << 8;
     }
+}
+
+void
+textscreen_get_cursor(struct hw_textscreen *screen, int *cx, int *cy)
+{
+    screen = SELECT_SCREEN(screen);
+    *cx = screen->cursor_x;   
+    *cy = screen->cursor_y;
 }
 
 void

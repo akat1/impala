@@ -41,8 +41,22 @@
 #include <machine/video.h>
 
 enum {
+    DEFAULT_FG = COLOR_BRIGHTGRAY,
+    DEFAULT_BG = COLOR_BLACK,
+    HIDDEN = COLOR_DARKGRAY,
+    CONSOLE_ATTR= COLOR_WHITE
+};
+
+#define CONSOLE_ATTR_CODE "\033[s\033[1;30;40m"
+
+enum {
     PARSER_MAX_ATTRS = 10
 };
+
+enum {
+    VTTY_MAX = 3
+};
+
 
 typedef struct vt_parser vt_parser_t;
 struct vt_parser {
@@ -59,55 +73,26 @@ struct vtty {
     int             bold;
     int             sattr;
     int             sattr2;
+    int             cx;
+    int             cy;
     textscreen_t    screen;
     vt_parser_t     parser;
     mutex_t         mtx;
     devd_t         *dev;
 };
 
-enum {
-    VTTY_MAX = 3
-};
 
 static void vtty_put(vtty_t *t, char c);
 static void vtty_out(vtty_t *t, const char *c);
-static vtty_t vttys[VTTY_MAX];
-static vtty_t *current_vtty = NULL;
-static devd_t *consdev;
+static int vt_parser_put(vt_parser_t *vtprs, char c);
+static void vt_parser_reset(vt_parser_t *vtprs);
+static void vtty_code(vtty_t *vt, int c);
 
-// domy¶lne atrybuty
+
+
 enum {
-    DEFAULT_FG = COLOR_BRIGHTGRAY,
-    DEFAULT_BG = COLOR_BLACK,
-    HIDDEN = COLOR_DARKGRAY
-};
-
-// Odwzorowanie kolorów czcionki z sekwencji steruj±cych na kolory VGA
-static int tty_fgattr_map[10] = {
-    TS_FG(DEFAULT_FG),
-    TS_FG(COLOR_RED),
-    TS_FG(COLOR_GREEN),
-    TS_FG(COLOR_BROWN),
-    TS_FG(COLOR_BLUE),
-    TS_FG(COLOR_MAGENTA),
-    TS_FG(COLOR_CYAN),
-    TS_FG(COLOR_BRIGHTGRAY),
-    TS_FG(COLOR_BRIGHTGRAY),
-    TS_FG(COLOR_BRIGHTGRAY)
-};
-
-// Odwzorowanie kolorów t³a z sekwencji steruj±cych na kolory VGA
-static int tty_bgattr_map[10] = {
-    TS_BG(DEFAULT_BG),
-    TS_BG(COLOR_RED),
-    TS_BG(COLOR_GREEN),
-    TS_BG(COLOR_BROWN),
-    TS_BG(COLOR_BLUE),
-    TS_BG(COLOR_MAGENTA),
-    TS_BG(COLOR_CYAN),
-    TS_BG(COLOR_BRIGHTGRAY),
-    TS_BG(COLOR_BLACK),
-    TS_BG(COLOR_BLACK)
+    PARSER_ERROR    = -1,
+    PARSER_CONT     = -2,
 };
 
 static d_open_t ttyv_open;
@@ -145,6 +130,39 @@ static devsw_t conssw = {
 };
 
 
+static vtty_t vttys[VTTY_MAX];
+static vtty_t *current_vtty = NULL;
+static devd_t *consdev;
+
+// Odwzorowanie kolorów czcionki z sekwencji steruj±cych na kolory VGA
+static int tty_fgattr_map[10] = {
+    TS_FG(DEFAULT_FG),
+    TS_FG(COLOR_RED),
+    TS_FG(COLOR_GREEN),
+    TS_FG(COLOR_BROWN),
+    TS_FG(COLOR_BLUE),
+    TS_FG(COLOR_MAGENTA),
+    TS_FG(COLOR_CYAN),
+    TS_FG(COLOR_BRIGHTGRAY),
+    TS_FG(COLOR_BRIGHTGRAY),
+    TS_FG(COLOR_BRIGHTGRAY)
+};
+
+// Odwzorowanie kolorów t³a z sekwencji steruj±cych na kolory VGA
+static int tty_bgattr_map[10] = {
+    TS_BG(DEFAULT_BG),
+    TS_BG(COLOR_RED),
+    TS_BG(COLOR_GREEN),
+    TS_BG(COLOR_BROWN),
+    TS_BG(COLOR_BLUE),
+    TS_BG(COLOR_MAGENTA),
+    TS_BG(COLOR_CYAN),
+    TS_BG(COLOR_BRIGHTGRAY),
+    TS_BG(COLOR_BLACK),
+    TS_BG(COLOR_BLACK)
+};
+
+
 /*========================================================================
  * Konsola
  */
@@ -152,10 +170,10 @@ static devsw_t conssw = {
 void
 cons_init()
 {
-    consdev = devd_create(&conssw, -1, NULL, "system console");
+    consdev = devd_create(&conssw, -1, NULL);
     for (int i = 0; i < VTTY_MAX; i++) {
         mutex_init(&vttys[i].mtx, MUTEX_NORMAL);
-        vttys[i].dev = devd_create(&ttyvsw, i, &vttys[i],  "virtual terminal");
+        vttys[i].dev = devd_create(&ttyvsw, i, &vttys[i]);
         vttys[i].sattr = COLOR_BRIGHTGRAY;
         if (i > 0) {
             textscreen_clone(&vttys[i].screen);
@@ -169,17 +187,197 @@ cons_init()
 
 #define isprint(c) ( 31 < c && c < 127 )
 void
-cons_out(const char *c)
+cons_output(int t, const char *c)
 {
     if (current_vtty) {
-        vtty_out(current_vtty, c);
+        char buf[SPRINTF_BUFSIZE];
+        char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
+        ptr = str_cat(ptr, c);
+        str_cat(ptr, "\033[u");
+        vtty_out(current_vtty, buf);
     } else {
+        // Je¿eli obs³uga terminali nie jest jeszcze zainicjalizowana
+        // to nadajemy rêcznie na ekran
         for (; *c; c++) {
-            if (isprint(*c)) textscreen_put(NULL, *c, COLOR_WHITE);
+            if (isprint(*c)) textscreen_put(NULL, *c, CONSOLE_ATTR);
             if (*c == '\n') textscreen_next_line(NULL);
         }
     }
 }
+
+
+/*========================================================================
+ * Obs³uga wirtualnych terminali w emulacji VT100
+ */
+
+/*
+ * Sekwencje steruj±cy terminalu VT100.
+ * Wszystkie zaczynaj± siê od znaku ESCAPE, klamrami {}
+ * s± oznaczone zmienne. Zapis {X=y} oznacza, ¿e parametr
+ * X mo¿e nie zostaæ podany, i wtedy przyjmuje domy¶ln± warto¶æ y.
+ * Opis kodów dostêpny na stronie (kody poni¿ej s± w tej samej kolejno¶æi)
+ *      http://www.termsys.demon.co.uk/vtansi.htm
+ *
+ * Dodatkowe oznaczenia:
+ *  #   - kod jest rozpoznawany przez sterownik
+ *  @   - kod jest rozpoznawany i obs³ugiwany przez sterownik
+ */
+enum {
+    ESC_RESET,      // c (@)
+    ESC_LWRAPON,    // [7h 
+    ESC_LWRAPOFF,   // [71 
+    ESC_G0,         // ( (#)
+    ESC_G1,         // ) (#)
+    ESC_CURHOME,    // [{ROW=0};{COL=0}H (@)
+    ESC_CURUP,      // [{COUNT=1}A (@)
+    ESC_CURDOWN,    // [{COUNT=1}B (@)
+    ESC_CURFORW,    // [{COUNT=1}C (@)
+    ESC_CURBACK,    // [{COUNT=1}D (@)
+    ESC_CURFORCE,   // [{ROW=0};{COL=0}f (@)
+    ESC_CURSAVE,    // [s (@)
+    ESC_CURLOAD,    // [u (@)
+    ESC_CURSAVEA,   // 7 (@)
+    ESC_CURLOADA,   // 8 (@)
+    ESC_SCROLLE,    // [r (#)
+    ESC_SCROLL,     // [{start};{end}r (#)
+    ESC_SCROLLD,    // D (#)
+    ESC_SCROLLU,    // M (#)
+    ESC_TABSET,     // H (#)
+    ESC_TABCLR,     // [g (#)
+    ESC_TABCLRA,    // [3g
+    ESC_ERASEE,     // [K (#)
+    ESC_ERASEB,     // [1K
+    ESC_ERASEL,     // [2K
+    ESC_ERASED,     // [J (#)
+    ESC_ERASEU,     // [1J (#)
+    ESC_ERASES,     // [2J (@)
+    ESC_PRINTS,     // [i (#)
+    ESC_PRINTL,     // [1i (#)
+    ESC_LOGS,       // [4i (#)
+    ESC_LOGE,       // [7i (#)
+    ESC_DEFKEY,     // [{key};"{string}"p
+    ESC_ATTR,       // [{attr1};...;{attrn}m (@)
+};
+
+
+void
+vtty_out(vtty_t *vt, const char *c)
+{
+    enum {
+        CODE_ESC = 033
+    };
+    bool escape = FALSE;
+    mutex_lock(&vt->mtx);
+    for (; *c; c++) {
+        if (escape) {
+            int code = vt_parser_put(&vt->parser, *c); 
+            if (code == PARSER_ERROR) {
+                escape = FALSE;
+            } else
+            if (code != PARSER_CONT) {
+                vtty_code(vt, code);
+                escape = FALSE;
+            }
+        } else {
+            if (*c == CODE_ESC) {
+                escape = TRUE;
+                vt_parser_reset(&vt->parser);
+            } else {
+                vtty_put(vt, *c);
+            }
+        }
+    }
+    mutex_unlock(&vt->mtx);
+}
+
+void
+vtty_put(vtty_t *vt, char c)
+{
+    if (isprint(c)) {
+        textscreen_put(&vt->screen, c, vt->sattr);
+    } else
+    if (c == '\n') {
+        textscreen_next_line(&vt->screen);
+    } else {
+        textscreen_put(&vt->screen, '?', vt->sattr);
+    }
+}
+
+void
+vtty_code(vtty_t *vt, int c)
+{
+    int cx,cy;
+    textscreen_get_cursor(&vt->screen, &cx, &cy);
+    switch (c) {
+        case ESC_CURHOME:
+            cx = vt->parser.attr[0];
+            cy = vt->parser.attr[1];
+            textscreen_update_cursor(&vt->screen, cx, cy);
+            break;
+        case ESC_CURSAVEA:
+            vt->cx = cx;
+            vt->cy = cy;
+        case ESC_CURSAVE:
+            vt->sattr2 = vt->sattr;
+            break;
+        case ESC_CURLOADA:
+            textscreen_update_cursor(&vt->screen, vt->cx, vt->cy);
+        case ESC_CURLOAD:
+            vt->sattr = vt->sattr2;
+            break;
+        case ESC_CURUP:
+            cy -= vt->parser.attr[0];
+            textscreen_update_cursor(&vt->screen, cx, cy);
+            break;
+        case ESC_CURDOWN:
+            cy += vt->parser.attr[0];
+            textscreen_update_cursor(&vt->screen, cx, cy);
+        case ESC_CURFORW:
+            cx += vt->parser.attr[0];
+            textscreen_update_cursor(&vt->screen, cx, cy);
+        case ESC_CURBACK:
+            cx -= vt->parser.attr[0];
+            textscreen_update_cursor(&vt->screen, cx, cy);
+        case ESC_RESET:
+            textscreen_clear(&vt->screen);
+            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+            break;
+        case ESC_ERASES:
+            textscreen_clear(&vt->screen);
+            break;
+        case ESC_ATTR:
+            for (int i = 0; i <= vt->parser.attr_i; i++) {
+                int a = vt->parser.attr[i];
+                if (a < 10) {
+                    switch (a) {
+                        case 0:
+                            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+                            break;
+                        case 1:
+                            vt->sattr = TS_BOLD(vt->sattr);
+                            break;
+                        case 5: // mruganie
+                            break;
+                        case 7:
+                            vt->sattr = TS_BG(_TS_FG(vt->sattr)) |
+                                TS_FG(_TS_BG(vt->sattr));
+                            break;
+                    }
+                } else
+                if (30 <= a && a < 40) {
+                    vt->sattr = _TS_BG(vt->sattr) | _TS_BOLD(vt->sattr)
+                        | tty_fgattr_map[a-30];
+                } else
+                if (40 <= a && a < 50) {
+                    vt->sattr = _TS_FG(vt->sattr) | _TS_BOLD(vt->sattr)
+                        | tty_bgattr_map[a-40];
+                }
+            }
+            break;
+    }
+}
+
+
 
 /*========================================================================
  * Plik urz±dzenia: /dev/console
@@ -216,170 +414,44 @@ cons_ioctl(devd_t *d, int cmd, uintptr_t param)
 }
 
 /*========================================================================
- * Obs³uga wirtualnych terminali w emulacji VT100
+ * Plik urz±dzenia: /dev/ttyvXX
  */
 
+int
+ttyv_open(devd_t *d, int flags)
+{
+    return -ENOTSUP;
+}
 
-static int vt_parser_put(vt_parser_t *vtprs, char c);
-static void vt_parser_reset(vt_parser_t *vtprs);
+int
+ttyv_read(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
 
-/*
- * Sekwencje steruj±cy terminalu VT100.
- * Wszystkie zaczynaj± siê od znaku ESCAPE, klamrami {}
- * s± oznaczone zmienne. Zapis {X=y} oznacza, ¿e parametr
- * X mo¿e nie zostaæ podany, i wtedy przyjmuje domy¶ln± warto¶æ y.
- * Opis kodów dostêpny na stronie (kody poni¿ej s± w tej samej kolejno¶æi)
- *      http://www.termsys.demon.co.uk/vtansi.htm
- *
- * Dodatkowe oznaczenia:
- *  #   - kod jest rozpoznawany przez sterownik
- *  @   - kod jest rozpoznawany i obs³ugiwany przez sterownik
- */
-enum {
-    ESC_RESET,      // c (@)
-    ESC_LWRAPON,    // [7h 
-    ESC_LWRAPOFF,   // [71 
-    ESC_G0,         // ( (#)
-    ESC_G1,         // ) (#)
-    ESC_CURHOME,    // [{ROW=0};{COL=0}H (#)
-    ESC_CURUP,      // [{COUNT=1}A (#)
-    ESC_CURDOWN,    // [{COUNT=1}B (#)
-    ESC_CURFORW,    // [{COUNT=1}C (#)
-    ESC_CURBACK,    // [{COUNT=1}D (#)
-    ESC_CURFORCE,   // [{ROW=-};{COL=0}f (#)
-    ESC_CURSAVE,    // [s (@)
-    ESC_CURLOAD,    // [u (@)
-    ESC_CURSAVEA,   // 7 (#)
-    ESC_CURLOADA,   // 8 (#)
-    ESC_SCROLLE,    // [r (#)
-    ESC_SCROLL,     // [{start};{end}r (#)
-    ESC_SCROLLD,    // D (#)
-    ESC_SCROLLU,    // M (#)
-    ESC_TABSET,     // H (#)
-    ESC_TABCLR,     // [g (#)
-    ESC_TABCLRA,    // [3g
-    ESC_ERASEE,     // [K (#)
-    ESC_ERASEB,     // [1K
-    ESC_ERASEL,     // [2K
-    ESC_ERASED,     // [J (#)
-    ESC_ERASEU,     // [1J (#)
-    ESC_ERASES,     // [2J (@)
-    ESC_PRINTS,     // [i (#)
-    ESC_PRINTL,     // [1i (#)
-    ESC_LOGS,       // [4i (#)
-    ESC_LOGE,       // [7i (#)
-    ESC_DEFKEY,     // [{key};"{string}"p
-    ESC_ATTR,       // [{attr1};...;{attrn}m (@)
-};
+int
+ttyv_write(devd_t *d, uio_t *u)
+{
+    return -ENOTSUP;
+}
 
-// atrybuty ESC_ATTR
-enum {
-    ATTR_RESET      = 0,
-    ATTR_BOLD       = 1,
-    ATTR_DIM        = 2,
-    ATTR_UNDER      = 4,
-    ATTR_BLINK      = 5,
-    ATTR_REVERSE    = 7,
-    ATTR_HIDDEN     = 8
-};
+int
+ttyv_ioctl(devd_t *d, int cmd, uintptr_t param)
+{
+    return -ENOTSUP;
+}
 
-enum {
-    PARSER_ERROR    = -1,
-    PARSER_CONT     = -2,
-};
+int
+ttyv_close(devd_t *d)
+{
+    return -ENOTSUP;
+}
+
 
 /*========================================================================
  * Implementacja parsera skanuj±cego sekwencje steruj±ce VT100
  */
 
-static void vtty_code(vtty_t *vt, int c);
-
-void
-vtty_out(vtty_t *vt, const char *c)
-{
-    enum {
-        CODE_ESC = 033
-    };
-    bool escape = FALSE;
-    mutex_lock(&vt->mtx);
-    for (; *c; c++) {
-        if (escape) {
-            int code = vt_parser_put(&vt->parser, *c); 
-            if (code == PARSER_ERROR) {
-                escape = FALSE;
-            } else
-            if (code != PARSER_CONT) {
-                vtty_code(vt, code);
-                escape = FALSE;
-            }
-        } else {
-            if (*c == CODE_ESC) {
-                escape = TRUE;
-                vt_parser_reset(&vt->parser);
-            } else {
-                vtty_put(vt, *c);
-            }
-        }
-    }
-    mutex_unlock(&vt->mtx);
-}
-
-void
-vtty_code(vtty_t *vt, int c)
-{
-    switch (c) {
-        case ESC_CURSAVE:
-            vt->sattr2 = vt->sattr;
-            break;
-        case ESC_CURLOAD:
-            vt->sattr = vt->sattr2;
-            break;
-        case ESC_RESET:
-            textscreen_clear(&vt->screen);
-            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
-            break;
-        case ESC_ERASES:
-            textscreen_clear(&vt->screen);
-            break;
-        case ESC_ATTR:
-            for (int i = 0; i <= vt->parser.attr_i; i++) {
-                int a = vt->parser.attr[i];
-                if (a < 10) {
-                    switch (a) {
-                        case 0:
-                            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
-                            break;
-                        case 1:
-                            vt->sattr = TS_BOLD(vt->sattr);
-                            break;
-                    }
-                } else
-                if (30 <= a && a < 40) {
-                    vt->sattr = _TS_BG(vt->sattr) | _TS_BOLD(vt->sattr)
-                        | tty_fgattr_map[a-30];
-                } else
-                if (40 <= a && a < 50) {
-                    vt->sattr = _TS_FG(vt->sattr) | _TS_BOLD(vt->sattr)
-                        | tty_bgattr_map[a-40];
-                }
-            }
-            break;
-    }
-}
-
-
-void
-vtty_put(vtty_t *vt, char c)
-{
-    if (isprint(c)) {
-        textscreen_put(&vt->screen, c, vt->sattr);
-    } else 
-    if (c == '\n') {
-        textscreen_next_line(&vt->screen);
-    } else {
-        textscreen_put(&vt->screen, '?', vt->sattr);
-    }
-}
 
 enum {
     P_DUMMY,
@@ -563,38 +635,3 @@ vt_parser_put(vt_parser_t *vtprs, char c)
     vtprs->state = nexts;
     return ret;
 }
-
-/*========================================================================
- * Plik urz±dzenia: /dev/ttyvXX
- */
-
-int
-ttyv_open(devd_t *d, int flags)
-{
-    return -ENOTSUP;
-}
-
-int
-ttyv_read(devd_t *d, uio_t *u)
-{
-    return -ENOTSUP;
-}
-
-int
-ttyv_write(devd_t *d, uio_t *u)
-{
-    return -ENOTSUP;
-}
-
-int
-ttyv_ioctl(devd_t *d, int cmd, uintptr_t param)
-{
-    return -ENOTSUP;
-}
-
-int
-ttyv_close(devd_t *d)
-{
-    return -ENOTSUP;
-}
-

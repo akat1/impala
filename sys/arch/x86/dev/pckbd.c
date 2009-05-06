@@ -31,7 +31,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
 #include <machine/interrupt.h>
 #include <machine/pckbd.h>
@@ -46,7 +45,8 @@ enum {
 };
 
 enum {
-    MAX_SC_LINEAR = 88
+    MAX_SC_LINEAR = 88,
+    PCKBD_BUFSIZE = 20,
 };
 
 //static int bh_in_queue=0;
@@ -57,11 +57,50 @@ char key_modifiers;     /// wykaz naci¶niêtych klawiszy-modyfikatorów
 static bool i8042_irq1(void);
 static void __enqueue_keycode(int sc);
 static void set_modifiers(void);
+static void kq_insert(char c);
+
+char key_queue[PCKBD_BUFSIZE];
+#define IDX(i) ((i)%PCKBD_BUFSIZE)
+int key_b, key_s;
+
+
+void
+kq_insert(char c)
+{
+    if (key_s == PCKBD_BUFSIZE) return;
+    key_queue[IDX(key_b + key_s)] = c;
+    key_s++;
+}
+
+
+char
+pckbd_get_char()
+{
+    
+    char c;
+
+    SYSTEM_DEBUG = 1;   
+    int s = splhigh ();
+    TRACE_IN("inside");
+    splx(s);
+    SYSTEM_DEBUG = 0;
+    return -1;
+    if (key_s == 0) {
+        c = -1;
+    } else {
+        c = key_queue[key_b];
+        key_b++;
+        key_s--;
+    }
+    splx(s);
+    return c;
+}
 
 void
 __enqueue_keycode(int kc)
 {
     char c = '?';
+    // sprawdzamy czy mamy miejsce w kolejce.
     bool shift=(key_modifiers & (KM_LSHIFT | KM_RSHIFT))>0;
     if(kc<MAX_SC_LINEAR) {
         c = keymap_normal[kc];
@@ -71,13 +110,8 @@ __enqueue_keycode(int kc)
         if(shift)
             c = keymap_shift[kc];
     }
-
-    if(c=='Q')
-        panic("OH NOOOO..... you pressed Q .... u r stupitt!!!\n");
-    KASSERT(c!='W');
-    
-    //kprintf("%c", c);
-    //put_to_console_queue(c);  //czy co¶ ko³o - jak kto¶ potrzebuje
+    if (0)
+    kq_insert(c);
 }
 
 void
@@ -94,6 +128,8 @@ void
 pckbd_init()
 {
     irq_install_handler(IRQ1, i8042_irq1, IPL_TTY);
+    key_b = 0;
+    key_s = 0;
 }
 
 bool
@@ -101,9 +137,12 @@ i8042_irq1()
 {
     static uint8_t last_scancode = 0;
     uint8_t scancode = io_in8(PCKBD_DATA_PORT);
+    return FALSE;
+
     uint8_t up_action = scancode & 0x80;
     uint8_t keycode = 0;
-    
+
+
     if(last_scancode == 0 && (scancode == 0xe0 || scancode == 0xe1)) {
         last_scancode = scancode;
         irq_done();
@@ -121,7 +160,7 @@ i8042_irq1()
     } else if(last_scancode == 0xe0) {
         last_scancode = 0;
         if(e0_kcodes[scancode] == 0) {
-            kprintf("WARNING: Unknown keyboard scancode 0xe0%x\n", scancode);
+//             kprintf("WARNING: Unknown keyboard scancode 0xe0%x\n", scancode);
         } else {
             keycode = e0_kcodes[scancode];
         }
@@ -146,10 +185,6 @@ i8042_irq1()
         }
         set_modifiers();
     }
-/*    static tq_task_t bh_task = {0, &__enqueue_keycode, 0};
-    if(!bh_in_queue)
-        tq_enqueue(&bh_task);
-    bh_in_queue = 1;*/
      
     irq_done();
     return TRUE;

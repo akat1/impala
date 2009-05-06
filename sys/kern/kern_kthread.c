@@ -34,7 +34,7 @@
 #include <sys/thread.h>
 #include <sys/kthread.h>
 #include <sys/sched.h>
-#include <sys/kprintf.h>
+#include <sys/utils.h>
 
 /// Wej¶ciowa procedura dla obs³ugi w±tku.
 static void __kthr(kthread_t *arg);

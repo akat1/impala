@@ -31,10 +31,10 @@
  */
 
 #include <sys/types.h>
-#include <sys/kprintf.h>
-#include <sys/libkutil.h>
+#include <sys/utils.h>
 #include <sys/thread.h>
 #include <sys/vm.h>
+#include <sys/string.h>
 
 #include <machine/descriptor.h>
 #include <machine/tss.h>
@@ -43,9 +43,7 @@
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
 #include <machine/pckbd.h>
-#include <sys/libkutil.h>
-#include <sys/thread.h>
-#include <machine/memory.h>
+#include <machine/video.h>
 
 void init_x86(void);
 void _unhnd_intrpt(void);

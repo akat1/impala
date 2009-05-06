@@ -32,7 +32,6 @@
 
 #include <sys/types.h>
 #include <sys/clock.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
 #include <machine/interrupt.h>
 #include <machine/i8254.h>

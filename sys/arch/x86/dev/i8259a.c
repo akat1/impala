@@ -31,10 +31,10 @@
  */
 
 #include <sys/types.h>
+#include <sys/utils.h>
 #include <machine/i8259a.h>
 #include <machine/io.h>
 #include <machine/interrupt.h>
-#include <sys/kprintf.h>
 
 enum {
     PIC_M = 0x20,
@@ -109,6 +109,7 @@ i8259a_init()
 void
 i8259a_update_masks()
 {
+    TRACE_IN0();
     //nasz cel: ustawiæ picX_pl_mask
     //we¼my liniowy porz±dek; przerwanie o poziomie l powinno byæ w³±czone
     //na wszystkich poziomach mniejszych od l
@@ -134,16 +135,20 @@ i8259a_update_masks()
 void
 i8259a_reset_mask()
 {
+    TRACE_IN("enter");
      //for(int i=0; i<MAX_IPL; i++)
        // kprintf("maski (ipl=%u): %08b %08b\n", i, pic1_pl_mask[i], pic2_pl_mask[i]);
     io_out8(PIC_M+1, pic1_pl_mask[CPL]);
     io_out8(PIC_S+1, pic2_pl_mask[CPL]);
+    TRACE_IN("leave");
+
 }
 
 /// Przed w³±czeniem przerwania powinno mieæ ono ustawiony priorytet
 void
 i8259a_irq_enable(int n)
 {
+    TRACE_IN0();
     if (n < 0x8)
         pic1_en_mask |= 1 << n;
     else
@@ -155,6 +160,7 @@ i8259a_irq_enable(int n)
 void
 i8259a_irq_disable(int n)
 {
+    TRACE_IN0();
     if (n < 0x8)
         pic1_en_mask &= ~(1 << n);
     else
@@ -166,21 +172,25 @@ i8259a_irq_disable(int n)
 void
 i8259a_set_irq_priority(int irq, int ipl)
 {
+    TRACE_IN0();
     irq_priority[irq]=ipl;
 }
 
 void
 i8259a_raiseipl(int pl)
 {
+    TRACE_IN("enter");
     if(CPL==pl)
         return;
     CPL=pl;
-    i8259a_reset_mask();    
+    i8259a_reset_mask();
+    TRACE_IN("leave");
 }
 
 void
 i8259a_loweripl(int pl)
 {
+    TRACE_IN0();
     CPL=pl;
     i8259a_reset_mask();
     //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
@@ -190,6 +200,7 @@ i8259a_loweripl(int pl)
 int
 i8259a_getipl()
 {
+    TRACE_IN0();
     return CPL;
 }
 

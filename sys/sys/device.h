@@ -74,7 +74,7 @@ struct devd {
     list_node_t  L_devs;
 };
 
-devd_t *devd_create(devsw_t *dsw, int unit, void *pr, const char *fmt, ...);
+devd_t *devd_create(devsw_t *dsw, int unit, void *pr);
 void devd_destroy(devd_t *dev);
 void dev_init(void);
 devd_t *devd_find(const char *name);
@@ -84,6 +84,7 @@ int devd_close(devd_t *d);
 int devd_read(devd_t *d, uio_t *u);
 int devd_write(devd_t *d, uio_t *u);
 int devd_strategy(devd_t *d, iobuf_t *bp);
+void devd_printf(devd_t *d, const char *fmt, ...);
 
 #endif
 

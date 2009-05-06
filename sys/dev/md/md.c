@@ -36,7 +36,6 @@
 #include <sys/kmem.h>
 #include <sys/errno.h>
 #include <sys/thread.h>
-#include <sys/kprintf.h>
 #include <sys/string.h>
 #include <sys/bio.h>
 #include <dev/md/md.h>
@@ -180,8 +179,7 @@ md_create(int unit, void *data, size_t size)
         _str_type = "foreign";
     }
     list_insert_in_order(&memdisks, md, (list_less_f*) md_less);
-    md->devd = devd_create(&md_devsw, md->unit, md, 
-        "memory disk (%s) <%p+%u>",  _str_type, md->data, md->size);
+    md->devd = devd_create(&md_devsw, md->unit, md);
     md->owner = NULL;       
     return 0;
 }

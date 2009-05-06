@@ -31,7 +31,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/kprintf.h>
 #include <sys/thread.h>
 #include <sys/syscall.h>
 #include <sys/utils.h>
@@ -153,16 +152,22 @@ print_frame(const char *name, interrupt_frame *f)
     kprintf("   %%ebp = %p\n", f->f_ebp);
 }
 
-int splhigh()
+
+
+int
+splhigh()
 {
     irq_disable();
+    TRACE_IN("enter");
     int opl=i8259a_getipl();
     i8259a_raiseipl(IPL_HIGH);
+    TRACE_IN("leave");
     irq_enable();
     return opl;
 }
 
-int splclock()
+int
+splclock()
 {
     irq_disable();
     int opl=i8259a_getipl();
@@ -172,7 +177,8 @@ int splclock()
     return opl;
 }
 
-int splbio()
+int
+splbio()
 {
     irq_disable();
     int opl=i8259a_getipl();
@@ -182,7 +188,8 @@ int splbio()
     return opl;
 }
 
-int spltty()
+int
+spltty()
 {
     irq_disable();
     int opl=i8259a_getipl();
@@ -192,7 +199,8 @@ int spltty()
     return opl;
 }
 
-int spl0()
+int
+spl0()
 {
     irq_disable();
     int opl=i8259a_getipl();
@@ -201,7 +209,8 @@ int spl0()
     return opl;
 }
 
-void splx(int pl)
+void
+splx(int pl)
 {
     irq_disable();
     int opl=i8259a_getipl();

@@ -69,6 +69,7 @@ typedef struct uio uio_t;
 typedef struct filed filed_t;
 typedef struct iobuf iobuf_t;
 typedef struct vnode vnode_t;
+typedef struct consdevsw consdevsw_t;
 #endif
 
 #include <sys/list.h>

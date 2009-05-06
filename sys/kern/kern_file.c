@@ -33,7 +33,7 @@
 #include <sys/types.h>
 #include <sys/fcntl.h>
 #include <sys/device.h>
-#include <sys/kprintf.h>
+#include <sys/utils.h>
 #include <sys/uio.h>
 #include <sys/kmem.h>
 

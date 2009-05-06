@@ -32,10 +32,9 @@
 
 #include <sys/types.h>
 #include <sys/thread.h>
-#include <sys/libkutil.h>
 #include <sys/sched.h>
 #include <sys/utils.h>
-#include <sys/kprintf.h>
+#include <sys/string.h>
 
 thread_t *curthread;
 thread_t *thread_idle;

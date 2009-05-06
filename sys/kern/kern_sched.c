@@ -34,7 +34,6 @@
 #include <sys/thread.h>
 #include <sys/sched.h>
 #include <sys/clock.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.

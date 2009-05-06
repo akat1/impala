@@ -176,6 +176,7 @@ snprintf(char *dst, size_t size, const char *fmt, ...)
 int
 vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
 {
+    char *dstorg = dst;
     int i;
     int left = size - 1;
     char buf[INTERNAL_BUF];
@@ -274,7 +275,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
     }
     *dst = 0;
 
-    return i;
+    return ((uintptr_t)dst-(uintptr_t)dstorg);
 }
 
 int

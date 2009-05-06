@@ -43,7 +43,6 @@
 #include <sys/vm/vm_lpool.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
-#include <sys/kprintf.h>
 
 /*
  * U¿ywana strategia do przydzia³u buforów opiera siê na przydziale ostatnio
@@ -92,7 +91,8 @@ enum {
     /// Ograniczenie na elementy grupowane na stronie.
     LARGE_SIZE  = PAGE_SIZE/4,
     /// Pomocnik przy rozpoznawaniu uszkodzonia struktur
-    KMEM_BUFCTL_MAGIC = 0xdeadbabe
+    KMEM_BUFCTL_MAGIC = 0xdeadbabe,
+    LARGE_BUFS_PREALLOC  = 10,
 };
 
 
@@ -141,6 +141,7 @@ static mem_bucket_t buckets[] = {
     {1 << 10, "kmem_alloc bucket [1024]", NULL},
     {1 << 11, "kmem_alloc bucket [2048]", NULL},
     {1 << 12, "kmem_alloc bucket [4096]", NULL},
+    {1 << 13, "kmem_alloc bucket [8192]", NULL},
     {0, NULL, NULL}
 };
 
@@ -344,7 +345,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
             data += cache->elem_size + sizeof(kmem_bufctl_t);
         }
     } else {
-        panic("Allocating SLABS for LARGE not supported");
+        panic("Large not supported");
     }
 }
 

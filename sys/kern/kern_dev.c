@@ -36,7 +36,6 @@
 #include <sys/errno.h>
 #include <sys/utils.h>
 #include <sys/string.h>
-#include <sys/kprintf.h>
 #include <dev/md/md.h>
 
 static list_t devs;
@@ -59,7 +58,7 @@ dev_init()
 static bool find_this_dev(const devd_t *d, const char *name);
 
 devd_t *
-devd_create(devsw_t *dsw, int unit, void *priv, const char *fmt, ...)
+devd_create(devsw_t *dsw, int unit, void *priv)
 {
     devd_t *dev = kmem_alloc( sizeof(devd_t), KM_SLEEP );   
     if (unit == -1) {
@@ -67,15 +66,23 @@ devd_create(devsw_t *dsw, int unit, void *priv, const char *fmt, ...)
     } else {
         snprintf(dev->name, DEVD_MAXNAME, "%s%u", dsw->name, unit);
     }
-    va_list ap;
-    VA_START(ap, fmt);
-    vsnprintf(dev->descr, DEVD_MAXDESCR, fmt, ap);
     dev->devsw = dsw;
     dev->priv = priv;
     list_insert_tail(&devs, dev);
-    kprintf("%s: %s\n", dev->name, dev->descr);
     return dev;
 }
+
+void
+devd_printf(devd_t *d, const char *fmt, ...)
+{
+    char buf[SPRINTF_BUFSIZE];
+    va_list ap;
+    VA_START(ap, fmt);
+    vsnprintf(buf, SPRINTF_BUFSIZE, fmt, ap);
+    VA_END(ap);
+    kprintf("%s: %s\n", d->name, buf);
+}
+
 
 devd_t *
 devd_find(const char *name)

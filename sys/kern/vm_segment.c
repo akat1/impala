@@ -34,7 +34,6 @@
 #include <sys/vm.h>
 #include <sys/vm/vm_lpool.h>
 #include <sys/vm/vm_internal.h>
-#include <sys/kprintf.h>
 #include <sys/utils.h>
 
 static vm_addr_t _vm_segment_expand(vm_segment_t *vseg, vm_size_t s);

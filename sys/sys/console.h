@@ -34,8 +34,17 @@
 #define __SYS_CONSOLE_H
 #ifdef __KERNEL
 
+enum {
+    CONS_ERROR,
+    CONS_MSG
+};
+
 void cons_init(void);
-void cons_out(const char *str);
+void cons_output(int msgt, const char *str);
+
+#define cons_msg(msg) cons_output(CONS_MSG, msg)
+#define cons_err(msg) cons_output(CONS_ERROR, msg)
+
 
 #endif
 #endif

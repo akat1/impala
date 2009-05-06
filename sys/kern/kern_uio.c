@@ -32,7 +32,6 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <sys/kprintf.h>
 #include <sys/string.h>
 #include <sys/utils.h>
 
