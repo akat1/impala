@@ -5,10 +5,15 @@
 #  $Id$
 #  
 
-.set text_selector, 0x08
-.set data_selector, 0x10
+.equ text_selector, 0x08
+.equ data_selector, 0x10
 
+.equ utext_selector, 0x18
+.equ udata_selector, 0x20
+.equ SEL_DPL3, 0x3
 
+.global 
+.global cpu_user_mode
 .global cpu_gdt_load
 .global cpu_ldt_load
 .global cpu_idt_load
@@ -36,6 +41,23 @@ offset32    CTX_ESP,    0
 offset32    CTX_EBP,    1
 offset32    CTX_EFLAGS, 2
 offset32    CTX_CR3,    3
+
+cpu_user_mode:
+    movl %esp, %eax
+    pushl $udata_selector|SEL_DPL3
+    pushl %eax
+    pushf
+    pushl $utext_selector|SEL_DPL3
+    pushl $1f
+    iret
+1:
+    mov $udata_selector|SEL_DPL3, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %ss
+    mov %ax, %gs
+    ret
 
 thread_context_load:
     enter $0, $0
@@ -66,31 +88,31 @@ thread_context_store:
 
 cpu_gdt_load:
     enter $0,$0
-	movl 8(%ebp), %eax
-	lgdt (%eax)
-	movl $data_selector, %eax
-	movl %eax, %ds
-	movl %eax, %es
-	movl %eax, %fs
-	movl %eax, %gs
+    movl 8(%ebp), %eax
+    lgdt (%eax)
+    movl $data_selector, %eax
+    movl %eax, %ds
+    movl %eax, %es
+    movl %eax, %fs
+    movl %eax, %gs
     movl %eax, %ss
-	ljmp $text_selector, $gdt_load.1
-	movl %eax, %cr0
+    ljmp $text_selector, $gdt_load.1
+    movl %eax, %cr0
     or $0x1, %eax
     movl %cr0, %eax
 gdt_load.1:
-	leave
-	ret
+    leave
+    ret
 
 cpu_ldt_load:
-	movl 4(%esp), %eax
-	lldt (%eax)
-	ret
+    movl 4(%esp), %eax
+    lldt (%eax)
+    ret
 
 cpu_idt_load:
     movl 4(%esp), %eax
-	lidt (%eax)
-	ret
+    lidt (%eax)
+    ret
 
 cpu_tr_load:
     ltr 4(%esp)
@@ -158,7 +180,7 @@ far_copy_in:
     movw 12(%ebp), %ds  # src sel
     movl 16(%ebp), %esi # src
     movl 20(%ebp), %ecx # len
-    rep movsb           # skopiuje ECX bajtow z DS:ESI do ES:EDI
+    rep movsb       # skopiuje ECX bajtow z DS:ESI do ES:EDI
     popl %esi
     popl %edi
     popl %ds

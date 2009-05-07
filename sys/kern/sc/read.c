@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,30 +29,37 @@
  * $Id$
  */
 
-#ifndef __SYS_SCHED_H
-#define __SYS_SCHED_H
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/utils.h>
+#include <sys/string.h>
+#include <sys/syscall.h>
+#include <machine/video.h>
 
-#ifdef __KERNEL
-extern int sched_quantum;
+typedef struct sc_read_args sc_read_args;
 
-void sched_init(void);
-void sched_action(void);
-void sched_yield(void);
-void sched_exit(thread_t *thr);
-
-void sched_insert(thread_t *thr);
-void sched_remove(thread_t *thr);
-
-void sched_unlock_and_wait(mutex_t *m);
-void sched_wait(void);
-void sched_wakeup(thread_t *n);
-
-void msleep(uint mtime);
-void ssleep(uint stime);
-
-#endif
+struct sc_read_args {
+    int fd;
+    addr_t *data;
+    size_t size;
+};
 
 
+errno_t sc_read(thread_t *p, syscall_result_t *r, sc_read_args *args);
 
-#endif
+errno_t
+sc_read(thread_t *p, syscall_result_t *r, sc_read_args *args)
+{
+    char buf[100];
+    mem_cpy(buf, "to jest test to jest test to jest test to jest test to jest test", 20);
+
+    if ( args->size > sizeof(buf) ) 
+        args->size = sizeof(buf);
+
+    mem_cpy(args->data, buf, args->size);
+
+    r->result = args->size;    
+
+    return EOK;
+}
 

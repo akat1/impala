@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -32,19 +31,44 @@
 
 #include <sys/types.h>
 #include <sys/thread.h>
+#include <sys/proc.h>
 #include <sys/sched.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
 
 typedef struct sc_exit_args sc_exit_args;
+
 struct sc_exit_args {
-	int error_code;
+    int error;
 };
 
-void sc_exit(thread_t *p, sc_exit_args *args);
+errno_t sc_exit(thread_t *p, syscall_result_t *r, sc_exit_args *args);
 
-
-void
-sc_exit(thread_t *p, sc_exit_args *args)
+errno_t
+sc_exit(thread_t *t, syscall_result_t *r, sc_exit_args *args)
 {
-    sched_exit();
+    proc_t *p = t->thr_proc;
+    thread_t *t_iter;
+
+    // ustawiamy status procesu 
+    p->status = args->error;
+    r->result = args->error;
+
+    t_iter = (thread_t *)list_head(&p->p_threads);
+
+    #define NEXTTHR() (thread_t *)list_next(&p->p_threads, t_iter)
+    {
+        t_iter->thr_flags = THREAD_ZOMBIE;
+        if ( t_iter != curthread )
+            sched_exit(t_iter);
+    } while ((t_iter = NEXTTHR()))
+    #undef NEXTTHR
+
+    // proces zombie 
+    p->p_flags = PROC_ZOMBIE;
+    
+    sched_exit(curthread);
+
+    return EOK;
 }
 

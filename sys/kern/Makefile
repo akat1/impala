@@ -16,6 +16,7 @@ SRCS=\
 	kern_kthread.c\
 	kern_main.c\
 	kern_mem.c\
+	kern_proc.c\
 	kern_sched.c\
 	kern_syscall.c\
 	kern_thread.c\
@@ -27,8 +28,24 @@ SRCS=\
 	vm_lpool.c\
 	vm_segment.c\
 	vm_trap.c\
-	sc/exit.c\
-	sc/write.c\
+	sc/close.c\
+        sc/execve.c\
+        sc/exit.c\
+        sc/fork.c\
+        sc/getpid.c\
+        sc/getppid.c\
+        sc/getuid.c\
+        sc/kill.c\
+        sc/lseek.c\
+        sc/nanosleep.c\
+        sc/open.c\
+        sc/pause.c\
+        sc/read.c\
+        sc/setuid.c\
+        sc/sigaction.c\
+        sc/wait.c\
+        sc/waitpid.c\
+        sc/write.c\
 	tmp_rootimage.c\
 
 

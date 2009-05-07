@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,30 +29,61 @@
  * $Id$
  */
 
-#ifndef __SYS_SCHED_H
-#define __SYS_SCHED_H
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/utils.h>
+#include <sys/string.h>
+#include <sys/syscall.h>
+#include <machine/video.h>
 
-#ifdef __KERNEL
-extern int sched_quantum;
+typedef struct sc_wait_args sc_wait_args;
 
-void sched_init(void);
-void sched_action(void);
-void sched_yield(void);
-void sched_exit(thread_t *thr);
-
-void sched_insert(thread_t *thr);
-void sched_remove(thread_t *thr);
-
-void sched_unlock_and_wait(mutex_t *m);
-void sched_wait(void);
-void sched_wakeup(thread_t *n);
-
-void msleep(uint mtime);
-void ssleep(uint stime);
-
-#endif
+struct sc_wait_args {
+    int *status;
+};
 
 
+errno_t sc_wait(thread_t *p, syscall_result_t *r, sc_wait_args *args);
 
-#endif
+errno_t
+sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
+{
+    proc_t *p = t->thr_proc;
+    proc_t *p_iter;
+
+    /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
+    while(1)
+    {
+        p_iter = (proc_t *)list_head(&(p->p_children));
+
+        /* proces nie ma dzieci - czekamy na sygnal */
+        if ( p_iter == NULL )
+            for(;;);
+
+        #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
+        {
+            if ( proc_is_zombie(p_iter) )
+            {
+                // odlaczamy dziecko
+                list_remove(&(p->p_children), p_iter);
+                // zwracamy jego pid jako wynik
+                r->result = p_iter->p_pid;
+
+                // zwracamy status procesu
+                if ( args->status != NULL ) 
+                    *(args->status) = p_iter->status;
+
+                // niszczymy dziecko
+                proc_destroy(p_iter);
+                
+                return EOK;
+            }
+        } while ((p_iter = NEXTPROC()));
+        #undef NEXTPROC
+    }
+
+    // Nieosiagalny
+    return EOK;
+}
 

@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,30 +29,60 @@
  * $Id$
  */
 
-#ifndef __SYS_SCHED_H
-#define __SYS_SCHED_H
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/utils.h>
+#include <sys/string.h>
+#include <sys/syscall.h>
+#include <sys/proc.h>
 
-#ifdef __KERNEL
-extern int sched_quantum;
+typedef struct sc_waitpid_args sc_waitpid_args;
 
-void sched_init(void);
-void sched_action(void);
-void sched_yield(void);
-void sched_exit(thread_t *thr);
+struct sc_waitpid_args {
+    pid_t   pid;
+    int     *status;
+    int     options;
 
-void sched_insert(thread_t *thr);
-void sched_remove(thread_t *thr);
-
-void sched_unlock_and_wait(mutex_t *m);
-void sched_wait(void);
-void sched_wakeup(thread_t *n);
-
-void msleep(uint mtime);
-void ssleep(uint stime);
-
-#endif
+};
 
 
+errno_t sc_waitpid(thread_t *p, syscall_result_t *r, sc_waitpid_args *args);
 
-#endif
+/** XXX: Narazie tylko per pid */
+
+errno_t
+sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
+{
+    proc_t *to_trace = proc_find(args->pid);
+    proc_t *p = t->thr_proc;
+
+    if ( to_trace == NULL || (!proc_is_parent(t->thr_proc, to_trace)))
+    {
+        r->result = -1;
+        return ECHILD;
+    }
+
+    while(1)
+    {
+        if ( proc_is_zombie(to_trace) )
+        {
+                // odlaczamy dziecko
+                list_remove(&(p->p_children), to_trace);
+                // zwracamy jego pid jako wynik
+                r->result = to_trace->p_pid;
+
+                // zwracamy status procesu
+                if ( args->status != NULL ) 
+                    *(args->status) = to_trace->status;
+
+                // niszczymy dziecko
+                proc_destroy(to_trace);
+                
+                return EOK;
+        }
+    }
+
+    return EOK;
+}
 

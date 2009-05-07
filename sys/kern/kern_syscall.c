@@ -33,27 +33,56 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/syscall.h>
+#include <sys/utils.h>
 
-void sc_exit(thread_t *proc, va_list ap);
-void sc_write(thread_t *prov, va_list ap);
-
-typedef void sc_handler_f(thread_t *proc, va_list ap);
+errno_t sc_execve(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_exit(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_fork(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_getpid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_getppid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_getuid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_kill(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_lseek(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_nanosleep(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_open(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_pause(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_read(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_setuid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_sigaction(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_wait(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_waitpid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_write(thread_t *proc, syscall_result_t *r, va_list ap);
 
 static sc_handler_f *syscall_table[] = {
+    sc_execve,
     sc_exit,
-    sc_exit,
-    sc_exit,
-    sc_write,
-    sc_exit,
-    sc_exit,
-    sc_exit
+    sc_fork,
+    sc_getpid,
+    sc_getppid,
+    sc_getuid,
+    sc_kill,
+    sc_lseek,
+    sc_nanosleep,
+    sc_open,
+    sc_pause,
+    sc_read,
+    sc_setuid,
+    sc_sigaction,
+    sc_wait,
+    sc_waitpid,
+    sc_write
 };
 
 void
-syscall(thread_t *thr, int n, va_list ap)
+syscall(thread_t *thr, int n, syscall_result_t *r, va_list ap)
 {
+
+    kprintf("syscall %u!\n", n);
+
     if (n < SYSCALL_MAX) {
-        syscall_table[n](thr, ap);
-    }
+        r->errno = syscall_table[n](thr, r, ap);
+    } 
+    
+    return;
 }
 

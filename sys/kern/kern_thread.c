@@ -96,6 +96,15 @@ thread_create(int priv, addr_t entry, addr_t arg)
     }
 }
 
+void
+thread_destroy(thread_t *t)
+{
+    kprintf("NISZCZE: %p\n",t);
+    return;
+}
+
+
+
 /*=============================================================================
  * Obsluga mutexow. (FIFO).
  */

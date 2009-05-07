@@ -90,14 +90,16 @@ init_x86()
     setgdt(SEL_UCODE, 0x0, 0xffff, ucode, attr);
     setgdt(SEL_UDATA, 0x0, 0xffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
-    p_tss0.tss_io = sizeof(p_tss0)-1;
+    p_tss0.tss_io = 0;
+
+    p_tss0.tss_ss0 = 0x10;
 
     mem_zero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;
     p_gdtr.limit = sizeof(p_gdt) -1;
     cpu_gdt_load(&p_gdtr);
 
-    cpu_tr_load(SEL_MK(SEL_TSS0, SEL_DPL0));
+    cpu_tr_load(SEL_MK(SEL_TSS0, SEL_DPL3));
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
@@ -113,8 +115,8 @@ init_x86()
         setidt(i+0x20, SEL_MK(SEL_CODE, SEL_DPL0), irq_table[i], intrpt_attr);
     }
 
-    setidt(INTRPT_SYSCALL, SEL_MK(SEL_CODE, SEL_DPL3),
-        (uintptr_t)_intrpt_syscall, intrpt_attr);
+    setidt(INTRPT_SYSCALL, SEL_MK(SEL_CODE, SEL_DPL0),
+        (uintptr_t)_intrpt_syscall, intrpt_attr | GATE_DPL3);
 
     mem_zero(&p_idtr, sizeof(p_idtr));
     p_idtr.base = &p_idt;
@@ -125,7 +127,15 @@ init_x86()
     pckbd_init();
     vm_low_init();
     video_init();
-    __asm__("sti");
+    irq_enable();
+}
+
+void setesp0(void *a);
+
+void
+setesp0(void *a)
+{
+     p_tss0.tss_esp0 = (uint32_t)a;
 }
 
 

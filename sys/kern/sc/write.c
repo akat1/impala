@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -32,6 +31,9 @@
 
 #include <sys/types.h>
 #include <sys/thread.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
+#include <machine/video.h>
 
 typedef struct sc_write_args sc_write_args;
 
@@ -42,9 +44,18 @@ struct sc_write_args {
 };
 
 
-void sc_write(thread_t *p, sc_write_args *args);
+errno_t sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args);
 
-void
-sc_write(thread_t *p, sc_write_args *args)
+errno_t
+sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args)
 {
+//    char buf[1024];
+//    kprintf("TID(%u) - WRITE(%u,%p,%u)nx", p->thr_tid, args->fd, args->data, args->size);
+//    if (args->size > 1024) args->size = 1024;
+//    mem_cpy(buf, args->data, args->size);
+//    buf[args->size-1] = 0;
+    textscreen_enable_forced_attr(COLOR_BRIGHTGRAY);
+    kprintf("%s\n", args->data);
+    textscreen_disable_forced_attr();
+    return EOK;
 }

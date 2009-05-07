@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,30 +29,48 @@
  * $Id$
  */
 
-#ifndef __SYS_SCHED_H
-#define __SYS_SCHED_H
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/sched.h>
+#include <sys/time.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
 
-#ifdef __KERNEL
-extern int sched_quantum;
+typedef struct sc_nanosleep_args sc_nanosleep_args;
 
-void sched_init(void);
-void sched_action(void);
-void sched_yield(void);
-void sched_exit(thread_t *thr);
+struct sc_nanosleep_args
+{
+    timespec_t *req;
+    timespec_t *rem;
+};
 
-void sched_insert(thread_t *thr);
-void sched_remove(thread_t *thr);
+errno_t sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args );
 
-void sched_unlock_and_wait(mutex_t *m);
-void sched_wait(void);
-void sched_wakeup(thread_t *n);
+/**
+ * XXX: todo sygna³y i rem
+ */
 
-void msleep(uint mtime);
-void ssleep(uint stime);
+errno_t
+sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
+{
+    /* sprawdzamy parametry */
+    if ( (args->req->tv_sec < 0) || 
+         !(args->req->tv_nsec >= 0 && args->req->tv_nsec <= 999999999) )
+    {
+        r->result = -1;
+        return EINVAL;
+    }
 
-#endif
+    p->thr_flags |= THREAD_SLEEP;
 
+    if ( args->req->tv_sec > 0 )
+        ssleep(args->req->tv_sec);
+    if ( args->req->tv_nsec > 0 )
+        msleep(args->req->tv_nsec); // XXX: mili
 
+    p->thr_flags ^= THREAD_SLEEP;
 
-#endif
+    return EOK;
+}
 

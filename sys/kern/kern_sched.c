@@ -233,12 +233,13 @@ msleep(uint mtime)
 
 /// Niszczy aktualny w±tek.
 void
-sched_exit()
+sched_exit(thread_t *t)
 {
     spinlock_lock(&sprq);
-    list_remove(&run_queue, curthread);
-    curthread->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
-    curthread = NULL;
+    list_remove(&run_queue, t);
+    t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
+    if ( t == curthread )
+        curthread = NULL;
     __sched_yield();
 }
 

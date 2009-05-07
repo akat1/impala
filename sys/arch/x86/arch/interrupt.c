@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/syscall.h>
+#include <sys/string.h>
 #include <sys/utils.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_trap.h>
@@ -93,10 +94,19 @@ void
 ISR_syscall(interrupt_frame frame)
 {
     va_list ap;
-    ap = (va_list) (frame.f_esp+4);
+    syscall_result_t result;
+    
+    mem_zero(&result, sizeof(result));
+
+    ap = (va_list) (frame.f_esp);
     curthread->thr_flags |= THREAD_SYSCALL;
-    syscall(curthread, frame.f_eax, ap);
+    syscall(curthread, frame.f_eax, &result, ap);
     curthread->thr_flags ^= THREAD_SYSCALL;
+
+    // result
+    frame.f_eax = result.result;
+    frame.f_ecx = result.errno;
+    // kprintf("result: %x  errno: %x\n", frame.f_eax, frame.f_ecx);
 }
 
 void

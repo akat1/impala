@@ -36,6 +36,7 @@
 #include <sys/string.h>
 #include <machine/cpu.h>
 
+void setesp0(void* a);
 
 /**
  * Inicjalizuje kontekst.
@@ -63,6 +64,7 @@ thread_switch(thread_t *t_to, thread_t *t_from)
     if (thread_context_store(&t_from->thr_context)) {
         // Jestesmy w watku t_from
         curthread = t_to;
+        setesp0(t_to->thr_kstack+0x2000);
         if (t_to->thr_flags & THREAD_NEW) {
             thread_enter(t_to);
         } else {
@@ -89,6 +91,10 @@ thread_enter(thread_t *t_to)
     entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
+
+    if (!(t_to->thr_flags & THREAD_KERNEL))
+        cpu_user_mode();
+
     __asm__ volatile (
         "movl %%eax, %%esp"
         :

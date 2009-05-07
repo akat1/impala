@@ -143,6 +143,7 @@ enum CPU_EDX_FEATURE {
 };
 
 #ifdef __KERNEL
+void cpu_user_mode(void);
 uint32_t cpu_get_cr0(void);
 uint32_t cpu_get_cr2(void);
 uint32_t cpu_get_cr3(void);

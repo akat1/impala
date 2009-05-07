@@ -51,6 +51,9 @@ typedef uint32_t blkno_t;
 typedef int gid_t;
 typedef int uid_t;
 typedef int mode_t;
+typedef int pid_t;
+typedef int errno_t;
+typedef int time_t;
 
 // Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS
@@ -70,6 +73,8 @@ typedef struct filed filed_t;
 typedef struct iobuf iobuf_t;
 typedef struct vnode vnode_t;
 typedef struct consdevsw consdevsw_t;
+typedef struct timespec timespec_t;
+typedef struct pcred pcred_t;
 #endif
 
 #include <sys/list.h>

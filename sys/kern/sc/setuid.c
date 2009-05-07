@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,30 +29,34 @@
  * $Id$
  */
 
-#ifndef __SYS_SCHED_H
-#define __SYS_SCHED_H
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/sched.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
 
-#ifdef __KERNEL
-extern int sched_quantum;
+typedef struct setuid_args setuid_args;
 
-void sched_init(void);
-void sched_action(void);
-void sched_yield(void);
-void sched_exit(thread_t *thr);
+struct setuid_args {
+    uid_t uid;
+};
 
-void sched_insert(thread_t *thr);
-void sched_remove(thread_t *thr);
+errno_t sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args);
 
-void sched_unlock_and_wait(mutex_t *m);
-void sched_wait(void);
-void sched_wakeup(thread_t *n);
+errno_t
+sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args)
+{
+    r->result = t->thr_proc->p_cred->p_uid;
 
-void msleep(uint mtime);
-void ssleep(uint stime);
-
-#endif
-
-
-
-#endif
+    if ( t->thr_proc->p_cred->p_uid == 0 )
+    {
+        t->thr_proc->p_cred->p_uid = args->uid;
+        r->result = t->thr_proc->p_cred->p_uid;
+        return EOK;
+    }
+    else
+        return EPERM;
+}
 

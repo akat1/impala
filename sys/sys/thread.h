@@ -64,7 +64,8 @@ struct thread {
     uint            thr_wakeup_time;
     /// stos (tymczasowo tutaj)
     char            thr_stack[THREAD_STACK_SIZE];
-    /// proceser, do którego w±tek przynale¿y
+    char            thr_kstack[THREAD_STACK_SIZE];
+    /// proces, do którego w±tek przynale¿y
     proc_t         *thr_proc;
     /// wêze³ kolejki planisty
     list_node_t     L_run_queue;
@@ -112,7 +113,8 @@ enum THREAD_FLAGS {
     THREAD_SYSCALL   = 1 << 3, // are in syscall handler
     THREAD_SLEEP     = 1 << 4, // sleeped
     THREAD_INPROC    = 1 << 5, // connected to user process
-    THREAD_INRUNQ    = 1 << 6  // are in run-queue
+    THREAD_INRUNQ    = 1 << 6, // are in run-queue
+    THREAD_KERNEL    = 1 << 7  // kernel thread
 };
 
 enum {
@@ -142,6 +144,7 @@ extern list_t threads_list;     // thread_t.L_threads
 
 void thread_init(void);
 thread_t *thread_create(int priv, addr_t entry, addr_t arg);
+void thread_destroy(thread_t *t);
 
 // do wywalenia
 void thread_suspend(thread_t *t);

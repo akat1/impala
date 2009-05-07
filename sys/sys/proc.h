@@ -33,17 +33,64 @@
 #ifndef __SYS_PROC_H
 #define __SYS_PROC_H
 
-struct proc {
-    int             p_pid;
-    list_t          p_threads;
-    int             p_flags;
-    addr_t          p_entry;
-    list_node_t     L_procs;
+#include <sys/thread.h>
+
+struct pcred {
+    /// identyfikator użytkownika
+    uid_t           p_uid;
+    /// identyfikator grupy
+    gid_t           p_gid;
 };
 
-proc *proc_create();
-void proc_exit();
+struct proc {
+    /// identyfikator procesu
+    pid_t           p_pid;
+    /// identyfikator rodzica
+    pid_t           p_ppid;
+    /// przywileje
+    pcred_t         *p_cred;
+    /// lista wątków wchodzących w skład procesu
+    list_t          p_threads;
+    /// lista dzieci procesu
+    list_t          p_children;
+    /// flagi procesu
+    int             p_flags;
+    /// status
+    int             status;
+    /// węzeł procesów
+    list_node_t     L_procs;
+    /// węzeł listy dzieci
+    list_node_t     L_children;
+};
 
+#ifdef __KERNEL
 
+/// Lista procesów działająych w systemie.
+extern list_t procs_list;
+/// Aktualnie wykonywany proces.
+extern proc_t *curproc;
+
+void proc_init(void);
+proc_t *proc_create(void);
+void proc_insert_thread(proc_t *proc, thread_t *thread);
+void proc_insert_child(proc_t *proc, proc_t *child);
+proc_t *proc_find(pid_t pid);
+void proc_destroy(proc_t *p);
+bool proc_is_zombie(proc_t *p);
+bool proc_is_parent(proc_t *parent, proc_t *child);
+
+enum PROC_FLAGS
+{
+    PROC_NEW    = 1<<0, // proces został utworzony
+    PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
+    PROC_RUN    = 1<<2  // proces w kolejce uruchomieniowej
+};
+
+enum
+{
+    INIT_PID    = 0
+};
+
+#endif
 #endif
 
