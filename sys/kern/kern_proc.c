@@ -103,6 +103,7 @@ proc_destroy(proc_t *proc)
             proc_insert_child(init, p_iter);
     }
 
+    kmem_free(proc->p_cred);
     kmem_free(proc);
 
     return;
