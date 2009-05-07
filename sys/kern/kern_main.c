@@ -100,6 +100,7 @@ init_kernel()
 {
     vm_init();
     kmem_init();
+    proc_init();
     thread_init();
     sched_init();
     clock_init();
