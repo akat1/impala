@@ -40,7 +40,8 @@
 
 enum {
     MAX_THREAD = 0x10,
-    THREAD_STACK_SIZE = 0x2000
+    THREAD_STACK_SIZE = 0x2000,
+    THREAD_KSTACK_SIZE = 0x2000
 };
 
 /// wiruj±cy zamek.
@@ -62,9 +63,9 @@ struct thread {
     /// opcje
     int             thr_flags;
     uint            thr_wakeup_time;
-    /// stos (tymczasowo tutaj)
-    char            thr_stack[THREAD_STACK_SIZE];
-    char            thr_kstack[THREAD_STACK_SIZE];
+    /// stos
+    char            *thr_stack;
+    char            *thr_kstack;
     /// proces, do którego w±tek przynale¿y
     proc_t         *thr_proc;
     /// wêze³ kolejki planisty

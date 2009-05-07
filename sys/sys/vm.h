@@ -30,9 +30,12 @@
  * $Id$
  */
 
-#ifndef __SYS_VM
-#define __SYS_VM
+#define PAGE_MASK (PAGE_SIZE-1)
+#define round_page(x) (((x) + PAGE_MASK) & ~PAGE_MASK)
 
+#ifndef __SYS_VM_H
+#define __SYS_VM_H
+#ifdef __KERNEL
 #include <sys/vm/vm_types.h>
 #include <machine/memory.h>
 #include <sys/vm/vm_pmap.h>
@@ -61,5 +64,5 @@ vm_addr_t vm_ptov(vm_paddr_t v);
 vm_paddr_t vm_vtop(vm_addr_t p);
 
 
-
+#endif
 #endif

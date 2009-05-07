@@ -34,6 +34,7 @@
 #include <sys/thread.h>
 #include <sys/sched.h>
 #include <sys/utils.h>
+#include <sys/kmem.h>
 #include <sys/string.h>
 
 thread_t *curthread;
@@ -41,26 +42,42 @@ thread_t *thread_idle;
 
 list_t threads_list;
 
-static thread_t thread_table[MAX_THREAD];
 static uint last_pid;
+static kmem_cache_t *thread_cache;
 
-static list_t __free_threads;
+static void thread_ctor(void *_thr);
+static void thread_dtor(void *_thr);
+
 
 /*=============================================================================
  * Obsluga watkow.
  */
+
+
+void
+thread_ctor(void *_thr)
+{
+    thread_t *thr = _thr;
+    list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
+    thr->thr_stack = kmem_alloc(THREAD_STACK_SIZE, KM_SLEEP);
+    thr->thr_kstack = kmem_alloc(THREAD_KSTACK_SIZE, KM_SLEEP);
+}
+
+void
+thread_dtor(void *_thr)
+{
+    thread_t *thr = _thr;
+    kmem_free(thr->thr_stack);
+    kmem_free(thr->thr_stack);
+}
 
 /// Inicjalizuje obs³ugê w±tków.
 void
 thread_init()
 {
     last_pid = 0;
-    mem_zero(&thread_table, sizeof(thread_table));
-    list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
-    list_create(&__free_threads, offsetof(thread_t, L_threads), FALSE);
-    for (int i = 0; i < MAX_THREAD; i++) {
-        list_insert_tail(&__free_threads, &thread_table[i]);
-    }
+    thread_cache = kmem_cache_create("thread", sizeof(thread_t),
+        thread_ctor, thread_dtor);
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN;
 
@@ -78,7 +95,7 @@ thread_init()
 thread_t *
 thread_create(int priv, addr_t entry, addr_t arg)
 {
-    thread_t *free_thr = list_extract_first(&__free_threads);
+    thread_t *free_thr = kmem_cache_alloc(thread_cache, KM_SLEEP);
     if (free_thr) {
         thread_t *t = free_thr;
         t->thr_flags = THREAD_NEW;
@@ -92,7 +109,7 @@ thread_create(int priv, addr_t entry, addr_t arg)
         return t;
     } else {
         kprintf("ERROR: no free threads!\n");
-        return 0;
+        return NULL;
     }
 }
 

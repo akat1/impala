@@ -39,6 +39,7 @@
 #include <dev/md/md.h>
 
 static list_t devs;
+static kmem_cache_t *devd_cache;
 
 int
 dnotsupported(devd_t *d)
@@ -50,8 +51,8 @@ dnotsupported(devd_t *d)
 void
 dev_init()
 {
-    DEBUGF("initializing device sub-system");
     list_create(&devs, offsetof(devd_t, L_devs), FALSE);
+    devd_cache = kmem_cache_create("devs", sizeof(devd_t), NULL, NULL);
     md_init();
 }
 
@@ -60,7 +61,7 @@ static bool find_this_dev(const devd_t *d, const char *name);
 devd_t *
 devd_create(devsw_t *dsw, int unit, void *priv)
 {
-    devd_t *dev = kmem_alloc( sizeof(devd_t), KM_SLEEP );   
+    devd_t *dev = kmem_cache_alloc( devd_cache, KM_SLEEP );
     if (unit == -1) {
         snprintf(dev->name, DEVD_MAXNAME, "%s", dsw->name);
     } else {

@@ -41,6 +41,7 @@
 #include <sys/utils.h>
 #include <sys/kmem.h>
 #include <sys/vfs.h>
+#include <sys/proc.h>
 #include <dev/md/md.h>
 #include <machine/interrupt.h>
 #include <machine/pckbd.h>
@@ -67,14 +68,17 @@ prepare_root()
 
 void
 start_init_process()
-{   
-    kprintf("VT100\033[Atest\n");
+{
+    enum {
+        S = 20*PAGE_SIZE
+    };
     kprintf("[infinite loop]\n");
-    char c;
-    while (TRUE) {
-        while ( (c = pckbd_get_char()) == -1 );
-        kprintf("char: %c\n", c);
-    }
+    char *x = kmem_alloc(S, KM_SLEEP);
+    kprintf("Got %p\n", x);
+    kmem_free(x);
+    x = kmem_alloc(S, KM_SLEEP);
+    kprintf("Got %p\n", x);
+
     for (;;);
 }
 

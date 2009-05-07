@@ -44,23 +44,16 @@
 #include <sys/thread.h>
 #include <sys/utils.h>
 
-/*
- * U¿ywana strategia do przydzia³u buforów opiera siê na przydziale ostatnio
- * u¿ywanego buforu, w tym celu u¿ywamy list z buforami jak kolejek FIFO.
- * Wierzê, ¿e ten sposób przydzia³u mo¿e w jakim¶ stopniu okazaæ siê efektywny
- * - ostatnio u¿ywany "kawa³ek pamiêci" mo¿e byæ w cache procesora.
- */
-
 typedef struct kmem_slab kmem_slab_t;
 typedef struct kmem_bufctl kmem_bufctl_t;
 
-
 /// Cache
 struct kmem_cache {
-    size_t          elem_size;
     const char     *name;
     kmem_ctor_t    *ctor;
     kmem_dtor_t    *dtor;
+    size_t          elem_size;
+    size_t          slab_size;
     list_t          empty_slabs;
     list_t          part_slabs;
     list_t          full_slabs;
@@ -88,11 +81,10 @@ struct kmem_bufctl {
 
 
 enum {
-    /// Ograniczenie na elementy grupowane na stronie.
-    LARGE_SIZE  = PAGE_SIZE/4,
+    LARGE_SIZE  = PAGE_SIZE/8,
+    BIG_SIZE = (1<<15),
     /// Pomocnik przy rozpoznawaniu uszkodzonia struktur
-    KMEM_BUFCTL_MAGIC = 0xdeadbabe,
-    LARGE_BUFS_PREALLOC  = 10,
+    KMEM_BUFCTL_MAGIC = 0xdeadbabe,    
 };
 
 
@@ -129,19 +121,21 @@ struct mem_bucket {
 
 /// Obslugiwane kube³ki pamiêci.
 static mem_bucket_t buckets[] = {
-    {1 <<  1, "kmem_alloc bucket [2]", NULL},
-    {1 <<  2, "kmem_alloc bucket [4]", NULL},
-    {1 <<  3, "kmem_alloc bucket [8]", NULL},
-    {1 <<  4, "kmem_alloc bucket [16]", NULL},
-    {1 <<  5, "kmem_alloc bucket [32]", NULL},
-    {1 <<  6, "kmem_alloc bucket [64]", NULL},
-    {1 <<  7, "kmem_alloc bucket [128]", NULL},
-    {1 <<  8, "kmem_alloc bucket [256]", NULL},
-    {1 <<  9, "kmem_alloc bucket [512]", NULL},
-    {1 << 10, "kmem_alloc bucket [1024]", NULL},
-    {1 << 11, "kmem_alloc bucket [2048]", NULL},
-    {1 << 12, "kmem_alloc bucket [4096]", NULL},
-    {1 << 13, "kmem_alloc bucket [8192]", NULL},
+    {1 <<  1, "kmem_alloc[2]", NULL},
+    {1 <<  2, "kmem_alloc[4]", NULL},
+    {1 <<  3, "kmem_alloc[8]", NULL},
+    {1 <<  4, "kmem_alloc[16]", NULL},
+    {1 <<  5, "kmem_alloc[32]", NULL},
+    {1 <<  6, "kmem_alloc[64]", NULL},
+    {1 <<  7, "kmem_alloc[128]", NULL},
+    {1 <<  8, "kmem_alloc[256]", NULL},
+    {1 <<  9, "kmem_alloc[512]", NULL},
+    {1 << 10, "kmem_alloc[1024]", NULL},
+    {1 << 11, "kmem_alloc[2048]", NULL},
+    {1 << 12, "kmem_alloc[4096]", NULL},
+    {1 << 13, "kmem_alloc[8192]", NULL},
+    {1 << 14, "kmem_alloc[16384]", NULL},
+    {1 << 15, "kmem_alloc[32768]", NULL},
     {0, NULL, NULL}
 };
 
@@ -151,13 +145,27 @@ static mem_bucket_t buckets[] = {
  * @param flags opcje przydzia³u.
  * @return wska¼nik do przydzielonego elementu.
  */
+
+
 void*
 kmem_alloc(size_t s, int flags)
 {
+    if (s == 0) return NULL;
+    if (BIG_SIZE < s) {
+        s += sizeof(kmem_bufctl_t);
+        s = round_page(s);
+        kmem_bufctl_t *bctl =
+            (kmem_bufctl_t*) vm_segment_alloc(&vm_kspace.seg_data, s);
+        bctl->magic = KMEM_BUFCTL_MAGIC;
+        bctl->slab = NULL;
+        // ¶rednio podoba mi siê ten triczek, ale niech tak zostanie.
+        bctl->addr = (void*)(s);
+        return bctl+1;
+    }
     int i;
     for (i = 0; buckets[i].size && buckets[i].size < s; i++);
     if (buckets[i].size == 0)
-        panic("Allocating large regions not possible yet");
+        panic("Internal error");
     return kmem_cache_alloc(buckets[i].cache, flags);
 }
 
@@ -169,7 +177,12 @@ void
 kmem_free(void *ptr)
 {
     kmem_bufctl_t *bctl = get_bufctl_from_ptr(ptr);
-    kmem_cache_free(bctl->slab->cache, ptr);
+    if (bctl->slab) {
+        kmem_cache_free(bctl->slab->cache, ptr);
+    } else {
+        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)bctl,
+            (size_t)bctl->addr);
+    }
 }
 
 /// Inicjalizuje kube³ki.
@@ -199,6 +212,7 @@ kmem_cache_t*
 kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     kmem_dtor_t *dtor)
 {
+    if (esize == 0) return NULL;
     mutex_lock(&global_lock);
     kmem_cache_t *cache = vm_lpool_alloc(&lpool_caches);
     cache_init(cache);
@@ -206,6 +220,29 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     cache->name = name;
     cache->ctor = ctor;
     cache->dtor = dtor;
+    size_t size = esize + sizeof(kmem_bufctl_t);
+    
+     if (LARGE_SIZE < esize) {
+        size_t bestfit, slabsize, waste;
+        size_t minwaste = 0 - 1;
+        size_t psize = round_page(size);
+        for (int i = 1; i < 9; i++) {
+            slabsize = i*psize;
+            waste = slabsize - (slabsize/size)*size;
+            if (waste < minwaste) {
+                minwaste = waste;
+                bestfit = slabsize;
+            }
+        }
+        cache->slab_size = bestfit;
+     } else {
+        cache->slab_size = PAGE_SIZE;
+     }
+
+    DEBUGF("%s: slab_size %u items %u (wasted %u)", name, cache->slab_size,
+        cache->slab_size / (esize + sizeof(kmem_bufctl_t)),
+        cache->slab_size - (cache->slab_size / size) * size
+        );
     mutex_unlock(&global_lock);
     return cache;
 }
@@ -262,17 +299,19 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
     kmem_bufctl_t *bctl = get_bufctl_from_ptr(m);
     // sprawdzamy czy dan± p³ytê nie trzeba przepi±æ.
     if (list_length(&bctl->slab->free_bufs) == 0) {
-        list_remove(&cache->full_slabs, bctl);
-        list_insert_head(&cache->part_slabs, bctl); 
+        list_remove(&cache->full_slabs, bctl->slab);
+        list_insert_head(&cache->part_slabs, bctl->slab); 
     } else
     if (list_length(&bctl->slab->used_bufs) == 1) {
-        list_remove(&cache->part_slabs, bctl);
-        list_insert_head(&cache->empty_slabs, bctl);
+        list_remove(&cache->part_slabs, bctl->slab);
+        list_insert_head(&cache->empty_slabs, bctl->slab);
     }
     // przepinamy bufor
+
     list_remove(&bctl->slab->used_bufs, bctl);
     list_insert_head(&bctl->slab->free_bufs, bctl);
     check_cache(cache);
+
     mutex_unlock(&cache->mtx);
 }
 
@@ -329,23 +368,19 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
 {
     list_create(&slab->free_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
-    char *data = (char*)vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE);
-    KASSERT(data != NULL);
     slab->cache = cache;
-    if (cache->elem_size < LARGE_SIZE) {
-        slab->addr = data;
-        slab->items = PAGE_SIZE / ( sizeof(kmem_bufctl_t) + cache->elem_size );
-        for (int i = 0; i < slab->items; i++) {
-            kmem_bufctl_t *bctl = (kmem_bufctl_t*) data;
-            bctl->addr = data + sizeof(kmem_bufctl_t);
-            bctl->magic = KMEM_BUFCTL_MAGIC;
-            bctl->slab = slab;
-            if (cache->ctor) cache->ctor(bctl->addr);
-            list_insert_tail(&slab->free_bufs, bctl);
-            data += cache->elem_size + sizeof(kmem_bufctl_t);
-        }
-    } else {
-        panic("Large not supported");
+    char *data = (char*)vm_segment_alloc(&vm_kspace.seg_data, cache->slab_size);
+    KASSERT(data != NULL);
+    slab->addr = data;
+    slab->items = cache->slab_size / ( sizeof(kmem_bufctl_t) + cache->elem_size );
+    for (int i = 0; i < slab->items; i++) {
+        kmem_bufctl_t *bctl = (kmem_bufctl_t*) data;
+        bctl->addr = data + sizeof(kmem_bufctl_t);
+        bctl->magic = KMEM_BUFCTL_MAGIC;
+        bctl->slab = slab;
+        if (cache->ctor) cache->ctor(bctl->addr);
+        list_insert_tail(&slab->free_bufs, bctl);
+        data += cache->elem_size + sizeof(kmem_bufctl_t);
     }
 }
 
@@ -359,7 +394,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
 kmem_slab_t *
 get_slab_from_cache(kmem_cache_t *cache)
 {
-    list_t *ls = NULL;  
+    list_t *ls = NULL;
     if (list_length(&cache->part_slabs) > 0) {
         ls = &cache->part_slabs;
     } else
@@ -409,7 +444,7 @@ check_cache(kmem_cache_t *cache)
         while ( (x = list_next(&slab->free_bufs, x)) ) {
             cache->dtor(x);
         }
-        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)slab->addr, PAGE_SIZE);
+        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
         mutex_lock(&global_lock);
         vm_lpool_free(&lpool_slabs, slab);
         mutex_unlock(&global_lock);

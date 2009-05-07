@@ -332,12 +332,15 @@ vtty_code(vtty_t *vt, int c)
         case ESC_CURDOWN:
             cy += vt->parser.attr[0];
             textscreen_update_cursor(&vt->screen, cx, cy);
+            break;
         case ESC_CURFORW:
             cx += vt->parser.attr[0];
             textscreen_update_cursor(&vt->screen, cx, cy);
+            break;
         case ESC_CURBACK:
             cx -= vt->parser.attr[0];
             textscreen_update_cursor(&vt->screen, cx, cy);
+            break;
         case ESC_RESET:
             textscreen_clear(&vt->screen);
             vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);

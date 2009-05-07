@@ -73,7 +73,7 @@ bio_init()
     bufs_out = &bufs_age1;
     mutex_init(&list_lock, MUTEX_NORMAL);
 
-    physbuf_cache = kmem_cache_create("Physical I/O buffer cache",
+    physbuf_cache = kmem_cache_create("physio",
         sizeof(iobuf_t), (kmem_ctor_t*) physbuf_ctor,
         (kmem_dtor_t*)physbuf_dtor);
 
