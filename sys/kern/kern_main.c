@@ -36,6 +36,7 @@
 #include <sys/device.h>
 #include <sys/bio.h>
 #include <sys/console.h>
+#include <sys/proc.h>
 #include <sys/vm.h>
 #include <sys/utils.h>
 #include <sys/kmem.h>
