@@ -36,7 +36,7 @@
 #include <sys/thread.h>
 
 struct pcred {
-    /// identyfikator uÅ¼ytkownika
+    /// identyfikator u¿ytkownika
     uid_t           p_uid;
     /// identyfikator grupy
     gid_t           p_gid;
@@ -49,7 +49,7 @@ struct proc {
     pid_t           p_ppid;
     /// przywileje
     pcred_t         *p_cred;
-    /// lista wÄ…tkÃ³w wchodzÄ…cych w skÅ‚ad procesu
+    /// lista w±tków wchodz±cych w sk³ad procesu
     list_t          p_threads;
     /// lista dzieci procesu
     list_t          p_children;
@@ -57,15 +57,15 @@ struct proc {
     int             p_flags;
     /// status
     int             status;
-    /// wÄ™zeÅ‚ procesÃ³w
+    /// wêze³ procesów
     list_node_t     L_procs;
-    /// wÄ™zeÅ‚ listy dzieci
+    /// wêze³ listy dzieci
     list_node_t     L_children;
 };
 
 #ifdef __KERNEL
 
-/// Lista procesÃ³w dziaÅ‚ajÄ…ych w systemie.
+/// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
 /// Aktualnie wykonywany proces.
 extern proc_t *curproc;
@@ -81,7 +81,7 @@ bool proc_is_parent(proc_t *parent, proc_t *child);
 
 enum PROC_FLAGS
 {
-    PROC_NEW    = 1<<0, // proces zostaÅ‚ utworzony
+    PROC_NEW    = 1<<0, // proces zosta³ utworzony
     PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
     PROC_RUN    = 1<<2  // proces w kolejce uruchomieniowej
 };
