@@ -85,7 +85,12 @@ ISR_irq(interrupt_frame frame)
 {
     bool eoi = FALSE;
     if (frame.f_n < MAX_IRQ) {
-        eoi = irq_handlers[frame.f_n]();
+        if(irq_handlers[frame.f_n] == NULL) {
+            eoi=0;
+            kprintf("Sp. interrupt: %u\n", frame.f_n);
+        }
+        else
+            eoi = irq_handlers[frame.f_n]();
     }
     if (!eoi) i8259a_send_eoi();
 }
@@ -171,8 +176,8 @@ splhigh()
     TRACE_IN("enter");
     int opl=i8259a_getipl();
     i8259a_raiseipl(IPL_HIGH);
-    TRACE_IN("leave");
     irq_enable();
+    TRACE_IN("leave");
     return opl;
 }
 

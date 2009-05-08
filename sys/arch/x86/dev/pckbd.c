@@ -79,11 +79,11 @@ pckbd_get_char()
     
     char c;
 
-    SYSTEM_DEBUG = 1;   
+//    SYSTEM_DEBUG = 1;
     int s = splhigh ();
     TRACE_IN("inside");
     splx(s);
-    SYSTEM_DEBUG = 0;
+//    SYSTEM_DEBUG = 0;
     return -1;
     if (key_s == 0) {
         c = -1;

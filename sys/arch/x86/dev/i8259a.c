@@ -98,9 +98,10 @@ i8259a_init()
 
     pic1_en_mask = 0x0; // wszystkie przerwania wy³±czone
     pic2_en_mask = 0x0;
-    for(int i=0; i<MAX_IPL; i++)
+    for(int i=0; i<MAX_IRQ; i++)
         irq_priority[i] = IPL_NONE;
     CPL = 0;
+       
     i8259a_update_masks();
     i8259a_reset_mask();
 }
@@ -124,20 +125,20 @@ i8259a_update_masks()
     for(int i=1; i<MAX_IPL; i++)
         mask_at_pl[i] = mask_at_pl[i-1] | irqs_at_pl[i];
     //guard?
-    irq_disable();
+//    irq_disable();
     for(int i=0; i<MAX_IPL; i++) {
         pic1_pl_mask[i] = ~pic1_en_mask | (mask_at_pl[i] & 0xff);
         pic2_pl_mask[i] = ~pic2_en_mask | ((mask_at_pl[i]>>8) & 0xff);
     }
-    irq_enable();
+//    irq_enable();
 }
 
 void
 i8259a_reset_mask()
 {
     TRACE_IN("enter");
-     //for(int i=0; i<MAX_IPL; i++)
-       // kprintf("maski (ipl=%u): %08b %08b\n", i, pic1_pl_mask[i], pic2_pl_mask[i]);
+//     for(int i=0; i<MAX_IPL; i++)
+//        kprintf("maski (ipl=%u, cpl=%u): %08b %08b\n", i, CPL, pic1_pl_mask[i], pic2_pl_mask[i]);
     io_out8(PIC_M+1, pic1_pl_mask[CPL]);
     io_out8(PIC_S+1, pic2_pl_mask[CPL]);
     TRACE_IN("leave");
