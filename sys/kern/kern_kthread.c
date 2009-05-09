@@ -44,7 +44,7 @@ static void __kthr(kthread_t *arg);
  * @param thr referencja do deskryptora w±tku.
  * @param f adres procedury wej¶ciowej.
  * @param arg adres przekazany jako argument do procedury wej¶ciowej.
- * 
+ *
  */
 void
 kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
@@ -62,6 +62,6 @@ __kthr(kthread_t *arg)
 //    TRACE_IN("elo");
 //    TRACE_IN("arg=%p entry=%p entry_arg=%p", arg, arg->kt_entry, arg->kt_arg);
     arg->kt_entry(arg->kt_arg);
-    sched_exit((thread_t *)arg);
+    sched_exit(arg->kt_thread);
 }
 

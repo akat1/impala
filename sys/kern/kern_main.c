@@ -42,6 +42,7 @@
 #include <sys/kmem.h>
 #include <sys/vfs.h>
 #include <sys/proc.h>
+#include <sys/string.h>
 #include <dev/md/md.h>
 #include <machine/interrupt.h>
 #include <machine/pckbd.h>
@@ -66,19 +67,34 @@ prepare_root()
 {
 }
 
+char tabA[4096];
+char tabB[4096];
+char tabC[4096];
+
+static void tf(void *addr);
+
+void
+tf(void *addr)
+{
+    static vm_pmap_t pmap;
+    vm_pmap_clone(&pmap, &vm_kspace.pmap);
+    vm_pmap_map(&pmap, (vm_addr_t)tabC, &pmap, (vm_addr_t)addr,
+        PAGE_SIZE);
+    vm_pmap_switch(&pmap);
+
+    kprintf("%s\n",tabC);
+}
+
 void
 start_init_process()
 {
-    enum {
-        S = 20*PAGE_SIZE
-    };
+    static kthread_t t0,t1;
+    str_cpy(tabA, "tabA");
+    str_cpy(tabB, "tabB");
+    str_cpy(tabC, "tabC");
+    kthread_create(&t0, tf, tabA);
+    kthread_create(&t1, tf, tabB);
     kprintf("[infinite loop]\n");
-    char *x = kmem_alloc(S, KM_SLEEP);
-    kprintf("Got %p\n", x);
-    kmem_free(x);
-    x = kmem_alloc(S, KM_SLEEP);
-    kprintf("Got %p\n", x);
-
     for (;;) {
         char c=pckbd_get_char();
         if(c!=-1)
@@ -99,9 +115,9 @@ print_welcome()
     kprintf("   http://www.ii.uni.wroc.pl/\n");
     kprintf("----\n");
     kprintf("Impala Operating System, build at %s %s\n", __TIME__, __DATE__);
-    kprintf("kernel loaded at: %p+%u kB\n", &kernel_start, 
+    kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
-    
+
 }
 
 void

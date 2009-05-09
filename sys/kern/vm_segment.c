@@ -68,7 +68,7 @@ vm_segment_alloc(vm_segment_t *vseg, vm_size_t size, void *_res)
     *res = region->end;
     expand_region(vseg, region, size);
     return 0;
-    
+
 }
 
 
@@ -119,7 +119,7 @@ expand_region(vm_segment_t *segment, vm_region_t *region, vm_size_t size)
         // zlepiamy ze sob± regiony, miêdzy którymi nie ma ju¿ dziury
         region->end = nextreg->end;
         region->size += nextreg->size;
-        list_remove(&segment->regions, nextreg); 
+        list_remove(&segment->regions, nextreg);
     }
     vm_pmap_fill(&segment->space->pmap, newaddr, size);
 }

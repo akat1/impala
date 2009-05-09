@@ -118,8 +118,8 @@ create_kernel_space()
         VM_SPACE_CODE_SIZE, VM_SPACE_CODE_SIZE);
     vm_segment_create(&vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA_BEGIN,
         0, VM_SPACE_DATA_SIZE);
-    vm_segment_create(&vm_kspace.seg_stack, &vm_kspace, 0,
-        0, 0);
+    vm_segment_create(&vm_kspace.seg_stack, &vm_kspace, VM_SPACE_STACK_BEGIN,
+        0, VM_SPACE_STACK_SIZE);
 
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
@@ -349,8 +349,9 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
     vm_addr_t src_addr, vm_size_t size)
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
-        vm_page_t *page = pmap_get_page(src_pmap, src_addr += PAGE_SIZE);
+        vm_page_t *page = pmap_get_page(src_pmap, src_addr);
         vm_pmap_insert(dst_pmap, page, dst_addr);
+        src_addr += PAGE_SIZE;
     }
 }
 

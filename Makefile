@@ -21,7 +21,6 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 
 commit:
 	svn commit
-	make depend
 
 burn: build-image
 	sudo dd if=image/floppy.img of=${FLOPPY_DEV}
