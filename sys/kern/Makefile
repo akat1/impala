@@ -51,4 +51,4 @@ SRCS=\
 
 
 
-include ${IMPALA_MK}/kernel.mk 
+include ../../mk/kernel.mk 

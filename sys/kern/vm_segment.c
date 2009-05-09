@@ -60,7 +60,7 @@ vm_segment_alloc(vm_segment_t *vseg, vm_size_t size)
 //     TRACE_IN("vseg=%p size=%u", vseg, size);
     vm_region_t *r = NULL;
     vm_region_t *rnext = NULL;
-    size = PAGE_ROUND(size)*PAGE_SIZE;
+    size = PAGE_ROUND(size);
     // Przeszukujemy regiony w segmencie.
     while ((r = list_next(&vseg->regions, r))) {
         rnext = list_next(&vseg->regions, r);
@@ -138,7 +138,7 @@ _find_region(vm_segment_t *vms, vm_addr_t a)
 vm_addr_t
 _vm_segment_expand(vm_segment_t *vms, vm_size_t size)
 {
-    int pages = PAGE_ROUND(size);
+    int pages = YPAGE_ROUND(size);
     size = pages*PAGE_SIZE;
     if (vms->size + size < vms->limit) {
         vm_addr_t b = vms->base + vms->size;

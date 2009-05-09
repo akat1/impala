@@ -60,14 +60,13 @@ enum {
 #define PAGE_DIR(p) (((uintptr_t)p) >> 22)
 /// Wyci±ga z adresu indeks w tablicy stron.
 #define PAGE_TBL(p) ( (((uintptr_t)p) >> 12) & 0x3ff)
-
 #define BASE_ADDR(p) (((uintptr_t)p) >> PAGE_SHIFT)
 #define PTE_ADDR(p) ((uintptr_t)p & 0xfffff000 )
 
 
 #define PAGE_ADDR(p) (((uintptr_t)p) << PAGE_SHIFT)
 
-#define PAGE_ROUND(a) (((a)+PAGE_SIZE-1)/PAGE_SIZE)
+
 
 /**
  * Opis bitów dla wpisów w tablicy stron (Page Table Entry)
@@ -136,6 +135,7 @@ struct vm_page {
     /// fizyczny adres strony
     vm_paddr_t  phys_addr;
     /// adres w wirtualnej przestrzeni j±dra
+    /// u¿ywanie jedynie dla meta-danych VM!
     vm_addr_t   kvirt_addr;
     /// opcje
     uint32_t    flags;
@@ -154,9 +154,10 @@ struct vm_ptable {
 /// odwzorowanie stron.
 struct vm_pmap {
     /// fizyczny adres katalogu stron.
-    vm_paddr_t       pdir;      // fizyczny adres katalogu stron.
+    vm_paddr_t      pdir;       // fizyczny adres katalogu stron.
+    bool            keep_ptes;  // nie zwalnia pamiêci po pustych PTE
     /// lista stron w odwzorowaniu.
-    list_t           pages;     // wmapowane strony.
+    list_t          pages;      // wmapowane strony.
 };
 
 extern size_t vm_physmem_max;

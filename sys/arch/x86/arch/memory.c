@@ -121,6 +121,7 @@ create_kernel_space()
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     list_create(&kmap->pages, offsetof(vm_page_t, L_pages), FALSE);
+    kmap->keep_ptes = TRUE;
     page = vm_alloc_page();
     page->kvirt_addr = page->phys_addr;
     kmap->pdir = page->phys_addr;
@@ -275,6 +276,7 @@ vm_pmap_init(vm_pmap_t *vpm)
 {
     mem_zero(vpm, sizeof(*vpm));
     vpm->pdir = vm_vtop((uintptr_t)_alloc_ptable());
+    vpm->keep_ptes = FALSE;
     list_create(&vpm->pages, offsetof(vm_page_t,L_pages), FALSE);
     return (vpm->pdir != 0);
 }
@@ -295,7 +297,6 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
     return vm_pmap_insert_(vpm, p->phys_addr, va);
 }
 
-
 /**
  * Ustawia odwzorowywanie strony.
  * @param vpm odwzorowanie stron.
@@ -312,7 +313,7 @@ bool
 vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
 {
     int pte = PAGE_TBL(va);
-    vm_ptable_t *pt = _pmap_pde(vpm, va); //(vm_ptable_t*) PTE_ADDR(vpm->pdir->table[pde]);
+    vm_ptable_t *pt = _pmap_pde(vpm, va);
     if (pt == NULL) {
         pt = _alloc_ptable();
         if (pt == NULL) return FALSE;
@@ -321,6 +322,36 @@ vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | PTE_US;
     return TRUE;
 
+}
+static bool find_page(const void *x, const void *param);
+bool find_page(const void *x, const void *param)
+{
+    uintptr_t paddr = (uintptr_t)param;
+    const vm_page_t *pg = (const vm_page_t*)x;
+    if (pg->phys_addr == paddr) return TRUE;
+    return FALSE;
+}
+
+/**
+ * Zwalnia stronê.
+ */
+bool
+vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
+{
+    int pte = PAGE_TBL(va);
+    vm_ptable_t *pt = _pmap_pde(pmap, va);
+    if (pt == NULL) {
+        return FALSE;
+    }
+
+    vm_page_t *pg = list_find(&pmap->pages, find_page, (void*)pt->table[pte]);
+    KASSERT(pg != NULL);
+    list_remove(&pmap->pages, pg);
+    pt->table[pte] = 0;
+    if (!pmap->keep_ptes) {
+        // usun stronê z pamiêci
+    }
+    return TRUE;
 }
 
 
@@ -396,15 +427,6 @@ vm_ptov(vm_paddr_t pa)
 {
     int n = BASE_ADDR(pa);
     return vm_pages[n].kvirt_addr + PAGE_OFF(pa);
-}
-
-/**
- * Kasowanie strony z katalogu.
- */
-vm_page_t *
-vm_pmap_remove(vm_pmap_t *vpm, vm_addr_t addr)
-{
-    return 0;
 }
 
 

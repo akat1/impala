@@ -30,18 +30,20 @@
  * $Id$
  */
 
-#define PAGE_MASK (PAGE_SIZE-1)
-#define round_page(x) (((x) + PAGE_MASK) & ~PAGE_MASK)
 
 #ifndef __SYS_VM_H
 #define __SYS_VM_H
 #ifdef __KERNEL
+
 #include <sys/vm/vm_types.h>
 #include <machine/memory.h>
 #include <sys/vm/vm_pmap.h>
 #include <sys/vm/vm_segment.h>
 #include <sys/vm/vm_space.h>
 
+#define PAGE_MASK (PAGE_SIZE-1)
+#define YPAGE_ROUND(x) (((x) + PAGE_MASK)/PAGE_SIZE)
+#define PAGE_ROUND(x) (((x) + PAGE_MASK) & ~PAGE_MASK)
 
 extern list_t vm_free_pages;
 extern vm_space_t vm_kspace;

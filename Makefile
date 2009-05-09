@@ -19,11 +19,11 @@ run: build-image
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
 
-commit: cleandepend
+commit:
 	svn commit
 	make depend
 
 burn: build-image
 	sudo dd if=image/floppy.img of=${FLOPPY_DEV}
 
-include ${IMPALA_MK}/subdir.mk
+include mk/subdir.mk

@@ -113,6 +113,7 @@ list_prev(const list_t *ls, const void *elem)
 static inline void *
 list_remove(list_t *ls, void *x)
 {
+    if (x == NULL) return NULL;
     list_node_t *x_node = __elem_node(ls, x);
     void *y = x_node->next;
     if (x_node->prev) __prev_node(ls, x)->next = x_node->next;

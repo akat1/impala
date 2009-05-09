@@ -153,7 +153,7 @@ kmem_alloc(size_t s, int flags)
     if (s == 0) return NULL;
     if (BIG_SIZE < s) {
         s += sizeof(kmem_bufctl_t);
-        s = round_page(s);
+        s = PAGE_ROUND(s);
         kmem_bufctl_t *bctl =
             (kmem_bufctl_t*) vm_segment_alloc(&vm_kspace.seg_data, s);
         bctl->magic = KMEM_BUFCTL_MAGIC;
@@ -225,7 +225,7 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
      if (LARGE_SIZE < esize) {
         size_t bestfit, slabsize, waste;
         size_t minwaste = 0 - 1;
-        size_t psize = round_page(size);
+        size_t psize = PAGE_ROUND(size);
         for (int i = 1; i < 9; i++) {
             slabsize = i*psize;
             waste = slabsize - (slabsize/size)*size;
@@ -324,14 +324,15 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
 void
 kmem_init()
 {
-
+    kprintf(".\n");
     vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches), 
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
+    kprintf(";\n");
+
     vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
         sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
     vm_lpool_create(&lpool_bufctls, offsetof(kmem_bufctl_t, L_bufs),
         sizeof(kmem_bufctl_t), VM_LPOOL_PREALLOC);
-
     mutex_init(&global_lock, MUTEX_NORMAL);
     alloc_init();
 }
