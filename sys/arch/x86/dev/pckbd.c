@@ -78,18 +78,13 @@ pckbd_get_char()
 {
     
     char c;
-
-//    SYSTEM_DEBUG = 1;
-    int s = splhigh ();
+    int s = spltty ();
     TRACE_IN("inside");
-    splx(s);
-//    SYSTEM_DEBUG = 0;
-    return -1;
     if (key_s == 0) {
         c = -1;
     } else {
         c = key_queue[key_b];
-        key_b++;
+        key_b=IDX(key_b+1);
         key_s--;
     }
     splx(s);
@@ -110,7 +105,6 @@ __enqueue_keycode(int kc)
         if(shift)
             c = keymap_shift[kc];
     }
-    if (0)
     kq_insert(c);
 }
 
@@ -137,7 +131,6 @@ i8042_irq1()
 {
     static uint8_t last_scancode = 0;
     uint8_t scancode = io_in8(PCKBD_DATA_PORT);
-    return FALSE;
 
     uint8_t up_action = scancode & 0x80;
     uint8_t keycode = 0;
@@ -168,8 +161,7 @@ i8042_irq1()
         //To raczej 'pause break'...
         if(scancode == 0x45 && up_action) {  //ostatni bajt scancode klawisza pause break
             last_scancode = 0;
-            #define KC_PAUSE_BREAK 139  //tak tymczasowo ;p
-            keycode = KC_PAUSE_BREAK;
+            keycode = KC_PAUSE;
         }                
     }
     

@@ -73,7 +73,6 @@ static uchar pic2_en_mask;
 static uchar pic1_pl_mask[MAX_IPL];
 static uchar pic2_pl_mask[MAX_IPL];
 static int irq_priority[MAX_IRQ];
-int CPL;    ///< current priority level
 
 void
 i8259a_init()
@@ -177,33 +176,6 @@ i8259a_set_irq_priority(int irq, int ipl)
     irq_priority[irq]=ipl;
 }
 
-void
-i8259a_raiseipl(int pl)
-{
-    TRACE_IN("enter");
-    if(CPL==pl)
-        return;
-    CPL=pl;
-    i8259a_reset_mask();
-    TRACE_IN("leave");
-}
-
-void
-i8259a_loweripl(int pl)
-{
-    TRACE_IN0();
-    CPL=pl;
-    i8259a_reset_mask();
-    //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
-    //podobnego, to tu mo¿emy je "obudziæ"
-}
-
-int
-i8259a_getipl()
-{
-    TRACE_IN0();
-    return CPL;
-}
 
 void
 i8259a_send_eoi()

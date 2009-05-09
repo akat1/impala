@@ -49,6 +49,7 @@ void TRAP_unhandled(interrupt_frame fr);
 void TRAP_gfault(interrupt_frame fr);
 void TRAP_pfault(interrupt_frame fr);
 static void print_frame(const char *s, interrupt_frame *f);
+int CPL;    ///< current priority level
 
 irq_handler_f *irq_handlers[MAX_IRQ];
 
@@ -169,71 +170,30 @@ print_frame(const char *name, interrupt_frame *f)
 
 
 
-int
-splhigh()
+void
+intrpt_raiseipl(int pl)
 {
-    irq_disable();
     TRACE_IN("enter");
-    int opl=i8259a_getipl();
-    i8259a_raiseipl(IPL_HIGH);
-    irq_enable();
+    if(CPL==pl)
+        return;
+    CPL=pl;
+    i8259a_reset_mask();
     TRACE_IN("leave");
-    return opl;
-}
-
-int
-splclock()
-{
-    irq_disable();
-    int opl=i8259a_getipl();
-    if(opl < IPL_CLOCK)
-        i8259a_raiseipl(IPL_CLOCK);
-    irq_enable();
-    return opl;
-}
-
-int
-splbio()
-{
-    irq_disable();
-    int opl=i8259a_getipl();
-    if(opl < IPL_BIO)
-        i8259a_raiseipl(IPL_BIO);
-    irq_enable();
-    return opl;
-}
-
-int
-spltty()
-{
-    irq_disable();
-    int opl=i8259a_getipl();
-    if(opl < IPL_TTY)
-        i8259a_raiseipl(IPL_TTY);
-    irq_enable();
-    return opl;
-}
-
-int
-spl0()
-{
-    irq_disable();
-    int opl=i8259a_getipl();
-    i8259a_loweripl(IPL_NONE);
-    irq_enable();
-    return opl;
 }
 
 void
-splx(int pl)
+intrpt_loweripl(int pl)
 {
-    irq_disable();
-    int opl=i8259a_getipl();
-    if(opl > pl)
-        i8259a_loweripl(pl);
-    else
-        i8259a_raiseipl(pl);
-    irq_enable();
+    TRACE_IN0();
+    CPL=pl;
+    i8259a_reset_mask();
+    //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
+    //podobnego, to tu mo¿emy je "obudziæ"
 }
 
-
+int
+intrpt_getipl()
+{
+    TRACE_IN0();
+    return CPL;
+}

@@ -76,3 +76,73 @@ vkprintf(const char *fmt, va_list ap)
     vsnprintf(big_buf, KPRINTF_BUF, fmt, ap);
     cons_msg(big_buf);
 }
+
+
+int
+splhigh()
+{
+    irq_disable();
+    TRACE_IN("enter");
+    int opl=intrpt_getipl();
+    intrpt_raiseipl(IPL_HIGH);
+    irq_enable();
+    TRACE_IN("leave");
+    return opl;
+}
+
+int
+splclock()
+{
+    irq_disable();
+    int opl=intrpt_getipl();
+    if(opl < IPL_CLOCK)
+        intrpt_raiseipl(IPL_CLOCK);
+    irq_enable();
+    return opl;
+}
+
+int
+splbio()
+{
+    irq_disable();
+    int opl=intrpt_getipl();
+    if(opl < IPL_BIO)
+        intrpt_raiseipl(IPL_BIO);
+    irq_enable();
+    return opl;
+}
+
+int
+spltty()
+{
+    irq_disable();
+    int opl=intrpt_getipl();
+    if(opl < IPL_TTY)
+        intrpt_raiseipl(IPL_TTY);
+    irq_enable();
+    return opl;
+}
+
+int
+spl0()
+{
+    irq_disable();
+    int opl=intrpt_getipl();
+    intrpt_loweripl(IPL_NONE);
+    irq_enable();
+    return opl;
+}
+
+void
+splx(int pl)
+{
+    irq_disable();
+    int opl=intrpt_getipl();
+    if(opl > pl)
+        intrpt_loweripl(pl);
+    else
+        intrpt_raiseipl(pl);
+    irq_enable();
+}
+
+

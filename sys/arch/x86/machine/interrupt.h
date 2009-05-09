@@ -107,12 +107,11 @@ void irq_install_handler(int irq, irq_handler_f *h, int ipl);
 void irq_free_handler(int irq);
 void irq_done(void);
 
-int splhigh(void);
-int splclock(void);
-int splbio(void);
-int spltty(void);
-int spl0(void);
-void splx(int pl);
+extern int CPL;
+
+void intrpt_raiseipl(int pl);
+void intrpt_loweripl(int pl);
+int  intrpt_getipl(void);
 
 
 /// Wy³±cza obs³ugê przerwañ

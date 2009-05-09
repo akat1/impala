@@ -79,7 +79,11 @@ start_init_process()
     x = kmem_alloc(S, KM_SLEEP);
     kprintf("Got %p\n", x);
 
-    for (;;);
+    for (;;) {
+        char c=pckbd_get_char();
+        if(c!=-1)
+            kprintf("%c", c);
+    }
 }
 
 void
