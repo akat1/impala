@@ -149,3 +149,12 @@ is_containing_addr(const vm_region_t *reg, vm_addr_t addr)
     return (reg->begin <= addr && addr < reg->end);
 }
 
+
+void *
+vm_kern_alloc(vm_size_t size)
+{
+    void *res;
+    vm_segment_alloc(&vm_kspace.seg_data, size, &res);
+    return res;
+}
+

@@ -60,7 +60,7 @@ enum {
 #define PAGE_DIR(p) (((uintptr_t)p) >> 22)
 /// Wyci±ga z adresu indeks w tablicy stron.
 #define PAGE_TBL(p) ( (((uintptr_t)p) >> 12) & 0x3ff)
-#define BASE_ADDR(p) (((uintptr_t)p) >> PAGE_SHIFT)
+#define PAGE_NUM(p) (((uintptr_t)p) >> PAGE_SHIFT)
 #define PTE_ADDR(p) ((uintptr_t)p & 0xfffff000 )
 
 
@@ -139,6 +139,7 @@ struct vm_page {
     vm_addr_t   kvirt_addr;
     /// opcje
     uint32_t    flags;
+    int         refcnt;
     /// wêze³ dla listy stron.
     list_node_t L_pages;        // lista stron.
     /// wêze³ dla listy odwzorowañ, w których jest strona.

@@ -76,7 +76,7 @@ vfs_byname(const char *name)
 {
     vfs_conf_t *c;
     mutex_lock(&global_lock);
-    c = list_find(&filesystems, is_this_fsname, (uintptr_t)name);
+    c = list_find(&filesystems, is_this_fsname, name);
     mutex_unlock(&global_lock);
     return c;
 }

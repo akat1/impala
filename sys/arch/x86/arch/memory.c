@@ -44,12 +44,13 @@
 size_t vm_physmem_max;
 size_t vm_physmem_free;
 
-vm_space_t vm_kspace;
 
 static void _pmap_insert_pte(vm_pmap_t *t, vm_page_t *p, vm_addr_t va);
 static void _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va);
+static vm_page_t * pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr);
 
 static vm_ptable_t *_alloc_ptable(void);
+static bool find_page(const vm_page_t *pg, uintptr_t paddr);
 
 /// Wska¼nik do tablicy opisu stron.
 static vm_page_t *vm_pages;
@@ -228,7 +229,7 @@ _collect_free_pages()
 {
     extern int kernel_end;
     vm_addr_t paddr;
-    vm_addr_t code_end = (BASE_ADDR(&kernel_end) + 1);
+    vm_addr_t code_end = (PAGE_NUM(&kernel_end) + 1);
     // ilo¶æ stron przeznaczonych na administracjê.
     vm_pages_size = ((sizeof(vm_page_t) * vm_physmem_max + 4095) >> PAGE_SHIFT);
 
@@ -248,6 +249,7 @@ _collect_free_pages()
         if (paddr > code_end) {
             vm_pages[i].kvirt_addr = 0;
             vm_pages[i].flags = PAGE_FREE;
+            vm_pages[i].refcnt = 0;
             list_insert_tail(&vm_free_pages, &vm_pages[i]);
         } else {
             vm_pages[i].kvirt_addr = paddr;
@@ -294,8 +296,18 @@ vm_pmap_init(vm_pmap_t *vpm)
 bool
 vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 {
+    vm_addr_t pa = p->phys_addr;
+    int pte = PAGE_TBL(va);
+    vm_ptable_t *pt = _pmap_pde(vpm, va);
+    if (pt == NULL) {
+        pt = _alloc_ptable();
+        if (pt == NULL) return FALSE;
+        _pmap_insert_pte_(vpm, pt, va);
+    }
+    p->refcnt++;
+    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | PTE_US;
     list_insert_tail(&vpm->pages, p);
-    return vm_pmap_insert_(vpm, p->phys_addr, va);
+    return TRUE;
 }
 
 /**
@@ -313,33 +325,33 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 bool
 vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
 {
-    int pte = PAGE_TBL(va);
-    vm_ptable_t *pt = _pmap_pde(vpm, va);
-    if (pt == NULL) {
-        pt = _alloc_ptable();
-        if (pt == NULL) return FALSE;
-        _pmap_insert_pte_(vpm, pt, va);
-    }
-    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | PTE_US;
-    return TRUE;
-
+    return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va);
 }
 
 void
 vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
 {
-    size += addr;
-    for (; addr < size; addr += PAGE_SIZE) {
+    for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
         vm_pmap_insert(pmap, p, addr);
     }
 }
 
-static bool find_page(const vm_page_t *pg, uintptr_t paddr);
-bool find_page(const vm_page_t *pg, uintptr_t paddr)
+
+void
+vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
+    vm_addr_t src_addr, vm_size_t size)
 {
-    return (pg->phys_addr == paddr);
-    
+    for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
+        vm_page_t *page = pmap_get_page(src_pmap, src_addr += PAGE_SIZE);
+        vm_pmap_insert(dst_pmap, page, dst_addr);
+    }
+}
+
+void
+vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
+{
+    ///@TODO wype³ñiæ!
 }
 
 /**
@@ -372,6 +384,8 @@ vm_pmap_erase(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
         vm_pmap_remove(pmap, addr);
     }
 }
+
+
 
 /**
  * T³umaczy adres wirtualny na fizyczny.
@@ -435,18 +449,6 @@ _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va)
     pdir->table[pde] = PTE_ADDR(pt) | PDE_PRESENT | PDE_RW | PDE_US;
 }
 
-/**
- * T³umaczy adres fizyczny na wirtualny.
- * @bug Obecnie dzia³a jedynie dla pamiêci wirtualnej j±dra.
- * @warning Zdefiniowane jedynie dla prawid³owych adresów.
- */
-vm_addr_t
-vm_ptov(vm_paddr_t pa)
-{
-    int n = BASE_ADDR(pa);
-    return vm_pages[n].kvirt_addr + PAGE_OFF(pa);
-}
-
 
 vm_ptable_t *
 _pmap_pde(const vm_pmap_t *vpm, vm_paddr_t addr)
@@ -466,6 +468,30 @@ _pmap_dir(const vm_pmap_t *vpm, vm_paddr_t addr)
 {
     vm_ptable_t *p = (vm_ptable_t*) vm_ptov(PTE_ADDR(vpm->pdir));
     return p;
+}
+
+vm_page_t *
+pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr)
+{
+    int n = PAGE_NUM(vm_pmap_phys(pmap, addr));
+    return &vm_pages[n];
+}
+
+/*========================================================================
+ * Obs³uga stron.
+ */
+
+
+/**
+ * T³umaczy adres fizyczny na wirtualny.
+ * @bug Obecnie dzia³a jedynie dla pamiêci wirtualnej j±dra.
+ * @warning Zdefiniowane jedynie dla prawid³owych adresów.
+ */
+vm_addr_t
+vm_ptov(vm_paddr_t pa)
+{
+    int n = PAGE_NUM(pa);
+    return vm_pages[n].kvirt_addr + PAGE_OFF(pa);
 }
 
 
@@ -490,3 +516,10 @@ _alloc_ptable()
     }
 }
 
+
+bool
+find_page(const vm_page_t *pg, uintptr_t paddr)
+{
+    return (pg->phys_addr == paddr);
+
+}

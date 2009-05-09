@@ -41,6 +41,8 @@
 /// Globalny zamek pamiêci wirtualnej.
 static spinlock_t vm_sp;
 vm_lpool_t vm_unused_regions;
+list_t vm_spaces;
+vm_space_t vm_kspace;
 
 /// Lista wolnych stron.
 list_t vm_free_pages;
@@ -51,6 +53,8 @@ void
 vm_init()
 {
     spinlock_init(&vm_sp);
+    list_create(&vm_spaces, offsetof(vm_space_t, L_spaces), FALSE);
+    list_insert_head(&vm_spaces, &vm_kspace);
 }
 
 

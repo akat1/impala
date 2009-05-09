@@ -34,10 +34,11 @@
 #define __SYS_VM_VM_SPACE_H
 
 struct vm_space {
-    vm_pmap_t      pmap;
-    vm_segment_t   seg_code;
-    vm_segment_t   seg_data;
-    vm_segment_t   seg_stack;
+    vm_pmap_t       pmap;
+    vm_segment_t    seg_code;
+    vm_segment_t    seg_data;
+    vm_segment_t    seg_stack;
+    list_node_t     L_spaces;
 };
 
 

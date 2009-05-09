@@ -38,11 +38,16 @@ bool vm_pmap_init(vm_pmap_t *);
 bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t);
 bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t);
 void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t);
-void vm_pmap_fillphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t);
+void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t);
 void vm_pmap_erase(vm_pmap_t *, vm_addr_t, vm_size_t);
 bool vm_pmap_remove(vm_pmap_t *, vm_addr_t);
 vm_paddr_t vm_pmap_phys(const vm_pmap_t *, vm_addr_t );
 bool vm_pmap_is_avail(const vm_pmap_t *, vm_addr_t);
 void vm_pmap_switch(const vm_pmap_t *);
-    
+void vm_pmap_clone(vm_pmap_t *, const vm_pmap_t *);
+void vm_pmap_map(vm_pmap_t *dst, vm_addr_t dst_addr,  const vm_pmap_t *src,
+    vm_addr_t src_addr, vm_size_t size);
+
+
+
 #endif
