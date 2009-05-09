@@ -54,8 +54,6 @@ vm_segment_create(vm_segment_t *vseg, vm_space_t *vsp,
 }
 
 
-
-
 int
 vm_segment_alloc(vm_segment_t *vseg, vm_size_t size, void *_res)
 {

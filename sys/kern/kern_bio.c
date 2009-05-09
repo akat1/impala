@@ -77,6 +77,7 @@ bio_init()
         sizeof(iobuf_t), (kmem_ctor_t*) physbuf_ctor,
         (kmem_dtor_t*)physbuf_dtor);
 
+    if (0) // w±tki wy³±czone s± z powodu niepoprawnej obs³ugi stosu
     kthread_create(&biodaemon_thread, biodaemon_main, NULL);
  
 }

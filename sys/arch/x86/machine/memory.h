@@ -40,7 +40,8 @@ enum {
     VM_SPACE_CODE_BEGIN     = 0x00100000,   // 1MB
     VM_SPACE_CODE_SIZE      = 0x00400000,   // 4MB
     VM_SPACE_DATA_BEGIN     = 0xc0000000,   // 3GB
-    VM_SPACE_DATA_SIZE      = 0x3fffffff,   // 1GB
+    VM_SPACE_DATA_SIZE      = 0x40000000,   // 1GB
+    VM_SPACE_DATA_END       = VM_SPACE_DATA_BEGIN + VM_SPACE_DATA_SIZE,
     VM_SPACE_UCODE_BEGIN    = 0x04000000,   // 64MB
     VM_SPACE_UCODE_SIZE     = 0x04400000,   // 4MB
     VM_SPACE_UDATA_BEGIN    = 0x40000000,   // 1GB
@@ -61,8 +62,9 @@ enum {
 /// Wyci±ga z adresu indeks w tablicy stron.
 #define PAGE_TBL(p) ( (((uintptr_t)p) >> 12) & 0x3ff)
 #define PAGE_NUM(p) (((uintptr_t)p) >> PAGE_SHIFT)
-#define PTE_ADDR(p) ((uintptr_t)p & 0xfffff000 )
-
+#define PTE_MASK 0xfffff000
+#define PTE_ADDR(p) ((uintptr_t)p & PTE_MASK )
+#define PTE_FLAGS(p) ((uintptr_t)p & ~PTE_MASK)
 
 #define PAGE_ADDR(p) (((uintptr_t)p) << PAGE_SHIFT)
 
@@ -70,7 +72,7 @@ enum {
 
 /**
  * Opis bitów dla wpisów w tablicy stron (Page Table Entry)
- * 
+ *
  * Intel 3A 3-29, Figure 3-14
  */
 enum {
@@ -155,7 +157,8 @@ struct vm_ptable {
 /// odwzorowanie stron.
 struct vm_pmap {
     /// fizyczny adres katalogu stron.
-    vm_paddr_t      pdir;       // fizyczny adres katalogu stron.
+    vm_paddr_t      physdir;    // fizyczny adres katalogu stron.
+    vm_ptable_t    *pdir;
     bool            keep_ptes;  // nie zwalnia pamiêci po pustych PTE
     /// lista stron w odwzorowaniu.
     list_t          pages;      // wmapowane strony.

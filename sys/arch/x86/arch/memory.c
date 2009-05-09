@@ -49,7 +49,7 @@ static void _pmap_insert_pte(vm_pmap_t *t, vm_page_t *p, vm_addr_t va);
 static void _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va);
 static vm_page_t * pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr);
 
-static vm_ptable_t *_alloc_ptable(void);
+static vm_ptable_t *_alloc_ptable(vm_page_t **pg);
 static bool find_page(const vm_page_t *pg, uintptr_t paddr);
 
 /// Wska¼nik do tablicy opisu stron.
@@ -57,16 +57,18 @@ static vm_page_t *vm_pages;
 /// Ilosc stron przeznaczona na opis.
 static int vm_pages_size;
 
+#define _GLOBAL(a,f) (VM_SPACE_DATA_BEGIN <= a && a < VM_SPACE_DATA_END)? f : 0
+
 /*========================================================================
  * Stronicowanie,
  */
 
 
-/// 
+///
 void
 vm_pmap_switch(const vm_pmap_t *pm)
 {
-    cpu_set_cr3(pm->pdir);
+    cpu_set_cr3(pm->physdir);
 }
 
 /// W³±cza stronicowanie.
@@ -125,21 +127,22 @@ create_kernel_space()
     kmap->keep_ptes = TRUE;
     page = vm_alloc_page();
     page->kvirt_addr = page->phys_addr;
-    kmap->pdir = page->phys_addr;
+    kmap->physdir = page->phys_addr;
+    kmap->pdir = (vm_ptable_t *) page->phys_addr;
     uintptr_t *table_dir = (uintptr_t*) page->phys_addr;
 
     page = vm_alloc_page();
     page->kvirt_addr = page->phys_addr;
 
     // Uzupe³niamy katalog stron.
-    table_dir[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_US;
-    for (int i = 1; i < 1024; i++) 
+    table_dir[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_G;
+    for (int i = 1; i < 1024; i++)
         table_dir[i] = 0;
 
     // Odwzorowywujemy jeden-do-jednego pierwsze 4MB
     uintptr_t *table = (uintptr_t*) page->phys_addr;
     for (int i = 0; i < 1024; i++) {
-        table[i] = PAGE_ADDR(i) | PTE_PRESENT | PTE_RW | PTE_US;
+        table[i] = PAGE_ADDR(i) | PTE_PRESENT | PTE_RW | PTE_G;
     }
 
     // W³±czamy stronicowanie.
@@ -150,7 +153,7 @@ create_kernel_space()
 void
 create_kernel_data()
 {
-   
+
     // Tworzymy tablice stron dla pamiêci j±dra, i rêcznie rozszerzamy
     // stertê j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
@@ -277,8 +280,10 @@ static vm_ptable_t *_pmap_dir(const vm_pmap_t *vpm, vm_paddr_t addr);
 bool
 vm_pmap_init(vm_pmap_t *vpm)
 {
+    vm_page_t *page;
     mem_zero(vpm, sizeof(*vpm));
-    vpm->pdir = vm_vtop((uintptr_t)_alloc_ptable());
+    vpm->pdir = (vm_ptable_t*) _alloc_ptable(&page);
+    vpm->physdir = page->phys_addr;
     vpm->keep_ptes = FALSE;
     list_create(&vpm->pages, offsetof(vm_page_t,L_pages), FALSE);
     return (vpm->pdir != 0);
@@ -296,16 +301,17 @@ vm_pmap_init(vm_pmap_t *vpm)
 bool
 vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 {
+    bool _G = _GLOBAL(va, PTE_G);
     vm_addr_t pa = p->phys_addr;
     int pte = PAGE_TBL(va);
     vm_ptable_t *pt = _pmap_pde(vpm, va);
     if (pt == NULL) {
-        pt = _alloc_ptable();
+        pt = _alloc_ptable(NULL);
         if (pt == NULL) return FALSE;
         _pmap_insert_pte_(vpm, pt, va);
     }
     p->refcnt++;
-    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | PTE_US;
+    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | _G;
     list_insert_tail(&vpm->pages, p);
     return TRUE;
 }
@@ -351,7 +357,19 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 void
 vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
 {
-    ///@TODO wype³ñiæ!
+        vm_pmap_init(dst);
+        vm_ptable_t *sdir = src->pdir;
+        vm_ptable_t *ddir = dst->pdir;
+        mem_cpy(dst->pdir, src->pdir, PAGE_SIZE);
+        for (int i = 0; i < PAGE_TBL(VM_SPACE_DATA_BEGIN); i++) {
+            if (sdir->table[i] & PDE_PRESENT) {
+                vm_page_t *page;
+                vm_ptable_t *newpt = _alloc_ptable(&page);
+                vm_ptable_t *oldpt = _pmap_pde(src, sdir->table[i]);
+                mem_cpy(newpt, oldpt, PAGE_SIZE);
+                ddir->table[i] = PTE_FLAGS(sdir->table[i]) | page->phys_addr;
+            }
+        }
 }
 
 /**
@@ -444,9 +462,10 @@ _pmap_insert_pte(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
 void
 _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va)
 {
+    bool _G = _GLOBAL(va, PDE_G);
     int pde = PAGE_DIR(va);
-    vm_ptable_t *pdir = _pmap_dir(vpm, va);
-    pdir->table[pde] = PTE_ADDR(pt) | PDE_PRESENT | PDE_RW | PDE_US;
+//     vm_ptable_t *pdir = _pmap_dir(vpm, va);
+    vpm->pdir->table[pde] = PTE_ADDR(pt) | PDE_PRESENT | PDE_RW | _G;
 }
 
 
@@ -466,8 +485,8 @@ _pmap_pde(const vm_pmap_t *vpm, vm_paddr_t addr)
 vm_ptable_t *
 _pmap_dir(const vm_pmap_t *vpm, vm_paddr_t addr)
 {
-    vm_ptable_t *p = (vm_ptable_t*) vm_ptov(PTE_ADDR(vpm->pdir));
-    return p;
+//     vm_ptable_t *p = (vm_ptable_t*) vm_ptov(PTE_ADDR(vpm->pdir));
+    return vpm->pdir;
 }
 
 vm_page_t *
@@ -505,8 +524,9 @@ vm_ptov(vm_paddr_t pa)
  * @return strona, lub NULL gdy nie uda³o siê przydzieliæ.
  */
 vm_ptable_t *
-_alloc_ptable()
+_alloc_ptable(vm_page_t **pgp)
 {
+#if 0
     vm_page_t *p = vm_kernel_alloc_page();
     if (p) {
         mem_zero((void*)p->phys_addr, PAGE_SIZE);
@@ -514,6 +534,13 @@ _alloc_ptable()
     } else {
         return NULL;
     }
+#endif
+    vm_ptable_t *res;
+    vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE, &res);
+    vm_page_t *pg = pmap_get_page(&vm_kspace.pmap, (vm_addr_t)res);
+    pg->kvirt_addr = (vm_addr_t) res;
+    if (pgp) *pgp = pg;
+    return res;
 }
 
 
