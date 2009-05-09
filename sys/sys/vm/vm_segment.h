@@ -44,6 +44,7 @@ struct vm_segment {
 };
 
 struct vm_region {
+    vm_segment_t    *segment;
     vm_addr_t       begin;
     vm_addr_t       end;
     size_t          size;
@@ -66,7 +67,7 @@ void vm_segment_create(vm_segment_t *vs, vm_space_t *s, vm_addr_t base,
 //void vm_segment_expand(vm_segment_t *vs, size_t size);
 vm_page_t * vm_segment_expand(vm_segment_t *vms, vm_addr_t *_va);
 
-vm_addr_t vm_segment_alloc(vm_segment_t *vs, size_t size);
+int vm_segment_alloc(vm_segment_t *vs, size_t size, void *res);
 void vm_segment_free(vm_segment_t *vs, vm_addr_t size, size_t length);
 
 

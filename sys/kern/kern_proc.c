@@ -162,7 +162,7 @@ bool find_this_pid(proc_t *p, pid_t pid)
 proc_t *
 proc_find(pid_t pid)
 {
-    return list_find(&procs_list, (list_pred_f *)find_this_pid, (void *)&pid);
+    return list_find(&procs_list, find_this_pid, pid);
 }
 
 /**

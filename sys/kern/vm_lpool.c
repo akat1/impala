@@ -128,9 +128,9 @@ vm_lpool_free(vm_lpool_t *vlp, void *x)
 {
 //    TRACE_IN("vlp=%p x=%p", vlp, x);
     _pool_t *p;
-    p = list_find(&vlp->full_pools, (list_pred_f*)is_in_this_pool, x);
+    p = list_find(&vlp->full_pools, is_in_this_pool, (uintptr_t) x );
     if (p == NULL) {
-        p = list_find(&vlp->part_pools, (list_pred_f*)is_in_this_pool, x);
+        p = list_find(&vlp->part_pools, is_in_this_pool, (uintptr_t) x);
     }
     KASSERT(p != NULL);
     list_insert_head(&p->elems, x);
@@ -177,7 +177,9 @@ stabilize_lpool(vm_lpool_t *vlp)
 //    TRACE_IN0();
     size_t emptys = list_length(&vlp->empty_pools);
     if (vlp->flags & VM_LPOOL_PREALLOC && emptys == 0) {
-        _pool_t *pl = (_pool_t*) vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE);
+        _pool_t *pl;
+        if (vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE, &pl)) {
+        }
         vm_lpool_insert_empty(vlp, pl);
     } else
     if (emptys > 1) {

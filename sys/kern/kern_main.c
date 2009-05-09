@@ -105,7 +105,6 @@ init_kernel()
 {
     vm_init();
     kmem_init();
-    kprintf(".\n");
     proc_init();
     thread_init();
     sched_init();

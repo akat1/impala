@@ -187,8 +187,7 @@ md_create(int unit, void *data, size_t size)
 void
 md_destroy(int unit)
 {
-    memdisk_t *md = list_find(&memdisks, (list_pred_f*) md_is_this,
-        (void*)unit);
+    memdisk_t *md = list_find(&memdisks, md_is_this, unit);
     KASSERT(md != NULL);
     KASSERT(md->owner == NULL);
     list_remove(&memdisks, md);

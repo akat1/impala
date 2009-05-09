@@ -89,7 +89,7 @@ devd_t *
 devd_find(const char *name)
 {
     uintptr_t u = (uintptr_t)name;
-    devd_t *d = list_find(&devs, (list_pred_f*)find_this_dev, (void*)u);
+    devd_t *d = list_find(&devs, find_this_dev, u);
     return d;
 }
 

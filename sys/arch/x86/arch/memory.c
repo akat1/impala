@@ -200,6 +200,7 @@ initialize_internal()
     reg->begin = kdata->base;
     reg->size = kdata->size;
     reg->end = reg->begin + reg->size;
+    reg->segment = kdata;
     list_insert_head(&kdata->regions, reg);
 }
 
@@ -323,13 +324,22 @@ vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
     return TRUE;
 
 }
-static bool find_page(const void *x, const void *param);
-bool find_page(const void *x, const void *param)
+
+void
+vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
 {
-    uintptr_t paddr = (uintptr_t)param;
-    const vm_page_t *pg = (const vm_page_t*)x;
-    if (pg->phys_addr == paddr) return TRUE;
-    return FALSE;
+    size += addr;
+    for (; addr < size; addr += PAGE_SIZE) {
+        vm_page_t *p = vm_alloc_page();
+        vm_pmap_insert(pmap, p, addr);
+    }
+}
+
+static bool find_page(const vm_page_t *pg, uintptr_t paddr);
+bool find_page(const vm_page_t *pg, uintptr_t paddr)
+{
+    return (pg->phys_addr == paddr);
+    
 }
 
 /**
@@ -343,8 +353,8 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     if (pt == NULL) {
         return FALSE;
     }
-
-    vm_page_t *pg = list_find(&pmap->pages, find_page, (void*)pt->table[pte]);
+    pt->table[pte] = PTE_ADDR(pt->table[pte]);
+    vm_page_t *pg = list_find(&pmap->pages, find_page, pt->table[pte]);
     KASSERT(pg != NULL);
     list_remove(&pmap->pages, pg);
     pt->table[pte] = 0;
@@ -354,6 +364,14 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     return TRUE;
 }
 
+
+void
+vm_pmap_erase(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
+{
+    for (size += addr; addr < size; addr += PAGE_SIZE) {
+        vm_pmap_remove(pmap, addr);
+    }
+}
 
 /**
  * T³umaczy adres wirtualny na fizyczny.

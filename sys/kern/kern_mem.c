@@ -154,8 +154,10 @@ kmem_alloc(size_t s, int flags)
     if (BIG_SIZE < s) {
         s += sizeof(kmem_bufctl_t);
         s = PAGE_ROUND(s);
-        kmem_bufctl_t *bctl =
-            (kmem_bufctl_t*) vm_segment_alloc(&vm_kspace.seg_data, s);
+        kmem_bufctl_t *bctl;
+        if (vm_segment_alloc(&vm_kspace.seg_data, s, (vm_addr_t*)&bctl)) {
+            panic("no memory");
+        }
         bctl->magic = KMEM_BUFCTL_MAGIC;
         bctl->slab = NULL;
         // ¶rednio podoba mi siê ten triczek, ale niech tak zostanie.
@@ -239,10 +241,12 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
         cache->slab_size = PAGE_SIZE;
      }
 
+#if 0
     DEBUGF("%s: slab_size %u items %u (wasted %u)", name, cache->slab_size,
         cache->slab_size / (esize + sizeof(kmem_bufctl_t)),
         cache->slab_size - (cache->slab_size / size) * size
         );
+#endif
     mutex_unlock(&global_lock);
     return cache;
 }
@@ -324,11 +328,8 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
 void
 kmem_init()
 {
-    kprintf(".\n");
     vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches), 
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
-    kprintf(";\n");
-
     vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
         sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
     vm_lpool_create(&lpool_bufctls, offsetof(kmem_bufctl_t, L_bufs),
@@ -370,7 +371,11 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
     list_create(&slab->free_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     slab->cache = cache;
-    char *data = (char*)vm_segment_alloc(&vm_kspace.seg_data, cache->slab_size);
+    char *data;
+    if (vm_segment_alloc(&vm_kspace.seg_data, cache->slab_size,
+            (vm_addr_t*)&data)) {
+        panic("no memory");
+    }
     KASSERT(data != NULL);
     slab->addr = data;
     slab->items = cache->slab_size / ( sizeof(kmem_bufctl_t) + cache->elem_size );
