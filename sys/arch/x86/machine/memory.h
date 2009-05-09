@@ -162,6 +162,8 @@ struct vm_pmap {
     /// fizyczny adres katalogu stron.
     vm_paddr_t      physdir;    // fizyczny adres katalogu stron.
     vm_ptable_t    *pdir;
+    uint16_t        pdircount[1024];
+
     bool            keep_ptes;  // nie zwalnia pamiêci po pustych PTE
     /// lista stron w odwzorowaniu.
     list_t          pages;      // wmapowane strony.

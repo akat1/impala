@@ -123,6 +123,7 @@ create_kernel_space()
 
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
+    mem_zero(kmap, sizeof(vm_pmap_t));
     list_create(&kmap->pages, offsetof(vm_page_t, L_pages), FALSE);
     kmap->keep_ptes = TRUE;
     page = vm_alloc_page();
@@ -311,6 +312,7 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
         _pmap_insert_pte_(vpm, pt, va);
     }
     p->refcnt++;
+    if (!_G) vpm->pdircount[PAGE_DIR(va)]++;
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | _G;
     list_insert_tail(&vpm->pages, p);
     return TRUE;
@@ -380,6 +382,8 @@ bool
 vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
 {
     int pte = PAGE_TBL(va);
+    int pde = PAGE_DIR(va);
+    int _G = _GLOBAL(va, 1);
     vm_ptable_t *pt = _pmap_pde(pmap, va);
     if (pt == NULL) {
         return FALSE;
@@ -389,8 +393,11 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     KASSERT(pg != NULL);
     list_remove(&pmap->pages, pg);
     pt->table[pte] = 0;
-    if (!pmap->keep_ptes) {
-        // usun stronê z pamiêci
+    if (!_G) {
+        if (--pmap->pdircount[pde] == 0) {
+            vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)pt, PAGE_SIZE);
+            pmap->pdir->table[pde] = 0;
+        }
     }
     return TRUE;
 }
