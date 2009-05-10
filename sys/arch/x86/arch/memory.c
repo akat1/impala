@@ -250,13 +250,14 @@ _collect_free_pages()
     list_create( &vm_free_pages, offsetof(vm_page_t, L_pages), FALSE);
     for (int i = 0; i < vm_physmem_free; i++, paddr += PAGE_SIZE) {
         vm_pages[i].phys_addr = paddr;
+        vm_pages[i].flags = 0;
         if (paddr > code_end) {
             vm_pages[i].kvirt_addr = 0;
-            vm_pages[i].flags = PAGE_FREE;
             vm_pages[i].refcnt = 0;
             list_insert_tail(&vm_free_pages, &vm_pages[i]);
         } else {
             vm_pages[i].kvirt_addr = paddr;
+            vm_pages[i].refcnt = 1;
             vm_pages[i].flags = 0;
         }
     }
@@ -389,14 +390,20 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
         return FALSE;
     }
     pt->table[pte] = PTE_ADDR(pt->table[pte]);
+    ///@TODO: VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
+    ///       licznikach odniesieñ i deskryptorach stron.
     vm_page_t *pg = list_find(&pmap->pages, find_page, pt->table[pte]);
     KASSERT(pg != NULL);
+    pg->refcnt--;
     list_remove(&pmap->pages, pg);
     pt->table[pte] = 0;
     if (!_G) {
         if (--pmap->pdircount[pde] == 0) {
             vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)pt, PAGE_SIZE);
             pmap->pdir->table[pde] = 0;
+            if (pg->refcnt == 0) {
+                list_insert_tail(&vm_free_pages, pg);
+            }
         }
     }
     return TRUE;
