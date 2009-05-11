@@ -346,12 +346,11 @@ vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, int flags)
 }
 
 void
-vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
+vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, int flags)
 {
     for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
-        vm_pmap_insert(pmap, p, addr, 
-                        VM_PROT_RWX | VM_PROT_SYSTEM);
+        vm_pmap_insert(pmap, p, addr, flags);
     }
 }
 

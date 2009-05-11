@@ -46,8 +46,8 @@ enum {
 bool vm_pmap_init(vm_pmap_t *);
 bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t, int flags);
 bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t, int flags);
-void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t);
-void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t);
+void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t, int flags);
+void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t, int flags);
 void vm_pmap_erase(vm_pmap_t *, vm_addr_t, vm_size_t);
 bool vm_pmap_remove(vm_pmap_t *, vm_addr_t);
 vm_paddr_t vm_pmap_phys(const vm_pmap_t *, vm_addr_t );

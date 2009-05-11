@@ -121,7 +121,8 @@ expand_region(vm_segment_t *segment, vm_region_t *region, vm_size_t size)
         region->size += nextreg->size;
         list_remove(&segment->regions, nextreg);
     }
-    vm_pmap_fill(&segment->space->pmap, newaddr, size);
+    vm_pmap_fill(&segment->space->pmap, newaddr, size,
+                  VM_PROT_RWX | VM_PROT_SYSTEM);
 }
 
 bool
