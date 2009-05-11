@@ -51,7 +51,6 @@ static void _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va);
 static vm_page_t * pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr);
 
 static vm_ptable_t *_alloc_ptable(vm_page_t **pg);
-static bool find_page(const vm_page_t *pg, uintptr_t paddr);
 
 /// Wska¼nik do tablicy opisu stron.
 static vm_page_t *vm_pages;
@@ -132,8 +131,6 @@ create_kernel_space()
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     mem_zero(kmap, sizeof(vm_pmap_t));
-    list_create(&kmap->pages, offsetof(vm_page_t, L_pages), FALSE);
-    kmap->keep_ptes = TRUE;
     page = vm_alloc_page();
     page->kvirt_addr = page->phys_addr;
     kmap->physdir = page->phys_addr;
@@ -298,9 +295,7 @@ vm_pmap_init(vm_pmap_t *vpm)
     mem_zero(vpm, sizeof(*vpm));
     vpm->pdir = (vm_ptable_t*) _alloc_ptable(&page);
     vpm->physdir = page->phys_addr;
-    vpm->keep_ptes = FALSE;
     mem_cpy(vpm->pdir, vm_kspace.pmap.pdir, PAGE_SIZE);
-    list_create(&vpm->pages, offsetof(vm_page_t,L_pages), FALSE);
     return (vpm->pdir != 0);
 }
 
@@ -331,7 +326,6 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
         | ((flags & VM_PROT_WRITE)?PTE_RW:0)
         | ((flags & VM_PROT_SYSTEM)?0:PTE_US)
         | _G;
-    list_insert_tail(&vpm->pages, p);
     return TRUE;
 }
 
@@ -359,6 +353,17 @@ vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, int flags)
     for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
         vm_pmap_insert(pmap, p, addr, flags);
+    }
+}
+
+void
+vm_pmap_mapphys(vm_pmap_t *pmap, vm_addr_t dst_addr, vm_paddr_t src_addr,
+                      vm_size_t size, int flags)
+{
+    int n = PAGE_NUM(src_addr);
+    for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE, n++) {
+        vm_page_t *page = &vm_pages[n];
+        vm_pmap_insert(pmap, page, dst_addr, flags);
     }
 }
 
@@ -409,10 +414,10 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     pt->table[pte] = PTE_ADDR(pt->table[pte]);
     ///@TODO: VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
     ///       licznikach odniesieñ i deskryptorach stron.
-    vm_page_t *pg = list_find(&pmap->pages, find_page, pt->table[pte]);
+    ///@TODO: zastanowiæ siê nad sensem poprzedniego TODO
+    vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
     KASSERT(pg != NULL);
     pg->refcnt--;
-    list_remove(&pmap->pages, pg);
     pt->table[pte] = 0;
     if (!_G) {
         if (--pmap->pdircount[pde] == 0) {
@@ -475,7 +480,8 @@ vm_pmap_is_avail(const vm_pmap_t *vpm, vm_addr_t va)
  * Zwraca flagi ustawione dla strony zwi±zanej z danym adresem wirtualnym
  */
 
-int _pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr)
+int
+_pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr)
 {
     int pte = PAGE_TBL(addr);
     vm_ptable_t *pt = _pmap_pde(pmap, addr);
@@ -582,12 +588,4 @@ _alloc_ptable(vm_page_t **pgp)
     pg->kvirt_addr = (vm_addr_t) res;
     if (pgp) *pgp = pg;
     return res;
-}
-
-
-bool
-find_page(const vm_page_t *pg, uintptr_t paddr)
-{
-    return (pg->phys_addr == paddr);
-
 }

@@ -159,10 +159,7 @@ struct vm_page {
     vm_addr_t   kvirt_addr;
     uint32_t    flags;      ///< opcje
     int         refcnt;
-    /// wêze³ dla listy stron.
-    list_node_t L_pages;        // lista stron.
-    /// wêze³ dla listy odwzorowañ, w których jest strona.
-    list_node_t L_pmaps;        // lista odwzorowañ w których jest strona.
+    list_node_t L_pages;    ///< wêze³ dla listy stron.
 };
 
 /// Tablica (katalog) stron.
@@ -173,13 +170,9 @@ struct vm_ptable {
 
 /// odwzorowanie stron.
 struct vm_pmap {
-    vm_paddr_t      physdir;    //< fizyczny adres katalogu stron.
+    vm_paddr_t      physdir;    ///< fizyczny adres katalogu stron.
     vm_ptable_t    *pdir;
     uint16_t        pdircount[1024];
-
-    bool            keep_ptes;  // nie zwalnia pamiêci po pustych PTE
-    /// lista stron w odwzorowaniu.
-    list_t          pages;      // wmapowane strony.
 };
 
 extern size_t vm_physmem_max;
