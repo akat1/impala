@@ -104,7 +104,7 @@ vm_segment_expand(vm_segment_t *vms, vm_addr_t *_va)
         vm_addr_t va;
         vm_page_t *p = vm_alloc_page();
         va = vms->base + vms->size;
-        vm_pmap_insert(&vms->space->pmap, p, va); 
+        vm_pmap_insert(&vms->space->pmap, p, va, VM_PROT_RWX | VM_PROT_SYSTEM); 
         p->flags &= ~PAGE_FREE;
         vms->size += PAGE_SIZE;
         if (_va) *_va = va;

@@ -34,9 +34,18 @@
 #ifndef __SYS_VM_VM_PMAP_H
 #define __SYS_VM_VM_PMAP_H
 
+enum {
+    VM_PROT_READ = 1<<0,
+    VM_PROT_WRITE = 1<<1,
+    VM_PROT_EXEC = 1<<2,
+    VM_PROT_USER = 1<<3,
+    VM_PROT_SYSTEM = 1<<4,
+    VM_PROT_RWX = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXEC
+};
+
 bool vm_pmap_init(vm_pmap_t *);
-bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t);
-bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t);
+bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t, int flags);
+bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t, int flags);
 void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t);
 void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t);
 void vm_pmap_erase(vm_pmap_t *, vm_addr_t, vm_size_t);

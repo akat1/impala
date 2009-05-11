@@ -137,13 +137,11 @@ enum PAGE_FLAGS {
 
 /// Deskryptor strony pamiêci
 struct vm_page {
-    /// fizyczny adres strony
-    vm_paddr_t  phys_addr;
+    vm_paddr_t  phys_addr;  ///< fizyczny adres strony
     /// adres w wirtualnej przestrzeni j±dra
     /// u¿ywanie jedynie dla meta-danych VM!
     vm_addr_t   kvirt_addr;
-    /// opcje
-    uint32_t    flags;
+    uint32_t    flags;      ///< opcje
     int         refcnt;
     /// wêze³ dla listy stron.
     list_node_t L_pages;        // lista stron.
@@ -159,8 +157,7 @@ struct vm_ptable {
 
 /// odwzorowanie stron.
 struct vm_pmap {
-    /// fizyczny adres katalogu stron.
-    vm_paddr_t      physdir;    // fizyczny adres katalogu stron.
+    vm_paddr_t      physdir;    //< fizyczny adres katalogu stron.
     vm_ptable_t    *pdir;
     uint16_t        pdircount[1024];
 

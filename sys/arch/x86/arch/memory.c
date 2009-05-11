@@ -45,6 +45,7 @@ size_t vm_physmem_max;
 size_t vm_physmem_free;
 
 
+static int _pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr);
 static void _pmap_insert_pte(vm_pmap_t *t, vm_page_t *p, vm_addr_t va);
 static void _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va);
 static vm_page_t * pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr);
@@ -176,7 +177,8 @@ create_kernel_data()
         table[i] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_US;
         kdata->size += PAGE_SIZE;
         _pmap_insert_pte(kmap, page, vaddr);
-        vm_pmap_insert(kmap, page, page->kvirt_addr);
+        vm_pmap_insert(kmap, page, page->kvirt_addr,
+                       VM_PROT_RWX | VM_PROT_SYSTEM);
         vaddr += PAGE_SIZE*1024;
     }
 }
@@ -191,13 +193,15 @@ initialize_internal()
     vm_page_t *page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
     kdata->size += PAGE_SIZE;
-    vm_pmap_insert(kmap, page, page->kvirt_addr);
+    vm_pmap_insert(kmap, page, page->kvirt_addr,
+                    VM_PROT_RWX | VM_PROT_SYSTEM); //czy na pewno?
     vm_lpool_create_(&vm_unused_regions, offsetof(vm_region_t,L_regions),
             sizeof(vm_region_t), VM_LPOOL_NORMAL, (void*)page->kvirt_addr);
     page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
     kdata->size += PAGE_SIZE;
-    vm_pmap_insert(kmap, page, page->kvirt_addr);
+    vm_pmap_insert(kmap, page, page->kvirt_addr, 
+                    VM_PROT_RWX | VM_PROT_SYSTEM);
     vm_lpool_insert_empty(&vm_unused_regions, (void*)page->kvirt_addr);
 
     vm_region_t *reg = vm_lpool_alloc(&vm_unused_regions);
@@ -207,6 +211,7 @@ initialize_internal()
     reg->end = reg->begin + reg->size;
     reg->segment = kdata;
     list_insert_head(&kdata->regions, reg);
+    cpu_set_cr0(cpu_get_cr0() | CR0_WP);
 }
 
 /// Wykrywa ilo¶æ zainstalowanej pamiêci RAM.
@@ -301,7 +306,7 @@ vm_pmap_init(vm_pmap_t *vpm)
  *         na now± tablicê stron.
  */
 bool
-vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
+vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
 {
     bool _G = _GLOBAL(va, PTE_G);
     vm_addr_t pa = p->phys_addr;
@@ -314,7 +319,10 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
     }
     p->refcnt++;
     if (!_G) vpm->pdircount[PAGE_DIR(va)]++;
-    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT | PTE_RW | _G;
+    pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT 
+        | ((flags & VM_PROT_WRITE)?PTE_RW:0)
+        | ((flags & VM_PROT_SYSTEM)?0:PTE_US)
+        | _G;
     list_insert_tail(&vpm->pages, p);
     return TRUE;
 }
@@ -332,9 +340,9 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
  * Nie bêdziemy zarz±dzañ stronami z kodem j±dra.
  */
 bool
-vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va)
+vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, int flags)
 {
-    return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va);
+    return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va, flags);
 }
 
 void
@@ -342,7 +350,8 @@ vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
 {
     for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
-        vm_pmap_insert(pmap, p, addr);
+        vm_pmap_insert(pmap, p, addr, 
+                        VM_PROT_RWX | VM_PROT_SYSTEM);
     }
 }
 
@@ -353,7 +362,9 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
-        vm_pmap_insert(dst_pmap, page, dst_addr);
+        ///@todo: mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
+        int flags = _pmap_page_flags(src_pmap, src_addr);
+        vm_pmap_insert(dst_pmap, page, dst_addr, flags);
         src_addr += PAGE_SIZE;
     }
 }
@@ -454,7 +465,16 @@ vm_pmap_is_avail(const vm_pmap_t *vpm, vm_addr_t va)
     return pt->table[pte] & PTE_PRESENT;
 }
 
+/**
+ * Zwraca flagi ustawione dla strony zwi±zanej z danym adresem wirtualnym
+ */
 
+int _pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr)
+{
+    int pte = PAGE_TBL(addr);
+    vm_ptable_t *pt = _pmap_pde(pmap, addr);
+    return PTE_FLAGS(pt->table[pte]);
+}
 
 /**
  * Wstawia tablicê stron w katalog.
