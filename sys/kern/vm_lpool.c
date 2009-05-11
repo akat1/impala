@@ -178,14 +178,14 @@ stabilize_lpool(vm_lpool_t *vlp)
     size_t emptys = list_length(&vlp->empty_pools);
     if (vlp->flags & VM_LPOOL_PREALLOC && emptys == 0) {
         _pool_t *pl;
-        if (vm_segment_alloc(&vm_kspace.seg_data, PAGE_SIZE, &pl)) {
+        if (vm_segment_alloc(vm_kspace.seg_data, PAGE_SIZE, &pl)) {
         }
         vm_lpool_insert_empty(vlp, pl);
     } else
     if (emptys > 1) {
         while (list_length(&vlp->empty_pools) > 1) {
             _pool_t *pl = list_extract_last(&vlp->empty_pools);
-            vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)pl, PAGE_SIZE);
+            vm_segment_free(vm_kspace.seg_data, (vm_addr_t)pl, PAGE_SIZE);
         }
     }
 }

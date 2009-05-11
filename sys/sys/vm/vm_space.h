@@ -32,14 +32,26 @@
 
 #ifndef __SYS_VM_VM_SPACE_H
 #define __SYS_VM_VM_SPACE_H
+#ifdef __KERNEL
 
 struct vm_space {
     vm_pmap_t       pmap;
-    vm_segment_t    seg_code;
-    vm_segment_t    seg_data;
-    vm_segment_t    seg_stack;
+    vm_segment_t    *seg_text;
+    vm_segment_t    *seg_data;
+    vm_segment_t    *seg_stack;
     list_node_t     L_spaces;
+    int             space;
 };
 
+enum {
+    VM_SPACE_SYSTEM,
+    VM_SPACE_USER
+};
 
+int vm_space_create(vm_space_t *, int space);
+int vm_space_resize_stack(vm_space_t *, vm_size_t s);
+void vm_space_destroy(vm_space_t *space);
+void vm_space_clone(vm_space_t *space);
+
+#endif
 #endif

@@ -86,11 +86,7 @@ ISR_irq(interrupt_frame frame)
 {
     bool eoi = FALSE;
     if (frame.f_n < MAX_IRQ) {
-        if(irq_handlers[frame.f_n] == NULL) {
-            eoi=0;
-            kprintf("Sp. interrupt: %u\n", frame.f_n);
-        }
-        else
+        if(irq_handlers[frame.f_n] != NULL) 
             eoi = irq_handlers[frame.f_n]();
     }
     if (!eoi) i8259a_send_eoi();

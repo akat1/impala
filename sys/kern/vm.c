@@ -46,7 +46,7 @@ vm_space_t vm_kspace;
 
 /// Lista wolnych stron.
 list_t vm_free_pages;
-
+vm_lpool_t vm_lpool_segments;
 
 /// Inicjalizuje system pamiêci wirtualnej.
 void
@@ -55,6 +55,8 @@ vm_init()
     spinlock_init(&vm_sp);
     list_create(&vm_spaces, offsetof(vm_space_t, L_spaces), FALSE);
     list_insert_head(&vm_spaces, &vm_kspace);
+    vm_lpool_create(&vm_lpool_segments, offsetof(vm_segment_t, L_segments),
+        sizeof(vm_segment_t), VM_LPOOL_NORMAL);
 }
 
 
@@ -96,24 +98,6 @@ vm_free_page(vm_page_t *p)
     vm_physmem_free++;
 }
 
-
-vm_page_t *
-vm_segment_expand(vm_segment_t *vms, vm_addr_t *_va)
-{
-    if (vms->base + vms->size + PAGE_SIZE <= vms->limit) {
-        vm_addr_t va;
-        vm_page_t *p = vm_alloc_page();
-        va = vms->base + vms->size;
-        vm_pmap_insert(&vms->space->pmap, p, va, VM_PROT_RWX | VM_PROT_SYSTEM); 
-        p->flags &= ~PAGE_FREE;
-        vms->size += PAGE_SIZE;
-        if (_va) *_va = va;
-        return p;
-    } else {
-        return NULL;
-    }
-}
-
 vm_paddr_t
 vm_space_phys(const vm_space_t *vms, vm_addr_t addr)
 {
@@ -137,15 +121,5 @@ vm_paddr_t
 vm_vtop(vm_addr_t va)
 {
     return vm_pmap_phys(&vm_kspace.pmap, va);
-}
-
-
-vm_page_t *
-vm_kernel_alloc_page()
-{
-    vm_addr_t x;
-    vm_page_t *p = vm_segment_expand(&vm_kspace.seg_data, &x);
-    p->kvirt_addr = x;
-    return p;
 }
 

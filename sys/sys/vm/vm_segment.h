@@ -37,24 +37,26 @@ struct vm_segment {
     vm_space_t     *space;
     vm_addr_t       base;
     vm_addr_t       end;
-    size_t          size;
-    size_t          limit;
+    vm_size_t       size;
+    vm_size_t       limit;
     int             flags;
     list_t          regions;
+    list_node_t     L_segments;
 };
 
 struct vm_region {
     vm_segment_t    *segment;
     vm_addr_t       begin;
     vm_addr_t       end;
-    size_t          size;
+    vm_size_t       size;
     list_node_t     L_regions;
-    int             flags;
+//     int             flags;
 };
 
 
 enum VM_SEGMENT_FLAGS {
-    VM_SEG_EXPAND_DOWN      = 1 << 0
+    VM_SEGMENT_NORMAL       = 1 << 1,
+    VM_SEGMENT_EXPDOWN      = 1 << 2
 };
 
 enum VM_REGION_FLAGS {
@@ -63,12 +65,9 @@ enum VM_REGION_FLAGS {
 };
 
 void vm_segment_create(vm_segment_t *vs, vm_space_t *s, vm_addr_t base,
-        size_t len, size_t limit);
-//void vm_segment_expand(vm_segment_t *vs, size_t size);
-vm_page_t * vm_segment_expand(vm_segment_t *vms, vm_addr_t *_va);
-
+        size_t len, size_t limit, int flags);
+int vm_segment_resize(vm_segment_t *vseg, vm_size_t size);
 int vm_segment_alloc(vm_segment_t *vs, size_t size, void *res);
 void vm_segment_free(vm_segment_t *vs, vm_addr_t size, size_t length);
-
 
 #endif

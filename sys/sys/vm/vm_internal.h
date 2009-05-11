@@ -34,6 +34,6 @@
 #define __SYS_VM_VM_INTERNAL_H
 
 extern vm_lpool_t vm_unused_regions;
-
+extern vm_lpool_t vm_lpool_segments;
 #endif
 

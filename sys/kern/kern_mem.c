@@ -84,7 +84,7 @@ enum {
     LARGE_SIZE  = PAGE_SIZE/8,
     BIG_SIZE = (1<<15),
     /// Pomocnik przy rozpoznawaniu uszkodzonia struktur
-    KMEM_BUFCTL_MAGIC = 0xdeadbabe,    
+    KMEM_BUFCTL_MAGIC = 0xdeadbabe,
 };
 
 
@@ -155,7 +155,7 @@ kmem_alloc(size_t s, int flags)
         s += sizeof(kmem_bufctl_t);
         s = PAGE_ROUND(s);
         kmem_bufctl_t *bctl;
-        if (vm_segment_alloc(&vm_kspace.seg_data, s, (vm_addr_t*)&bctl)) {
+        if (vm_segment_alloc(vm_kspace.seg_data, s, (vm_addr_t*)&bctl)) {
             panic("no memory");
         }
         bctl->magic = KMEM_BUFCTL_MAGIC;
@@ -182,7 +182,7 @@ kmem_free(void *ptr)
     if (bctl->slab) {
         kmem_cache_free(bctl->slab->cache, ptr);
     } else {
-        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)bctl,
+        vm_segment_free(vm_kspace.seg_data, (vm_addr_t)bctl,
             (size_t)bctl->addr);
     }
 }
@@ -223,7 +223,7 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     cache->ctor = ctor;
     cache->dtor = dtor;
     size_t size = esize + sizeof(kmem_bufctl_t);
-    
+
      if (LARGE_SIZE < esize) {
         size_t bestfit, slabsize, waste;
         size_t minwaste = 0 - 1;
@@ -304,7 +304,7 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
     // sprawdzamy czy dan± p³ytê nie trzeba przepi±æ.
     if (list_length(&bctl->slab->free_bufs) == 0) {
         list_remove(&cache->full_slabs, bctl->slab);
-        list_insert_head(&cache->part_slabs, bctl->slab); 
+        list_insert_head(&cache->part_slabs, bctl->slab);
     } else
     if (list_length(&bctl->slab->used_bufs) == 1) {
         list_remove(&cache->part_slabs, bctl->slab);
@@ -328,7 +328,7 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
 void
 kmem_init()
 {
-    vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches), 
+    vm_lpool_create(&lpool_caches, offsetof(kmem_cache_t, L_caches),
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
     vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
         sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
@@ -372,7 +372,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
     list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     slab->cache = cache;
     char *data;
-    if (vm_segment_alloc(&vm_kspace.seg_data, cache->slab_size,
+    if (vm_segment_alloc(vm_kspace.seg_data, cache->slab_size,
             (vm_addr_t*)&data)) {
         panic("no memory");
     }
@@ -450,7 +450,7 @@ check_cache(kmem_cache_t *cache)
         while ( (x = list_next(&slab->free_bufs, x)) ) {
             cache->dtor(x);
         }
-        vm_segment_free(&vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
+        vm_segment_free(vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
         mutex_lock(&global_lock);
         vm_lpool_free(&lpool_slabs, slab);
         mutex_unlock(&global_lock);
@@ -465,7 +465,7 @@ kmem_bufctl_t *
 get_bufctl_from_ptr(void *ptr)
 {
     /*
-     * W przysz³o¶ci ten schemat mo¿e siê zmieniæ dla alokacji 
+     * W przysz³o¶ci ten schemat mo¿e siê zmieniæ dla alokacji
      * du¿ych porcji danych, st±d oddzielna procedura.
      */
     kmem_bufctl_t *bctl = ((kmem_bufctl_t*) ptr) - 1;
