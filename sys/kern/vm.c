@@ -31,12 +31,12 @@
  */
 
 #include <sys/types.h>
-#include <sys/list.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_pmap.h>
 #include <sys/vm/vm_lpool.h>
 #include <sys/vm/vm_internal.h>
 #include <sys/thread.h>
+#include <sys/utils.h>
 
 /// Globalny zamek pamiêci wirtualnej.
 static spinlock_t vm_sp;
@@ -57,6 +57,7 @@ vm_init()
     list_insert_head(&vm_spaces, &vm_kspace);
     vm_lpool_create(&vm_lpool_segments, offsetof(vm_segment_t, L_segments),
         sizeof(vm_segment_t), VM_LPOOL_NORMAL);
+    DEBUGF("vm inited");
 }
 
 

@@ -44,7 +44,7 @@ int segment_grow(vm_segment_t *vseg, vm_size_t size);
 int segment_descend(vm_segment_t *vseg, vm_size_t size);
 
 
-#define has_space(seg,size) (((seg)->size + size) < (seg)->limit)
+#define has_space(seg,size) (((seg)->size + (size)) <= (seg)->limit)
 
 void
 vm_segment_create(vm_segment_t *vseg, vm_space_t *vsp,
@@ -91,12 +91,17 @@ vm_segment_resize(vm_segment_t *vseg, vm_size_t size)
 int
 segment_grow(vm_segment_t *vseg, vm_size_t size)
 {
+//     TRACE_IN("");
+    vm_addr_t start;
     if (!has_space(vseg,size)) return -1;
     if (vseg->flags & VM_SEGMENT_EXPDOWN) {
+//         TRACE_IN("VM_SEGMENT_EXPDOWN");
         // je¿eli to segment pamiêci rozszerzalny w dó³ (stosowy)
         vseg->size += size;
         vseg->end -= size;
+        start = vseg->end;
     } else {
+//         TRACE_IN("VM_SEGMENT_NORMAL");
         // je¿eli to segment pamiêci z normalnym zarz±dzaniem.
         vm_region_t *reg = list_tail(&vseg->regions);
         if (reg == NULL) {
@@ -107,18 +112,23 @@ segment_grow(vm_segment_t *vseg, vm_size_t size)
             reg->segment = vseg;
             reg->begin = vseg->base;
             reg->size = size;
+            start = reg->end;
             reg->end = reg->begin + size;
         } else {
             // je¿eli jakie¶ s±, to zlecamy rozszerzenie tego ostatniego.
             return expand_region(vseg, reg, size);
         }
     }
+//     TRACE_IN("map fill %p+%p", start, size);
+    vm_pmap_fill(&vseg->space->pmap, start, size,
+                  VM_PROT_RWX | VM_PROT_SYSTEM);
     return 0;
 }
 
 int
 segment_descend(vm_segment_t *vseg, vm_size_t size)
 {
+    TRACE_IN("");
     return -1;
 }
 

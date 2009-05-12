@@ -80,7 +80,7 @@ i8259a_init()
     // ICW1
     io_out8(PIC_M, ICW1_RESET | ICW1_ICW4);
     // ICW2
-    io_out8(PIC_M+1, INTERRUPT_VECTOR);   
+    io_out8(PIC_M+1, INTERRUPT_VECTOR);
     // ICW3
     io_out8(PIC_M+1, 0x04);
     // ICW4
@@ -89,7 +89,7 @@ i8259a_init()
     // ICW1
     io_out8(PIC_S, ICW1_RESET | ICW1_ICW4);
     // ICW2
-    io_out8(PIC_S+1, INTERRUPT_VECTOR+0x8);   
+    io_out8(PIC_S+1, INTERRUPT_VECTOR+0x8);
     // ICW3
     io_out8(PIC_S+1, 0x02);
     // ICW4
@@ -100,7 +100,7 @@ i8259a_init()
     for(int i=0; i<MAX_IRQ; i++)
         irq_priority[i] = IPL_NONE;
     CPL = 0;
-       
+
     i8259a_update_masks();
     i8259a_reset_mask();
 }
@@ -109,7 +109,6 @@ i8259a_init()
 void
 i8259a_update_masks()
 {
-    TRACE_IN0();
     //nasz cel: ustawiæ picX_pl_mask
     //we¼my liniowy porz±dek; przerwanie o poziomie l powinno byæ w³±czone
     //na wszystkich poziomach mniejszych od l
@@ -118,7 +117,7 @@ i8259a_update_masks()
         irqs_at_pl[i] = 0;
     for(int i=0; i<MAX_IRQ; i++)
         irqs_at_pl[irq_priority[i]] |= 1<<i;
-    
+
     int mask_at_pl[MAX_IPL];
     mask_at_pl[0] = irqs_at_pl[0];
     for(int i=1; i<MAX_IPL; i++)
@@ -135,12 +134,10 @@ i8259a_update_masks()
 void
 i8259a_reset_mask()
 {
-    TRACE_IN("enter");
 //     for(int i=0; i<MAX_IPL; i++)
 //        kprintf("maski (ipl=%u, cpl=%u): %08b %08b\n", i, CPL, pic1_pl_mask[i], pic2_pl_mask[i]);
     io_out8(PIC_M+1, pic1_pl_mask[CPL]);
     io_out8(PIC_S+1, pic2_pl_mask[CPL]);
-    TRACE_IN("leave");
 
 }
 
@@ -148,7 +145,6 @@ i8259a_reset_mask()
 void
 i8259a_irq_enable(int n)
 {
-    TRACE_IN0();
     if (n < 0x8)
         pic1_en_mask |= 1 << n;
     else
@@ -160,7 +156,6 @@ i8259a_irq_enable(int n)
 void
 i8259a_irq_disable(int n)
 {
-    TRACE_IN0();
     if (n < 0x8)
         pic1_en_mask &= ~(1 << n);
     else
@@ -172,7 +167,6 @@ i8259a_irq_disable(int n)
 void
 i8259a_set_irq_priority(int irq, int ipl)
 {
-    TRACE_IN0();
     irq_priority[irq]=ipl;
 }
 

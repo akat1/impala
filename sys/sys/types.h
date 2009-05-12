@@ -35,7 +35,6 @@
 
 #include <sys/cdefs.h>
 #include <machine/types.h>
-
 typedef unsigned char  uchar;
 typedef unsigned short ushort;
 typedef unsigned int   uint;
@@ -75,6 +74,8 @@ typedef struct vnode vnode_t;
 typedef struct consdevsw consdevsw_t;
 typedef struct timespec timespec_t;
 typedef struct pcred pcred_t;
+
+#include <sys/vm/vm_types.h>
 #endif
 
 #include <sys/list.h>

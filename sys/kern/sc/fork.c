@@ -41,7 +41,7 @@
 
 errno_t sc_fork(thread_t *t, syscall_result_t *r);
 
-thread_t *__copy_thread(thread_t *t);
+// thread_t *__copy_thread(thread_t *t);
 
 void teest(void);
 
@@ -51,6 +51,7 @@ void teest(void)
     kprintf("!"); 
 }
 
+#if 0
 thread_t *
 __copy_thread(thread_t *t)
 {
@@ -65,10 +66,12 @@ __copy_thread(thread_t *t)
 
     return t_copy;
 }
+#endif
 
 errno_t
 sc_fork(thread_t *t, syscall_result_t *r)
 {
+#if 0
     proc_t *p;
     thread_t *thr, *thr_copy;
 
@@ -88,7 +91,7 @@ sc_fork(thread_t *t, syscall_result_t *r)
         sched_insert(thr_copy);
     } while ( (thr = NEXT_THR()) );
     #undef NEXT_THR
-
-    return EOK;
+#endif
+    return -ENOTSUP;
 }
 

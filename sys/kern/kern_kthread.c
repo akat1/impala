@@ -35,10 +35,11 @@
 #include <sys/kthread.h>
 #include <sys/sched.h>
 #include <sys/utils.h>
+#include <sys/vm.h>
 
 /// Wej¶ciowa procedura dla obs³ugi w±tku.
 static void __kthr(kthread_t *arg);
-
+static void setup_vmspace(thread_t *arg);
 /**
  * Tworzy nowy w±tek po stronie j±dra.
  * @param thr referencja do deskryptora w±tku.
@@ -49,9 +50,12 @@ static void __kthr(kthread_t *arg);
 void
 kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
 {
+    thread_t *thr = thread_create(0, (void*)__kthr, kthr);
+    if (!thr) panic("cannot create kernel thread");
+    setup_vmspace(thr);
     kthr->kt_arg = arg;
     kthr->kt_entry = f;
-    kthr->kt_thread = thread_create(0, (void*)__kthr, kthr);
+    kthr->kt_thread = thr;
     kthr->kt_thread->thr_flags |= THREAD_KERNEL;
     sched_insert(kthr->kt_thread);
 }
@@ -65,3 +69,10 @@ __kthr(kthread_t *arg)
     sched_exit(arg->kt_thread);
 }
 
+void
+setup_vmspace(thread_t *thr)
+{
+    vm_space_t *vs = thr->vm_space;
+    vm_space_create(vs, VM_SPACE_SYSTEM);
+    vm_space_create_kstack(vs, THREAD_KSTACK_SIZE);
+}

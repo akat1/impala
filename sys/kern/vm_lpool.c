@@ -45,6 +45,7 @@ struct _pool {
 
 static void stabilize_lpool(vm_lpool_t *vlp);
 static void init_pool(vm_lpool_t *vlp, _pool_t *pl);
+static void grow_lpool(vm_lpool_t *vlp);
 static bool is_in_this_pool(uintptr_t paddr, uintptr_t target);
 
 /**
@@ -100,13 +101,16 @@ vm_lpool_create(vm_lpool_t *vlp, int offset, size_t esize, int flags)
 void*
 vm_lpool_alloc(vm_lpool_t *vlp)
 {
-//    TRACE_IN("vlp=%p", vlp);
     void *x;
     _pool_t *pl;
     if ( list_length(&vlp->part_pools) > 1 ) {
         pl = list_extract_first(&vlp->part_pools);
     } else {
         pl = list_extract_first(&vlp->empty_pools);
+        if (pl == NULL) {
+            grow_lpool(vlp);
+            pl = list_extract_first(&vlp->empty_pools);
+        }
     }
     x = list_extract_first(&pl->elems);
     if (list_length(&pl->elems) == 0) {
@@ -126,7 +130,6 @@ vm_lpool_alloc(vm_lpool_t *vlp)
 void
 vm_lpool_free(vm_lpool_t *vlp, void *x)
 {
-//    TRACE_IN("vlp=%p x=%p", vlp, x);
     _pool_t *p;
     p = list_find(&vlp->full_pools, is_in_this_pool, (uintptr_t) x );
     if (p == NULL) {
@@ -177,10 +180,7 @@ stabilize_lpool(vm_lpool_t *vlp)
 //    TRACE_IN0();
     size_t emptys = list_length(&vlp->empty_pools);
     if (vlp->flags & VM_LPOOL_PREALLOC && emptys == 0) {
-        _pool_t *pl;
-        if (vm_segment_alloc(vm_kspace.seg_data, PAGE_SIZE, &pl)) {
-        }
-        vm_lpool_insert_empty(vlp, pl);
+        grow_lpool(vlp);
     } else
     if (emptys > 1) {
         while (list_length(&vlp->empty_pools) > 1) {
@@ -188,6 +188,16 @@ stabilize_lpool(vm_lpool_t *vlp)
             vm_segment_free(vm_kspace.seg_data, (vm_addr_t)pl, PAGE_SIZE);
         }
     }
+}
+
+void
+grow_lpool(vm_lpool_t *vlp)
+{
+    _pool_t *pl;
+    if (vm_segment_alloc(vm_kspace.seg_data, PAGE_SIZE, &pl)) {
+        panic("grow_lpool: cannot allocate memory");
+    }
+    vm_lpool_insert_empty(vlp, pl);
 }
 
 /**

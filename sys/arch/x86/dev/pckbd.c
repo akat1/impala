@@ -50,7 +50,7 @@ enum {
 };
 
 //static int bh_in_queue=0;
-int key_down[256];      ///< wykaz naci¶niêtych klawiszy, indeksowany po 'keycode' 
+int key_down[256];      ///< wykaz naci¶niêtych klawiszy, indeksowany po 'keycode'
                         /// pewno lepiej bêdzie indeksowaæ po czym¶ innym ;)
 char key_modifiers;     /// wykaz naci¶niêtych klawiszy-modyfikatorów
 
@@ -76,10 +76,9 @@ kq_insert(char c)
 char
 pckbd_get_char()
 {
-    
+
     char c;
     int s = spltty ();
-    TRACE_IN("inside");
     if (key_s == 0) {
         c = -1;
     } else {
@@ -101,7 +100,7 @@ __enqueue_keycode(int kc)
         c = keymap_normal[kc];
         if('a' <= c && c <= 'z')
             shift ^= (key_modifiers & KM_CAPSLOCK)>0;
-        
+
         if(shift)
             c = keymap_shift[kc];
     }
@@ -141,9 +140,9 @@ i8042_irq1()
         irq_done();
         return TRUE;
     }
-    
+
     scancode &= 0x7f;
-    
+
     if(last_scancode == 0) {
         if (scancode <= MAX_SC_LINEAR) {
             keycode = scancode;
@@ -162,9 +161,9 @@ i8042_irq1()
         if(scancode == 0x45 && up_action) {  //ostatni bajt scancode klawisza pause break
             last_scancode = 0;
             keycode = KC_PAUSE;
-        }                
+        }
     }
-    
+
     if(keycode) {
         if(keycode == KC_CAPSLOCK) {
             if(!up_action)
@@ -177,7 +176,7 @@ i8042_irq1()
         }
         set_modifiers();
     }
-     
+
     irq_done();
     return TRUE;
 }

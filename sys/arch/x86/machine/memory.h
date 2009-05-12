@@ -35,7 +35,7 @@
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1 << PAGE_SHIFT)
 
-
+#if 0
 enum {
     VM_SPACE_CODE_BEGIN     = 0x00100000,   // 1MB
     VM_SPACE_CODE_SIZE      = 0x00400000,   // 4MB
@@ -50,14 +50,14 @@ enum {
     VM_SPACE_UDATA_BEGIN    = 0x40000000,   // 1GB
     VM_SPACE_UDATA_SIZE     = 0x7fff0000
 };
-
+#endif
 // Skroci³em nazwy, _BEGIN,_SIZE,_END by³o za d³ugie.
 enum {
     VM_SPACE_TEXT       = 0x00100000,   // 1MB
     VM_SPACE_TEXT_S     = 0x00400000,   // 4MB
     VM_SPACE_TEXT_E     = VM_SPACE_TEXT+VM_SPACE_TEXT_S,
     VM_SPACE_DATA       = 0xc0000000,   // 3GB
-    VM_SPACE_DATA_S     = 0x40000000,   // 1GB-stos
+    VM_SPACE_DATA_S     = 0x3ffff000,   // 1GB-stos
     VM_SPACE_DATA_E     = VM_SPACE_DATA + VM_SPACE_DATA_S,
     VM_SPACE_UTEXT      = 0x04000000,   // 64MB
     VM_SPACE_UTEXT_S    = 0x04400000,   // 4MB

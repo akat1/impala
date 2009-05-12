@@ -33,13 +33,12 @@
 #ifndef __SYS_THREAD_H
 #define __SYS_THREAD_H
 
-#include <machine/thread.h>
-#include <machine/atomic.h>
 #include <sys/list.h>
 #include <sys/sched.h>
+#include <machine/thread.h>
+#include <machine/atomic.h>
 
 enum {
-    MAX_THREAD = 0x10,
     THREAD_STACK_SIZE = 0x2000,
     THREAD_KSTACK_SIZE = 0x2000
 };
@@ -58,14 +57,11 @@ struct thread {
     addr_t          thr_entry_point;
     /// adres argumenty procedury wej¶ciowej
     addr_t          thr_entry_arg;
-    /// poziom uprzywilejowania
-    int             thr_priv;
     /// opcje
     int             thr_flags;
     uint            thr_wakeup_time;
     /// stos
-    char            *thr_stack;
-    char            *thr_kstack;
+    vm_space_t      *vm_space;
     /// proces, do którego w±tek przynale¿y
     proc_t         *thr_proc;
     /// wêze³ kolejki planisty
@@ -92,7 +88,6 @@ struct mutex {
     list_t        mtx_waiting; // thread_t.L_wait
 };
 
-
 struct semaph {
     mutex_t         mtx;
     int             count;
@@ -108,6 +103,7 @@ struct cqueue {
 
 
 enum THREAD_FLAGS {
+    THREAD_USER      = 0,      // w±tek u¿ytkownika (sztuczna flaga)
     THREAD_NEW       = 1 << 0, // in-creating
     THREAD_ZOMBIE    = 1 << 1, // in-destroying
     THREAD_RUN       = 1 << 2, // are running
@@ -125,13 +121,10 @@ enum {
     MUTEX_WAKEUP_ALL = 1 << 2
 };
 
-
 enum {
     MUTEX_LOCKED,
     MUTEX_UNLOCKED
 };
-
-
 
 enum {
     SPINLOCK_UNLOCK,
@@ -144,7 +137,7 @@ extern thread_t *thread_idle;
 extern list_t threads_list;     // thread_t.L_threads
 
 void thread_init(void);
-thread_t *thread_create(int priv, addr_t entry, addr_t arg);
+thread_t *thread_create(int space, addr_t entry, addr_t arg);
 void thread_destroy(thread_t *t);
 
 // do wywalenia

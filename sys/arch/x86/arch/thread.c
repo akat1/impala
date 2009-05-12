@@ -34,6 +34,7 @@
 #include <sys/thread.h>
 #include <sys/utils.h>
 #include <sys/string.h>
+#include <sys/vm.h>
 #include <machine/cpu.h>
 
 void setesp0(void* a);
@@ -41,16 +42,13 @@ void setesp0(void* a);
 /**
  * Inicjalizuje kontekst.
  * @param ctx referencja do kontekstu
- * @param priv poziom uprzywilejowania
- * @param ustack adres stosu
  */
 
 void
-thread_context_init(thread_context *ctx, int priv, addr_t ustack)
+thread_context_init(thread_context *ctx)
 {
     mem_zero(ctx, sizeof(thread_context));
     ctx->c_eflags = EFLAGS_BITS;
-    ctx->c_esp = (uint32_t) ustack + THREAD_STACK_SIZE-8;
 }
 
 /**
@@ -64,7 +62,6 @@ thread_switch(thread_t *t_to, thread_t *t_from)
     if (thread_context_store(&t_from->thr_context)) {
         // Jestesmy w watku t_from
         curthread = t_to;
-        setesp0(t_to->thr_kstack+0x2000);
         if (t_to->thr_flags & THREAD_NEW) {
             thread_enter(t_to);
         } else {
@@ -91,9 +88,11 @@ thread_enter(thread_t *t_to)
     entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
-
+    vm_pmap_switch(&t_to->vm_space->pmap);
+    t_to->thr_context.c_esp = t_to->vm_space->seg_stack->base-4;
     if (!(t_to->thr_flags & THREAD_KERNEL))
         cpu_user_mode();
+
 
     __asm__ volatile (
         "movl %%eax, %%esp"

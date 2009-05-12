@@ -86,7 +86,7 @@ ISR_irq(interrupt_frame frame)
 {
     bool eoi = FALSE;
     if (frame.f_n < MAX_IRQ) {
-        if(irq_handlers[frame.f_n] != NULL) 
+        if(irq_handlers[frame.f_n] != NULL)
             eoi = irq_handlers[frame.f_n]();
     }
     if (!eoi) i8259a_send_eoi();
@@ -97,7 +97,7 @@ ISR_syscall(interrupt_frame frame)
 {
     va_list ap;
     syscall_result_t result;
-    
+
     mem_zero(&result, sizeof(result));
 
     ap = (va_list) (frame.f_esp);
@@ -131,7 +131,7 @@ TRAP_pfault(interrupt_frame f)
 {
     vm_trap_frame_t vtf;
     vm_disable_paging();
-    vtf.fault_addr = cpu_get_cr2(); 
+    vtf.fault_addr = cpu_get_cr2();
     vtf.reason = (f.f_errno & PFE_PRESENT)?
              VM_PFAULT_NO_PERMISSION
             : VM_PFAULT_NO_PRESENT;
@@ -169,18 +169,15 @@ print_frame(const char *name, interrupt_frame *f)
 void
 intrpt_raiseipl(int pl)
 {
-    TRACE_IN("enter");
     if(CPL==pl)
         return;
     CPL=pl;
     i8259a_reset_mask();
-    TRACE_IN("leave");
 }
 
 void
 intrpt_loweripl(int pl)
 {
-    TRACE_IN0();
     CPL=pl;
     i8259a_reset_mask();
     //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
@@ -190,6 +187,5 @@ intrpt_loweripl(int pl)
 int
 intrpt_getipl()
 {
-    TRACE_IN0();
     return CPL;
 }

@@ -56,6 +56,7 @@ static void start_init_process(void);
 void
 kmain()
 {
+    SYSTEM_DEBUG = 1;
     print_welcome();
     init_kernel();
     prepare_root();
@@ -67,33 +68,28 @@ prepare_root()
 {
 }
 
-char tabA[4096];
-char tabB[4096];
-char tabC[4096];
 
 static void tf(void *addr);
 
 void
 tf(void *addr)
 {
-    static vm_pmap_t pmap;
-    vm_pmap_clone(&pmap, &vm_kspace.pmap);
-    vm_pmap_map(&pmap, (vm_addr_t)tabC, &pmap, (vm_addr_t)addr,
-        PAGE_SIZE);
-    vm_pmap_switch(&pmap);
-
-    kprintf("%s\n",tabC);
+    ssleep(1);
+    int i;
+    kprintf("THREAD: %s\n", addr);
+    kprintf("VAR i: %p\n", &i);
+    i = (int)addr;
+    kprintf("VAR i=%u\n", i);
+    vm_space_print(curthread->vm_space);
 }
 
 void
 start_init_process()
 {
     static kthread_t t0,t1;
-    str_cpy(tabA, "tabA");
-    str_cpy(tabB, "tabB");
-    str_cpy(tabC, "tabC");
-    kthread_create(&t0, tf, tabA);
-    kthread_create(&t1, tf, tabB);
+    kthread_create(&t0, tf, "t0");
+    ssleep(2);
+    kthread_create(&t1, tf, "t1");
     kprintf("[infinite loop]\n");
     for (;;) {
         char c=pckbd_get_char();

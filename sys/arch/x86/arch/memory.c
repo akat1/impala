@@ -61,7 +61,7 @@ static vm_segment_t kseg_text;
 static vm_segment_t kseg_data;
 static vm_segment_t kseg_stack;
 
-#define _GLOBAL(a,f) (VM_SPACE_DATA_BEGIN <= a && a < VM_SPACE_DATA_END)? f : 0
+#define _GLOBAL(a,f) (VM_SPACE_DATA <= a && a < VM_SPACE_DATA_E)? f : 0
 
 /*========================================================================
  * Stronicowanie,
@@ -108,7 +108,6 @@ vm_low_init()
     create_kernel_space();
     create_kernel_data();
     initialize_internal();
-
 }
 
 vm_page_t *page;
@@ -121,13 +120,13 @@ create_kernel_space()
     vm_kspace.seg_text = &kseg_text;
     vm_kspace.seg_data = &kseg_data;
     vm_kspace.seg_stack = &kseg_stack;
+    vm_kspace.seg_kstack = &kseg_stack;
     vm_segment_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
         VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_SEGMENT_NORMAL);
     vm_segment_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,
         0, VM_SPACE_DATA_S, VM_SEGMENT_NORMAL);
     vm_segment_create(vm_kspace.seg_stack, &vm_kspace,
-        VM_SPACE_DATA+VM_SPACE_DATA_S, 0, VM_SPACE_STACK_SIZE,
-        VM_SEGMENT_EXPDOWN);
+        VM_SPACE_DATA_E, 0, 0, VM_SEGMENT_EXPDOWN);
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     mem_zero(kmap, sizeof(vm_pmap_t));
@@ -387,7 +386,7 @@ vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
         vm_pmap_init(dst);
         vm_ptable_t *sdir = src->pdir;
         vm_ptable_t *ddir = dst->pdir;
-        for (int i = 0; i < PAGE_TBL(VM_SPACE_DATA_BEGIN); i++) {
+        for (int i = 0; i < PAGE_TBL(VM_SPACE_DATA); i++) {
             if (sdir->table[i] & PDE_PRESENT) {
                 vm_page_t *page;
                 vm_ptable_t *newpt = _alloc_ptable(&page);

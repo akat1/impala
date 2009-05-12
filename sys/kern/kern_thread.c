@@ -36,7 +36,7 @@
 #include <sys/utils.h>
 #include <sys/kmem.h>
 #include <sys/string.h>
-
+#include <sys/vm.h>
 thread_t *curthread;
 thread_t *thread_idle;
 
@@ -59,16 +59,14 @@ thread_ctor(void *_thr)
 {
     thread_t *thr = _thr;
     list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
-    thr->thr_stack = kmem_alloc(THREAD_STACK_SIZE, KM_SLEEP);
-    thr->thr_kstack = kmem_alloc(THREAD_KSTACK_SIZE, KM_SLEEP);
+    thr->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
 }
 
 void
 thread_dtor(void *_thr)
 {
     thread_t *thr = _thr;
-    kmem_free(thr->thr_stack);
-    kmem_free(thr->thr_stack);
+    kmem_free(thr->vm_space);
 }
 
 /// Inicjalizuje obs³ugê w±tków.
@@ -88,23 +86,23 @@ thread_init()
  * @param priv Poziom uprzywilejowania.
  * @param entry Adres procedury wej¶ciowej.
  * @param arg Adres argumentu przekazywany do procedury wej¶ciowej.
+ * @param ssize Rozmiar stosu.
  *
  * Procedura przydziela ogólny deskryptor w±tku. W±tek przydzielony
  * w ten sposób znajduje siê w stanie surowym.
  */
 thread_t *
-thread_create(int priv, addr_t entry, addr_t arg)
+thread_create(int type, addr_t entry, addr_t arg)
 {
     thread_t *free_thr = kmem_cache_alloc(thread_cache, KM_SLEEP);
     if (free_thr) {
         thread_t *t = free_thr;
-        t->thr_flags = THREAD_NEW;
+        t->thr_flags = THREAD_NEW | type;
         t->thr_tid = last_pid++;
-        t->thr_priv = priv;
         t->thr_entry_point = entry;
         t->thr_entry_arg = arg;
         t->thr_wakeup_time = 0;
-        thread_context_init(&t->thr_context, priv, t->thr_stack);
+        thread_context_init(&t->thr_context);
         list_insert_tail(&threads_list, t);
         return t;
     } else {
@@ -116,7 +114,9 @@ thread_create(int priv, addr_t entry, addr_t arg)
 void
 thread_destroy(thread_t *t)
 {
+    KASSERT(t->thr_flags & THREAD_ZOMBIE);
     kprintf("NISZCZE: %p\n",t);
+    kmem_cache_free(thread_cache, t);
     return;
 }
 
@@ -246,7 +246,7 @@ mutex_trylock(mutex_t *m)
  * Je¿eli w±tek jest w³a¶cicielem zamku to mo¿e oczekiwaæ na nim sygna³.
  * Procedura wychodzi z sekcji krytycznej, a nastêpnie usypia w±tek.
  * U¶piony w±tek jest dodawany do listy w±tków oczekuj±cych na sygna³.
- * 
+ *
  * Gdy w±tek zostanie obudzony to zamek zostanie automatycznie mu
  * przydzielony (powróci do swojej sekcji krytycznej).
  */
@@ -263,7 +263,7 @@ mutex_wait(mutex_t *m)
 /**
  * Budzi jeden w±tek oczekuj±cy na sygna³.
  * @param m zamek.
- * 
+ *
  * Je¿eli w±tek jest w³a¶cicielem zamka, to mo¿e obudziæ oczekuj±cy sygna³u
  * na tym zamku w±tek. Procedura zaznacza informacjê, ¿e przy odblokowaniu
  * zamku nale¿y przenie¶æ jeden w±tek oczekuj±cy na sygna³ do listy w±tków
@@ -342,7 +342,7 @@ cqueue_insert(cqueue_t *q, void *d)
  * Procedura usypia w±tek, gdy kolejka jest pusta a kolejka
  * nie zota³a w³±czona. W przeciwnym wypadku zwraca NULL.
  */
- 
+
 void*
 cqueue_extract(cqueue_t *q)
 {
