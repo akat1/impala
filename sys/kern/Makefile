@@ -27,7 +27,6 @@ SRCS=\
 	vm.c\
 	vm_lpool.c\
 	vm_segment.c\
-	vm_space.c\
 	vm_trap.c\
 	sc/close.c\
         sc/execve.c\
