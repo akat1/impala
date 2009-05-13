@@ -72,7 +72,9 @@ __kthr(kthread_t *arg)
 void
 setup_vmspace(thread_t *thr)
 {
-    vm_space_t *vs = thr->vm_space;
-    vm_space_create(vs, VM_SPACE_SYSTEM);
-    vm_space_create_kstack(vs, THREAD_KSTACK_SIZE);
+    thr->vm_space = &vm_kspace;
+    vm_space_create_stack(thr->vm_space, (vm_addr_t*)&thr->thr_stack,
+        THREAD_KSTACK_SIZE);
+    thr->thr_stack_size = THREAD_KSTACK_SIZE;
+    DEBUGF("new stack %p+%u", thr->thr_stack, thr->thr_stack_size);
 }

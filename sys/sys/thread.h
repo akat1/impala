@@ -50,14 +50,18 @@ struct spinlock {
 
 /// w±tek procesora.
 struct thread {
-    thread_context  thr_context;    ///< stan procesora.
-    int             thr_tid;
+    thread_context  thr_context;    ///< kontekst
     addr_t          thr_entry_point;///< adres procedury wej¶ciowej
     addr_t          thr_entry_arg;  ///< adres argumenty procedury wej¶ciowej
     int             thr_flags;      ///< opcje
     uint            thr_wakeup_time;///< kiedy obudziæ u¶piony w±tek
-    vm_space_t     *vm_space;       ///< stos
+    vm_space_t     *vm_space;       ///< przestrzen, w ktorej jest watek.
+    addr_t          thr_stack;      ///< stos
+    size_t          thr_stack_size; ///< rozmiar stosu
+    addr_t          thr_kstack;     ///< stos dla jadra
+    size_t          thr_kstack_size;///< rozmiar stosu dla jadra
     proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
+    int             thr_tid;
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych

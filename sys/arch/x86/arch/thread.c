@@ -88,7 +88,9 @@ thread_enter(thread_t *t_to)
     entry = (entry_point) t_to->thr_entry_point;
     //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
     vm_pmap_switch(&t_to->vm_space->pmap);
-    t_to->thr_context.c_esp = t_to->vm_space->seg_stack->base-4;
+    t_to->thr_context.c_esp = (uintptr_t)t_to->thr_stack +
+        t_to->thr_stack_size - 4;
+    setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
     if (!(t_to->thr_flags & THREAD_KERNEL))
         cpu_user_mode();
 

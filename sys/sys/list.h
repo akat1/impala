@@ -86,7 +86,7 @@ list_is_empty(const list_t *ls)
     return (ls->ls_length == 0);
 }
 
-static inline void* 
+static inline void*
 list_head(const list_t *ls)
 {
     return ls->ls_root.next;
@@ -165,7 +165,7 @@ __list_insert_before(list_t *ls, void *xs, void *x)
     if (x_node->prev) __prev_node(ls,x)->next = x;
 }
 
-static inline void 
+static inline void
 list_insert_head(list_t *ls, void *elem)
 {
     list_node_t *node = __elem_node(ls,elem);
@@ -182,7 +182,7 @@ list_insert_head(list_t *ls, void *elem)
 }
 
 
-static inline void 
+static inline void
 list_insert_tail(list_t *ls, void *elem)
 {
     list_node_t *node = __elem_node(ls,elem);
@@ -231,7 +231,7 @@ list_insert_before(list_t *ls, void *xs, void *x)
 static inline void
 _list_insert_in_order(list_t *ls, void *x, list_less_f *is_less)
 {
-    
+
     void *elem = NULL;
     // lecimy po liscie dopoki: elem < x
     while ( (elem = list_next(ls, elem)) && is_less(elem,x) );
@@ -262,6 +262,26 @@ _list_find(list_t *ls, list_pred_f *pred, uintptr_t parg)
     return list_find_next(ls, NULL, pred, parg);
 }
 
+
+#define list_find_rev_next(ls, elem, pred, arg)\
+    _list_find_rev_next(ls, elem, (list_pred_f*) pred, (uintptr_t) arg)
+
+static inline void *
+_list_find_rev_next(list_t *ls, void *elem, list_pred_f *pred, uintptr_t parg)
+{
+    while ( (elem = list_prev(ls, elem)) ) {
+        if (pred(elem, parg)) return elem;
+    }
+    return NULL;
+}
+
+#define list_find_rev(ls, pred, arg)\
+    _list_find_rev(ls, (list_pred_f*) pred, (uintptr_t) arg)
+static inline void *
+_list_find_rev(list_t *ls, list_pred_f *pred, uintptr_t parg)
+{
+    return list_find_rev_next(ls, NULL, pred, parg);
+}
 
 #undef __elem_node
 #undef __next_node

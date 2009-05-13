@@ -57,16 +57,15 @@ static void thread_dtor(void *_thr);
 void
 thread_ctor(void *_thr)
 {
-    thread_t *thr = _thr;
-    
-    thr->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+//     thread_t *thr = _thr;
+//     thr->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
 }
 
 void
 thread_dtor(void *_thr)
 {
-    thread_t *thr = _thr;
-    kmem_free(thr->vm_space);
+//     thread_t *thr = _thr;
+//     kmem_free(thr->vm_space);
 }
 
 /// Inicjalizuje obs³ugê w±tków.

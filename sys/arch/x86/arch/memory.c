@@ -120,7 +120,7 @@ create_kernel_space()
     vm_kspace.seg_text = &kseg_text;
     vm_kspace.seg_data = &kseg_data;
     vm_kspace.seg_stack = &kseg_stack;
-    vm_kspace.seg_kstack = &kseg_stack;
+//     vm_kspace.seg_kstack = &kseg_stack;
     vm_segment_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
         VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_SEGMENT_NORMAL);
     vm_segment_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,

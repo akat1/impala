@@ -78,8 +78,6 @@ tf(void *addr)
     int i;
     kprintf("THREAD: %s\n", addr);
     kprintf("VAR i: %p\n", &i);
-    i = (int)addr;
-    kprintf("VAR i=%u\n", i);
     vm_space_print(curthread->vm_space);
 }
 
@@ -87,8 +85,8 @@ void
 start_init_process()
 {
     static kthread_t t0,t1;
+//     kprintf("\033[2J");
     kthread_create(&t0, tf, "t0");
-    ssleep(2);
     kthread_create(&t1, tf, "t1");
     kprintf("[infinite loop]\n");
     for (;;) {
