@@ -95,8 +95,7 @@ splclock()
 {
     irq_disable();
     int opl=intrpt_getipl();
-    if(opl < IPL_CLOCK)
-        intrpt_raiseipl(IPL_CLOCK);
+    intrpt_raiseipl(IPL_CLOCK);
     irq_enable();
     return opl;
 }
@@ -106,8 +105,7 @@ splbio()
 {
     irq_disable();
     int opl=intrpt_getipl();
-    if(opl < IPL_BIO)
-        intrpt_raiseipl(IPL_BIO);
+    intrpt_raiseipl(IPL_BIO);
     irq_enable();
     return opl;
 }
@@ -117,8 +115,7 @@ spltty()
 {
     irq_disable();
     int opl=intrpt_getipl();
-    if(opl < IPL_TTY)
-        intrpt_raiseipl(IPL_TTY);
+    intrpt_raiseipl(IPL_TTY);
     irq_enable();
     return opl;
 }

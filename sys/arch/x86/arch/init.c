@@ -85,10 +85,10 @@ init_x86()
     // Ustawienie GDT
     mem_zero(&p_gdt, sizeof(p_gdt));
     mem_zero(&p_tss0, sizeof(p_tss0));
-    setgdt(SEL_CODE, 0x0, 0xfffff, code, attr);
-    setgdt(SEL_DATA, 0x0, 0xfffff, data, attr);
-    setgdt(SEL_UCODE, 0x0, 0xffff, ucode, attr);
-    setgdt(SEL_UDATA, 0x0, 0xffff, udata, attr);
+    setgdt(SEL_CODE, 0x0, 0xffffffff, code, attr);
+    setgdt(SEL_DATA, 0x0, 0xffffffff, data, attr);
+    setgdt(SEL_UCODE, 0x0, 0xffffffff, ucode, attr);
+    setgdt(SEL_UDATA, 0x0, 0xffffffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
     p_tss0.tss_io = 0;
 

@@ -101,12 +101,12 @@ thread_context_load:
 thread_context_store:
     enter $0, $0
     movl 8(%ebp), %edi
+    pushfl
+    popl CTX_EFLAGS(%edi)
     movl %ebp, CTX_EBP(%edi)
     movl %esp, CTX_ESP(%edi)
     movl %cr3, %eax
     movl %eax, CTX_CR3(%edi)
-    pushfl
-    popl CTX_EFLAGS(%edi)
     movl $0x1, %eax
     leave
     ret

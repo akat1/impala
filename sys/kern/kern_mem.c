@@ -155,7 +155,7 @@ kmem_alloc(size_t s, int flags)
         s += sizeof(kmem_bufctl_t);
         s = PAGE_ROUND(s);
         kmem_bufctl_t *bctl;
-        if (vm_segment_alloc(vm_kspace.seg_data, s, (vm_addr_t*)&bctl)) {
+        if (vm_segment_alloc(vm_kspace.seg_data, s, &bctl)) {
             panic("no memory");
         }
         bctl->magic = KMEM_BUFCTL_MAGIC;
@@ -225,7 +225,7 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     size_t size = esize + sizeof(kmem_bufctl_t);
 
      if (LARGE_SIZE < esize) {
-        size_t bestfit, slabsize, waste;
+        size_t bestfit=0, slabsize, waste;
         size_t minwaste = 0 - 1;
         size_t psize = PAGE_ROUND(size);
         for (int i = 1; i < 9; i++) {
@@ -372,8 +372,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
     list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     slab->cache = cache;
     char *data;
-    if (vm_segment_alloc(vm_kspace.seg_data, cache->slab_size,
-            (vm_addr_t*)&data)) {
+    if (vm_segment_alloc(vm_kspace.seg_data, cache->slab_size, &data)) {
         panic("no memory");
     }
     KASSERT(data != NULL);

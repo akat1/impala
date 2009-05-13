@@ -50,38 +50,25 @@ struct spinlock {
 
 /// w±tek procesora.
 struct thread {
-    /// stan procesora.
-    thread_context  thr_context;
+    thread_context  thr_context;    ///< stan procesora.
     int             thr_tid;
-    /// adres procedury wej¶ciowej
-    addr_t          thr_entry_point;
-    /// adres argumenty procedury wej¶ciowej
-    addr_t          thr_entry_arg;
-    /// opcje
-    int             thr_flags;
-    uint            thr_wakeup_time;
-    /// stos
-    vm_space_t      *vm_space;
-    /// proces, do którego w±tek przynale¿y
-    proc_t         *thr_proc;
-    /// wêze³ kolejki planisty
-    list_node_t     L_run_queue;
-    /// wêze³ listy w±tków
-    list_node_t     L_threads;
-    /// wêze³ listy w±tków oczekuj±cych
-    list_node_t     L_wait;
+    addr_t          thr_entry_point;///< adres procedury wej¶ciowej
+    addr_t          thr_entry_arg;  ///< adres argumenty procedury wej¶ciowej
+    int             thr_flags;      ///< opcje
+    uint            thr_wakeup_time;///< kiedy obudziæ u¶piony w±tek
+    vm_space_t     *vm_space;       ///< stos
+    proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
+    list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
+    list_node_t     L_threads;      ///< wêze³ listy w±tków
+    list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
 };
 
 /// zamek typu mutex.
 struct mutex {
-    /// w±tek bêd±cy w³a¶cicielem zamka.
-    thread_t     *mtx_owner;
-    /// stan zamka.
-    int           mtx_locked;
-    /// opcje.
-    int           mtx_flags;
-    /// pomocniczy wiruj±cy zamek.
-    spinlock_t    mtx_slock;
+    thread_t     *mtx_owner;   ///< w±tek bêd±cy w³a¶cicielem zamka.
+    int           mtx_locked;  ///< stan zamka.
+    int           mtx_flags;   ///< opcje.
+    spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
     /// lista w±tków oczekuj±cych na wej¶cie
     list_t        mtx_locking; // thread_t.L_wait
     /// lista w±tków oczekuj±cych na poinformowanie
@@ -95,10 +82,8 @@ struct semaph {
 
 /// wspó³biezna kolejka
 struct cqueue {
-    /// zamek
-    mutex_t     q_mtx;
-    /// lista danych
-    list_t      q_data;
+    mutex_t     q_mtx;     ///< zamek
+    list_t      q_data;    ///< lista danych
 };
 
 
@@ -132,7 +117,7 @@ enum {
 };
 
 #ifdef __KERNEL
-extern thread_t *curthread;     // nie lepiej curthread ?
+extern thread_t * volatile curthread;     // nie lepiej curthread ?
 extern thread_t *thread_idle;
 extern list_t threads_list;     // thread_t.L_threads
 

@@ -37,7 +37,7 @@
 #include <sys/kmem.h>
 #include <sys/string.h>
 #include <sys/vm.h>
-thread_t *curthread;
+thread_t * volatile curthread;
 thread_t *thread_idle;
 
 list_t threads_list;
@@ -58,7 +58,7 @@ void
 thread_ctor(void *_thr)
 {
     thread_t *thr = _thr;
-    list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
+    
     thr->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
 }
 
@@ -74,10 +74,11 @@ void
 thread_init()
 {
     last_pid = 0;
+    list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
     thread_cache = kmem_cache_create("thread", sizeof(thread_t),
         thread_ctor, thread_dtor);
     curthread = thread_create(0, 0, 0);
-    curthread->thr_flags = THREAD_RUN;
+    curthread->thr_flags = THREAD_RUN | THREAD_KERNEL;
 
 }
 

@@ -57,10 +57,9 @@ thread_context_init(thread_context *ctx)
  * @param t_from deskryptor obecnie dzia³aj±cego w±tku.
  */
 void
-thread_switch(thread_t *t_to, thread_t *t_from)
+thread_switch(thread_t *t_to, thread_t * volatile t_from)
 {
-    if (thread_context_store(&t_from->thr_context)) {
-        // Jestesmy w watku t_from
+    if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
         if (t_to->thr_flags & THREAD_NEW) {
             thread_enter(t_to);
@@ -83,16 +82,15 @@ thread_switch(thread_t *t_to, thread_t *t_from)
 void
 thread_enter(thread_t *t_to)
 {
-
     typedef void (*entry_point)(void*);
     entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
+    //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
     vm_pmap_switch(&t_to->vm_space->pmap);
     t_to->thr_context.c_esp = t_to->vm_space->seg_stack->base-4;
     if (!(t_to->thr_flags & THREAD_KERNEL))
         cpu_user_mode();
-
 
     __asm__ volatile (
         "movl %%eax, %%esp"

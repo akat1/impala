@@ -88,6 +88,8 @@ ISR_irq(interrupt_frame frame)
     if (frame.f_n < MAX_IRQ) {
         if(irq_handlers[frame.f_n] != NULL)
             eoi = irq_handlers[frame.f_n]();
+        else
+            kprintf("Spurious interrupt!\n");
     }
     if (!eoi) i8259a_send_eoi();
 }
@@ -169,7 +171,7 @@ print_frame(const char *name, interrupt_frame *f)
 void
 intrpt_raiseipl(int pl)
 {
-    if(CPL==pl)
+    if(CPL>=pl)
         return;
     CPL=pl;
     i8259a_reset_mask();
