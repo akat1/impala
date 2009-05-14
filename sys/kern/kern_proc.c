@@ -36,36 +36,52 @@
 #include <sys/thread.h>
 #include <sys/utils.h>
 #include <sys/kmem.h>
+#include <sys/vm.h>
 
-pid_t last_pid;
+static pid_t last_pid;
 list_t procs_list;
-proc_t *curproc;
+kmem_cache_t *proc_cache;
+static bool find_this_pid(proc_t *p, pid_t pid);
+static void proc_ctor(void *obj);
+static void proc_dtor(void *obj);
 
-bool find_this_pid(proc_t *p, pid_t pid);
+
+void
+proc_ctor(void *obj)
+{
+    proc_t *proc = obj;
+    proc->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+    proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
+}
+
+void
+proc_dtor(void *obj)
+{
+    proc_t *proc = obj;
+    kmem_free(proc->p_cred);
+    kmem_free(proc->vm_space);
+}
+
 
 /// Inicjalizuje obs³ugê procesów.
-
 void
 proc_init(void)
 {
     last_pid = INIT_PID;
     LIST_CREATE(&procs_list, proc_t, L_procs, FALSE);
+    proc_cache = kmem_cache_create("proc", sizeof(proc_t), proc_ctor,
+        proc_dtor);
     return;
 }
 
 /**
  * Przydziela deskryptor procesu.
  */
-
 proc_t *
 proc_create(void)
 {
-    proc_t *new_p = (proc_t *)kmem_alloc(sizeof(proc_t), KM_NOSLEEP);
-
-    kprintf("%p\n",new_p);
-
-    if ( new_p == NULL )
-        panic("No free procs left");
+    proc_t *new_p = kmem_cache_alloc(proc_cache, KM_SLEEP);
+    KASSERT(new_p != NULL);
 
     new_p->p_pid = last_pid++;
     new_p->p_ppid = 0; // XXX: fork
@@ -74,7 +90,8 @@ proc_create(void)
     LIST_CREATE(&(new_p->p_threads), thread_t, L_threads, FALSE);
     LIST_CREATE(&(new_p->p_children), proc_t, L_children, FALSE);
     list_insert_head(&procs_list, new_p);
-    
+
+    vm_space_create(new_p->vm_space, VM_SPACE_USER);
     return new_p;
 }
 
@@ -82,7 +99,6 @@ proc_create(void)
  * Niszczy proces
  * @param proc - proces do zniszczenia
  */
-
 void
 proc_destroy(proc_t *proc)
 {
@@ -99,27 +115,30 @@ proc_destroy(proc_t *proc)
     /* przepinamy dzieci */
     while ( (p_iter = (proc_t *)list_extract_first(&(proc->p_children))) )
     {
-            // przepinamy dziecko pod INIT_PID 
+            // przepinamy dziecko pod INIT_PID
             proc_insert_child(init, p_iter);
     }
 
     kmem_free(proc->p_cred);
-    kmem_free(proc);
-
+    kmem_cache_free(proc_cache, proc);
     return;
 }
 
-/**
- * Dodaje w±tek do procesu.
- * @param proc - proces
- * @param thread - watek
- */
-void
-proc_insert_thread(proc_t *proc, thread_t *thread)
+thread_t *
+proc_create_thread(proc_t *proc, size_t stack_size, addr_t entry)
 {
-    thread->thr_proc = proc;
-    list_insert_head(&(proc->p_threads), thread);
-    return;
+    thread_t *t = thread_create(THREAD_USER, entry, NULL);
+    t->vm_space = proc->vm_space;
+    t->thr_stack_size = stack_size;
+    t->thr_kstack_size = THREAD_KSTACK_SIZE;
+    t->thr_proc = proc;
+    vm_space_create_stack(proc->vm_space, &t->thr_stack, stack_size);
+    vm_space_create_stack(&vm_kspace, &t->thr_kstack, THREAD_KSTACK_SIZE);
+    DEBUGF("user thread created");
+    vm_space_print(t->vm_space);
+    DEBUGF("   KSTACK  %p-%p (+%p)", t->thr_kstack, t->thr_kstack
+        + t->thr_kstack_size, t->thr_kstack_size);
+    return t;
 }
 
 /**

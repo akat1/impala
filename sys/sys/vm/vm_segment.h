@@ -39,6 +39,7 @@ struct vm_segment {
     vm_addr_t       end;
     vm_size_t       size;
     vm_size_t       limit;
+    vm_prot_t       prot;
     int             flags;
     list_t          regions;
     void            *search_func;
@@ -66,9 +67,9 @@ enum VM_REGION_FLAGS {
 };
 
 void vm_segment_create(vm_segment_t *vs, vm_space_t *s, vm_addr_t base,
-        size_t len, size_t limit, int flags);
+        size_t len, size_t limit, vm_prot_t prot, int flags);
 int vm_segment_resize(vm_segment_t *vseg, vm_size_t size);
 int vm_segment_alloc(vm_segment_t *vs, size_t size, void *res);
 void vm_segment_free(vm_segment_t *vs, vm_addr_t size, size_t length);
-
+void vm_segment_protect(vm_segment_t *vs, vm_prot_t prot);
 #endif

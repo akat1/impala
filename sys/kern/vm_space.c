@@ -43,28 +43,18 @@ static int set_stack(vm_space_t *, vm_segment_t *, vm_segment_t *,
 int
 vm_space_create(vm_space_t *vs, int space)
 {
-    panic("dont use this!");
-    vs->space = space;
+    KASSERT(space == VM_SPACE_USER);
     vm_pmap_init(&vs->pmap);
-
-    if (space == VM_SPACE_SYSTEM) {
-        vs->seg_text = vm_kspace.seg_text;
-        vs->seg_data = vm_kspace.seg_data;
-        vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
-        vm_pmap_clone(&vs->pmap, &vm_kspace.pmap);
-    } else {
-        vs->seg_text = vm_lpool_alloc(&vm_lpool_segments);
-        vs->seg_data = vm_lpool_alloc(&vm_lpool_segments);
-        vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
-        vm_segment_create(vs->seg_text, vs, VM_SPACE_UTEXT, 0,
-            VM_SPACE_UTEXT_S, VM_SEGMENT_NORMAL);
-        vm_segment_create(vs->seg_data, vs, VM_SPACE_UDATA, 0,
-            VM_SPACE_UDATA_S, VM_SEGMENT_NORMAL);
-    }
-    vm_segment_create(vs->seg_stack, vs, vs->seg_data->base +
-        vs->seg_data->limit, 0, 0, VM_SEGMENT_EXPDOWN);
-
-
+    vs->space = space;
+    vs->seg_text = vm_lpool_alloc(&vm_lpool_segments);
+    vs->seg_data = vm_lpool_alloc(&vm_lpool_segments);
+    vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
+    vm_segment_create(vs->seg_text, vs, VM_SPACE_UTEXT, 0, VM_SPACE_UTEXT_S,
+        VM_PROT_RWX, VM_SEGMENT_NORMAL);
+    vm_segment_create(vs->seg_data, vs, VM_SPACE_UDATA, 0, VM_SPACE_UDATA_S,
+        VM_PROT_RWX, VM_SEGMENT_NORMAL);
+    vm_segment_create(vs->seg_stack, vs, VM_SPACE_UDATA_E, 0, 0,
+        VM_PROT_RWX, VM_SEGMENT_EXPDOWN);
     return 0;
 }
 
@@ -78,8 +68,9 @@ vm_space_clone(vm_space_t *dst, const vm_space_t *src)
 }
 
 int
-vm_space_create_stack(vm_space_t *vs, vm_addr_t *addr, vm_size_t s)
+vm_space_create_stack(vm_space_t *vs, void *_addr, vm_size_t s)
 {
+    vm_addr_t *addr = _addr;
     return set_stack(vs, vs->seg_stack, vs->seg_data, addr, s);
 }
 
@@ -88,6 +79,8 @@ int
 set_stack(vm_space_t *vs, vm_segment_t *STACK, vm_segment_t *DATA,
     vm_addr_t *res, vm_size_t s)
 {
+//     TRACE_IN("vs=%p STACK=%p DATA=%p res=%p size=%p",vs, STACK, DATA,
+//         res, s);
     KASSERT(s > 0);
     s = PAGE_ROUND(s);
 
@@ -98,6 +91,7 @@ set_stack(vm_space_t *vs, vm_segment_t *STACK, vm_segment_t *DATA,
     }
 
     STACK->limit += s;
+//     TRACE_IN("here");
     return vm_segment_alloc(STACK, s, res);
 }
 

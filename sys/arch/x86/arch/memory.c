@@ -122,11 +122,11 @@ create_kernel_space()
     vm_kspace.seg_stack = &kseg_stack;
 //     vm_kspace.seg_kstack = &kseg_stack;
     vm_segment_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
-        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_SEGMENT_NORMAL);
+        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_PROT_RWX, VM_SEGMENT_NORMAL);
     vm_segment_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,
-        0, VM_SPACE_DATA_S, VM_SEGMENT_NORMAL);
+        0, VM_SPACE_DATA_S, VM_PROT_RWX, VM_SEGMENT_NORMAL);
     vm_segment_create(vm_kspace.seg_stack, &vm_kspace,
-        VM_SPACE_DATA_E, 0, 0, VM_SEGMENT_EXPDOWN);
+        VM_SPACE_DATA_E, 0, 0, VM_PROT_RWX, VM_SEGMENT_EXPDOWN);
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     mem_zero(kmap, sizeof(vm_pmap_t));
@@ -140,14 +140,14 @@ create_kernel_space()
     page->kvirt_addr = page->phys_addr;
 
     // Uzupe³niamy katalog stron.
-    table_dir[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_G;
+    table_dir[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_G | PTE_US;
     for (int i = 1; i < 1024; i++)
         table_dir[i] = 0;
 
     // Odwzorowywujemy jeden-do-jednego pierwsze 4MB
     uintptr_t *table = (uintptr_t*) page->phys_addr;
     for (int i = 0; i < 1024; i++) {
-        table[i] = PAGE_ADDR(i) | PTE_PRESENT | PTE_RW | PTE_G;
+        table[i] = PAGE_ADDR(i) | PTE_PRESENT | PTE_RW | PTE_G | PTE_US;
     }
 
     // W³±czamy stronicowanie.
@@ -324,7 +324,7 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT
         | ((flags & VM_PROT_WRITE)?PTE_RW:0)
         | ((flags & VM_PROT_SYSTEM)?0:PTE_US)
-        | _G;
+        | _G | PTE_US | PTE_RW;
     return TRUE;
 }
 
@@ -510,8 +510,9 @@ _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va)
 {
     bool _G = _GLOBAL(va, PDE_G);
     int pde = PAGE_DIR(va);
+    int addr = vm_vtop((uintptr_t)pt);
 //     vm_ptable_t *pdir = _pmap_dir(vpm, va);
-    vpm->pdir->table[pde] = PTE_ADDR(pt) | PDE_PRESENT | PDE_RW | _G;
+    vpm->pdir->table[pde] = addr | PDE_PRESENT | PDE_RW | PTE_US | _G;
 }
 
 

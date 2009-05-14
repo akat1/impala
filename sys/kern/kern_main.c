@@ -69,31 +69,35 @@ prepare_root()
 }
 
 
-static void tf(void *addr);
+static void PROC_init(void);
 
 void
-tf(void *addr)
+PROC_init()
 {
-    ssleep(1);
-    int i;
-    kprintf("THREAD: %s\n", addr);
-    kprintf("VAR i: %p\n", &i);
-    vm_space_print(curthread->vm_space);
+    __asm__(
+        "movl $3, %eax;"
+        "int $0x80"
+    );
+
+    for (;;);
 }
+
+char buf[THREAD_STACK_SIZE];
+char kbuf[THREAD_KSTACK_SIZE];
 
 void
 start_init_process()
 {
-    static kthread_t t0,t1;
-//     kprintf("\033[2J");
-    kthread_create(&t0, tf, "t0");
-    kthread_create(&t1, tf, "t1");
-    kprintf("[infinite loop]\n");
-    for (;;) {
-        char c=pckbd_get_char();
-        if(c!=-1)
-            kprintf("%c", c);
-    }
+    proc_t *p = proc_create();
+    void *entry = (void*) (VM_SPACE_UTEXT + PAGE_OFF(PROC_init));
+    thread_t *t = proc_create_thread(p, THREAD_STACK_SIZE, entry);
+    vm_pmap_map(&t->vm_space->pmap, VM_SPACE_UTEXT, &vm_kspace.pmap,
+        PTE_ADDR(PROC_init), VM_PROT_RWX);
+    DEBUGF("big fake: %p -> %p", PROC_init, entry);
+    sched_insert(t);
+    for (;;);
+    t = 0;
+    PROC_init();
 }
 
 void

@@ -57,6 +57,7 @@ struct proc {
     int             p_flags;
     /// status
     int             status;
+    vm_space_t      *vm_space;
     /// wêze³ procesów
     list_node_t     L_procs;
     /// wêze³ listy dzieci
@@ -72,7 +73,7 @@ extern proc_t *curproc;
 
 void proc_init(void);
 proc_t *proc_create(void);
-void proc_insert_thread(proc_t *proc, thread_t *thread);
+thread_t * proc_create_thread(proc_t *, size_t stack_size, addr_t entry);
 void proc_insert_child(proc_t *proc, proc_t *child);
 proc_t *proc_find(pid_t pid);
 void proc_destroy(proc_t *p);

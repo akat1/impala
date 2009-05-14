@@ -62,14 +62,16 @@ enum {
  */
 void
 vm_segment_create(vm_segment_t *vseg, vm_space_t *vsp,
-    vm_addr_t base, vm_size_t size, vm_size_t limit, int flags)
+    vm_addr_t base, vm_size_t size, vm_size_t limit, vm_prot_t p, int flags)
 {
     vseg->space = vsp;
     vseg->base = base;
     vseg->size = size;
-    vseg->end = vseg->base + vseg->size;
+    vseg->end = base + size;
     vseg->limit = limit;
     vseg->flags = flags;
+    vseg->prot = p;
+//     DEBUGF("segc %p-%p", base, vseg->end);
     if (flags & VM_SEGMENT_EXPDOWN) {
         vseg->search_func = has_hole_after_reg;
     } else {
@@ -88,32 +90,37 @@ vm_segment_create(vm_segment_t *vseg, vm_space_t *vsp,
 int
 vm_segment_alloc(vm_segment_t *vseg, vm_size_t size, void *_res)
 {
+//     TRACE_IN("vseg=%p size=%p res=%p", vseg, size, _res);
     int expand = EXPAND_UP;
     vm_addr_t *res = _res;
     size = PAGE_ROUND(size);
     vm_region_t *region = list_head(&vseg->regions);
     if (region == NULL) {
         if (do_first_region(vseg, &region)) return -1;
+//         TRACE_IN("created first region");
     }
     // sprawdzamy czy istnieje dziura pomiêdzy pocz±tkiem segmentu
     // a pierwszym regionem
     if (size < region->begin - vseg->base) {
+//         TRACE_IN("found hole at segment begin");
         return expand_region(vseg, region, size, EXPAND_DOWN);
     }
     // Ok, no to szukamy dziury za regionem
     region = list_find(&vseg->regions, has_hole_after_reg, size);
     if (region == NULL) {
-//         TRACE_IN("nie znalaz³em dziury");
+//         TRACE_IN("hole not found");
         if (vseg->flags & VM_SEGMENT_EXPDOWN) {
+//             TRACE_IN("expading down");
             expand = EXPAND_DOWN;
             region = list_head(&vseg->regions);
             *res = region->begin - size;
         } else {
+//             TRACE_IN("expanding up");
             region = list_tail(&vseg->regions);
             *res = region->end;
         }
     } else {
-//         TRACE_IN("Znalazlem dziure!");
+//            TRACE_IN("found hole!");
 //         kprintf("seg: %p-%p (+%p)\n", vseg->base,vseg->end,vseg->size);
 //         kprintf("reg: %p-%p (+%p)\n", region->begin,region->end, region->size);
         *res = region->end;
@@ -172,9 +179,29 @@ vm_segment_free(vm_segment_t *vseg, vm_addr_t vaddr, vm_size_t size)
     vm_pmap_erase(&vseg->space->pmap, vaddr, size);
 }
 
+/**
+ * Zmienia ochronê segmentu.
+ * @param seg deskryptor segmentu.
+ * @param newprot nowe prawa dostêpu.
+ *
+ * Procedura zmienia prawa dostêpu do ka¿dej strony przydzielonej do
+ * danego segmentu.
+ */
+void
+vm_segment_protect(vm_segment_t *seg, vm_prot_t newprot)
+{
+    seg->prot = newprot;
+    vm_region_t *reg = NULL;
+    while ( (reg = list_next(&seg->regions, reg)) ) {
+        // vm_pmap_fillprot(&seg->space->pmap, reg->begin, reg->size, newprot);
+    }
+}
+
+
 int
 expand_region(vm_segment_t *seg, vm_region_t *region, vm_size_t size, int m)
 {
+//     TRACE_IN("seg=%p region=%p size=%p", seg, region, size);
     vm_addr_t newaddr;
     if (m == EXPAND_UP) {
 //         TRACE_IN("rozszerzamy w gore");
@@ -194,9 +221,10 @@ expand_region(vm_segment_t *seg, vm_region_t *region, vm_size_t size, int m)
             list_remove(&seg->regions, nextreg);
         }
     } else {
-//         TRACE_IN("rozszerzamy w dol");
+//         TRACE_IN("expandinb down");
         vm_region_t *prevreg = list_prev(&seg->regions, region);
         if (prevreg == NULL) {
+//             TRACE_IN("at first region!");
             if (!has_space(seg,size)) return -1;
             seg->base -= size;
             seg->size += size;
@@ -210,51 +238,16 @@ expand_region(vm_segment_t *seg, vm_region_t *region, vm_size_t size, int m)
             list_remove(&seg->regions, prevreg);
         }
     }
+//     static int c;
+//     c++;
+//     TRACE_IN("fill %p-%p [%u]", newaddr, newaddr+size,c);
     vm_pmap_fill(&seg->space->pmap, newaddr, size,
-        VM_PROT_RWX | VM_PROT_SYSTEM);
+        seg->prot);
+//     TRACE_IN("done [%u]", c--);
     return 0;
 }
 
 
-#if 0
-int
-expand_region(vm_segment_t *seg, vm_region_t *region, vm_size_t size, int m)
-{
-    vm_region_t *nextreg = list_next(&seg->regions, region);
-    vm_region_t *prevreg = list_prev(&seg->regions, region);
-    vm_size_t newaddr = region->end;
-    if (m == EXPAND_UP && nextreg == NULL) {
-        if (!has_space(seg,size)) return -1;
-        // rozszerzamy tak¿e segment
-        region->end += size;
-        region->size += size;
-        seg->end = region->end;
-        seg->size += size;
-    } else
-    if (m == EXPAND_DOWN && prevreg == NULL) {
-        if (!has_space(seg,size)) return -1;
-        region->begin -= size;
-        region->size += size;
-        seg->base = region->begin;
-        seg->size += size;
-        newaddr = region->begin;
-    } else {
-
-    }
-    if (region->end == nextreg->begin) {
-        region->end += size;
-        region->size += size;
-        // zlepiamy ze sob± regiony, miêdzy którymi nie ma ju¿ dziury
-        region->end = nextreg->end;
-        region->size += nextreg->size;
-        list_remove(&seg->regions, nextreg);
-    }
-
-    vm_pmap_fill(&seg->space->pmap, newaddr, size,
-        VM_PROT_RWX | VM_PROT_SYSTEM);
-    return 0;
-}
-#endif
 
 bool
 is_prev(const vm_region_t *regA, const vm_region_t *regB)
@@ -283,13 +276,15 @@ is_containing_addr(const vm_region_t *reg, vm_addr_t addr)
 int
 do_first_region(vm_segment_t *vseg, vm_region_t **reg)
 {
+//     TRACE_IN("vseg=%p reg=%p", vseg, reg);
     vm_region_t *region = vm_lpool_alloc(&vm_unused_regions);
     region->segment = vseg;
     region->begin = vseg->base;
     region->size = vseg->size;
     region->end = vseg->end;
+//     TRACE_IN("fill %p-%p",vseg->base, vseg->size+vseg->base);
     vm_pmap_fill(&vseg->space->pmap, vseg->base, vseg->size,
-        VM_PROT_RWX);
+        vseg->prot);
     list_insert_head(&vseg->regions, region);
     *reg = region;
     return 0;

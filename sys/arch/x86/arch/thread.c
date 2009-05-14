@@ -83,23 +83,28 @@ void
 thread_enter(thread_t *t_to)
 {
     typedef void (*entry_point)(void*);
+    void *arg = t_to->thr_entry_arg;
+    uint32_t ESP;
     entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
-    //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
-    vm_pmap_switch(&t_to->vm_space->pmap);
+    kprintf("pmap: %p\n", &t_to->vm_space->pmap);
     t_to->thr_context.c_esp = (uintptr_t)t_to->thr_stack +
         t_to->thr_stack_size - 4;
     setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
-    if (!(t_to->thr_flags & THREAD_KERNEL))
+    vm_pmap_switch(&t_to->vm_space->pmap);
+    ESP = t_to->thr_context.c_esp;
+    if (!(t_to->thr_flags & THREAD_KERNEL)) {
+        DEBUGF("switching to umode %p", entry);
         cpu_user_mode();
+    }
 
     __asm__ volatile (
         "movl %%eax, %%esp"
         :
-        : "a" (t_to->thr_context.c_esp)
+        : "a" (ESP)
         : "%esp" );
-    entry(t_to->thr_entry_arg);
+    entry(arg);
     panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }
 

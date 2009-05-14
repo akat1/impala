@@ -36,7 +36,7 @@
 typedef uintptr_t vm_addr_t;
 typedef uintptr_t vm_paddr_t;
 typedef uintptr_t vm_size_t;
-
+typedef unsigned int vm_prot_t;
 typedef struct vm_page vm_page_t;
 typedef struct vm_pmap vm_pmap_t;
 typedef struct vm_space vm_space_t;

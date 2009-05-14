@@ -73,7 +73,7 @@ void
 setup_vmspace(thread_t *thr)
 {
     thr->vm_space = &vm_kspace;
-    vm_space_create_stack(thr->vm_space, (vm_addr_t*)&thr->thr_stack,
+    vm_space_create_stack(thr->vm_space, &thr->thr_stack,
         THREAD_KSTACK_SIZE);
     thr->thr_stack_size = THREAD_KSTACK_SIZE;
     DEBUGF("new stack %p+%u", thr->thr_stack, thr->thr_stack_size);
