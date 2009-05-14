@@ -57,9 +57,9 @@ static vm_page_t *vm_pages;
 /// Ilosc stron przeznaczona na opis.
 static int vm_pages_size;
 
-static vm_segment_t kseg_text;
-static vm_segment_t kseg_data;
-static vm_segment_t kseg_stack;
+static vm_seg_t kseg_text;
+static vm_seg_t kseg_data;
+static vm_seg_t kseg_stack;
 
 #define _GLOBAL(a,f) (VM_SPACE_DATA <= a && a < VM_SPACE_DATA_E)? f : 0
 
@@ -121,12 +121,12 @@ create_kernel_space()
     vm_kspace.seg_data = &kseg_data;
     vm_kspace.seg_stack = &kseg_stack;
 //     vm_kspace.seg_kstack = &kseg_stack;
-    vm_segment_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
-        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_PROT_RWX, VM_SEGMENT_NORMAL);
-    vm_segment_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,
-        0, VM_SPACE_DATA_S, VM_PROT_RWX, VM_SEGMENT_NORMAL);
-    vm_segment_create(vm_kspace.seg_stack, &vm_kspace,
-        VM_SPACE_DATA_E, 0, 0, VM_PROT_RWX, VM_SEGMENT_EXPDOWN);
+    vm_seg_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
+        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_PROT_RWX, VM_SEG_NORMAL);
+    vm_seg_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,
+        0, VM_SPACE_DATA_S, VM_PROT_RWX, VM_SEG_NORMAL);
+    vm_seg_create(vm_kspace.seg_stack, &vm_kspace,
+        VM_SPACE_DATA_E, 0, 0, VM_PROT_RWX, VM_SEG_EXPDOWN);
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     mem_zero(kmap, sizeof(vm_pmap_t));
@@ -162,7 +162,7 @@ create_kernel_data()
     // Tworzymy tablice stron dla pamiêci j±dra, i rêcznie rozszerzamy
     // stertê j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
-    vm_segment_t *kdata = vm_kspace.seg_data;
+    vm_seg_t *kdata = vm_kspace.seg_data;
     vm_addr_t vaddr = kdata->base;
 
     // przydzielamy pamiêæ na pierwsz± tablicê stron.
@@ -190,7 +190,7 @@ void
 initialize_internal()
 {
     vm_pmap_t *kmap = &vm_kspace.pmap;
-    vm_segment_t *kdata = vm_kspace.seg_data;
+    vm_seg_t *kdata = vm_kspace.seg_data;
 
     // przydzielamy miejsce na poczatkowe regiony
     vm_page_t *page = vm_alloc_page();
@@ -410,23 +410,25 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     if (pt == NULL) {
         return FALSE;
     }
-    pt->table[pte] = PTE_ADDR(pt->table[pte]);
-    ///@TODO: VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
-    ///       licznikach odniesieñ i deskryptorach stron.
-    ///@TODO: zastanowiæ siê nad sensem poprzedniego TODO
-    vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
-    KASSERT(pg != NULL);
-    pg->refcnt--;
-    pt->table[pte] = 0;
-    if (!_G) {
-        if (--pmap->pdircount[pde] == 0) {
-            vm_segment_free(vm_kspace.seg_data, (vm_addr_t)pt, PAGE_SIZE);
-            pmap->pdir->table[pde] = 0;
-            if (pg->refcnt == 0) {
-                list_insert_tail(&vm_free_pages, pg);
-            }
+    if (pt->table[pte] & PTE_PRESENT) {
+        pt->table[pte] = PTE_ADDR(pt->table[pte]);
+        ///@TODO: VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
+        ///       licznikach odniesieñ i deskryptorach stron.
+        ///@TODO: zastanowiæ siê nad sensem poprzedniego TODO
+        vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
+        KASSERT(pg != NULL);
+        pg->refcnt--;
+        if (pg->refcnt == 0) {
+            list_insert_tail(&vm_free_pages, pg);
         }
     }
+    if (!_G) {
+        if (--pmap->pdircount[pde] == 0) {
+            vm_seg_free(vm_kspace.seg_data, (vm_addr_t)pt, PAGE_SIZE);
+            pmap->pdir->table[pde] = 0;
+        }
+    }
+    pt->table[pte] = 0;
     return TRUE;
 }
 
@@ -583,7 +585,7 @@ _alloc_ptable(vm_page_t **pgp)
     }
 #endif
     vm_ptable_t *res;
-    vm_segment_alloc(vm_kspace.seg_data, PAGE_SIZE, &res);
+    vm_seg_alloc(vm_kspace.seg_data, PAGE_SIZE, &res);
     vm_page_t *pg = pmap_get_page(&vm_kspace.pmap, (vm_addr_t)res);
     pg->kvirt_addr = (vm_addr_t) res;
     if (pgp) *pgp = pg;

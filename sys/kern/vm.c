@@ -55,8 +55,8 @@ vm_init()
     spinlock_init(&vm_sp);
     list_create(&vm_spaces, offsetof(vm_space_t, L_spaces), FALSE);
     list_insert_head(&vm_spaces, &vm_kspace);
-    vm_lpool_create(&vm_lpool_segments, offsetof(vm_segment_t, L_segments),
-        sizeof(vm_segment_t), VM_LPOOL_NORMAL);
+    vm_lpool_create(&vm_lpool_segments, offsetof(vm_seg_t, L_segments),
+        sizeof(vm_seg_t), VM_LPOOL_NORMAL);
     DEBUGF("vm inited");
 }
 

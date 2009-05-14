@@ -155,7 +155,7 @@ kmem_alloc(size_t s, int flags)
         s += sizeof(kmem_bufctl_t);
         s = PAGE_ROUND(s);
         kmem_bufctl_t *bctl;
-        if (vm_segment_alloc(vm_kspace.seg_data, s, &bctl)) {
+        if (vm_seg_alloc(vm_kspace.seg_data, s, &bctl)) {
             panic("no memory");
         }
         bctl->magic = KMEM_BUFCTL_MAGIC;
@@ -182,7 +182,7 @@ kmem_free(void *ptr)
     if (bctl->slab) {
         kmem_cache_free(bctl->slab->cache, ptr);
     } else {
-        vm_segment_free(vm_kspace.seg_data, (vm_addr_t)bctl,
+        vm_seg_free(vm_kspace.seg_data, (vm_addr_t)bctl,
             (size_t)bctl->addr);
     }
 }
@@ -372,7 +372,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
     list_create(&slab->used_bufs, offsetof(kmem_bufctl_t, L_bufs), FALSE);
     slab->cache = cache;
     char *data;
-    if (vm_segment_alloc(vm_kspace.seg_data, cache->slab_size, &data)) {
+    if (vm_seg_alloc(vm_kspace.seg_data, cache->slab_size, &data)) {
         panic("no memory");
     }
     KASSERT(data != NULL);
@@ -449,7 +449,7 @@ check_cache(kmem_cache_t *cache)
         while ( (x = list_next(&slab->free_bufs, x)) ) {
             cache->dtor(x);
         }
-        vm_segment_free(vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
+        vm_seg_free(vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
         mutex_lock(&global_lock);
         vm_lpool_free(&lpool_slabs, slab);
         mutex_unlock(&global_lock);

@@ -43,10 +43,17 @@ enum {
     VM_PROT_RWX = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXEC
 };
 
+enum {
+    VM_GHOST_ONDEMAND = 1,
+};
+
 bool vm_pmap_init(vm_pmap_t *);
 bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t, int flags);
+bool vm_pmap_insert_ghost(vm_pmap_t *, vm_paddr_t, vm_addr_t, int ghost);
 bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t, int flags);
 void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t, int flags);
+void vm_pmap_fillprot(vm_pmap_t *, vm_addr_t , vm_size_t, int flags);
+
 void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t, int flags);
 void vm_pmap_erase(vm_pmap_t *, vm_addr_t, vm_size_t);
 bool vm_pmap_remove(vm_pmap_t *, vm_addr_t);

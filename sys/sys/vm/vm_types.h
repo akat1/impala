@@ -40,7 +40,7 @@ typedef unsigned int vm_prot_t;
 typedef struct vm_page vm_page_t;
 typedef struct vm_pmap vm_pmap_t;
 typedef struct vm_space vm_space_t;
-typedef struct vm_segment vm_segment_t;
+typedef struct vm_seg vm_seg_t;
 typedef struct vm_region vm_region_t;
 typedef struct vm_ptable vm_ptable_t;
 typedef struct vm_lpool vm_lpool_t;

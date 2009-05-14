@@ -185,7 +185,7 @@ stabilize_lpool(vm_lpool_t *vlp)
     if (emptys > 1) {
         while (list_length(&vlp->empty_pools) > 1) {
             _pool_t *pl = list_extract_last(&vlp->empty_pools);
-            vm_segment_free(vm_kspace.seg_data, (vm_addr_t)pl, PAGE_SIZE);
+            vm_seg_free(vm_kspace.seg_data, (vm_addr_t)pl, PAGE_SIZE);
         }
     }
 }
@@ -194,7 +194,7 @@ void
 grow_lpool(vm_lpool_t *vlp)
 {
     _pool_t *pl;
-    if (vm_segment_alloc(vm_kspace.seg_data, PAGE_SIZE, &pl)) {
+    if (vm_seg_alloc(vm_kspace.seg_data, PAGE_SIZE, &pl)) {
         panic("grow_lpool: cannot allocate memory");
     }
     vm_lpool_insert_empty(vlp, pl);

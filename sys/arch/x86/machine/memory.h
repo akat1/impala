@@ -132,6 +132,13 @@ enum {
 };
 
 /**
+ * VM_GHOST_* w PTE/PDE
+ */
+enum {
+    GHOST_ONDEM    = 1 << 1
+};
+
+/**
  * Opisy bitów dla b³êdu wyj±tku b³êdu strony (Page fualt).
  *
  * Intel 3A 5-50

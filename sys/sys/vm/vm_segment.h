@@ -32,8 +32,9 @@
 
 #ifndef __SYS_VM_VM_SEG_H
 #define __SYS_VM_VM_SEG_H
+#ifdef __KERNEL
 
-struct vm_segment {
+struct vm_seg {
     vm_space_t     *space;
     vm_addr_t       base;
     vm_addr_t       end;
@@ -47,7 +48,7 @@ struct vm_segment {
 };
 
 struct vm_region {
-    vm_segment_t    *segment;
+    vm_seg_t       *segment;
     vm_addr_t       begin;
     vm_addr_t       end;
     vm_size_t       size;
@@ -56,9 +57,10 @@ struct vm_region {
 };
 
 
-enum VM_SEGMENT_FLAGS {
-    VM_SEGMENT_NORMAL       = 1 << 1,
-    VM_SEGMENT_EXPDOWN      = 1 << 2
+enum VM_SEG_FLAGS {
+    VM_SEG_NORMAL       = 1 << 1,
+    VM_SEG_EXPDOWN      = 1 << 2,
+    VM_SEG_ONDEMAND     = 1 << 3
 };
 
 enum VM_REGION_FLAGS {
@@ -66,10 +68,11 @@ enum VM_REGION_FLAGS {
     VM_REGION_USED          = 1 << 0
 };
 
-void vm_segment_create(vm_segment_t *vs, vm_space_t *s, vm_addr_t base,
+void vm_seg_create(vm_seg_t *vs, vm_space_t *s, vm_addr_t base,
         size_t len, size_t limit, vm_prot_t prot, int flags);
-int vm_segment_resize(vm_segment_t *vseg, vm_size_t size);
-int vm_segment_alloc(vm_segment_t *vs, size_t size, void *res);
-void vm_segment_free(vm_segment_t *vs, vm_addr_t size, size_t length);
-void vm_segment_protect(vm_segment_t *vs, vm_prot_t prot);
+int vm_seg_clone(vm_seg_t *dst, vm_space_t *s, vm_seg_t *src);
+int vm_seg_alloc(vm_seg_t *vs, size_t size, void *res);
+void vm_seg_free(vm_seg_t *vs, vm_addr_t size, size_t length);
+void vm_seg_protect(vm_seg_t *vs, vm_prot_t prot);
+#endif
 #endif
