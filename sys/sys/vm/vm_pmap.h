@@ -40,7 +40,8 @@ enum {
     VM_PROT_EXEC = 1<<2,
     VM_PROT_USER = 1<<3,
     VM_PROT_SYSTEM = 1<<4,
-    VM_PROT_RWX = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXEC
+    VM_PROT_RWX = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXEC,
+    VM_PROT_RX = VM_PROT_READ | VM_PROT_EXEC
 };
 
 enum {
@@ -48,13 +49,13 @@ enum {
 };
 
 bool vm_pmap_init(vm_pmap_t *);
-bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t, int flags);
+bool vm_pmap_insert(vm_pmap_t *, vm_page_t *, vm_addr_t, vm_prot_t);
 bool vm_pmap_insert_ghost(vm_pmap_t *, vm_paddr_t, vm_addr_t, int ghost);
-bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t, int flags);
-void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t, int flags);
-void vm_pmap_fillprot(vm_pmap_t *, vm_addr_t , vm_size_t, int flags);
+bool vm_pmap_insert_(vm_pmap_t *, vm_paddr_t , vm_addr_t, vm_prot_t);
+void vm_pmap_fill(vm_pmap_t *, vm_addr_t , vm_size_t, vm_prot_t);
+void vm_pmap_fillprot(vm_pmap_t *, vm_addr_t , vm_size_t, vm_prot_t);
 
-void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t, int flags);
+void vm_pmap_mapphys(vm_pmap_t *, vm_addr_t , vm_paddr_t, vm_size_t, vm_prot_t);
 void vm_pmap_erase(vm_pmap_t *, vm_addr_t, vm_size_t);
 bool vm_pmap_remove(vm_pmap_t *, vm_addr_t);
 vm_paddr_t vm_pmap_phys(const vm_pmap_t *, vm_addr_t );

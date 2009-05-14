@@ -32,6 +32,8 @@
 #ifndef __MACHINE_MEMORY_H
 #define __MACHINE_MEMORY_H
 
+#include <sys/vm/vm_pmap.h>
+
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1 << PAGE_SHIFT)
 
@@ -87,6 +89,11 @@ enum {
 
 #define PAGE_ADDR(p) (((uintptr_t)p) << PAGE_SHIFT)
 
+#define PTEFLAGS_TO_PROT(x) (((x&PTE_RW)?VM_PROT_RWX:VM_PROT_RX) \
+                | ((x&PTE_US)?VM_PROT_USER:VM_PROT_SYSTEM))
+            
+#define PROT_TO_PTEFLAGS(x) (((x&VM_PROT_WRITE)?PTE_RW:0) | \
+                ((x&VM_PROT_SYSTEM)?0:PTE_US))
 
 
 /**
@@ -189,6 +196,7 @@ void vm_low_init(void);
 void vm_enable_paging(void);
 void vm_disable_paging(void);
 bool vm_is_paging(void);
+
 
 #endif
 

@@ -36,6 +36,7 @@
 #include <sys/string.h>
 #include <sys/vm.h>
 #include <machine/cpu.h>
+#include <machine/interrupt.h>
 
 void setesp0(void* a);
 
@@ -84,8 +85,8 @@ thread_enter(thread_t *t_to)
 {
     typedef void (*entry_point)(void*);
     void *arg = t_to->thr_entry_arg;
-    uint32_t ESP;
-    entry_point entry;
+    register uint32_t ESP;
+    register entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
     entry = (entry_point) t_to->thr_entry_point;
     kprintf("pmap: %p\n", &t_to->vm_space->pmap);
@@ -94,16 +95,18 @@ thread_enter(thread_t *t_to)
     setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
     vm_pmap_switch(&t_to->vm_space->pmap);
     ESP = t_to->thr_context.c_esp;
+    irq_enable();
     if (!(t_to->thr_flags & THREAD_KERNEL)) {
         DEBUGF("switching to umode %p", entry);
         cpu_user_mode();
     }
-
     __asm__ volatile (
         "movl %%eax, %%esp"
         :
         : "a" (ESP)
         : "%esp" );
+
+    
     entry(arg);
     panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }

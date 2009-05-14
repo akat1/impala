@@ -45,7 +45,7 @@ size_t vm_physmem_max;
 size_t vm_physmem_free;
 
 
-static int _pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr);
+static vm_prot_t _pmap_page_prot(const vm_pmap_t *pmap, vm_addr_t addr);
 static void _pmap_insert_pte(vm_pmap_t *t, vm_page_t *p, vm_addr_t va);
 static void _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va);
 static vm_page_t * pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr);
@@ -122,11 +122,14 @@ create_kernel_space()
     vm_kspace.seg_stack = &kseg_stack;
 //     vm_kspace.seg_kstack = &kseg_stack;
     vm_seg_create(vm_kspace.seg_text, &vm_kspace, VM_SPACE_TEXT,
-        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_PROT_RWX, VM_SEG_NORMAL);
+        VM_SPACE_TEXT_S, VM_SPACE_TEXT_S, VM_PROT_RWX | VM_PROT_SYSTEM,
+                   VM_SEG_NORMAL);
     vm_seg_create(vm_kspace.seg_data, &vm_kspace, VM_SPACE_DATA,
-        0, VM_SPACE_DATA_S, VM_PROT_RWX, VM_SEG_NORMAL);
+        0, VM_SPACE_DATA_S, VM_PROT_RWX | VM_PROT_SYSTEM,
+                   VM_SEG_NORMAL);
     vm_seg_create(vm_kspace.seg_stack, &vm_kspace,
-        VM_SPACE_DATA_E, 0, 0, VM_PROT_RWX, VM_SEG_EXPDOWN);
+        VM_SPACE_DATA_E, 0, 0, VM_PROT_RWX | VM_PROT_SYSTEM,
+                   VM_SEG_EXPDOWN);
     // stwórz odwzorowywanie j±dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     mem_zero(kmap, sizeof(vm_pmap_t));
@@ -147,6 +150,7 @@ create_kernel_space()
     // Odwzorowywujemy jeden-do-jednego pierwsze 4MB
     uintptr_t *table = (uintptr_t*) page->phys_addr;
     for (int i = 0; i < 1024; i++) {
+        ///@todo: dowiedzieæ siê, czemu musi byæ PTE_US. kto z tego korzysta??
         table[i] = PAGE_ADDR(i) | PTE_PRESENT | PTE_RW | PTE_G | PTE_US;
     }
 
@@ -169,7 +173,7 @@ create_kernel_data()
     vm_page_t *page = vm_alloc_page();
     page->kvirt_addr = kdata->base + kdata->size;
     uintptr_t *table = (uintptr_t*) page->phys_addr;
-    table[0] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_US;
+    table[0] = page->phys_addr | PDE_PRESENT | PDE_RW;
     _pmap_insert_pte(kmap, page, vaddr);
     kdata->size += PAGE_SIZE;
     vaddr += PAGE_SIZE*1024;
@@ -177,7 +181,7 @@ create_kernel_data()
         page = vm_alloc_page();
         mem_zero((void*)page->phys_addr, PAGE_SIZE);
         page->kvirt_addr = kdata->base + kdata->size;
-        table[i] = page->phys_addr | PDE_PRESENT | PDE_RW | PDE_US;
+        table[i] = page->phys_addr | PDE_PRESENT | PDE_RW;
         kdata->size += PAGE_SIZE;
         _pmap_insert_pte(kmap, page, vaddr);
         vm_pmap_insert(kmap, page, page->kvirt_addr,
@@ -214,7 +218,7 @@ initialize_internal()
     reg->end = reg->begin + reg->size;
     reg->segment = kdata;
     list_insert_head(&kdata->regions, reg);
-    cpu_set_cr0(cpu_get_cr0() | CR0_WP);
+    cpu_set_cr0(cpu_get_cr0() | CR0_WP); //w³±czamy ochronê przed zapisem
 }
 
 /// Wykrywa ilo¶æ zainstalowanej pamiêci RAM.
@@ -308,7 +312,7 @@ vm_pmap_init(vm_pmap_t *vpm)
  *         na now± tablicê stron.
  */
 bool
-vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
+vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
 {
     bool _G = _GLOBAL(va, PTE_G);
     vm_addr_t pa = p->phys_addr;
@@ -322,9 +326,8 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
     p->refcnt++;
     if (!_G) vpm->pdircount[PAGE_DIR(va)]++;
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT
-        | ((flags & VM_PROT_WRITE)?PTE_RW:0)
-        | ((flags & VM_PROT_SYSTEM)?0:PTE_US)
-        | _G | PTE_US | PTE_RW;
+        | PROT_TO_PTEFLAGS(prot)
+        | _G;
     return TRUE;
 }
 
@@ -341,28 +344,28 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, int flags)
  * Nie bêdziemy zarz±dzañ stronami z kodem j±dra.
  */
 bool
-vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, int flags)
+vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, vm_prot_t prot)
 {
-    return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va, flags);
+    return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va, prot);
 }
 
 void
-vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, int flags)
+vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, vm_prot_t prot)
 {
     for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
-        vm_pmap_insert(pmap, p, addr, flags);
+        vm_pmap_insert(pmap, p, addr, prot);
     }
 }
 
 void
 vm_pmap_mapphys(vm_pmap_t *pmap, vm_addr_t dst_addr, vm_paddr_t src_addr,
-                      vm_size_t size, int flags)
+                      vm_size_t size, vm_prot_t prot)
 {
     int n = PAGE_NUM(src_addr);
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE, n++) {
         vm_page_t *page = &vm_pages[n];
-        vm_pmap_insert(pmap, page, dst_addr, flags);
+        vm_pmap_insert(pmap, page, dst_addr, prot);
     }
 }
 
@@ -374,8 +377,8 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
         ///@todo: mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
-        int flags = _pmap_page_flags(src_pmap, src_addr);
-        vm_pmap_insert(dst_pmap, page, dst_addr, flags);
+        int prot = _pmap_page_prot(src_pmap, src_addr);
+        vm_pmap_insert(dst_pmap, page, dst_addr, prot);
         src_addr += PAGE_SIZE;
     }
 }
@@ -481,12 +484,13 @@ vm_pmap_is_avail(const vm_pmap_t *vpm, vm_addr_t va)
  * Zwraca flagi ustawione dla strony zwi±zanej z danym adresem wirtualnym
  */
 
-int
-_pmap_page_flags(const vm_pmap_t *pmap, vm_addr_t addr)
+vm_prot_t
+_pmap_page_prot(const vm_pmap_t *pmap, vm_addr_t addr)
 {
     int pte = PAGE_TBL(addr);
     vm_ptable_t *pt = _pmap_pde(pmap, addr);
-    return PTE_FLAGS(pt->table[pte]);
+    int flags = PTE_FLAGS(pt->table[pte]);
+    return PTEFLAGS_TO_PROT(flags);
 }
 
 /**

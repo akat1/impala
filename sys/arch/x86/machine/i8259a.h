@@ -33,6 +33,8 @@
 #ifndef __MACHINE_i8259A_H
 #define __MACHINE_i8259A_H
 
+#include <machine/interrupt.h>
+
 enum {
     PIC_IRQ0 = 0x01,
     PIC_IRQ1 = 0x02,
@@ -64,6 +66,7 @@ void i8259a_irq_enable(int n);
 void i8259a_irq_disable(int n);
 void i8259a_set_irq_priority(int n, int ipl);
 
+extern int irq_priority[MAX_IRQ];
 
 #endif
 

@@ -35,6 +35,7 @@
 #include <sys/sched.h>
 #include <sys/clock.h>
 #include <sys/utils.h>
+#include <machine/interrupt.h>
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
 int sched_quantum;
@@ -67,14 +68,15 @@ sched_init()
  * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
  */
 
+bool wantSched;
+
 void
 sched_action()
 {
     if (clock_ticks >= end_ticks) {
         end_ticks = clock_ticks + sched_quantum;
-        if (spinlock_trylock(&sprq)) {
-            __sched_yield();
-        }
+        try_sched_yield();
+//        wantSched=TRUE;
     }
 }
 
@@ -91,9 +93,23 @@ __sched_yield()
     thread_t *n = select_next_thread();
 //     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
     spinlock_unlock(&sprq);
-    if (n == curthread) 
+    if (n == curthread) {
+//        KASSERT(s==0);
+//        splx(s);
         return;
+    }
     thread_switch(n, curthread);
+//    KASSERT(s==0);
+//    splx(s);
+}
+
+///Próbuje prze³±czyæ kontekst
+void
+try_sched_yield()
+{
+    if(spinlock_trylock(&sprq))
+        __sched_yield();
+    else kprintf("Nie wysz³o..\n");
 }
 
 
@@ -262,7 +278,7 @@ select_next_thread()
             return p;
         }
     }
-    panic("Impossible to get here! runq=%u", list_length(&run_queue));
+    panic("Impossible to get here! runq=%u, curthr: %p, p: %p", list_length(&run_queue), curthread, p);
 #undef NEXTTHR
     return 0;
 }

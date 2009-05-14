@@ -41,12 +41,9 @@ typedef void kthread_entry_f(void *);
 
 /// W±tek j±dra.
 struct kthread {
-    /// w±tek procesora.
-    thread_t *kt_thread;
-    /// argument procedury wej¶ciowej
-    void     *kt_arg;
-    /// adres procedury wej¶ciowej
-    kthread_entry_f *kt_entry;;
+    thread_t *kt_thread;       ///< w±tek procesora.
+    void     *kt_arg;          ///< argument procedury wej¶ciowej
+    kthread_entry_f *kt_entry; ///< adres procedury wej¶ciowej
 };
 
 #ifdef __KERNEL

@@ -82,11 +82,11 @@ int
 splhigh()
 {
     irq_disable();
-    TRACE_IN("enter");
+//    TRACE_IN("enter");
     int opl=intrpt_getipl();
     intrpt_raiseipl(IPL_HIGH);
     irq_enable();
-    TRACE_IN("leave");
+//    TRACE_IN("leave");
     return opl;
 }
 

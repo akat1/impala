@@ -92,10 +92,15 @@ start_init_process()
     void *entry = (void*) (VM_SPACE_UTEXT + PAGE_OFF(PROC_init));
     thread_t *t = proc_create_thread(p, THREAD_STACK_SIZE, entry);
     vm_pmap_map(&t->vm_space->pmap, VM_SPACE_UTEXT, &vm_kspace.pmap,
-        PTE_ADDR(PROC_init), VM_PROT_RWX);
+        PTE_ADDR(PROC_init), 2*PAGE_SIZE);
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
-    for (;;);
+    kprintf("[infinite loop]\n"); 
+    for (;;) { 
+        char c=pckbd_get_char(); 
+        if(c!=-1) 
+            kprintf("%c", c); 
+    }
     t = 0;
     PROC_init();
 }
@@ -131,6 +136,6 @@ init_kernel()
     bio_init();
     vfs_init();
     cons_init();
-    ssleep(1);
+//    ssleep(1);
     kprintf("kernel initialized\n");
 }

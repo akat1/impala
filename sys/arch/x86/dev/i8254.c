@@ -66,7 +66,7 @@ i8254_set_freq(uint hz)
 {
     KASSERT(hz >= 19);  // wymagane, aby wynik mie¶ci³ siê w 2 bajtach
     
-    uint res=PIT_MAX_FREQ/hz;
+    uint res=(PIT_MAX_FREQ+hz/2)/hz;
     
     io_out8(PIT_MODE, 0x34); // licznik zero w trybie 2,
                              // przesy³ane oba bajty kodowanej binarnie liczby

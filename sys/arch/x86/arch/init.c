@@ -67,6 +67,10 @@ static descriptor_register_t p_idtr;
  * j±dra. Jej zadanie to zainicjalizowanie ¶rodowiska
  * do pracy w systemie operacyjnym.
  */
+
+uint8_t bbb[40960];
+void setesp0(void *a);
+
 void
 init_x86()
 {
@@ -85,14 +89,15 @@ init_x86()
     // Ustawienie GDT
     mem_zero(&p_gdt, sizeof(p_gdt));
     mem_zero(&p_tss0, sizeof(p_tss0));
-    setgdt(SEL_CODE, 0x0, 0xffffffff, code, attr);
-    setgdt(SEL_DATA, 0x0, 0xffffffff, data, attr);
-    setgdt(SEL_UCODE, 0x0, 0xffffffff, ucode, attr);
-    setgdt(SEL_UDATA, 0x0, 0xffffffff, udata, attr);
+    setgdt(SEL_CODE, 0x0, 0xfffff, code, attr);
+    setgdt(SEL_DATA, 0x0, 0xfffff, data, attr);
+    setgdt(SEL_UCODE, 0x0, 0xfffff, ucode, attr);
+    setgdt(SEL_UDATA, 0x0, 0xfffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
     p_tss0.tss_io = 0;
-
+    setesp0(bbb+40820);
     p_tss0.tss_ss0 = 0x10;
+    p_tss0.tss_cs=p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
 
     mem_zero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;
@@ -130,7 +135,7 @@ init_x86()
     irq_enable();
 }
 
-void setesp0(void *a);
+
 
 void
 setesp0(void *a)

@@ -77,21 +77,26 @@ irq_free_handler(int irq)
 void
 irq_done()
 {
-    irq_enable();
-    i8259a_send_eoi();
+//    irq_enable();
+//    i8259a_send_eoi();
 }
 
 void
 ISR_irq(interrupt_frame frame)
 {
-    bool eoi = FALSE;
+//    int volatile opl=CPL;
     if (frame.f_n < MAX_IRQ) {
         if(irq_handlers[frame.f_n] != NULL)
-            eoi = irq_handlers[frame.f_n]();
+        {
+//            intrpt_raiseipl(irq_priority[frame.f_n]);
+//            irq_enable();
+            irq_handlers[frame.f_n]();
+        }
         else
             kprintf("Spurious interrupt!\n");
     }
-    if (!eoi) i8259a_send_eoi();
+//    irq_disable();
+//    intrpt_loweripl(opl);
 }
 
 void
@@ -182,8 +187,25 @@ intrpt_loweripl(int pl)
 {
     CPL=pl;
     i8259a_reset_mask();
+   /* if((CPL==0) && wantSched)
+    {
+//        int s=splbio();
+        wantSched=FALSE;
+//        kprintf("Trying!\n");
+
+        try_sched_yield();
+//        splx(s);
+    }*/
     //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
     //podobnego, to tu mo¿emy je "obudziæ"
+}
+
+void
+intrpt_just0()
+{
+//    irq_disable();
+    CPL=0;
+    i8259a_reset_mask();
 }
 
 int

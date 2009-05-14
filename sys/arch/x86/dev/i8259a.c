@@ -63,7 +63,8 @@ enum {
 };
 
 enum {
-    OCW2_EOI_NORMAL = 0x20
+    OCW2_EOI_NORMAL = 0x20,
+    OCW3_SPECIAL_MASK_MODE = 0x68
 };
 
 static void i8259a_update_masks(void);
@@ -72,7 +73,8 @@ static uchar pic1_en_mask;  //które przerwania mamy w³±czone..
 static uchar pic2_en_mask;
 static uchar pic1_pl_mask[MAX_IPL];
 static uchar pic2_pl_mask[MAX_IPL];
-static int irq_priority[MAX_IRQ];
+
+int irq_priority[MAX_IRQ];
 
 void
 i8259a_init()
@@ -84,7 +86,7 @@ i8259a_init()
     // ICW3
     io_out8(PIC_M+1, 0x04);
     // ICW4
-    io_out8(PIC_M+1, ICW4_8086);
+    io_out8(PIC_M+1, ICW4_8086 | ICW4_EOI_AUTO);
 
     // ICW1
     io_out8(PIC_S, ICW1_RESET | ICW1_ICW4);
@@ -93,12 +95,15 @@ i8259a_init()
     // ICW3
     io_out8(PIC_S+1, 0x02);
     // ICW4
-    io_out8(PIC_S+1, ICW4_8086);
+    io_out8(PIC_S+1, ICW4_8086 | ICW4_EOI_AUTO);
 
+    io_out8(PIC_M, OCW3_SPECIAL_MASK_MODE);
+    io_out8(PIC_S, OCW3_SPECIAL_MASK_MODE);
+    
     pic1_en_mask = 0x0; // wszystkie przerwania wy³±czone
     pic2_en_mask = 0x0;
     for(int i=0; i<MAX_IRQ; i++)
-        irq_priority[i] = IPL_NONE;
+        irq_priority[i] = IPL_HIGH;
     CPL = 0;
 
     i8259a_update_masks();
@@ -138,7 +143,6 @@ i8259a_reset_mask()
 //        kprintf("maski (ipl=%u, cpl=%u): %08b %08b\n", i, CPL, pic1_pl_mask[i], pic2_pl_mask[i]);
     io_out8(PIC_M+1, pic1_pl_mask[CPL]);
     io_out8(PIC_S+1, pic2_pl_mask[CPL]);
-
 }
 
 /// Przed w³±czeniem przerwania powinno mieæ ono ustawiony priorytet
