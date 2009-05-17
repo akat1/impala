@@ -107,7 +107,8 @@ enum CPU_CR4 {
 /** 
  * Opis mo¿liwo¶ci procesora
  *
- * Intel IA-32 ADSM - 2A - 3-192
+ * Intel IA-32 ADSM - 2A - 3-192 - ECX
+ * Intel IA-32 ADSM - 2A - 3-192 - EDX
  */
 
 enum CPU_EDX_FEATURE {
@@ -142,6 +143,34 @@ enum CPU_EDX_FEATURE {
     EDX_FEATURE_PBE   = 1 << 31
 };
 
+enum CPU_ECX_FEATURE {
+    ECX_FEATURE_SSE3        = 1 << 0,
+    ECX_FEATURE_MONITOR     = 1 << 3,
+    ECX_FEATURE_DSCPL       = 1 << 4,
+    ECX_FEATURE_VMX         = 1 << 5,
+    ECX_FEATURE_SMX         = 1 << 6,
+    ECX_FEATURE_EST         = 1 << 7,
+    ECX_FEATURE_TM2         = 1 << 8,
+    ECX_FEATURE_SSSE3       = 1 << 9,
+    ECX_FEATURE_CNXTID      = 1 << 10,
+    ECX_FEATURE_CMPXCHG16B  = 1 << 13,
+    ECX_FEATURE_XTPR        = 1 << 14,
+    ECX_FEATURE_PDCM        = 1 << 15,
+    ECX_FEATURE_DCA         = 1 << 18,
+    ECX_FEATURE_SSE41       = 1 << 19,
+    ECX_FEATURE_SSE42       = 1 << 20,
+    ECX_FEATURE_POPCNT      = 1 << 23
+};
+
+
+enum CPU_CPUID_OPTIONS {
+    CPUID_BASIC,
+    CPUID_FEATURE,
+    CPUID_CACHE_TLB
+};
+
+
+
 #ifdef __KERNEL
 void cpu_user_mode(void);
 uint32_t cpu_get_cr0(void);
@@ -151,8 +180,21 @@ void cpu_set_cr0(uint32_t r);
 void cpu_set_cr2(uint32_t r);
 void cpu_set_cr3(uint32_t r);
 
-// Vendor
-//static char vendor_string[13];
+struct cpuid_result {
+    unsigned int r_eax;
+    unsigned int r_ebx;
+    unsigned int r_ecx;
+    unsigned int r_edx;
+};
+
+struct cpu_info {
+    char vendor_string[13];
+    unsigned int version_information;
+    unsigned int feature_ecx;
+    unsigned int feature_edx;
+};
+
+struct cpu_info cpu_i;
 
 #endif
 

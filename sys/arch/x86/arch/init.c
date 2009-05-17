@@ -46,11 +46,14 @@
 #include <machine/video.h>
 
 void init_x86(void);
+void _cpuid(int option, struct cpuid_result *r);
 void _unhnd_intrpt(void);
 void _intrpt_syscall(void);
+void _cpu_info(void);
 
 extern uintptr_t trap_table[];
 extern uintptr_t irq_table[];
+extern struct cpu_info cpu_i;
 
 static void setgdt(int, uintptr_t, uint, uint, uint);
 static void setidt(int i, uint selector, uintptr_t offset, uint access);
@@ -59,6 +62,35 @@ static descriptor_t p_idt[0x100];
 static task_state_segment p_tss0;
 static descriptor_register_t p_gdtr;
 static descriptor_register_t p_idtr;
+
+void _cpuid(int option, struct cpuid_result *r) {
+
+    __asm__ volatile (  
+        "cpuid;"                
+        :"=a"(r->r_eax), "=b"(r->r_ebx), "=c"(r->r_ecx), "=d"(r->r_edx)
+        :"a"(option));
+
+    return;
+}
+
+void _cpu_info(void)
+{
+    struct cpuid_result cpuid_r;
+
+    mem_zero(&cpu_i, sizeof(struct cpu_info));
+
+    _cpuid(CPUID_BASIC ,&cpuid_r);
+
+    ((unsigned int *)&(cpu_i.vendor_string))[0] = cpuid_r.r_ebx;
+    ((unsigned int *)&(cpu_i.vendor_string))[1] = cpuid_r.r_edx;
+    ((unsigned int *)&(cpu_i.vendor_string))[2] = cpuid_r.r_ecx;
+
+    _cpuid(CPUID_FEATURE ,&cpuid_r); 
+
+    cpu_i.version_information = cpuid_r.r_eax;
+    cpu_i.feature_ecx = cpuid_r.r_ecx;
+    cpu_i.feature_edx = cpuid_r.r_edx;
+}
 
 /**
  * Inicjalizuje obs³ugê architektury x86.
@@ -84,6 +116,7 @@ init_x86()
         intrpt_attr = GATE_PRESENT | GATE_TYPE_INTRPT,
         trap_attr = GATE_PRESENT | GATE_TYPE_TRAP
     };
+
     int i;
 
     // Ustawienie GDT
@@ -134,6 +167,7 @@ init_x86()
     vm_low_init();
     video_init();
     irq_enable();
+    _cpu_info();
 }
 
 
