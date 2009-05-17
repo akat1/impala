@@ -39,6 +39,7 @@ extern int sched_quantum;
 void sched_init(void);
 void sched_action(void);
 void try_sched_yield(void);
+void do_switch(void);
 void sched_yield(void);
 void sched_exit(thread_t *thr);
 

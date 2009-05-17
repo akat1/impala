@@ -108,13 +108,8 @@ void irq_install_handler(int irq, irq_handler_f *h, int ipl);
 void irq_free_handler(int irq);
 void irq_done(void);
 
-extern int CPL;
+extern int volatile CIPL;
 extern bool wantSched;
-
-void intrpt_just0(void);
-void intrpt_raiseipl(int pl);
-void intrpt_loweripl(int pl);
-int  intrpt_getipl(void);
 
 
 /// Wy³±cza obs³ugê przerwañ
@@ -128,6 +123,14 @@ static inline void irq_enable(void)
 {
     __asm__ volatile("sti");
 }
+
+
+int splhigh(void);
+int splclock(void);
+int splbio(void);
+int spltty(void);
+int spl0(void);
+void splx(int pl);
 
 #endif
 

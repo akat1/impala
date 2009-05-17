@@ -78,7 +78,7 @@ thread_init()
         thread_ctor, thread_dtor);
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN | THREAD_KERNEL;
-
+    //curthread->vm_space = &vm_kspace;
 }
 
 /**
@@ -102,6 +102,7 @@ thread_create(int type, addr_t entry, addr_t arg)
         t->thr_entry_point = entry;
         t->thr_entry_arg = arg;
         t->thr_wakeup_time = 0;
+        t->vm_space = NULL;
         thread_context_init(&t->thr_context);
         list_insert_tail(&threads_list, t);
         return t;

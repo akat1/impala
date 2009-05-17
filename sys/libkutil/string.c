@@ -41,7 +41,7 @@ addr_t
 mem_move(addr_t dst, addr_t src, size_t len)
 {
     addr_t org = dst;
-    size_t i;
+    ssize_t i;
 
     if ( dst != src && len > 0 ) {
         if (dst < src) {
@@ -152,7 +152,7 @@ str_cat(char *str, const char *s)
 static char *convert_uint32(char *b, uint32_t arg_u32);
 static char *convert_hexuint32(char *b, uint32_t arg_u32);
 static char *convert_binuint32(char *b, uint32_t arg_u32);
-static int from_string(char *dst, int *i, int *left, char *b, char sep, int fw, 
+static int from_string(char *dst, int *left, char *b, char sep, int fw, 
                         bool to_right);
 
 #define DEFAULT_ATTRIBUTE (COLOR_WHITE)
@@ -177,7 +177,6 @@ int
 vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
 {
     char *dstorg = dst;
-    int i;
     int left = size - 1;
     char buf[INTERNAL_BUF];
     char *pbuf;
@@ -186,7 +185,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
     if(!dst || !fmt)
         return -1;  // -EBLEBLE ?
     
-    for (i = 0; *fmt; i++, fmt++) {
+    for (; *fmt; fmt++) {
         pbuf = 0;
         switch (*fmt) {
             case '%': {
@@ -262,7 +261,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         break;
                 }
                 if (pbuf)
-                    dst += from_string(dst, &i, &left, pbuf, separator,
+                    dst += from_string(dst, &left, pbuf, separator,
                                         field_width, pad_to_right);
                 break; 
             }
@@ -279,7 +278,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
 }
 
 int
-from_string(char *dst, int *i, int *left, char *b, char sep, int fw, 
+from_string(char *dst, int *left, char *b, char sep, int fw, 
                         bool to_right)
 {
     char *dst_orig=dst;
@@ -301,7 +300,6 @@ from_string(char *dst, int *i, int *left, char *b, char sep, int fw,
         if((*left)-- > 0)
             *(dst++) = sep;
     
-    *i += fw-1;
     return dst-dst_orig;
 }
 

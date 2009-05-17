@@ -49,7 +49,7 @@ void TRAP_unhandled(interrupt_frame fr);
 void TRAP_gfault(interrupt_frame fr);
 void TRAP_pfault(interrupt_frame fr);
 static void print_frame(const char *s, interrupt_frame *f);
-int CPL;    ///< current priority level
+int volatile CIPL;    ///< current interrupt priority level
 
 irq_handler_f *irq_handlers[MAX_IRQ];
 
@@ -69,11 +69,14 @@ void
 irq_free_handler(int irq)
 {
     if (irq < MAX_IRQ) {
+         i8259a_set_irq_priority(irq, IPL_HIGH);
          i8259a_irq_disable(irq);
          irq_handlers[irq] = NULL;
     }
 }
 
+
+// Planuje wywaliæ irq_done, ale nie wszystko na raz...
 void
 irq_done()
 {
@@ -84,19 +87,19 @@ irq_done()
 void
 ISR_irq(interrupt_frame frame)
 {
-//    int volatile opl=CPL;
+    int opl=CIPL;
     if (frame.f_n < MAX_IRQ) {
         if(irq_handlers[frame.f_n] != NULL)
         {
-//            intrpt_raiseipl(irq_priority[frame.f_n]);
-//            irq_enable();
+            CIPL = irq_priority[frame.f_n];
+            i8259a_reset_mask();
+            irq_enable();
             irq_handlers[frame.f_n]();
         }
-        else
-            kprintf("Spurious interrupt!\n");
+//        else
+//            kprintf("Spurious interrupt!\n");
     }
-//    irq_disable();
-//    intrpt_loweripl(opl);
+    splx(opl);  //je¶li wracamy do zera, to tu mo¿e nast±piæ zmiana kontekstu
 }
 
 void
@@ -110,12 +113,12 @@ ISR_syscall(interrupt_frame frame)
     ap = (va_list) (frame.f_esp);
     curthread->thr_flags |= THREAD_SYSCALL;
     syscall(curthread, frame.f_eax, &result, ap);
-    curthread->thr_flags ^= THREAD_SYSCALL;
+    curthread->thr_flags &= ~THREAD_SYSCALL;
 
     // result
     frame.f_eax = result.result;
     frame.f_ecx = result.errno;
-    // kprintf("result: %x  errno: %x\n", frame.f_eax, frame.f_ecx);
+//    kprintf("result: %x  errno: %x\n", frame.f_eax, frame.f_ecx);
 }
 
 void
@@ -123,6 +126,7 @@ TRAP_unhandled(interrupt_frame f)
 {
     print_frame("unhandled exception", &f);
     __asm__("hlt");
+    while(1);
 }
 
 void
@@ -131,6 +135,7 @@ TRAP_gfault(interrupt_frame f)
     //panic("General protection fault\n");
     print_frame("general protection fault", &f);
     __asm__("hlt");
+    while(1);
 }
 
 void
@@ -165,51 +170,92 @@ print_frame(const char *name, interrupt_frame *f)
     kprintf("   %%ds  = %p\n", f->f_ds);
     kprintf("   %%es  = %p ", f->f_es);
     kprintf("   %%fs  = %p\n", f->f_fs);
-    kprintf("   %%gs  = %p ", f->f_fs);
+    kprintf("   %%gs  = %p ", f->f_gs);
     kprintf("   %%ss  = %p\n", f->f_ss);
     kprintf("   %%esp = %p ", f->f_esp);
     kprintf("   %%ebp = %p\n", f->f_ebp);
 }
 
 
-
-void
-intrpt_raiseipl(int pl)
+int
+splhigh()
 {
-    if(CPL>=pl)
-        return;
-    CPL=pl;
-    i8259a_reset_mask();
-}
-
-void
-intrpt_loweripl(int pl)
-{
-    CPL=pl;
-    i8259a_reset_mask();
-   /* if((CPL==0) && wantSched)
-    {
-//        int s=splbio();
-        wantSched=FALSE;
-//        kprintf("Trying!\n");
-
-        try_sched_yield();
-//        splx(s);
-    }*/
-    //je¿eli mamy jakie¶ softirq które mog³y byæ zablokowane czy co¶
-    //podobnego, to tu mo¿emy je "obudziæ"
-}
-
-void
-intrpt_just0()
-{
-//    irq_disable();
-    CPL=0;
-    i8259a_reset_mask();
+    irq_disable();
+    int opl = CIPL;
+    if(opl < IPL_HIGH) {
+        CIPL = IPL_HIGH;
+        i8259a_reset_mask();
+    }
+    irq_enable();
+    return opl;
 }
 
 int
-intrpt_getipl()
+splclock()
 {
-    return CPL;
+    irq_disable();
+    int opl = CIPL;
+    if(opl < IPL_CLOCK) {
+        CIPL = IPL_CLOCK;
+        i8259a_reset_mask();
+    }
+    irq_enable();
+    return opl;
 }
+
+int
+splbio()
+{
+    irq_disable();
+    int opl = CIPL;
+    if(opl < IPL_BIO) {
+        CIPL = IPL_BIO;
+        i8259a_reset_mask();
+    }
+    irq_enable();
+    return opl;
+}
+
+int
+spltty()
+{
+    irq_disable();
+    int opl = CIPL;
+    if(opl < IPL_TTY) {
+        CIPL = IPL_TTY;
+        i8259a_reset_mask();
+    }
+    irq_enable();
+    return opl;
+}
+
+int
+spl0()
+{
+    irq_disable();
+    int opl = CIPL;
+    CIPL = IPL_NONE;
+    i8259a_reset_mask();
+    irq_enable();
+    return opl;
+}
+
+void
+splx(int pl)
+{
+    irq_disable();
+    CIPL=pl;   //jeszcze nie ustawiaj masek
+    if(pl==0 && wantSched)
+        do_switch(); /* podmieniamy w±tek wykonania ... je¿eli gdzie indziej te¿
+                        wywo³ujemy do_switch() to mo¿e wyj¶æ nie tu,
+                        a gdzie indziej. Mo¿e te¿ uruchomiæ nowy w±tek.
+                        A chcemy, ¿eby dzia³a³ on z CIPL=0. 
+                        Niech ustawianie cipl na 0 zajdzie w ¶rodku..
+                     */
+    else
+        i8259a_reset_mask();    //CIPL ju¿ jest, tylko wy¶lij do PIC'a
+    irq_enable();
+}
+
+
+

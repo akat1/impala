@@ -104,7 +104,7 @@ i8259a_init()
     pic2_en_mask = 0x0;
     for(int i=0; i<MAX_IRQ; i++)
         irq_priority[i] = IPL_HIGH;
-    CPL = 0;
+    CIPL = 0;
 
     i8259a_update_masks();
     i8259a_reset_mask();
@@ -141,8 +141,8 @@ i8259a_reset_mask()
 {
 //     for(int i=0; i<MAX_IPL; i++)
 //        kprintf("maski (ipl=%u, cpl=%u): %08b %08b\n", i, CPL, pic1_pl_mask[i], pic2_pl_mask[i]);
-    io_out8(PIC_M+1, pic1_pl_mask[CPL]);
-    io_out8(PIC_S+1, pic2_pl_mask[CPL]);
+    io_out8(PIC_M+1, pic1_pl_mask[CIPL]);
+    io_out8(PIC_S+1, pic2_pl_mask[CIPL]);
 }
 
 /// Przed w³±czeniem przerwania powinno mieæ ono ustawiony priorytet

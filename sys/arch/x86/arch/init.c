@@ -95,9 +95,10 @@ init_x86()
     setgdt(SEL_UDATA, 0x0, 0xfffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
     p_tss0.tss_io = 0;
-    setesp0(bbb+40820);
+//    setesp0(bbb+40820);
     p_tss0.tss_ss0 = 0x10;
-    p_tss0.tss_cs=p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
+//    p_tss0.tss_cs=0x8;
+//    p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
 
     mem_zero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;

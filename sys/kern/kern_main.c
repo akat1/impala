@@ -79,7 +79,10 @@ PROC_init()
         "int $0x80"
     );
 
-    for (;;);
+    for (;;); __asm__(
+        "movl $3, %eax;"
+        "int $0x80"
+    );
 }
 
 char buf[THREAD_STACK_SIZE];

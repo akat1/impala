@@ -426,6 +426,7 @@ kmem_bufctl_t *
 reserve_bufctl(kmem_cache_t *cache, kmem_slab_t *slab)
 {
     kmem_bufctl_t *bufctl = list_extract_first(&slab->free_bufs);
+    KASSERT(bufctl);        
     list_insert_tail(&slab->used_bufs, bufctl);
     if (list_length(&slab->free_bufs) == 0) {
         list_insert_tail(&cache->full_slabs, slab);

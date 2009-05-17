@@ -39,6 +39,8 @@
 #include <machine/interrupt.h>
 
 void setesp0(void* a);
+void __thread_enter(thread_t *t);
+void __enter_arg_esp(void* entry, void* arg, uint32_t esp);
 
 /**
  * Inicjalizuje kontekst.
@@ -62,12 +64,16 @@ thread_switch(thread_t *t_to, thread_t * volatile t_from)
 {
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
+//        kprintf("esp0 sw to: %08x, %08x\n",t_to->thr_kstack, t_to->thr_kstack_size);
+//        kprintf("thr: %08x, from: %08x\n",t_to, t_from);
+        setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
         if (t_to->thr_flags & THREAD_NEW) {
-            thread_enter(t_to);
+            __thread_enter(t_to);
         } else {
             thread_context_load(&t_to->thr_context);
         }
     } else {
+//        __asm__ volatile ("":::"memory", "eax", "ebx", "ecx", "edx", "esi", "edi");
         // Jestesmy ponownie w watku t_from
         curthread = t_from;
     }
@@ -81,33 +87,45 @@ thread_switch(thread_t *t_to, thread_t * volatile t_from)
  */
 
 void
-thread_enter(thread_t *t_to)
+__thread_enter(thread_t *t_to)
 {
     typedef void (*entry_point)(void*);
-    void *arg = t_to->thr_entry_arg;
-    register uint32_t ESP;
-    register entry_point entry;
     t_to->thr_flags &= ~THREAD_NEW;
-    entry = (entry_point) t_to->thr_entry_point;
-    kprintf("pmap: %p\n", &t_to->vm_space->pmap);
-    t_to->thr_context.c_esp = (uintptr_t)t_to->thr_stack +
-        t_to->thr_stack_size - 4;
+            //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
+            
     setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
     vm_pmap_switch(&t_to->vm_space->pmap);
-    ESP = t_to->thr_context.c_esp;
-    irq_enable();
+
+    void *arg = t_to->thr_entry_arg;
+    entry_point entry = (entry_point) t_to->thr_entry_point;
+    uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
+    
+//    kprintf("00: %p, %p, %p\n", arg, entry, ESP);
+//    kprintf("bb: %p, %p, %p\n", arg, entry, ESP);
+
+    CIPL = 0;       // proces ma dzia³aæ z CIPL = 0
+    extern void i8259a_reset_mask(void);
+    i8259a_reset_mask();
+    
     if (!(t_to->thr_flags & THREAD_KERNEL)) {
-        DEBUGF("switching to umode %p", entry);
+//        DEBUGF("switching to umode %p", entry); lepiej nie -> w³±czy int.
         cpu_user_mode();
     }
-    __asm__ volatile (
-        "movl %%eax, %%esp"
-        :
-        : "a" (ESP)
-        : "%esp" );
-
-    
-    entry(arg);
+    else
+        irq_enable();
+  
+    __enter_arg_esp(entry, arg, ESP); //na wszelki wypadek ;)
     panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }
 
+void
+__enter_arg_esp(void* entry, void* arg, uint32_t esp)
+{
+    typedef void (*entry_point)(void*);
+    __asm__ volatile (
+        "movl %%eax, %%esp"
+        :
+        : "a" (esp)
+        : "%esp" );
+    ((entry_point)entry)(arg);
+}

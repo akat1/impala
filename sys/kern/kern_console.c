@@ -39,6 +39,7 @@
 #include <sys/errno.h>
 #include <sys/utils.h>
 #include <machine/video.h>
+#include <machine/interrupt.h>
 
 enum {
     DEFAULT_FG = COLOR_BRIGHTGRAY,
@@ -267,6 +268,7 @@ vtty_out(vtty_t *vt, const char *c)
         CODE_ESC = 033
     };
     bool escape = FALSE;
+    int X = spltty();
     mutex_lock(&vt->mtx);
     for (; *c; c++) {
         if (escape) {
@@ -288,6 +290,7 @@ vtty_out(vtty_t *vt, const char *c)
         }
     }
     mutex_unlock(&vt->mtx);
+    splx(X);
 }
 
 void

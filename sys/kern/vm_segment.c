@@ -104,6 +104,7 @@ vm_seg_alloc(vm_seg_t *vseg, vm_size_t size, void *_res)
     // a pierwszym regionem
     if (size < region->begin - vseg->base) {
 //         TRACE_IN("found hole at segment begin");
+        *res = region->begin - size;
         return expand_region(vseg, region, size, EXPAND_DOWN);
     }
     // Ok, no to szukamy dziury za regionem

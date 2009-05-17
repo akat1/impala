@@ -34,6 +34,7 @@
 #include <sys/utils.h>
 #include <sys/syscall.h>
 #include <machine/video.h>
+#include <machine/interrupt.h>
 
 typedef struct sc_write_args sc_write_args;
 

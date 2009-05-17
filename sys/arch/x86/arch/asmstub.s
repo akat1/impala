@@ -67,11 +67,16 @@ offset32    CTX_EBP,    1
 offset32    CTX_EFLAGS, 2
 offset32    CTX_CR3,    3
 
+
+
 cpu_user_mode:
     movl %esp, %eax
     pushl $udata_selector|SEL_DPL3
     pushl %eax
     pushf
+    popl %eax
+    or $0x200, %eax
+    pushl %eax
     pushl $utext_selector|SEL_DPL3
     pushl $1f
     iret
@@ -80,19 +85,18 @@ cpu_user_mode:
     mov %ax, %ds
     mov %ax, %es
     mov %ax, %fs
-    mov %ax, %ss
     mov %ax, %gs
     ret
 
 thread_context_load:
     enter $0, $0
     movl 8(%ebp), %edi
+    pushl CTX_EFLAGS(%edi)
+    popfl
     movl CTX_CR3(%edi), %eax
     movl %eax, %cr3
     movl CTX_ESP(%edi), %esp
     movl CTX_EBP(%edi), %ebp
-    pushl CTX_EFLAGS(%edi)
-    popfl
     movl $0x0, %eax
     leave
     ret

@@ -77,9 +77,9 @@ enum {
     /// zadanie j±dra.
     SEL_TSS0,
     /// zadanie u¿ytkownika.
-    SEL_UTSS0,
+//    SEL_UTSS0,
     /// bramka do trybu rzeczywistego
-    SEL_VM86,
+//    SEL_VM86,
     SEL_MAX
 };
 

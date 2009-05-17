@@ -39,12 +39,14 @@
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
 int sched_quantum;
+bool wantSched;
 
 /// Kolejka programów dzia³aj±cych.
 static list_t run_queue;
 static int end_ticks;
 /// Zamek zabezpieczaj±cy sekcje krytyczne planisty.
 static spinlock_t sprq;
+
 
 static inline thread_t * select_next_thread(void);
 static void __sched_yield(void);
@@ -68,15 +70,11 @@ sched_init()
  * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
  */
 
-bool wantSched;
-
 void
 sched_action()
 {
-    if (clock_ticks >= end_ticks) {
-        end_ticks = clock_ticks + sched_quantum;
-        try_sched_yield();
-//        wantSched=TRUE;
+    if (clock_ticks >= end_ticks && !wantSched) {
+        wantSched=TRUE;
     }
 }
 
@@ -86,30 +84,41 @@ sched_action()
  * Powinna byæ uruchamian tylko wewn±trz sekcji krytycznych
  * chronionych przez wiruj±cy zamek sprq. Jej zadanie to wybranie
  * kolejnego w±tku, wyj¶cie z sekcji krytycznej i zmiana kontekstu.
+ *
+ * Stan na wej: przerwania w³±czone, CIPL == IPL_SOFTCLOCK
  */
 void
 __sched_yield()
 {
-    thread_t *n = select_next_thread();
+    thread_t *n = select_next_thread(); // wymaganie: przerwanie zegarowe = ON
 //     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
-    spinlock_unlock(&sprq);
+    spinlock_unlock(&sprq); //nikt nam nie zablokuje, CIPL == IPL_SOFTCLOCK
     if (n == curthread) {
-//        KASSERT(s==0);
-//        splx(s);
-        return;
+        return; // jednak nie zmieniamy
     }
+   
+    end_ticks = clock_ticks + sched_quantum;
+    wantSched = FALSE;
+    irq_disable();
     thread_switch(n, curthread);
-//    KASSERT(s==0);
-//    splx(s);
+    irq_enable();
 }
 
-///Próbuje prze³±czyæ kontekst
+/**
+ * Próbuje prze³±czyæ kontekst
+ * Stan na wej¶ciu: przerwania: obojêtnie
+ * Stan na wyj¶ciu: przerwania: w³±czone, CIPL=0
+ */
 void
-try_sched_yield()
+do_switch()
 {
-    if(spinlock_trylock(&sprq))
+    int old=splbio();
+    KASSERT(old==0);
+    if(spinlock_trylock(&sprq)) //je¿eli odpalamy z w±tku to powinno byæ ok
         __sched_yield();
-    else kprintf("Nie wysz³o..\n");
+    //else spoko, przy opuszczaniu zamka bêdziemy uwa¿aæ..
+    //else kprintf("Nie wysz³o..\n");
+    spl0();
 }
 
 
@@ -117,8 +126,9 @@ try_sched_yield()
 void
 sched_yield()
 {
-    spinlock_lock(&sprq);
-    __sched_yield();
+    do_switch();
+//    spinlock_lock(&sprq);
+//    __sched_yield();
 }
 
 /// Dodaje w±tek do kolejki programów dzia³aj±cych.
@@ -130,6 +140,7 @@ sched_insert(thread_t *thr)
     thr->thr_flags |= THREAD_RUN|THREAD_INRUNQ;
     list_insert_tail(&run_queue, thr);
     spinlock_unlock(&sprq);
+    ///@TODO: dodaæ prze³±czanie
 }
 
 static void _mutex_wakeup(mutex_t *m);
@@ -182,7 +193,11 @@ sched_unlock_and_wait(mutex_t *m)
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     __mutex_unlock(m);
+    
+    int old=splbio();
+    KASSERT(old==0);    
     __sched_yield();
+    spl0();
 }
 
 /// Usypia dzia³aj±cy w±tek.
@@ -193,7 +208,10 @@ sched_wait()
 //    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
+    int old=splbio();
+    KASSERT(old==0);    
     __sched_yield();
+    spl0();
 }
 
 static inline void
@@ -256,7 +274,10 @@ sched_exit(thread_t *t)
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
     if ( t == curthread )
         curthread = NULL;
+    int old=splbio();
+    KASSERT(old==0);    
     __sched_yield();
+    spl0();
 }
 
 /// Wybiera nastêpny w±tek do obs³ugi.
