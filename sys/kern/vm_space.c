@@ -58,6 +58,18 @@ vm_space_create(vm_space_t *vs, int space)
     return 0;
 }
 
+void
+vm_space_destroy(vm_space_t *vs)
+{
+    KASSERT(vs->space == VM_SPACE_USER);
+    vm_seg_destroy(vs->seg_text);
+    vm_seg_destroy(vs->seg_data);
+    vm_seg_destroy(vs->seg_stack);
+    vm_lpool_free(&vm_lpool_segments, vs->seg_text);
+    vm_lpool_free(&vm_lpool_segments, vs->seg_data);
+    vm_lpool_free(&vm_lpool_segments, vs->seg_stack);
+}
+
 int
 vm_space_clone(vm_space_t *dst, const vm_space_t *src)
 {

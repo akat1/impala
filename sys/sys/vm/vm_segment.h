@@ -70,9 +70,15 @@ enum VM_REGION_FLAGS {
 
 void vm_seg_create(vm_seg_t *vs, vm_space_t *s, vm_addr_t base,
         size_t len, size_t limit, vm_prot_t prot, int flags);
+void vm_seg_destroy(vm_seg_t *vs);
 int vm_seg_clone(vm_seg_t *dst, vm_space_t *s, vm_seg_t *src);
+int vm_seg_reserve(vm_seg_t *vs,size_t size, void *res);
 int vm_seg_alloc(vm_seg_t *vs, size_t size, void *res);
 void vm_seg_free(vm_seg_t *vs, vm_addr_t size, size_t length);
+void vm_seg_release(vm_seg_t *vs, vm_addr_t size, size_t length);
 void vm_seg_protect(vm_seg_t *vs, vm_prot_t prot);
+int vm_seg_map(vm_seg_t *dst, const vm_seg_t *src, vm_addr_t, vm_size_t,
+    void *res);
+
 #endif
 #endif

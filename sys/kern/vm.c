@@ -124,3 +124,14 @@ vm_vtop(vm_addr_t va)
     return vm_pmap_phys(&vm_kspace.pmap, va);
 }
 
+int
+vm_kern_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res)
+{
+    return vm_seg_map(vm_kspace.seg_data, seg, addr, s, res);
+}
+
+void
+vm_kern_unmap(vm_addr_t addr, vm_size_t size)
+{
+    vm_seg_free(vm_kspace.seg_data, addr, size);
+}

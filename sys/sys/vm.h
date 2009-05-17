@@ -62,8 +62,8 @@ void vm_space_switch(const vm_space_t *sp);
 vm_page_t *vm_kernel_alloc_page(void);
 vm_addr_t vm_ptov(vm_paddr_t v);
 vm_paddr_t vm_vtop(vm_addr_t p);
-
-void *vm_kern_alloc(vm_size_t size);
+int vm_kern_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res);
+void vm_kern_unmap(vm_addr_t addr, vm_size_t size);
 
 #endif
 #endif
