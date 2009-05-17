@@ -68,6 +68,7 @@ prepare_root()
 {
 }
 
+#if 0
 
 static void PROC_init(void);
 
@@ -87,10 +88,12 @@ PROC_init()
 
 char buf[THREAD_STACK_SIZE];
 char kbuf[THREAD_KSTACK_SIZE];
+#endif
 
 void
 start_init_process()
 {
+#if 0
     proc_t *p = proc_create();
     void *entry = (void*) (VM_SPACE_UTEXT + PAGE_OFF(PROC_init));
     thread_t *t = proc_create_thread(p, THREAD_STACK_SIZE, entry);
@@ -98,14 +101,14 @@ start_init_process()
         PTE_ADDR(PROC_init), 2*PAGE_SIZE);
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
-    kprintf("[infinite loop]\n"); 
-    for (;;) { 
-        char c=pckbd_get_char(); 
-        if(c!=-1) 
-            kprintf("%c", c); 
+#endif
+    kprintf("PRZESUNIECIE:_\033[5B");
+    kprintf("[infinite loop]");
+    for (;;) {
+        char c=pckbd_get_char();
+        if(c!=-1)
+            kprintf("%c", c);
     }
-    t = 0;
-    PROC_init();
 }
 
 void

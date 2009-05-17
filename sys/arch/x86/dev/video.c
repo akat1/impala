@@ -59,7 +59,7 @@ enum {
 
 void
 video_init()
-{   
+{
 #if 0
     io_out8(VGA_PORT, REG_MAX_SCANLINE);
     uint8_t line = io_in8(VGA_PORT+1);
@@ -122,12 +122,16 @@ textscreen_next_line(struct hw_textscreen *screen)
 
 
 void
-textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row, 
+textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute)
 {
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
-
+    int cur_pos = (screen->cursor_y) * TS_WIDTH +
+        screen->cursor_x;
+    int pos = TS_WIDTH*row+col;
+    if (pos == cur_pos)
+        screen->cursor_hack = attribute<<8 | c;
     map[TS_WIDTH*row+col] = (uint16_t)attribute<<8|c;
 }
 
@@ -147,7 +151,7 @@ textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
             textscreen_scroll(screen);
     }
     else
-        textscreen_update_cursor(screen, screen->cursor_x+1, 
+        textscreen_update_cursor(screen, screen->cursor_x+1,
                 screen->cursor_y);
 }
 
@@ -160,7 +164,7 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
     if (col < 0) col = 0;
     if (row < 0) row = 0;
     if (col > TS_WIDTH-1) col = TS_WIDTH-1;
-    if (row > TS_HEIGHT-1) col = TS_HEIGHT-1;
+    if (row > TS_HEIGHT-1) row = TS_HEIGHT-1;
     // zapamietujemy poprzednia pozycje
     int cur_pos = (screen->cursor_y) * TS_WIDTH +
         screen->cursor_x;
@@ -169,13 +173,8 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
     screen->cursor_x = col;
 
     if (screen->screen_buf) {
-        // cursor_hack:  strasznie mnie wnerwia jak mi
-        // kursor mruga na terminalu. Chipset VGA nie pozwala tego zmieniæ, zatem sam
-        // robiê efekt "braku mrugania" rysuj±c kursor recznie.
-        //      -- wieczyk
-//        screen->screen_buf[cur_pos] = screen->cursor_hack;
-        cur_pos = (screen->cursor_y) * TS_WIDTH +
-            screen->cursor_x;
+        screen->screen_buf[cur_pos] = screen->cursor_hack;
+        cur_pos = (screen->cursor_y) * TS_WIDTH + screen->cursor_x;
 #if 0
         io_out8(VGA_PORT, REG_CUR_POS_HI);
         io_out8(VGA_PORT+1, cur_pos>>8 );
@@ -192,7 +191,7 @@ void
 textscreen_get_cursor(struct hw_textscreen *screen, int *cx, int *cy)
 {
     screen = SELECT_SCREEN(screen);
-    *cx = screen->cursor_x;   
+    *cx = screen->cursor_x;
     *cy = screen->cursor_y;
 }
 
@@ -204,10 +203,10 @@ textscreen_scroll(struct hw_textscreen *screen)
 
     mem_move(map, &map[TS_WIDTH],
                 24*TS_WIDTH*sizeof(uint16_t));
-    
+
     mem_set16(&map[24*TS_WIDTH], COLOR_WHITE<<8 | ' ',
             TS_WIDTH*sizeof(uint16_t));
-    
+
     textscreen_update_cursor(screen, 0, screen->cursor_y);
 
 }

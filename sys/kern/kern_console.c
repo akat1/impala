@@ -225,8 +225,8 @@ cons_output(int t, const char *c)
  */
 enum {
     ESC_RESET,      // c (@)
-    ESC_LWRAPON,    // [7h 
-    ESC_LWRAPOFF,   // [71 
+    ESC_LWRAPON,    // [7h
+    ESC_LWRAPOFF,   // [71
     ESC_G0,         // ( (#)
     ESC_G1,         // ) (#)
     ESC_CURHOME,    // [{ROW=0};{COL=0}H (@)
@@ -272,7 +272,7 @@ vtty_out(vtty_t *vt, const char *c)
     mutex_lock(&vt->mtx);
     for (; *c; c++) {
         if (escape) {
-            int code = vt_parser_put(&vt->parser, *c); 
+            int code = vt_parser_put(&vt->parser, *c);
             if (code == PARSER_ERROR) {
                 escape = FALSE;
             } else
