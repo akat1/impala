@@ -139,6 +139,6 @@ init_kernel()
     bio_init();
     vfs_init();
     cons_init();
-//    ssleep(1);
+    ssleep(1);
     kprintf("kernel initialized\n");
 }

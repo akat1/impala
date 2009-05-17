@@ -220,7 +220,7 @@ vm_seg_protect(vm_seg_t *seg, vm_prot_t newprot)
     seg->prot = newprot;
     vm_region_t *reg = NULL;
     while ( (reg = list_next(&seg->regions, reg)) ) {
-        // vm_pmap_fillprot(&seg->space->pmap, reg->begin, reg->size, newprot);
+        vm_pmap_fillprot(&seg->space->pmap, reg->begin, reg->size, newprot);
     }
 }
 

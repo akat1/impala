@@ -358,6 +358,30 @@ vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, vm_prot_t prot)
     }
 }
 
+/**
+ * Ustawia prawa dostêpu do istniej±cych stron.
+ * @param pmap odwzorowanie stron które modyfikujemy
+ * @param addr pocz±tek fragmentu pamiêci, któremu ustawiamy prawa dostêpu
+ * @param size rozmiar fragmentu pamiêci, ktremu ustawiamy prawa dostêpu
+ * @param prot ¿±dane prawa dostêpu do stron
+ */
+
+void
+vm_pmap_fillprot(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size,
+                  vm_prot_t prot)
+{
+    int pte = PAGE_TBL(addr);
+    vm_ptable_t *pt = _pmap_pde(pmap, addr);
+    for (size+=addr; addr < size; addr += PAGE_SIZE, pte++) {
+        if(pte == 1024) {
+            pte = 0;
+            pt = _pmap_pde(pmap, addr);
+        }
+        pt->table[pte] = (pt->table[pte] & ~(PTE_RW|PTE_US))
+                          | PROT_TO_PTEFLAGS(prot);
+    }
+}
+
 void
 vm_pmap_mapphys(vm_pmap_t *pmap, vm_addr_t dst_addr, vm_paddr_t src_addr,
                       vm_size_t size, vm_prot_t prot)
