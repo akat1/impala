@@ -12,6 +12,7 @@ SRCS=\
 	kern_bio.c\
 	kern_console.c\
 	kern_dev.c\
+	kern_exec.c\
 	kern_file.c\
 	kern_kthread.c\
 	kern_main.c\
