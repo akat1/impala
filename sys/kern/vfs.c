@@ -38,6 +38,7 @@
 #include <sys/utils.h>
 #include <sys/fcntl.h>
 #include <fs/mfs/mfs.h>
+#include <sys/errno.h>
 
 static void register_fss(void);
 static bool is_this_fsname(const vfs_conf_t *conf, const char *known);
@@ -93,11 +94,12 @@ vfs_create(vfs_t **fs, const char *fstype)
 {
     *fs = NULL;
     vfs_conf_t *conf = vfs_byname(fstype);
-    if (conf == NULL) return -1;
-    ///@TODO: VFS: sprawdzanie poprawno¶ci mpoint
+    if (conf == NULL) return -EINVAL;
     vfs_t *rfs = kmem_alloc(sizeof(*fs), KM_SLEEP);
     if(!rfs)
-        return 1;
+        return -ENOMEM;
+    rfs->vfs_private = NULL;
+    rfs->vfs_mpoint = NULL;
     rfs->vfs_mdev = NULL;
     rfs->vfs_ops = conf->ops;
     *fs = rfs;

@@ -36,13 +36,28 @@
 #include <sys/errno.h>
 #include <sys/kmem.h>
 
-vnode_t* alloc_vnode(void);
 
 vnode_t*
-alloc_vnode()
+vnode_alloc()
 {
     vnode_t *res = kmem_alloc(sizeof(vnode_t), KM_SLEEP);
+    res->v_refcnt++;
     return res;
+}
+
+void
+vref(vnode_t *vn)
+{
+    vn->v_refcnt++;
+}
+
+void
+vrele(vnode_t *vn)
+{
+    vn->v_refcnt--;
+    if(vn->v_refcnt == 0) {
+        kmem_free(vn);
+    }
 }
 
 int

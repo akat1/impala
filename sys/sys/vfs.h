@@ -66,8 +66,9 @@ typedef void vfs_sync_t(vfs_t *fs);
 
 
 /**
- *
+ * Abstrakcja na operacje na systemie plików
  */
+
 struct vfs_ops {
     vfs_mount_t     *vfs_mount;
     vfs_unmount_t   *vfs_unmount;

@@ -119,58 +119,41 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
 {
     int fd;
     filetable_chunk_t *fc;
-
-    switch(cmd)
-    {
+    switch(cmd) {
         case F_DUPFD:
-            
             if ( param > ft->max_ds )
                 return EINVAL;
-
             fc = _get_chunk_by_index(ft, (int)param);
-
-            if ( fc == NULL )
-            {
-                _filetable_expand(ft, param - list_length(&(ft->chunks))/FILES_PER_CHUNK);
+            if ( fc == NULL ) {
+                _filetable_expand(ft, param - list_length(&(ft->chunks))
+                                              / FILES_PER_CHUNK);
                 fc = _get_chunk_by_index(ft, param);
             }
-
             fd = param;
-
-            while ( fc != NULL )
-            {
-                for ( int i = param % FILES_PER_CHUNK ; i < FILES_PER_CHUNK ; i++ )
-                {
-                    if ( fc->files[i] == NULL )
-                    {
+            while ( fc != NULL ) {
+                for (int i = param % FILES_PER_CHUNK; i < FILES_PER_CHUNK; i++){
+                    if ( fc->files[i] == NULL ) {
                         fc->files[i] = f;
                         return fd;
                     }
-
                     fd++;
                 }
-
                 if ( fd > ft->max_ds )
                     return MAX_EXCEEDED; /// XXX
-
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
             break;
-
         case F_GETFL:
             return f->f_flags;
-
         case F_SETFL:
             return 0; /// XXX: co chcemy mieæ?
-
     }
-
     return 0;
 }
 
 
-file_t 
-*_get_file_by_index(filetable_t *ft, int index)
+file_t *
+_get_file_by_index(filetable_t *ft, int index)
 {
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
@@ -180,7 +163,8 @@ file_t
     return fc->files[index % FILES_PER_CHUNK];
 }
 
-void _set_file_by_index(filetable_t *ft, file_t *fd, int index)
+void 
+_set_file_by_index(filetable_t *ft, file_t *fd, int index)
 {
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
@@ -235,8 +219,7 @@ _filetable_expand(filetable_t *ft, int hm)
 {
     filetable_chunk_t *fc;
 
-    while (--hm)
-    {
+    while (--hm) {
         fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
         list_insert_tail(&(ft->chunks), fc);
     }
@@ -252,8 +235,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     filetable_chunk_t *fc;
 
     /* sprawdzamy czy to pierwszy deskyptor */
-    if ( list_is_empty(&(p->p_fd->chunks)) )
-    {
+    if ( list_is_empty(&(p->p_fd->chunks)) ) {
         _filetable_expand(p->p_fd, 1);
         fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
         fp->f_vnode = vn;
@@ -263,17 +245,14 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     fc = list_head(&(p->p_fd->chunks));
 
     {
-        for (int i = 0 ; i < FILES_PER_CHUNK ; i++)
-        {
-            if ( fc->files[i] == NULL )
-            {
+        for (int i = 0 ; i < FILES_PER_CHUNK ; i++) {
+            if ( fc->files[i] == NULL ) {
                 fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
                 fp->f_vnode = vn;
                 *result = fdp;
                 *fpp = fp;
                 return OK;
             }
-
             fdp++;
         }
 
@@ -318,10 +297,8 @@ filetable_free(filetable_t *fd)
 {
     filetable_chunk_t *t;
 
-    while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks))))
-    {
-        for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ )
-        {
+    while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks)))) {
+        for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
             /* sprawdzamy czy jest otwarty plik */
             if ( t->files[i] != NULL )
                 f_close(t->files[i]);

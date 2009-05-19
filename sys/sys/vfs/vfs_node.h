@@ -43,7 +43,7 @@
 
 struct vnode {
     int             v_type;        ///< typ vnode
-    int             v_refcount;    ///< licznik referencji
+    int             v_refcnt;      ///< licznik referencji
     vfs_t          *v_vfs_mounted_here; ///< system plików tutaj zamontowany
     vfs_t          *v_vfs;         ///< system plików tego vnode
     vnode_ops_t    *v_ops;         ///< wska¼nik do vnode_ops z tego fs
@@ -115,6 +115,9 @@ enum {
 };
 
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
+vnode_t* vnode_alloc(void);
+void vrele(vnode_t *vn);
+void vref(vnode_t *vn);
 
 #endif
 #endif
