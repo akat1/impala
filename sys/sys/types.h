@@ -68,7 +68,6 @@ typedef struct device device_t;
 typedef struct devd devd_t;
 typedef struct devsw devsw_t;
 typedef struct uio uio_t;
-typedef struct filed filed_t;
 typedef struct iobuf iobuf_t;
 typedef struct vnode vnode_t;
 typedef struct consdevsw consdevsw_t;

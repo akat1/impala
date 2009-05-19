@@ -102,7 +102,7 @@ start_init_process()
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
 #endif
-    kprintf("PRZESUNIECIE:_\033[5B");
+ //   kprintf("PRZESUNIECIE:_\033[5B");
     kprintf("[infinite loop]");
     for (;;) {
         char c=pckbd_get_char();

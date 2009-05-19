@@ -206,9 +206,9 @@ textscreen_scroll(struct hw_textscreen *screen)
 
     mem_set16(&map[24*TS_WIDTH], COLOR_WHITE<<8 | ' ',
             TS_WIDTH*sizeof(uint16_t));
-
-    textscreen_update_cursor(screen, 0, screen->cursor_y);
-
+    
+    screen->cursor_y--;
+    textscreen_update_cursor(screen, 0, screen->cursor_y+1);
 }
 
 void

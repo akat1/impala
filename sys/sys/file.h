@@ -51,12 +51,26 @@ struct filetable_chunk {
 };
 
 struct file {
-    int         flags;
-    vnode_t     *vn;
-    off_t       offset;
-    int         ref_cnt;
-    int         openmode;
+    vnode_t    *f_vnode;
+    off_t       f_offset;
+    int         f_refcnt;
+    mode_t      f_openmode;
+    int         f_flags;
+    //pcred_t   *f_pcred;
 };
+
+
+
+#define SEEK_SET    0
+#define SEEK_CUR    1
+#define SEEK_END    2
+
+
+#define O_RDONLY      (1 << 1)
+#define O_WRONLY      (1 << 2)
+#define O_RDWR        (1 << 3)
+#define O_CREAT       (1 << 4)
+
 
 #ifdef __KERNEL
 enum {
@@ -67,7 +81,16 @@ enum {
 void filetable_free(filetable_t *fd);
 filetable_t *filetable_alloc(void);
 int fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
-void fd_close(file_t *fp);
+
+ssize_t f_write(file_t *fd, uio_t *u);
+ssize_t f_read(file_t *fd, uio_t *u);
+int f_ioctl(file_t *fd, int cmd, uintptr_t param);
+void f_close(file_t *fd);
+
+ssize_t f_write1(file_t *fd, const void *buf, size_t len);
+ssize_t f_read1(file_t *fd, void *buf, size_t len);
+
+
 #endif
 
 #endif

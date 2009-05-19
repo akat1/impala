@@ -88,33 +88,44 @@ is_this_fsname(const vfs_conf_t *conf, const char *known)
 }
 
 
-vfs_mp_t *
-vfs_mp_create(vnode_t *dev_node, const char *fstype, const char *mpoint)
+int
+vfs_create(vfs_t **fs, const char *fstype)
 {
+    *fs = NULL;
     vfs_conf_t *conf = vfs_byname(fstype);
-    if (conf == NULL) return NULL;
+    if (conf == NULL) return -1;
     ///@TODO: VFS: sprawdzanie poprawno¶ci mpoint
-    vfs_mp_t *mp = kmem_alloc(sizeof(*mp), KM_SLEEP);
-    mp->dev_node = dev_node;
-    mp->vfs_conf = conf;
-    return mp;
+    vfs_t *rfs = kmem_alloc(sizeof(*fs), KM_SLEEP);
+    if(!rfs)
+        return 1;
+    rfs->vfs_mdev = NULL;
+    rfs->vfs_ops = conf->ops;
+    *fs = rfs;
+    return 0;
 }
 
+vnode_t *rootvnode;
 
+
+//tylko taki schemacik, jak to w przysz³o¶ci mo¿e wygl±daæ..
 void
 vfs_mountroot()
 {
     // Na sztywno wpisane mfs:/dev/md0
     DEBUGF("Trying to mount from mfs:/dev/md0");
     vnode_t *devn;
-    if (vnode_opendev("md0", O_RDWR, &devn) != 0) {
-        panic("cannot find root device");
-    }
-    vfs_mp_t *mp = vfs_mp_create(devn, "mfs", "/");
-    if (!mp) {
+//    if (vnode_opendev("md0", O_RDWR, &devn) != 0) {
+//        panic("cannot find root device");
+//    }
+    vfs_t *fs;
+    vfs_create(&fs, "mfs");
+    if (!fs) {
         panic("cannot create root mount point");
     }
-    if( VFS_MOUNT(mp) != 0 ) {
+    fs->vfs_mdev = devn->v_dev;
+    fs->vfs_mpoint = NULL;  //montuj nigdzie -> twórz samodzielne drzewko
+    if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");
     }
+    rootvnode = VFS_GETROOT(fs);
 }

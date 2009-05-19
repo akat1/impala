@@ -36,15 +36,15 @@
 #include <sys/utils.h>
 #include <sys/uio.h>
 #include <sys/kmem.h>
+#include <sys/vfs.h>
 #include <sys/file.h>
 #include <sys/proc.h>
 
-static ssize_t fdev_read(filed_t *fd, uio_t *u);
-static ssize_t fdev_write(filed_t *fd, uio_t *u);
 bool __chunk_is_empty(filetable_chunk_t *fd);
 
+/*
 ssize_t
-fdev_read(filed_t *fd, uio_t *u)
+fdev_read(file_t *fd, uio_t *u)
 {
     ssize_t l;
     if (u->offset == -1) u->offset = fd->data.devd.curpos;
@@ -56,7 +56,7 @@ fdev_read(filed_t *fd, uio_t *u)
 }
 
 ssize_t
-fdev_write(filed_t *fd, uio_t *u)
+fdev_write(file_t *fd, uio_t *u)
 {
     ssize_t l;
     if (u->offset == -1) u->offset = fd->data.devd.curpos;
@@ -68,13 +68,13 @@ fdev_write(filed_t *fd, uio_t *u)
 }
 
 
-filed_t *
-fd_opendev(const char *name, int flags)
+file_t *
+f_opendev(const char *name, int flags)
 {
     TRACE_IN("name=%s flags=%x", name, flags);
     devd_t *dev = devd_find(name);
     if (dev == NULL) return NULL;
-    filed_t *fd = kmem_alloc(sizeof(filed_t), KM_SLEEP);
+    file_t *fd = kmem_alloc(sizeof(file_t), KM_SLEEP);
     if (devd_open(dev, flags)!=0) {
         TRACE_IN("cannot open dev for fd=%p(%s)", fd, name);
         // free(fd);
@@ -86,18 +86,26 @@ fd_opendev(const char *name, int flags)
     fd->fd_write = fdev_write;
     return fd;
 }
-
+*/
 
 ssize_t 
-fd_write(filed_t *fd, uio_t *u)
+f_write(file_t *f, uio_t *u)
 {
-    return fd->fd_write(fd, u);
+    int error;
+    error = VOP_WRITE(f->f_vnode, u);
+    if(error) return error;
+    f->f_offset += u->size;
+    return u->size;
 }
 
 ssize_t
-fd_read(filed_t *fd, uio_t *u)
+f_read(file_t *f, uio_t *u)
 {
-    return fd->fd_read(fd, u);
+    int error = VOP_READ(f->f_vnode, u);
+    if(error)
+        return error;
+    f->f_offset += u->size;
+    return u->size;
 }
 
 bool
@@ -123,7 +131,7 @@ fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
         fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
         list_insert_head(&(p->p_fd->chunks), fc);
         fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-        fp->vn = vn;
+        fp->f_vnode = vn;
     }
 
     /* szukamy miejsca dla nowego deskryptora w chunkach */
@@ -135,7 +143,7 @@ fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
             if ( fc->files[i] == NULL )
             {
                 fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-                fp->vn = vn;
+                fp->f_vnode = vn;
                 *result = fdp;
                 *fpp = fp;
                 return FD_ALLOC_OK;
@@ -153,7 +161,7 @@ fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
     list_insert_tail(&(p->p_fd->chunks), fc);
     fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-    fp->vn = vn;
+    fp->f_vnode = vn;
     *result = fdp;
     *fpp = fp;
 
@@ -161,11 +169,11 @@ fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 }
 
 void
-fd_close(file_t *fp)
+f_close(file_t *fp)
 {
-    fp->ref_cnt--;
+    fp->f_refcnt--;
  
-    if ( fp->ref_cnt == 0 )
+    if ( fp->f_refcnt == 0 )
         kmem_free(fp);
 
     return;
@@ -192,7 +200,7 @@ filetable_free(filetable_t *fd)
         {
             /* sprawdzamy czy jest otwarty plik */
             if ( t->files[i] != NULL )
-                fd_close(t->files[i]);
+                f_close(t->files[i]);
         }
 
         /* zwalniamy chunka */

@@ -36,6 +36,15 @@
 #include <sys/errno.h>
 #include <sys/kmem.h>
 
+vnode_t* alloc_vnode(void);
+
+vnode_t*
+alloc_vnode()
+{
+    vnode_t *res = kmem_alloc(sizeof(vnode_t), KM_SLEEP);
+    return res;
+}
+
 int
 vnode_opendev(const char *devname, int mode, vnode_t **vn)
 {
@@ -44,8 +53,8 @@ vnode_opendev(const char *devname, int mode, vnode_t **vn)
     int e = devd_open(d,mode);
     if (e == 0) {
         vnode_t *v = kmem_alloc( sizeof(*vn), KM_SLEEP );
-        v->un.dev = d;
-        v->type = VNODE_TYPE_DEV;
+        v->v_dev = d;
+        v->v_type = VNODE_TYPE_DEV;
         *vn = v;
     }
     return e;
