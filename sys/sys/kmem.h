@@ -40,7 +40,7 @@ enum MALLOC_FLAGS {
 typedef void kmem_ctor_t(void *);
 typedef void kmem_dtor_t(void *);
 
-
+addr_t kmem_zalloc(size_t s, int flags);
 addr_t kmem_alloc(size_t s, int flags);
 void kmem_free(addr_t );
 

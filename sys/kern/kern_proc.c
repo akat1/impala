@@ -29,7 +29,6 @@
  * $Id$
  */
 
-
 #include <sys/types.h>
 #include <sys/utils.h>
 #include <sys/proc.h>
@@ -37,6 +36,7 @@
 #include <sys/utils.h>
 #include <sys/kmem.h>
 #include <sys/vm.h>
+#include <sys/file.h>
 
 static pid_t last_pid;
 list_t procs_list;
@@ -52,6 +52,7 @@ proc_ctor(void *obj)
     proc_t *proc = obj;
     proc->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
     proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
+    proc->p_fd = filetable_alloc();
 }
 
 void
@@ -60,6 +61,7 @@ proc_dtor(void *obj)
     proc_t *proc = obj;
     kmem_free(proc->p_cred);
     kmem_free(proc->vm_space);
+    filetable_free(proc->p_fd);
 }
 
 

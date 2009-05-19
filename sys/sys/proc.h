@@ -34,13 +34,21 @@
 #define __SYS_PROC_H
 
 #include <sys/thread.h>
+#include <sys/vfs/vfs_node.h>
+#include <sys/vfs/vfs_types.h>
+
+/// XXX: START - przenosimy to?
 
 struct pcred {
     /// identyfikator u¿ytkownika
     uid_t           p_uid;
     /// identyfikator grupy
     gid_t           p_gid;
+    /// licznik referencji
+    int             refcnt;
 };
+
+/// XXX: KONIEC
 
 struct proc {
     /// identyfikator procesu
@@ -49,6 +57,8 @@ struct proc {
     pid_t           p_ppid;
     /// przywileje
     pcred_t         *p_cred;
+    /// pliki przypisane do procesu
+    filetable_t     *p_fd;
     /// lista w±tków wchodz±cych w sk³ad procesu
     list_t          p_threads;
     /// lista dzieci procesu

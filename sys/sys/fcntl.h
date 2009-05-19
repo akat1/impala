@@ -67,7 +67,6 @@ filed_t *fd_opendev(const char *name, int flags);
 ssize_t fd_write(filed_t *fd, uio_t *u);
 ssize_t fd_read(filed_t *fd, uio_t *u);
 int fd_ioctl(filed_t *fd, int cmd, uintptr_t param);
-int fd_close(filed_t *fd);
 
 ssize_t fd_write1(filed_t *fd, const void *buf, size_t len);
 ssize_t fd_read1(filed_t *fd, void *buf, size_t len);

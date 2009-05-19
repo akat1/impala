@@ -30,56 +30,44 @@
  * $Id$
  */
 
-#ifndef __SYS_TYPES_H
-#define __SYS_TYPES_H
-
-#include <sys/cdefs.h>
-#include <machine/types.h>
-typedef unsigned char  uchar;
-typedef unsigned short ushort;
-typedef unsigned int   uint;
-#define addr_t void*
-typedef int bool;
-#define FALSE 0
-#define TRUE  1
-
-
-typedef uint32_t off_t;
-typedef uint32_t dev_t;
-typedef uint32_t blkno_t;
-typedef int gid_t;
-typedef int uid_t;
-typedef int mode_t;
-typedef int pid_t;
-typedef int errno_t;
-typedef int time_t;
-
-// Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
-#ifndef __HIDE_SYSTEM_TYPEDEFS
-typedef struct thread thread_t;
-typedef struct kthread kthread_t;
-typedef struct spinlock spinlock_t;
-typedef struct mutex mutex_t;
-typedef struct semaph semaph_t;
-typedef struct cqueue cqueue_t;
-typedef struct proc proc_t;
-typedef struct kmem_cache kmem_cache_t;
-typedef struct device device_t;
-typedef struct devd devd_t;
-typedef struct devsw devsw_t;
-typedef struct uio uio_t;
-typedef struct filed filed_t;
-typedef struct iobuf iobuf_t;
-typedef struct vnode vnode_t;
-typedef struct consdevsw consdevsw_t;
-typedef struct timespec timespec_t;
-typedef struct pcred pcred_t;
-typedef struct filetable filetable_t;
-typedef struct filetable_chunk filetable_chunk_t;
-typedef struct file file_t;
-#include <sys/vm/vm_types.h>
-#endif
+#ifndef __SYS_FILE_H
+#define __SYS_FILE_H
 
 #include <sys/list.h>
+#include <sys/types.h>
+
+enum {
+    FILES_PER_CHUNK = 32
+};
+
+struct filetable {
+    int     max_ds;
+    list_t  chunks;
+};
+
+struct filetable_chunk {
+    file_t      *files[FILES_PER_CHUNK];
+    list_node_t L_chunks;
+};
+
+struct file {
+    int         flags;
+    vnode_t     *vn;
+    off_t       offset;
+    int         ref_cnt;
+    int         openmode;
+};
+
+#ifdef __KERNEL
+enum {
+    FD_ALLOC_OK,
+    FD_ALLOC_MAX_EXCEEDED
+};
+
+void filetable_free(filetable_t *fd);
+filetable_t *filetable_alloc(void);
+int fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
+void fd_close(file_t *fp);
+#endif
 
 #endif

@@ -36,9 +36,12 @@
 #include <sys/utils.h>
 #include <sys/uio.h>
 #include <sys/kmem.h>
+#include <sys/file.h>
+#include <sys/proc.h>
 
 static ssize_t fdev_read(filed_t *fd, uio_t *u);
 static ssize_t fdev_write(filed_t *fd, uio_t *u);
+bool __chunk_is_empty(filetable_chunk_t *fd);
 
 ssize_t
 fdev_read(filed_t *fd, uio_t *u)
@@ -95,4 +98,109 @@ ssize_t
 fd_read(filed_t *fd, uio_t *u)
 {
     return fd->fd_read(fd, u);
+}
+
+bool
+__chunk_is_empty(filetable_chunk_t *chunk)
+{
+    for (int i = 0 ; i < FILES_PER_CHUNK ; i++ )
+        if ( chunk->files[i] != NULL )
+            return FALSE;
+
+    return TRUE;
+}
+
+int
+fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
+{
+    int fdp = 0;
+    file_t *fp;
+    filetable_chunk_t *fc;
+
+    /* sprawdzamy czy to pierwszy deskyptor */
+    if ( list_is_empty(&(p->p_fd->chunks)) )
+    {
+        fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
+        list_insert_head(&(p->p_fd->chunks), fc);
+        fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+        fp->vn = vn;
+    }
+
+    /* szukamy miejsca dla nowego deskryptora w chunkach */
+    fc = list_head(&(p->p_fd->chunks));
+
+    {
+        for (int i = 0 ; i < FILES_PER_CHUNK ; i++)
+        {
+            if ( fc->files[i] == NULL )
+            {
+                fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+                fp->vn = vn;
+                *result = fdp;
+                *fpp = fp;
+                return FD_ALLOC_OK;
+            }
+
+            fdp++;
+        }
+
+        if ( fdp >= p->p_fd->max_ds )
+            return FD_ALLOC_MAX_EXCEEDED;
+
+    } while ( (fc = (filetable_chunk_t *)list_next(&(p->p_fd->chunks), fc)) )
+
+    /* brak wolnych miejsc w chunkach */
+    fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
+    list_insert_tail(&(p->p_fd->chunks), fc);
+    fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+    fp->vn = vn;
+    *result = fdp;
+    *fpp = fp;
+
+    return FD_ALLOC_OK;
+}
+
+void
+fd_close(file_t *fp)
+{
+    fp->ref_cnt--;
+ 
+    if ( fp->ref_cnt == 0 )
+        kmem_free(fp);
+
+    return;
+}
+
+filetable_t *
+filetable_alloc(void)
+{
+    filetable_t *t = kmem_alloc(sizeof(filetable_t), KM_SLEEP);
+
+    LIST_CREATE(&(t->chunks), filetable_chunk_t, L_chunks, FALSE);
+
+    return t;
+}
+
+void
+filetable_free(filetable_t *fd)
+{
+    filetable_chunk_t *t;
+
+    while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks))))
+    {
+        for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ )
+        {
+            /* sprawdzamy czy jest otwarty plik */
+            if ( t->files[i] != NULL )
+                fd_close(t->files[i]);
+        }
+
+        /* zwalniamy chunka */
+        kmem_free(t);
+    }
+
+    /* zwalniamy tablicê */
+    kmem_free(fd);
+
+    return;
 }

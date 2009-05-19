@@ -43,6 +43,7 @@
 #include <sys/vm/vm_lpool.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
+#include <sys/string.h>
 
 typedef struct kmem_slab kmem_slab_t;
 typedef struct kmem_bufctl kmem_bufctl_t;
@@ -138,6 +139,24 @@ static mem_bucket_t buckets[] = {
     {1 << 15, "kmem_alloc[32768]", NULL},
     {0, NULL, NULL}
 };
+
+/**
+ * Przydziela pamiêæ j±dra wype³niaj±c j± zerami.
+ * @param s wielko¶æ.
+ * @param flags opcje przydzia³u.
+ * @return wska¼nik do przydzielonego elementu.
+ */
+
+void *
+kmem_zalloc(size_t s, int flags)
+{
+    void *x;
+    
+    x = kmem_alloc(s, flags);
+    mem_zero(x, s);
+
+    return x;
+}
 
 /**
  * Przydziela pamiêæ j±dra.
