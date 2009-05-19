@@ -71,21 +71,27 @@ struct file {
 #define O_RDWR        (1 << 3)
 #define O_CREAT       (1 << 4)
 
+#define F_DUPFD       (1 << 0)
+#define F_GETFL       (1 << 1)
+#define F_SETFL       (1 << 2)
+
 
 #ifdef __KERNEL
 enum {
-    FD_ALLOC_OK,
-    FD_ALLOC_MAX_EXCEEDED
+    OK,
+    MAX_EXCEEDED
 };
 
 void filetable_free(filetable_t *fd);
 filetable_t *filetable_alloc(void);
-int fd_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
 
+int f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
 ssize_t f_write(file_t *fd, uio_t *u);
 ssize_t f_read(file_t *fd, uio_t *u);
 int f_ioctl(file_t *fd, int cmd, uintptr_t param);
+int f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
 void f_close(file_t *fd);
+int f_seek(file_t *fd, off_t o, int whence);
 
 ssize_t f_write1(file_t *fd, const void *buf, size_t len);
 ssize_t f_read1(file_t *fd, void *buf, size_t len);
