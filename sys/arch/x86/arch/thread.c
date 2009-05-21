@@ -92,22 +92,28 @@ __thread_enter(thread_t *t_to)
     typedef void (*entry_point)(void*);
     t_to->thr_flags &= ~THREAD_NEW;
             //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
-
+            
     setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
     vm_pmap_switch(&t_to->vm_space->pmap);
 
     void *arg = t_to->thr_entry_arg;
     entry_point entry = (entry_point) t_to->thr_entry_point;
     uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
+    
+//    kprintf("00: %p, %p, %p\n", arg, entry, ESP);
+//    kprintf("bb: %p, %p, %p\n", arg, entry, ESP);
 
     CIPL = 0;       // proces ma dzia³aæ z CIPL = 0
     extern void i8259a_reset_mask(void);
     i8259a_reset_mask();
+    
     if (!(t_to->thr_flags & THREAD_KERNEL)) {
+//        DEBUGF("switching to umode %p", entry); lepiej nie -> w³±czy int.
         cpu_user_mode();
     }
     else
         irq_enable();
+  
     __enter_arg_esp(entry, arg, ESP); //na wszelki wypadek ;)
     panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }

@@ -1,29 +1,24 @@
 .SUFFIXES: .c.o .s.o .S.o
-PREFIX?=${ELF_PREFIX}
-ELF_PREFIX?=
-ELF_CC=${ELF_PREFIX}gcc
-AOUT_PREFIX?=i386-aout-
-AOUT_CC=${AOUT_PREFIX}gcc
-__INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
-_INCDIR?=${__INCDIR} ${INCDIR}
-__C_FLAGS=-m32 -std=c99 -ffreestanding -nostdinc -Wall -Wstrict-prototypes\
-	-Wmissing-prototypes -Werror ${_INCDIR} -mno-mmx -mno-sse -mno-sse2\
- 	-mno-sse3 -mno-3dnow
-_K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
-    -D__KERNEL
-_U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_SRCROOT}/usr/lib/libc/include
-_U_LDFLAGS=-L${IMPALA_SRCROOT}/usr/lib/crt -L${IMPALA_SRCROOT}/usr/lib/libc
-_CFLAGS?= ${_K_FLAGS_} ${CFLAGS}
-CFLAGS?=${_CFLAGS}
-CC= ${PREFIX}gcc
-AS= ${PREFIX}as
+GCC_PREFIX?=
+BINUTILS_PREFIX?=
+CC=${GCC_PREFIX}gcc
+INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
+C_FLAGS_=-m32 -std=c99 -ffreestanding -nostdinc -Wall -Wstrict-prototypes -Wmissing-prototypes -Werror ${INCDIR}\
+	 -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
+C_FLAGS?= ${C_FLAGS_}
+
+AS= ${BINUTILS_PREFIX}as
 AS_FLAGS= -32
-AR=${PREFIX}ar
-STRIP=${PREFIX}strip
-AR=${PREFIX}ar
-RANLIB=${PREFIX}ranlib
-LD=${PREFIX}ld
+
+AR=${BINUTILS_PREFIX}ar
+
+STRIP=${BINUTILS_PREFIX}strip
+AR=${BINUTILS_PREFIX}ar
+RANLIB=${BINUTILS_PREFIX}ranlib
+
+LD=${BINUTILS_PREFIX}ld
 LIBDIR?=
 LD_FLAGS=-nostdlib -T ${LD_SCRIPT} --cref -Map ${LD_MAP} ${LIBDIR}
-INSTALL=cp
+
+
 

@@ -33,8 +33,8 @@
 #ifndef __SYS_AOUT_H
 #define __SYS_AOUT_H
 
-typedef struct exec exec_t;
-struct exec {
+
+struct aout_header {
     uint32_t    a_midmag;
     uint32_t    a_text;
     uint32_t    a_data;
@@ -45,48 +45,12 @@ struct exec {
     uint32_t    a_drsize;
 };
 
-typedef struct nlist nlist_t;
-struct nlist {
-    union {
-        char    *n_name;
-        long    n_strx;
-    } n_un;
-    int8_t      n_type;
-    int8_t      n_other;
-    int16_t     n_desc;
-    uint32_t    n_value;
-};
+#define M_TEXTOFF(header) sizeof(header)
+#define M_DATAOFF(header) (M_TEXTOFF(header) + header.a_text)
+#define M_SYMOFF(header)
+#define M_STROFF(header)
 
-#define OMAGIC      0407
-#define NMAGIC      0410
-#define ZMAGIC      0413
-#define QMAGIC      0314
-#define MID_ZERO    0
-#define EX_PIC      0x10
-#define EX_DYNAMIC  0x20
-
-#define N_UNDF      0
-#define N_ABS       2
-#define N_TEXT      4
-#define N_DATA      6
-#define N_BSS       8
-#define N_EX        1
-
-#define N_GETMAGIC(ex) (((ex).a_midmag) & 0xffff)
-#define N_GETMID(ex) (((ex).a_midmag >> 16) & 0x3ff)
-#define N_GETFLAG(ex) (((ex).a_midmag >> 26) & 0x3f)
-#define N_BADMAG(ex) (N_GETMAGIC(ex) != ZMAGIC)
-
-
-#define N_TXTOFF(ex) sizeof(exec_t)
-#define N_DATAOFF(ex) (N_TXTOFF(ex) + (ex).a_text)
-#define N_RELOFF(ex) (N_DATAOFF(ex) + (ex).a_data)
-#define N_SYMOFF(ex) (N_RELOFF(ex) + (ex).a_trsize + (ex).a_drsize)
-#define N_STROFF(ex) (N_SYMOFF(ex) + (ex).a_syms)
-
-
-
-#ifdef __KERNEL
-bool aout_check(const void *first_page);
+#ifdef _KERNEL
+bool aout_check(void *first_page);
 #endif
 #endif

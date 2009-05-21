@@ -1,5 +1,5 @@
 LIBRARY= libfs
-CFLAGS=-D__KERNEL ${_K_FLAGS}
+C_FLAGS=-D__KERNEL ${C_FLAGS_}
 
 SRCS=\
 	mfs/mfs.c\

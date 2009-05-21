@@ -57,6 +57,7 @@ vm_init()
     list_insert_head(&vm_spaces, &vm_kspace);
     vm_lpool_create(&vm_lpool_segments, offsetof(vm_seg_t, L_segments),
         sizeof(vm_seg_t), VM_LPOOL_NORMAL);
+    DEBUGF("vm inited");
 }
 
 
@@ -124,36 +125,13 @@ vm_vtop(vm_addr_t va)
 }
 
 int
-vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res)
+vm_kern_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res)
 {
     return vm_seg_map(vm_kspace.seg_data, seg, addr, s, res);
 }
 
-int
-vm_remap(vm_addr_t vaddr, vm_size_t s, void *res)
-{
-    s = PAGE_ROUND(s);
-    vm_addr_t *vres = res;
-    if (vm_seg_reserve(vm_kspace.seg_data, s, res))
-        return -1;
-    vm_pmap_map(&vm_kspace.pmap, *vres, &curthread->vm_space->pmap,
-        vaddr, s);
-    return 0;
-}
-
-int
-vm_physmap(vm_paddr_t paddr, vm_size_t s, void *res)
-{
-    s = PAGE_ROUND(s);
-    vm_addr_t *vres = res;
-    if (vm_seg_reserve(vm_kspace.seg_data, s, res))
-        return -1;
-    vm_pmap_physmap(&vm_kspace.pmap, *vres, paddr, s, vm_kspace.seg_data->prot);
-    return 0;
-}
-
 void
-vm_unmap(vm_addr_t addr, vm_size_t size)
+vm_kern_unmap(vm_addr_t addr, vm_size_t size)
 {
     vm_seg_free(vm_kspace.seg_data, addr, size);
 }

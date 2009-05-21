@@ -43,6 +43,7 @@
 #include <sys/vm/vm_lpool.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
+#include <sys/string.h>
 
 typedef struct kmem_slab kmem_slab_t;
 typedef struct kmem_bufctl kmem_bufctl_t;
@@ -138,6 +139,24 @@ static mem_bucket_t buckets[] = {
     {1 << 15, "kmem_alloc[32768]", NULL},
     {0, NULL, NULL}
 };
+
+/**
+ * Przydziela pamiêæ j±dra wype³niaj±c j± zerami.
+ * @param s wielko¶æ.
+ * @param flags opcje przydzia³u.
+ * @return wska¼nik do przydzielonego elementu.
+ */
+
+void *
+kmem_zalloc(size_t s, int flags)
+{
+    void *x;
+    
+    x = kmem_alloc(s, flags);
+    mem_zero(x, s);
+
+    return x;
+}
 
 /**
  * Przydziela pamiêæ j±dra.
@@ -332,10 +351,8 @@ kmem_init()
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
     vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
         sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
-//    for (;;);
     vm_lpool_create(&lpool_bufctls, offsetof(kmem_bufctl_t, L_bufs),
         sizeof(kmem_bufctl_t), VM_LPOOL_PREALLOC);
-
     mutex_init(&global_lock, MUTEX_NORMAL);
     alloc_init();
 }
@@ -428,7 +445,7 @@ kmem_bufctl_t *
 reserve_bufctl(kmem_cache_t *cache, kmem_slab_t *slab)
 {
     kmem_bufctl_t *bufctl = list_extract_first(&slab->free_bufs);
-    KASSERT(bufctl);
+    KASSERT(bufctl);        
     list_insert_tail(&slab->used_bufs, bufctl);
     if (list_length(&slab->free_bufs) == 0) {
         list_insert_tail(&cache->full_slabs, slab);

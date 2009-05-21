@@ -110,9 +110,8 @@ ISR_syscall(interrupt_frame frame)
 
     mem_zero(&result, sizeof(result));
 
-    ap = (va_list) (frame.f_esp + 16);
+    ap = (va_list) (frame.f_esp);
     curthread->thr_flags |= THREAD_SYSCALL;
-
     syscall(curthread, frame.f_eax, &result, ap);
     curthread->thr_flags &= ~THREAD_SYSCALL;
 
@@ -250,7 +249,7 @@ splx(int pl)
         do_switch(); /* podmieniamy w±tek wykonania ... je¿eli gdzie indziej te¿
                         wywo³ujemy do_switch() to mo¿e wyj¶æ nie tu,
                         a gdzie indziej. Mo¿e te¿ uruchomiæ nowy w±tek.
-                        A chcemy, ¿eby dzia³a³ on z CIPL=0.
+                        A chcemy, ¿eby dzia³a³ on z CIPL=0. 
                         Niech ustawianie cipl na 0 zajdzie w ¶rodku..
                      */
     else

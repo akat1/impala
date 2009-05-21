@@ -33,19 +33,17 @@
 #include <sys/types.h>
 #include <sys/utils.h>
 #include <sys/string.h>
-#include <sys/vm.h>
 #include <machine/video.h>
 #include <machine/io.h>
 static int8_t forced_attr = 0;
 
 static struct hw_textscreen  defscreen;
-static struct hw_textscreen *current = NULL;
+static struct hw_textscreen *current;
 
 #define SELECT_SCREEN(ptr) (((ptr)==NULL)? current : ptr)
 #define SELECT_MAP(ptr) ((ptr->screen_buf)? ptr->screen_buf : ptr->screen_map)
-#define TS_VIDEO   (vm_paddr_t)0xb8000
+#define TS_VIDEO   (addr_t)0xb8000
 
-uint16_t *vidmem = NULL;
 
 enum {
     VGA_PORT = 0x3d4
@@ -76,20 +74,13 @@ video_init()
     uint16_t cur_pos = io_in8(VGA_PORT+1) << 8;
     io_out8(VGA_PORT, REG_CUR_POS_LO);
     cur_pos |=  io_in8(VGA_PORT+1);
-    vidmem = (void*)TS_VIDEO;
-
-
-    vm_physmap(TS_VIDEO, TS_SIZE*2, &vidmem);
 
     defscreen.cursor_x = cur_pos % TS_WIDTH;
     defscreen.cursor_y = cur_pos / TS_WIDTH;
-    defscreen.screen_buf = (uint16_t*) vidmem;
+    defscreen.screen_buf = (uint16_t*) TS_VIDEO;
     defscreen.cursor_hack = 0;
     current = &defscreen;
     defscreen.cursor_hack = defscreen.screen_buf[cur_pos];
-    SYSTEM_DEBUG = 1;
-
-
 }
 
 void
@@ -215,9 +206,9 @@ textscreen_scroll(struct hw_textscreen *screen)
 
     mem_set16(&map[24*TS_WIDTH], COLOR_WHITE<<8 | ' ',
             TS_WIDTH*sizeof(uint16_t));
-
-    textscreen_update_cursor(screen, 0, screen->cursor_y);
-
+    
+    screen->cursor_y--;
+    textscreen_update_cursor(screen, 0, screen->cursor_y+1);
 }
 
 void
@@ -241,9 +232,9 @@ void
 textscreen_draw(struct hw_textscreen *screen)
 {
     current = screen;
-    mem_cpy(vidmem, screen->screen_map,
+    mem_cpy(TS_VIDEO, screen->screen_map,
             TS_SIZE*sizeof(uint16_t));
-    screen->screen_buf = (uint16_t*) vidmem;
+    screen->screen_buf = (uint16_t*) TS_VIDEO;
     textscreen_update_cursor(screen, screen->cursor_x, screen->cursor_y);
 }
 

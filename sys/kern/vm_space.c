@@ -49,17 +49,14 @@ vm_space_create(vm_space_t *vs, int space)
     vs->seg_text = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_data = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
-#if 0
     vm_seg_create(vs->seg_text, vs, VM_SPACE_UTEXT, 0, VM_SPACE_UTEXT_S,
         VM_PROT_RWX, VM_SEG_NORMAL);
     vm_seg_create(vs->seg_data, vs, VM_SPACE_UDATA, 0, VM_SPACE_UDATA_S,
         VM_PROT_RWX, VM_SEG_NORMAL);
     vm_seg_create(vs->seg_stack, vs, VM_SPACE_UDATA_E, 0, 0,
         VM_PROT_RWX, VM_SEG_EXPDOWN);
-#endif
     return 0;
 }
-
 
 void
 vm_space_destroy(vm_space_t *vs)
@@ -97,6 +94,8 @@ int
 set_stack(vm_space_t *vs, vm_seg_t *STACK, vm_seg_t *DATA,
     vm_addr_t *res, vm_size_t s)
 {
+//     TRACE_IN("vs=%p STACK=%p DATA=%p res=%p size=%p",vs, STACK, DATA,
+//         res, s);
     KASSERT(s > 0);
     s = PAGE_ROUND(s);
 
@@ -105,7 +104,9 @@ set_stack(vm_space_t *vs, vm_seg_t *STACK, vm_seg_t *DATA,
         if ((DATA->limit - DATA->size) < s) return -1;
         DATA->limit -= (s-stackspace);
     }
+
     STACK->limit += s;
+//     TRACE_IN("here");
     return vm_seg_alloc(STACK, s, res);
 }
 

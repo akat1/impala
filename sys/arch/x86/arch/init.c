@@ -45,7 +45,6 @@
 #include <machine/pckbd.h>
 #include <machine/video.h>
 
-void kmain(void);
 void init_x86(void);
 void _cpuid(int option, struct cpuid_result *r);
 void _unhnd_intrpt(void);
@@ -54,7 +53,7 @@ void _cpu_info(void);
 
 extern uintptr_t trap_table[];
 extern uintptr_t irq_table[];
-struct cpu_info cpu_i;
+extern struct cpu_info cpu_i;
 
 static void setgdt(int, uintptr_t, uint, uint, uint);
 static void setidt(int i, uint selector, uintptr_t offset, uint access);
@@ -66,8 +65,8 @@ static descriptor_register_t p_idtr;
 
 void _cpuid(int option, struct cpuid_result *r) {
 
-    __asm__ volatile (
-        "cpuid;"
+    __asm__ volatile (  
+        "cpuid;"                
         :"=a"(r->r_eax), "=b"(r->r_ebx), "=c"(r->r_ecx), "=d"(r->r_edx)
         :"a"(option));
 
@@ -86,7 +85,7 @@ void _cpu_info(void)
     ((unsigned int *)&(cpu_i.vendor_string))[1] = cpuid_r.r_edx;
     ((unsigned int *)&(cpu_i.vendor_string))[2] = cpuid_r.r_ecx;
 
-    _cpuid(CPUID_FEATURE ,&cpuid_r);
+    _cpuid(CPUID_FEATURE ,&cpuid_r); 
 
     cpu_i.version_information = cpuid_r.r_eax;
     cpu_i.feature_ecx = cpuid_r.r_ecx;
@@ -140,16 +139,15 @@ init_x86()
     cpu_gdt_load(&p_gdtr);
 
     cpu_tr_load(SEL_MK(SEL_TSS0, SEL_DPL3));
-    extern void megaloop(void);
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop, //_unhnd_intrpt,
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&_unhnd_intrpt,
             intrpt_attr);
     }
 
     for (i = 0; i < 0x20; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop, /*trap_table[i]*/ trap_attr);
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), trap_table[i], trap_attr);
     }
 
     for (i = 0; i <= 23; i++) {
@@ -172,6 +170,8 @@ init_x86()
     _cpu_info();
 }
 
+
+
 void
 setesp0(void *a)
 {
@@ -184,7 +184,6 @@ void
 setidt(int i, uint selector, uintptr_t offset,
     uint access)
 {
-//     offset = offset - 0xc0000000 + 0x100000;
     gate_descr_t *entry = &p_idt[i].gdescr;
     entry->offset_low = (uint)offset & 0xffff;
     entry->offset_high = ((uint)offset >> 16);
@@ -198,7 +197,6 @@ void
 setgdt(int i, uintptr_t base, uint limit,
     uint acc, uint atrib)
 {
-//     base = base - 0xc0000000 + 0x100000;
     segment_descr_t *entry = &p_gdt[i].sdescr;
     entry->base_low = base & 0xffff;
     entry->base_mid = (base >> 16) & 0xff;

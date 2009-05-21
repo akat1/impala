@@ -34,34 +34,31 @@
 #define __SYS_PROC_H
 
 #include <sys/thread.h>
+#include <sys/vfs/vfs_node.h>
+#include <sys/vfs/vfs_types.h>
+
+/// XXX: START - przenosimy to?
 
 struct pcred {
-    /// identyfikator u¿ytkownika
-    uid_t           p_uid;
-    /// identyfikator grupy
-    gid_t           p_gid;
+    uid_t           p_uid;       ///< identyfikator u¿ytkownika
+    gid_t           p_gid;       ///< identyfikator grupy
+    int             refcnt;      ///< licznik referencji
 };
 
+/// XXX: KONIEC
+
 struct proc {
-    /// identyfikator procesu
-    pid_t           p_pid;
-    /// identyfikator rodzica
-    pid_t           p_ppid;
-    /// przywileje
-    pcred_t         *p_cred;
-    /// lista w±tków wchodz±cych w sk³ad procesu
-    list_t          p_threads;
-    /// lista dzieci procesu
-    list_t          p_children;
-    /// flagi procesu
-    int             p_flags;
-    /// status
-    int             status;
-    vm_space_t      *vm_space;
-    /// wêze³ procesów
-    list_node_t     L_procs;
-    /// wêze³ listy dzieci
-    list_node_t     L_children;
+    pid_t           p_pid;       ///< identyfikator procesu
+    pid_t           p_ppid;      ///< identyfikator rodzica
+    pcred_t        *p_cred;      ///< przywileje
+    filetable_t    *p_fd;        ///< pliki przypisane do procesu
+    list_t          p_threads;   ///< lista w±tków wchodz±cych w sk³ad procesu
+    list_t          p_children;  ///< lista dzieci procesu
+    int             p_flags;     ///< flagi procesu
+    int             status;      ///< status
+    vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
+    list_node_t     L_procs;     ///< wêze³ procesów
+    list_node_t     L_children;  ///< wêze³ listy dzieci
 };
 
 #ifdef __KERNEL
@@ -69,8 +66,7 @@ struct proc {
 /// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
 /// Aktualnie wykonywany proces.
-extern proc_t *curproc; // <- to jest nam potrzebne ?
-extern proc_t proc0;
+extern proc_t *curproc;
 
 void proc_init(void);
 proc_t *proc_create(void);

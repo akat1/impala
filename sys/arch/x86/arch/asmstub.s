@@ -26,9 +26,9 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-#
+# 
 #  $Id$
-#
+#  
 
 .equ text_selector, 0x08
 .equ data_selector, 0x10
@@ -37,7 +37,7 @@
 .equ udata_selector, 0x20
 .equ SEL_DPL3, 0x3
 
-.global
+.global 
 .global cpu_user_mode
 .global cpu_gdt_load
 .global cpu_ldt_load
@@ -55,27 +55,18 @@
 .global cpu_set_cr2
 .global cpu_set_cr3
 .global cpu_set_cr4
-.global kernel_startup
-.global kstack
+
 
 .macro offset32 name, num
 .equ \name, \num*4
 .endm
 
-.equ KSTACKSIZE, 0x2000
-.comm kstack, KSTACKSIZE, 32
 
 offset32    CTX_ESP,    0
 offset32    CTX_EBP,    1
 offset32    CTX_EFLAGS, 2
 offset32    CTX_CR3,    3
 
-
-kernel_startup:
-    movl $(kstack + KSTACKSIZE-4), %esp
-    call init_x86
-    call kmain
-    jmp .
 
 
 cpu_user_mode:
@@ -200,3 +191,29 @@ cpu_jmp_sel:
     ljmp *-4(%esp)
     addl $8, %esp
     ret
+
+.global far_copy_in
+# funkcja kopiujaca pomiedzy wybranym selektorem
+# segmentu a obecnie uzywanym selektorem danych
+# sluzy do kopiowania np danych z segmentu uzytkownika
+# do segmentu jadra
+far_copy_in:
+    enter $0, $0
+    pushl %es   
+    pushl %ds
+    pushl %edi
+    pushl %esi
+    movw %ds, %ax
+    movw %ax, %es
+    movl 8(%ebp), %edi  # dst
+    movw 12(%ebp), %ds  # src sel
+    movl 16(%ebp), %esi # src
+    movl 20(%ebp), %ecx # len
+    rep movsb       # skopiuje ECX bajtow z DS:ESI do ES:EDI
+    popl %esi
+    popl %edi
+    popl %ds
+    popl %es
+    leave
+    ret
+

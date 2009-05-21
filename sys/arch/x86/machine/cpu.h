@@ -104,7 +104,7 @@ enum CPU_CR4 {
     CR4_SMXE= 1 << 14
 };
 
-/**
+/** 
  * Opis mo¿liwo¶ci procesora
  *
  * Intel IA-32 ADSM - 2A - 3-192 - ECX
@@ -194,7 +194,7 @@ struct cpu_info {
     unsigned int feature_edx;
 };
 
-extern struct cpu_info cpu_i;
+struct cpu_info cpu_i;
 
 #endif
 

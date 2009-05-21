@@ -63,7 +63,7 @@ void
 vm_lpool_create_(vm_lpool_t *vlp, int offset, size_t esize, int flags,
     void *fpool)
 {
-
+//    TRACE_IN("vlp=%p offset=%u esize=%u", vlp, offset, esize);
     vlp->elem_size = esize;
     vlp->elems_per_page = (PAGE_SIZE - sizeof(_pool_t)) / esize;
     vlp->offset = offset;
@@ -177,8 +177,8 @@ vm_lpool_insert_empty(vm_lpool_t *vlp, void *page)
 void
 stabilize_lpool(vm_lpool_t *vlp)
 {
+//    TRACE_IN0();
     size_t emptys = list_length(&vlp->empty_pools);
-
     if (vlp->flags & VM_LPOOL_PREALLOC && emptys == 0) {
         grow_lpool(vlp);
     } else
@@ -208,6 +208,7 @@ grow_lpool(vm_lpool_t *vlp)
 void
 init_pool(vm_lpool_t *vlp, _pool_t *pl )
 {
+//    TRACE_IN("vlp=%p pl=%p", vlp, pl);
     list_create(&pl->elems, vlp->offset, FALSE);
     char *data = (char*)(pl+1);
     for (int i = 0; i < vlp->elems_per_page; i++) {

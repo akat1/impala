@@ -94,7 +94,6 @@ vm_seg_alloc(vm_seg_t *vseg, vm_size_t size, void *_res)
 {
     vm_addr_t na;
     if (vm_seg_reserve(vseg, size, &na)) return -1;
-//     TRACE_IN("seg=%p size=%p fill=%p", vseg, size, na);
     vm_pmap_fill(&vseg->space->pmap, na, size, vseg->prot);
     vm_addr_t *res = _res;
     *res = na;
@@ -117,14 +116,12 @@ vm_seg_reserve(vm_seg_t *vseg, vm_size_t size, void *_res)
     if (region == NULL) {
         if (do_first_region(vseg, &region)) return -1;
     }
-
     // sprawdzamy czy istnieje dziura pomiêdzy pocz±tkiem segmentu
     // a pierwszym regionem
     if (size < region->begin - vseg->base) {
         *res = region->begin - size;
         return expand_region(vseg, region, size, EXPAND_DOWN, _res);
     }
-
     // Ok, no to szukamy dziury za regionem
     region = list_find(&vseg->regions, has_hole_after_reg, size);
     if (region == NULL) {
@@ -246,11 +243,11 @@ vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
         vm_pmap_fill(&space->pmap, clonereg->begin, clonereg->size,
             dst->prot);
         vm_addr_t SRC,DST;
-        vm_segmap(dst, clonereg->begin, clonereg->size, &DST);
-        vm_segmap(src, reg->begin, reg->size, &SRC);
+        vm_kern_segmap(dst, clonereg->begin, clonereg->size, &DST);
+        vm_kern_segmap(src, reg->begin, reg->size, &SRC);
         mem_cpy((void*)DST, (void*)SRC, reg->size);
-        vm_unmap(DST, reg->size);
-        vm_unmap(SRC, reg->size);
+        vm_kern_unmap(DST, reg->size);
+        vm_kern_unmap(SRC, reg->size);
     }
     return 0;
 }
@@ -315,7 +312,6 @@ int
 expand_region(vm_seg_t *seg, vm_region_t *region, vm_size_t size, int m,
     void *_newaddr)
 {
-
     vm_addr_t newaddr;
     if (m == EXPAND_UP) {
         vm_region_t *nextreg = list_next(&seg->regions, region);
@@ -379,11 +375,15 @@ is_containing_addr(const vm_region_t *reg, vm_addr_t addr)
 int
 do_first_region(vm_seg_t *vseg, vm_region_t **reg)
 {
+//     TRACE_IN("vseg=%p reg=%p", vseg, reg);
     vm_region_t *region = vm_lpool_alloc(&vm_unused_regions);
     region->segment = vseg;
     region->begin = vseg->base;
     region->size = vseg->size;
     region->end = vseg->end;
+//     TRACE_IN("fill %p-%p",vseg->base, vseg->size+vseg->base);
+    vm_pmap_fill(&vseg->space->pmap, vseg->base, vseg->size,
+        vseg->prot);
     list_insert_head(&vseg->regions, region);
     *reg = region;
     return 0;

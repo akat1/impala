@@ -33,7 +33,6 @@
 #include <sys/thread.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
-#include <sys/console.h>
 #include <machine/video.h>
 #include <machine/interrupt.h>
 
@@ -41,7 +40,7 @@ typedef struct sc_write_args sc_write_args;
 
 struct sc_write_args {
     int fd;
-    addr_t data;
+    addr_t *data;
     size_t size;
 };
 
@@ -51,7 +50,13 @@ errno_t sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args);
 errno_t
 sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args)
 {
-    kprintf("write(%u,%p,%p)\n", args->fd,args->data,args->size);
-    cons_tty(args->data);
+//    char buf[1024];
+//    kprintf("TID(%u) - WRITE(%u,%p,%u)nx", p->thr_tid, args->fd, args->data, args->size);
+//    if (args->size > 1024) args->size = 1024;
+//    mem_cpy(buf, args->data, args->size);
+//    buf[args->size-1] = 0;
+    textscreen_enable_forced_attr(COLOR_BRIGHTGRAY);
+    kprintf("%s\n", args->data);
+    textscreen_disable_forced_attr();
     return EOK;
 }

@@ -2,7 +2,7 @@ _LIB_BUILD?= build
 _LIB_CLEAN?= clean
 _LIB_DEPEND?= depend
 _LIB_CLEANDEPEND?= cleandepend
-_LIB_INSTALL?= install
+
 LIBRARY?= libnoname
 
 include ${IMPALA_SRCROOT}/mk/build.mk
@@ -20,14 +20,10 @@ ${_LIB_CLEAN}:
 .depend ${_LIB_DEPEND}: ${SRCS}
 	@rm -f .depend
 	@for i in ${SRCS}; do	\
-		${CC} ${_CFLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
+		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
 	done;
 
 ${_LIB_CLEANDEPEND}:
 	@echo "" > .depend
-
-${_LIB_INSTALL}:
-	@echo " CP ${LIBRARY}.a"
-	@cp ${LIBRARY}.a ${IMPALA_OUTPUT}/lib/
 
 include .depend
