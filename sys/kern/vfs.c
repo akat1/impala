@@ -115,7 +115,7 @@ vfs_mountroot()
 {
     // Na sztywno wpisane mfs:/dev/md0
     DEBUGF("Trying to mount from mfs:/dev/md0");
-    vnode_t *devn;
+    vnode_t *devn = NULL;
 //    if (vnode_opendev("md0", O_RDWR, &devn) != 0) {
 //        panic("cannot find root device");
 //    }
