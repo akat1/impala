@@ -13,5 +13,5 @@ depend:
 cleandepend:
 
 clean:
-	rm -f ${OBJS}
+	@rm -f ${OBJS}
 

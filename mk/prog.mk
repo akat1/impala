@@ -13,7 +13,7 @@ ${_PROG_BUILD}: ${PROG}
 
 ${PROG}: ${OBJS}
 	@echo " LINK ${PROG}.a"
-	${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS}
+	@${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS}
 
 ${_PROG_CLEAN}:
 	@rm -f ${OBJS} ${PROGRARY}.a

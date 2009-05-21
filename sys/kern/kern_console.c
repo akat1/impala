@@ -38,6 +38,7 @@
 #include <sys/thread.h>
 #include <sys/errno.h>
 #include <sys/utils.h>
+#include <sys/uio.h>
 #include <machine/video.h>
 #include <machine/interrupt.h>
 
@@ -84,7 +85,9 @@ struct vtty {
 
 
 static void vtty_put(vtty_t *t, char c);
-static void vtty_out(vtty_t *t, const char *c);
+static void vtty_putstr(vtty_t *t, const char *c);
+void vtty_data_out(vtty_t *vt, const char *c, int n);
+
 static int vt_parser_put(vt_parser_t *vtprs, char c);
 static void vt_parser_reset(vt_parser_t *vtprs);
 static void vtty_code(vtty_t *vt, int c);
@@ -196,9 +199,9 @@ cons_output(int t, const char *c)
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
             str_cat(ptr, "\033[u");
-            vtty_out(current_vtty, buf);
+            vtty_putstr(current_vtty, buf);
         } else {
-            vtty_out(current_vtty, c);
+            vtty_putstr(current_vtty, c);
         }
     } else {
         // Je¿eli obs³uga terminali nie jest jeszcze zainicjalizowana
@@ -266,7 +269,13 @@ enum {
 
 
 void
-vtty_out(vtty_t *vt, const char *c)
+vtty_putstr(vtty_t *vt, const char *c)
+{
+    vtty_data_out(vt, c, str_len(c));
+}
+
+void
+vtty_data_out(vtty_t *vt, const char *c, int n)
 {
     enum {
         CODE_ESC = 033
@@ -274,7 +283,7 @@ vtty_out(vtty_t *vt, const char *c)
     bool escape = FALSE;
     int X = spltty();
     mutex_lock(&vt->mtx);
-    for (; *c; c++) {
+    for (; n; c++, n--) {
         if (escape) {
             int code = vt_parser_put(&vt->parser, *c);
             if (code == PARSER_ERROR) {
@@ -296,6 +305,7 @@ vtty_out(vtty_t *vt, const char *c)
     mutex_unlock(&vt->mtx);
     splx(X);
 }
+
 
 void
 vtty_put(vtty_t *vt, char c)
@@ -430,13 +440,17 @@ cons_ioctl(devd_t *d, int cmd, uintptr_t param)
 int
 ttyv_open(devd_t *d, int flags)
 {
-    return -ENOTSUP;
+    return 0;
 }
 
 int
 ttyv_read(devd_t *d, uio_t *u)
 {
-    return -ENOTSUP;
+    vtty_t *vtty = d->priv;
+    char BUF[512];
+    int n =  uio_move(BUF, 512, u);
+    vtty_data_out(vtty, BUF, n);
+    return n;
 }
 
 int

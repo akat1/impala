@@ -38,7 +38,7 @@
 static int kernel_copy(char *buf, uio_t *uio, size_t len);
 
 int
-uio_copy(void *buf, uio_t *uio, size_t len)
+uio_move(void *buf, size_t len, uio_t *uio)
 {
     TRACE_IN("buf=%p uio=%p len=%u", buf, uio, len);
     KASSERT(len <= uio->size);

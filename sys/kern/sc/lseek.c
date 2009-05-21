@@ -45,15 +45,16 @@ struct lseek_args {
     int whence;
 };
 
-errno_t sc_lseek(thread_t *p, syscall_result_t *r, va_list args);
+errno_t sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args);
 
 errno_t
-sc_lseek(thread_t *p, syscall_result_t *r, lseek_args *args)
+sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args)
 {
 #if 0
     file_t *f = fd_get(args->fd, p->thr_proc->p_fd);
     r->result = f_seek(f, offset, whenece);
     return ENOSTR;
 #endif
+    return EOK;
 }
 

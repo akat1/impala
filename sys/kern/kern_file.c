@@ -44,7 +44,9 @@
 bool _chunk_is_empty(filetable_chunk_t *fd);
 void _filetable_expand(filetable_t *ft, int hm);
 filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
-file_t *file_alloc(vnode_t *vn);
+static file_t *file_alloc(vnode_t *vn);
+static void fref(file_t *);
+static bool frele(file_t *);
 /*
 ssize_t
 fdev_read(file_t *fd, uio_t *u)
@@ -94,10 +96,10 @@ f_opendev(const char *name, int flags)
 file_t*
 file_alloc(vnode_t *vn)
 {
-    file_t *fn = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+    file_t *fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
     fp->f_vnode = vn;
-    fn->f_refcnt++;
-    return fn;
+    fp->f_refcnt++;
+    return fp;
 }
 
 void 
@@ -125,19 +127,15 @@ f_seek(file_t *f, off_t o, int whence)
     if ( f == NULL ) {
         return EBADF;
     }
-
     switch(whence) {
-
         case SEEK_SET:
-
+            f->f_offset = o;
             break;
-
         case SEEK_CUR:
+            f->f_offset += o;
             break;
-
         case SEEK_END:
             break;
-
         default:
             return EINVAL;
     }
@@ -157,6 +155,7 @@ ssize_t
 f_write(file_t *f, uio_t *u)
 {
     int error;
+    u->offset = f->f_offset;
     error = VOP_WRITE(f->f_vnode, u);
     if(error) 
         return error;
@@ -167,6 +166,7 @@ f_write(file_t *f, uio_t *u)
 ssize_t
 f_read(file_t *f, uio_t *u)
 {
+    u->offset = f->f_offset;
     int error = VOP_READ(f->f_vnode, u);
     if(error)
         return error;
@@ -329,7 +329,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 
     /* brak wolnych miejsc w chunkach */
     _filetable_expand(p->p_fd, 1);
-    fp = file_alloc();
+    fp = file_alloc(vn);
     *result = fdp;
     *fpp = fp;
 

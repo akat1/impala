@@ -15,7 +15,7 @@ ${LIBRARY}.a: ${OBJS}
 	@${RANLIB} ${LIBRARY}.a
 
 ${_LIB_CLEAN}:
-	rm -f ${OBJS} ${LIBRARY}.a
+	@rm -f ${OBJS} ${LIBRARY}.a
 
 .depend ${_LIB_DEPEND}: ${SRCS}
 	@rm -f .depend

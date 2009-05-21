@@ -56,11 +56,12 @@ struct uio {
     size_t      iovcnt;
     int         space;
     int         oper;
-    size_t      size;
+    size_t      size; // <- do wywalenia
+    size_t      resid;
     off_t       offset;
 };
 
-int uio_copy(void *dstbuf, uio_t *uio, size_t len);
+int uio_move(void *dstbuf, size_t len, uio_t *uio);
 
 #endif
 
