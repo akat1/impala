@@ -25,3 +25,5 @@ recur() {
 }
 
 cpath="" recur
+
+mkdir -p output/bin output/sbin output/usr/include output/etc output/boot/grub output/lib

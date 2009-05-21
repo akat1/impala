@@ -32,7 +32,9 @@
 
 #ifndef __SYS_EXEC_H
 #define __SYS_EXEC_H
-#ifdef _KERNEL
+#ifdef __KERNEL
+
+void fake_execve(thread_t *thr, const void *image, size_t size);
 
 #endif
 #endif

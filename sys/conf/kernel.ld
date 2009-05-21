@@ -1,12 +1,20 @@
 ENTRY (kernel_entrypoint)
 OUTPUT(elf32-i386)
 SECTIONS{
-    . = 0x100000;
+    . = KERNEL_BOOTSTRAP;
+    .bootstrap :
+        AT ( KERNEL_BOOTSTRAP ) {
+        arch/bootstrap.o(.bootstrap)
+        arch/bootstrap.o(*)
+    }
+    . = KERNEL_START + SIZEOF(.bootstrap);
     kernel_start = .;
-    .text :{
-	    arch/bootstrap.o(.text)
+    .text :
+        AT ( ADDR(.bootstrap) + SIZEOF(.bootstrap) )
+    {
         *(.text)
     }
+    kernel_text_end = .;
     .rodata ALIGN (0x1000) : {
         *(.rodata)
     }
@@ -20,6 +28,5 @@ SECTIONS{
         *(.bss)
     }
     kernel_end = .;
-
 }
 

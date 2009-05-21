@@ -1,9 +1,7 @@
 LIBRARY= libkutil
-C_FLAGS=-D__KERNEL ${C_FLAGS_}
+CFLAGS=-D__KERNEL ${_K_FLAGS}
 SRCS=\
 	string.c\
-
-
 
 include ${IMPALA_MK}/lib.mk
 

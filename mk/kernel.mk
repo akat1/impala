@@ -4,7 +4,7 @@ _KERNEL_DEPEND= depend
 _KERNEL_CLEANDEPEND= cleandepend
 .PHONY: ${KERNEL_MAIN}
 
-C_FLAGS=-D__KERNEL ${C_FLAGS_}
+CFLAGS=-D__KERNEL ${_K_FLAGS}
 
 LIBS?=
 KERNEL?= kernel
@@ -17,24 +17,24 @@ ${_KERNEL_BUILD}: ${KERNEL}
 
 
 ${_KERNEL_CLEAN}:
-	rm -f ${OBJS} ${KERNEL}
+	@rm -f ${OBJS} ${KERNEL}
 
 
 tmp_rootimage.c:
 	cp _tmp_rootimage.c tmp_rootimage.c
 
-${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS}
+${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS} ${LD_SCRIPT}
 	@echo " LD ${KERNEL}"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
 
 
 ${_LIB_CLEAN}:
-	rm -f ${OBJS} ${KERNEL}
+	@rm -f ${OBJS} ${KERNEL}
 
 .depend ${_KERNEL_DEPEND}: ${SRCS}
 	@rm -f .depend
 	@for i in ${SRCS}; do	\
-		${CC} ${C_FLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
+		${CC} ${_CFLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
 	done;
 
 

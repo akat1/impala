@@ -351,8 +351,10 @@ kmem_init()
         sizeof(kmem_cache_t), VM_LPOOL_PREALLOC);
     vm_lpool_create(&lpool_slabs, offsetof(kmem_slab_t, L_slabs),
         sizeof(kmem_slab_t), VM_LPOOL_PREALLOC);
+//    for (;;);
     vm_lpool_create(&lpool_bufctls, offsetof(kmem_bufctl_t, L_bufs),
         sizeof(kmem_bufctl_t), VM_LPOOL_PREALLOC);
+
     mutex_init(&global_lock, MUTEX_NORMAL);
     alloc_init();
 }
@@ -445,7 +447,7 @@ kmem_bufctl_t *
 reserve_bufctl(kmem_cache_t *cache, kmem_slab_t *slab)
 {
     kmem_bufctl_t *bufctl = list_extract_first(&slab->free_bufs);
-    KASSERT(bufctl);        
+    KASSERT(bufctl);
     list_insert_tail(&slab->used_bufs, bufctl);
     if (list_length(&slab->free_bufs) == 0) {
         list_insert_tail(&cache->full_slabs, slab);

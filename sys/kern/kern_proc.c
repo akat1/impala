@@ -38,12 +38,13 @@
 #include <sys/vm.h>
 #include <sys/file.h>
 
-static pid_t last_pid;
+static pid_t last_pid = 1;
 list_t procs_list;
 kmem_cache_t *proc_cache;
 static bool find_this_pid(proc_t *p, pid_t pid);
 static void proc_ctor(void *obj);
 static void proc_dtor(void *obj);
+proc_t proc0;
 
 
 void
@@ -73,7 +74,20 @@ proc_init(void)
     LIST_CREATE(&procs_list, proc_t, L_procs, FALSE);
     proc_cache = kmem_cache_create("proc", sizeof(proc_t), proc_ctor,
         proc_dtor);
-    return;
+
+    proc0.p_pid = 1;
+    proc0.p_ppid = 0;
+    proc0.p_cred = NULL;
+    proc0.p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
+    proc0.p_cred->p_uid = 0;
+    LIST_CREATE(&proc0.p_threads, thread_t, L_threads, FALSE);
+    LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
+    list_insert_head(&procs_list, &proc0);
+    list_insert_head(&proc0.p_threads, curthread);
+    curthread->thr_proc = &proc0;
+    proc0.vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+    curthread->vm_space = proc0.vm_space;
+    vm_space_create(proc0.vm_space, VM_SPACE_USER);
 }
 
 /**
@@ -89,8 +103,8 @@ proc_create(void)
     new_p->p_ppid = 0; // XXX: fork
     new_p->p_cred->p_uid = 0;  // XXX: fork
 
-    LIST_CREATE(&(new_p->p_threads), thread_t, L_threads, FALSE);
-    LIST_CREATE(&(new_p->p_children), proc_t, L_children, FALSE);
+    LIST_CREATE(&new_p->p_threads, thread_t, L_threads, FALSE);
+    LIST_CREATE(&new_p->p_children, proc_t, L_children, FALSE);
     list_insert_head(&procs_list, new_p);
 
     vm_space_create(new_p->vm_space, VM_SPACE_USER);
