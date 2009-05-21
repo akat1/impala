@@ -35,6 +35,7 @@
 #ifdef __KERNEL
 
 enum {
+    CONS_TTY,
     CONS_ERROR,
     CONS_MSG
 };
@@ -42,6 +43,7 @@ enum {
 void cons_init(void);
 void cons_output(int msgt, const char *str);
 
+#define cons_tty(msg) cons_output(CONS_TTY, msg)
 #define cons_msg(msg) cons_output(CONS_MSG, msg)
 #define cons_err(msg) cons_output(CONS_ERROR, msg)
 

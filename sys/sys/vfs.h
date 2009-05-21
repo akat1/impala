@@ -38,44 +38,8 @@
 #include <sys/vfs/vfs_conf.h>
 #include <sys/vfs/vfs_node.h>
 
-/**
- * Struktura reprezentuj±ca zamontowany system plików.
- */
-
-struct vfs {
-     vfs_ops_t  *vfs_ops;       ///< definicje operacji zwi±zanych z tym fs
-     vnode_t    *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
-     devd_t     *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
-     void       *vfs_private;   ///< prywatne dane systemu plików
-};
-
-int vfs_create(vfs_t **vsp, const char *type);
-int vfs_destroy(vfs_t *vp);
 void vfs_init(void);
 void vfs_mountroot(void);
-
-#define VFS_MOUNT(fs) (fs)->vfs_ops->vfs_mount((fs))
-#define VFS_UNMOUNT(fs) (fs)->vfs_ops->vfs_unmount((fs))
-#define VFS_SYNC(fs) (fs)->vfs_ops->vfs_sync((fs))
-#define VFS_GETROOT(fs) (fs)->vfs_ops->vfs_getroot((fs))
-
-typedef int vfs_mount_t(vfs_t *fs);
-typedef int vfs_unmount_t(vfs_t *fs);
-typedef vnode_t * vfs_getroot_t(vfs_t *fs);
-typedef void vfs_sync_t(vfs_t *fs);
-
-
-/**
- * Abstrakcja na operacje na systemie plików
- */
-
-struct vfs_ops {
-    vfs_mount_t     *vfs_mount;
-    vfs_unmount_t   *vfs_unmount;
-    vfs_getroot_t  *vfs_getroot;
-    vfs_sync_t      *vfs_sync;
-};
-
 
 
 #endif

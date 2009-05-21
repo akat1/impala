@@ -1,5 +1,5 @@
 LIBRARY= libarch
-C_FLAGS=-D__KERNEL ${C_FLAGS_} 
+CFLAGS=-D__KERNEL ${_K_FLAGS} 
 
 SRCS=\
 	arch/asmstub.s\

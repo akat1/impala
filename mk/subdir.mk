@@ -3,6 +3,7 @@ _SUBDIR_BUILD?= build
 _SUBDIR_CLEAN?= clean
 _SUBDIR_DEPEND?= depend
 _SUBDIR_CLEANDEPEND?= cleandepend
+_SUBDIR_INSTALL?= install
 
 #
 # GNU Make lubi drukowac do jakiego katalogu aktualnie wchodzi i z jakiego
@@ -30,6 +31,12 @@ ${_SUBDIR_DEPEND}:
 	@for d in ${SUBDIRS};\
 		do echo "===> ${DIRPRFX}$$d (depend)";\
 			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} depend; cd ..;\
+	done
+
+${_SUBDIR_INSTALL}:
+	@for d in ${SUBDIRS};\
+		do echo "===> ${DIRPRFX}$$d (install)";\
+			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} install; cd ..;\
 	done
 
 

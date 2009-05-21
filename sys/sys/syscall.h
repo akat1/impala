@@ -40,30 +40,30 @@ enum {
 };
 
 enum {
-    SYSCALL_execve,
-    SYSCALL_exit,
-    SYSCALL_fork,
-    SYSCALL_getpid,
-    SYSCALL_getppid,
-    SYSCALL_getuid,
-    SYSCALL_kill,
-    SYSCALL_lseek,
-    SYSCALL_nanosleep,
-    SYSCALL_open,
-    SYSCALL_pause,
-    SYSCALL_read,
-    SYSCALL_setuid,
-    SYSCALL_sigaction,
-    SYSCALL_wait,
-    SYSCALL_waitpid,
-    SYSCALL_write,
-    SYSCALL_MAX
+    SYS_execve,
+    SYS_exit,
+    SYS_fork,
+    SYS_getpid,
+    SYS_getppid,
+    SYS_getuid,
+    SYS_kill,
+    SYS_lseek,
+    SYS_nanosleep,
+    SYS_open,
+    SYS_pause,
+    SYS_read,
+    SYS_setuid,
+    SYS_sigaction,
+    SYS_wait,
+    SYS_waitpid,
+    SYS_write,
+    SYS_MAX
 };
 
 #ifdef __KERNEL
 
 /// struktura s³u¿±ca do zwracania wyników z wywo³añ systemowych
-struct syscall_result { 
+struct syscall_result {
     int result;
     int errno;
 };

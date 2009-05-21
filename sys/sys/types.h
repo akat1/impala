@@ -68,14 +68,13 @@ typedef struct device device_t;
 typedef struct devd devd_t;
 typedef struct devsw devsw_t;
 typedef struct uio uio_t;
+typedef struct filed filed_t;
 typedef struct iobuf iobuf_t;
 typedef struct vnode vnode_t;
 typedef struct consdevsw consdevsw_t;
 typedef struct timespec timespec_t;
 typedef struct pcred pcred_t;
-typedef struct filetable filetable_t;
-typedef struct filetable_chunk filetable_chunk_t;
-typedef struct file file_t;
+
 #include <sys/vm/vm_types.h>
 #endif
 

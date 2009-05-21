@@ -34,10 +34,11 @@
 #define __SYS_VFS_VFS_CONF_H
 #ifdef __KERNEL
 
+enum {
+    VFS_MP_MAXPATH  = 255,
+    VFS_MP_MAXDEVPATH = 32
+};
 
-/**
- * Reprezentuje dostêpny w systemie typ systemu plików.
- */
 
 struct vfs_conf {
     const char  *name;
@@ -45,8 +46,31 @@ struct vfs_conf {
     list_node_t  L_confs;
 };
 
+struct vfs_mp {
+    const char  mount_path[VFS_MP_MAXPATH];
+    const char  dev_path[VFS_MP_MAXDEVPATH];
+    vnode_t    *dev_node;
+    vfs_conf_t *vfs_conf;
+};
+
+typedef int vfs_mount_t(vfs_mp_t *vmp);
+typedef int vfs_unmount_t(vfs_mp_t *vmp);
+
+struct vfs_ops {
+    vfs_mount_t     *vfs_mount;
+    vfs_unmount_t   *vfs_unmount;
+};
+
+#define VFS_MOUNT(m) (m)->vfs_conf->ops->vfs_mount(m)
+#define VFS_UNMOUNT(m) (m)->vfs_conf->ops->vfs_unmount(m)
+
 void vfs_register(const char *name, vfs_ops_t *ops);
 vfs_conf_t *vfs_byname(const char *name);
+
+vfs_mp_t *vfs_mp_create(vnode_t *devn, const char *fstype, const char *mp);
+void vfs_mp_destroy(vfs_mp_t *vmp);
+
+
 
 #endif
 #endif

@@ -191,11 +191,15 @@ void
 cons_output(int t, const char *c)
 {
     if (current_vtty) {
-        char buf[SPRINTF_BUFSIZE];
-        char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
-        ptr = str_cat(ptr, c);
-        str_cat(ptr, "\033[u");
-        vtty_out(current_vtty, buf);
+        if (t != CONS_TTY) {
+            char buf[SPRINTF_BUFSIZE];
+            char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
+            ptr = str_cat(ptr, c);
+            str_cat(ptr, "\033[u");
+            vtty_out(current_vtty, buf);
+        } else {
+            vtty_out(current_vtty, c);
+        }
     } else {
         // Je¿eli obs³uga terminali nie jest jeszcze zainicjalizowana
         // to nadajemy rêcznie na ekran

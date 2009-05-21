@@ -1,0 +1,4 @@
+
+
+
+int syscall(int sc,...);

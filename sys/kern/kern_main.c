@@ -43,9 +43,10 @@
 #include <sys/vfs.h>
 #include <sys/proc.h>
 #include <sys/string.h>
+#include <sys/exec.h>
 #include <dev/md/md.h>
 #include <machine/interrupt.h>
-#include <machine/pckbd.h>
+#include <machine/cpu.h>
 
 void kmain(void);
 static void print_welcome(void);
@@ -80,7 +81,7 @@ PROC_init()
         "int $0x80"
     );
 
-    for (;;); __asm__(
+    for (   ;;); __asm__(
         "movl $3, %eax;"
         "int $0x80"
     );
@@ -102,13 +103,10 @@ start_init_process()
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
 #endif
- //   kprintf("PRZESUNIECIE:_\033[5B");
-    kprintf("[infinite loop]");
-    for (;;) {
-        char c=pckbd_get_char();
-        if(c!=-1)
-            kprintf("%c", c);
-    }
+    extern unsigned char image[];
+    extern unsigned int image_size;
+    fake_execve(curthread, &image, image_size);
+    panic("Cannot start init process");
 }
 
 void
@@ -124,8 +122,10 @@ print_welcome()
     kprintf("   http://www.ii.uni.wroc.pl/\n");
     kprintf("----\n");
     kprintf("Impala Operating System, build at %s %s\n", __TIME__, __DATE__);
+    kprintf("CPU: %s\n", cpu_i.vendor_string);
     kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
+
 
 }
 
@@ -134,14 +134,14 @@ init_kernel()
 {
     vm_init();
     kmem_init();
-    proc_init();
     thread_init();
     sched_init();
     clock_init();
     dev_init();
     bio_init();
-//    vfs_init();
-//    cons_init();
+    vfs_init();
+    proc_init();
+    cons_init();
     ssleep(1);
     kprintf("kernel initialized\n");
 }

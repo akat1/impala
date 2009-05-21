@@ -29,74 +29,14 @@
  *
  * $Id$
  */
+#ifndef __UNISTD_H
+#define __UNISTD_H
 
-#ifndef __SYS_FILE_H
-#define __SYS_FILE_H
-
-#include <sys/list.h>
 #include <sys/types.h>
 
-enum {
-    FILES_PER_CHUNK = 32
-};
-
-struct filetable {
-    int     max_ds;
-    list_t  chunks;
-};
-
-struct filetable_chunk {
-    file_t      *files[FILES_PER_CHUNK];
-    list_node_t L_chunks;
-};
-
-struct file {
-    vnode_t    *f_vnode;
-    off_t       f_offset;
-    int         f_refcnt;
-    mode_t      f_openmode;
-    int         f_flags;
-    //pcred_t   *f_pcred;
-};
-
-
-
-#define SEEK_SET    0
-#define SEEK_CUR    1
-#define SEEK_END    2
-
-
-#define O_RDONLY      (1 << 1)
-#define O_WRONLY      (1 << 2)
-#define O_RDWR        (1 << 3)
-#define O_CREAT       (1 << 4)
-
-#define F_DUPFD       (1 << 0)
-#define F_GETFL       (1 << 1)
-#define F_SETFL       (1 << 2)
-
-
-#ifdef __KERNEL
-enum {
-    OK,
-    MAX_EXCEEDED
-};
-
-void filetable_free(filetable_t *fd);
-filetable_t *filetable_alloc(void);
-
-int f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
-ssize_t f_write(file_t *fd, uio_t *u);
-ssize_t f_read(file_t *fd, uio_t *u);
-int f_ioctl(file_t *fd, int cmd, uintptr_t param);
-int f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
-void f_close(file_t *fd);
-int f_seek(file_t *fd, off_t o, int whence);
-
-ssize_t f_write1(file_t *fd, const void *buf, size_t len);
-ssize_t f_read1(file_t *fd, void *buf, size_t len);
-
+ssize_t read(int fd, void *buf, size_t l);
+ssize_t write(int fd, const void *buf, size_t l);
 
 #endif
 
-#endif
+

@@ -101,8 +101,8 @@ buf_destroy(iobuf_t *b)
 void
 buf_assign(iobuf_t *b, vnode_t *vn)
 {
-    KASSERT(vn->v_type = VNODE_TYPE_DEV);
-    b->dev = vn->v_dev;
+    KASSERT(vn->type = VNODE_TYPE_DEV);
+    b->dev = vn->un.dev;
     b->flags |= IOB_BUSY;
 }
 
