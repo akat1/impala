@@ -46,29 +46,29 @@ struct sc_write_args {
 };
 
 
-errno_t sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args);
+errno_t sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args);
 
 errno_t
-sc_write(thread_t *p, syscall_result_t *r, sc_write_args *args)
+sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
 {
     kprintf("write(%u,%p,%p)\n", args->fd,args->data,args->size);
     cons_tty(args->data);
     return EOK;
 #if 0
     // jak to mniej wiecej powinno moim zdaniem wygladac:
-    file_t *file = fd_get(args->fd);
+    file_t *file = fd_get(args->fd, t->thr_proc->p_fd);
     if (f == NULL) {
         return EBADF;
     }
     uio_t u;
     iovec_t iov;
-    iov.iov_base = r->data;
-    iov.iov_len = r->size;
+    iov.iov_base = args->data;
+    iov.iov_len = args->size;
     u.iovs = &iov;
     u.iovcnt = 1;
     u.oper = UIO_WRITE;
     u.space = UIO_SYSTEM;
     u.owner = p;
-    fd_write(file, &u);
+    r->result = f_write(file, &u);
 #endif
 }

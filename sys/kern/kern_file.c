@@ -44,9 +44,7 @@
 bool _chunk_is_empty(filetable_chunk_t *fd);
 void _filetable_expand(filetable_t *ft, int hm);
 filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
-file_t *_get_file_by_index(filetable_t *ft, int index);
-void _set_file_by_index(filetable_t *ft, file_t *fd, int index);
-
+file_t *file_alloc(vnode_t *vn);
 /*
 ssize_t
 fdev_read(file_t *fd, uio_t *u)
@@ -93,6 +91,68 @@ f_opendev(const char *name, int flags)
 }
 */
 
+file_t*
+file_alloc(vnode_t *vn)
+{
+    file_t *fn = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+    fp->f_vnode = vn;
+    fn->f_refcnt++;
+    return fn;
+}
+
+void 
+fref(file_t *f)
+{
+    f->f_refcnt++;
+}
+
+bool
+frele(file_t *f)
+{
+    f->f_refcnt--;
+
+    if ( f->f_refcnt == 0 ) {
+        kmem_free(f);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+off_t
+f_seek(file_t *f, off_t o, int whence)
+{
+    if ( f == NULL ) {
+        return EBADF;
+    }
+
+    switch(whence) {
+
+        case SEEK_SET:
+
+            break;
+
+        case SEEK_CUR:
+            break;
+
+        case SEEK_END:
+            break;
+
+        default:
+            return EINVAL;
+    }
+
+    /* NOT REACHED */
+    return 0;
+}
+
+int
+f_ioctl(file_t *f, int cmd, uintptr_t param)
+{
+    //return VOP_IOCTL(f->f_vnode, cmd, param);
+    return 0;
+}
+
 ssize_t 
 f_write(file_t *f, uio_t *u)
 {
@@ -121,19 +181,24 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
     filetable_chunk_t *fc;
     switch(cmd) {
         case F_DUPFD:
-            if ( param > ft->max_ds )
+            if ( param > ft->max_ds )    
                 return EINVAL;
+
             fc = _get_chunk_by_index(ft, (int)param);
+
             if ( fc == NULL ) {
                 _filetable_expand(ft, param - list_length(&(ft->chunks))
                                               / FILES_PER_CHUNK);
                 fc = _get_chunk_by_index(ft, param);
             }
+
             fd = param;
+
             while ( fc != NULL ) {
                 for (int i = param % FILES_PER_CHUNK; i < FILES_PER_CHUNK; i++){
                     if ( fc->files[i] == NULL ) {
                         fc->files[i] = f;
+                        fref(f);
                         return fd;
                     }
                     fd++;
@@ -142,7 +207,9 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                     return MAX_EXCEEDED; /// XXX
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
+
             break;
+
         case F_GETFL:
             return f->f_flags;
         case F_SETFL:
@@ -153,23 +220,23 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
 
 
 file_t *
-_get_file_by_index(filetable_t *ft, int index)
+f_get(filetable_t *ft, int index)
 {
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
-    if ( fc == NULL )
+    if ( fc == NULL ) {
         return NULL;
+    }
 
     return fc->files[index % FILES_PER_CHUNK];
 }
 
 void 
-_set_file_by_index(filetable_t *ft, file_t *fd, int index)
+f_set(filetable_t *ft, file_t *fd, int index)
 {
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
-    if ( fc == NULL )
-    {
+    if ( fc == NULL ) {
         _filetable_expand(ft, index - list_length(&(ft->chunks))/FILES_PER_CHUNK);
         fc = _get_chunk_by_index(ft, index);
     }
@@ -219,7 +286,7 @@ _filetable_expand(filetable_t *ft, int hm)
 {
     filetable_chunk_t *fc;
 
-    while (--hm) {
+    while (hm--) {
         fc = kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
         list_insert_tail(&(ft->chunks), fc);
     }
@@ -247,8 +314,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     {
         for (int i = 0 ; i < FILES_PER_CHUNK ; i++) {
             if ( fc->files[i] == NULL ) {
-                fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-                fp->f_vnode = vn;
+                fp = file_alloc(vn);
                 *result = fdp;
                 *fpp = fp;
                 return OK;
@@ -263,8 +329,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 
     /* brak wolnych miejsc w chunkach */
     _filetable_expand(p->p_fd, 1);
-    fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-    fp->f_vnode = vn;
+    fp = file_alloc();
     *result = fdp;
     *fpp = fp;
 
@@ -274,11 +339,8 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 void
 f_close(file_t *fp)
 {
-    fp->f_refcnt--;
- 
-    if ( fp->f_refcnt == 0 )
-        kmem_free(fp);
-
+    frele(fp);
+    /// XXX: VOP_CLOSE + uio
     return;
 }
 
@@ -299,16 +361,13 @@ filetable_free(filetable_t *fd)
 
     while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks)))) {
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
-            /* sprawdzamy czy jest otwarty plik */
             if ( t->files[i] != NULL )
                 f_close(t->files[i]);
         }
 
-        /* zwalniamy chunka */
         kmem_free(t);
     }
 
-    /* zwalniamy tablicê */
     kmem_free(fd);
 
     return;

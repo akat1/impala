@@ -77,6 +77,7 @@ struct file {
 
 
 #ifdef __KERNEL
+/* XXX */
 enum {
     OK,
     MAX_EXCEEDED
@@ -92,6 +93,9 @@ int f_ioctl(file_t *fd, int cmd, uintptr_t param);
 int f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
 void f_close(file_t *fd);
 int f_seek(file_t *fd, off_t o, int whence);
+file_t *f_get(filetable_t *ft, int index);
+void f_set(filetable_t *ft, file_t *fd, int index);
+
 
 ssize_t f_write1(file_t *fd, const void *buf, size_t len);
 ssize_t f_read1(file_t *fd, void *buf, size_t len);

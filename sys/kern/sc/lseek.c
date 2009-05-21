@@ -35,13 +35,25 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/file.h>
 
-errno_t sc_lseek(thread_t *p, syscall_result_t *r, va_list ap);
+typedef struct lseek_args  lseek_args;
+
+struct lseek_args {
+    int fd;
+    off_t offset;
+    int whence;
+};
+
+errno_t sc_lseek(thread_t *p, syscall_result_t *r, va_list args);
 
 errno_t
-sc_lseek(thread_t *p, syscall_result_t *r, va_list ap)
+sc_lseek(thread_t *p, syscall_result_t *r, lseek_args *args)
 {
-    r->result = 0;
+#if 0
+    file_t *f = fd_get(args->fd, p->thr_proc->p_fd);
+    r->result = f_seek(f, offset, whenece);
     return ENOSTR;
+#endif
 }
 

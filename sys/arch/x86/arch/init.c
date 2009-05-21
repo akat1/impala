@@ -64,7 +64,8 @@ static task_state_segment p_tss0;
 static descriptor_register_t p_gdtr;
 static descriptor_register_t p_idtr;
 
-void _cpuid(int option, struct cpuid_result *r) {
+void
+_cpuid(int option, struct cpuid_result *r) {
 
     __asm__ volatile (
         "cpuid;"
@@ -74,7 +75,8 @@ void _cpuid(int option, struct cpuid_result *r) {
     return;
 }
 
-void _cpu_info(void)
+void
+_cpu_info(void)
 {
     struct cpuid_result cpuid_r;
 
@@ -101,7 +103,6 @@ void _cpu_info(void)
  * do pracy w systemie operacyjnym.
  */
 
-uint8_t bbb[40960];
 void setesp0(void *a);
 
 void
@@ -129,7 +130,6 @@ init_x86()
     setgdt(SEL_UDATA, 0x0, 0xfffff, udata, attr);
     setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
     p_tss0.tss_io = 0;
-//    setesp0(bbb+40820);
     p_tss0.tss_ss0 = 0x10;
 //    p_tss0.tss_cs=0x8;
 //    p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
