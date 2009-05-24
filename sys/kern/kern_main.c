@@ -105,7 +105,7 @@ start_init_process()
     sched_insert(t);
 #endif
     vnode_t *fn;
-    lookup(NULL, &fn, "/sbin/init", NULL);
+    vfs_lookup(NULL, &fn, "/sbin/init", NULL);
     if(fn) {
         vattr_t attr;
         attr.va_mask = VATTR_SIZE;

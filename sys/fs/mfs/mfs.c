@@ -11,6 +11,7 @@
 #include <sys/uio.h>
 #include <fs/mfs/mfs_internal.h>
 
+
 static vfs_mount_t   mfs_mount;
 static vfs_unmount_t mfs_unmount;
 static vfs_sync_t    mfs_sync;
@@ -49,6 +50,18 @@ static vnode_ops_t mfs_vnode_ops = {
     .vop_lookup = mfs_lookup,
 };
 
+static mfs_node_t* _alloc_node(void);
+int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
+int _get_vnode(mfs_node_t *node, vnode_t **vpp, vfs_t *fs);
+
+mfs_node_t*
+_alloc_node()
+{
+    mfs_node_t *n = kmem_zalloc(sizeof(mfs_node_t), KM_SLEEP);
+    n->vnode = NULL;
+    return n;
+}
+
 int
 mfs_open(vnode_t *vn, int flags, mode_t mode)
 {
@@ -56,15 +69,30 @@ mfs_open(vnode_t *vn, int flags, mode_t mode)
 }
 
 int
-mfs_create(vnode_t *vn, char *name)
+mfs_create(vnode_t *vn, char *name, vattr_t *attr)
 {
-    return -ENOTSUP;
+    if(!vn || !name || !attr || vn->v_type != VNODE_TYPE_DIR)
+        return -EINVAL;
+    mfs_node_t *pnode = vn->v_private;
+    mfs_node_t *node = _alloc_node();
+    if(!node)
+        return -ENOMEM;
+    node->name = str_dup(name);
+    node->size = attr->va_size;
+    node->type = (attr->va_type==VNODE_TYPE_REG)?MFS_TYPE_REG:MFS_TYPE_DIR;
+    node->attr = attr->va_mode;
+    node->data = NULL;
+    node->parent = pnode;
+    node->child = NULL;
+    node->next = pnode->child;
+    pnode->child = node;
+    return 0;
 }
 
 int
 mfs_close(vnode_t *vn)
 {
-    return -ENOTSUP;
+    return 0;
 }
 
 int
@@ -82,7 +110,10 @@ mfs_read(vnode_t *vn, uio_t *u)
 int
 mfs_write(vnode_t *vn, uio_t *u)
 {
-    return -ENOTSUP;
+    if(!vn || vn->v_type != VNODE_TYPE_REG)
+        return -EINVAL;
+    return -ENOTSUP;    
+    return 0;
 }
 
 int
@@ -94,7 +125,12 @@ mfs_ioctl(vnode_t *vn, int cmd, uintptr_t arg)
 int
 mfs_seek(vnode_t *vn, off_t off)
 {
-    return -ENOTSUP;
+    if(!vn)
+        return -EINVAL;
+    mfs_node_t *n = vn->v_private;
+    if(n->size > off)
+        return 0;
+    return -EINVAL;
 }
 
 int
@@ -112,14 +148,38 @@ mfs_getattr(vnode_t *vn, vattr_t *attr)
     if(attr->va_mask & VATTR_TYPE)
         attr->va_type = (node->type==MFS_TYPE_DIR)?
                             VNODE_TYPE_DIR:VNODE_TYPE_REG;
+    if(attr->va_mask & VATTR_MODE)
+        attr->va_mode = node->attr;
+    if(attr->va_mask & VATTR_UID)
+        attr->va_uid = 0;
+    if(attr->va_mask & VATTR_GID)
+        attr->va_gid = 0;
+    if(attr->va_mask & VATTR_DEV)
+        attr->va_dev = NULL;
     return 0;
 }
 
 int
 mfs_setattr(vnode_t *vn, vattr_t *attr)
 {
-    //mfs_node_t *node = vn->v_private;
-    
+    mfs_node_t *node = vn->v_private;
+    if(attr->va_mask & (VATTR_UID | VATTR_GID | VATTR_DEV))
+        return -EINVAL;
+    if(attr->va_mask & VATTR_SIZE) {
+        if(attr->va_size > node->size)
+            return -EINVAL;
+        else
+            node->size = attr->va_size; //obicinamy
+    }
+    if(attr->va_mask & VATTR_TYPE) {
+        if(attr->va_type == VNODE_TYPE_DIR)
+            node->type = MFS_TYPE_DIR;
+        else if(attr->va_type == VNODE_TYPE_REG)
+            node->type = MFS_TYPE_REG;
+        else return -EINVAL;
+    }
+    if(attr->va_mask & VATTR_MODE)
+        node->attr = attr->va_mode;
     return 0;
 }
 
@@ -138,12 +198,39 @@ pc_cmp(cpath_t *path, const char *fname)
 }
 
 int
+_get_vnode(mfs_node_t *en, vnode_t **vpp, vfs_t *fs)
+{
+    if(en->vnode == NULL) {
+        vnode_t *res = vnode_alloc();
+        if(!res)
+            return -ENOMEM;
+        res->v_vfs = fs;
+        res->v_flags = (en->parent)?0:VNODE_FLAG_ROOT;
+        res->v_ops = &mfs_vnode_ops;
+        res->v_type = (en->type==MFS_TYPE_DIR)?
+                        VNODE_TYPE_DIR:VNODE_TYPE_REG;
+        res->v_private = en;
+        en->vnode = res;
+    }
+    *vpp = en->vnode;
+    return 0;
+}
+
+int
 mfs_lookup(vnode_t *vn, vnode_t **vpp, cpath_t *path)
 {
-//    mfs_data_t *mfs = vn->v_vfs->vfs_private;
     *vpp = NULL;
     mfs_node_t *en = vn->v_private;
-//    kprintf("Searching!\n");
+    if(!pc_cmp(path, "..")) {
+        path->now+=2;
+        if(!en->parent) {
+            *vpp = vn;
+            return 0;
+        }
+        en = en->parent;
+        _get_vnode(en, vpp, vn->v_vfs);
+        return 0;
+    }        
     en = en->child;
     while(en) {
         if(!pc_cmp(path, en->name))
@@ -151,21 +238,8 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, cpath_t *path)
         en = en->next;
     }
     if(en) {
-//        kprintf("Found!\n");
         path->now+=str_len(en->name);
-        if(en->vnode == NULL) {
-            vnode_t *res = vnode_alloc();
-            if(!res)
-                return -ENOMEM;
-            res->v_vfs = vn->v_vfs;
-            res->v_flags = 0;
-            res->v_ops = &mfs_vnode_ops;
-            res->v_type = (en->type==MFS_TYPE_DIR)?
-                            VNODE_TYPE_DIR:VNODE_TYPE_REG;
-            res->v_private = en;
-            en->vnode = res;
-        }
-        *vpp = en->vnode;
+        _get_vnode(en, vpp, vn->v_vfs);
         return 0;
     }
     return -ENOENT;
@@ -185,17 +259,6 @@ fs_mfs_init()
     vfs_register("mfs", &mfs_ops);
 }
 
-
-static mfs_node_t* _alloc_node(void);
-int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
-
-mfs_node_t*
-_alloc_node()
-{
-    mfs_node_t *n = kmem_zalloc(sizeof(mfs_node_t), KM_SLEEP);
-    n->vnode = NULL;
-    return n;
-}
 
 int
 mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)

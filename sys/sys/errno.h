@@ -40,164 +40,85 @@
 ///@TODO: Przerobiæ na #define
 enum POSIX_ERRNO {
     __POSIX_ERRNO_START = 20,
-    /// argument list too long
-    E2BIG,
-    /// permission deined
-    EACCESS,
-    /// address in use
-    EADDRINUSE,
-    /// address not available
-    EADDRNOTAVAIL,
-    /// address family not supported
-    EAFNOSUPPORT,
-    /// resource unavailable, try again
-    EAGAIN,
-    /// connection already in progress.
-    EALREADY,
-    /// bad file descriptor
-    EBADF,
-    /// bad message
-    EBADMSG,
-    /// device or resource busy
-    EBUSY,
-    /// operation canceled
-    ECANCELED,
-    /// no child processes
-    ECHILD,
-    /// connection aborted.
-    ECONNABORTED,
-    /// Connection refused.
-    ECONNREFUSED,
-    /// Connection reset.
-    ECONNRESET,
-    /// Resource deadlock would occur.
-    EDEADLK,
-    /// Destination address required.
-    EDESTADDRREQ,
-    /// Mathematics argument out of domain of function.
-    EDOM,
-    /// Reserved.
-    EDQUOT,
-    /// File exists.
-    EEXIST,
-    /// Bad address.
-    EFAULT,
-    /// File too large.
-    EFBIG,
-    /// Host is unreachable.
-    EHOSTUNREACH,
-    /// Identifier removed.
-    EIDRM,
-    /// Illegal byte sequence.
-    EILSEQ,
-    /// Operation in progress.
-    EINPROGRESS,
-    /// Interrupted function.
-    EINTR,
-    /// Invalid argument.
-    EINVAL,
-    /// I/O error.
-    EIO,
-    /// Socket is connected.
-    EISCONN,
-    /// Is a directory.
-    EISDIR,
-    /// Too many levels of symbolic links.
-    ELOOP,
-    /// Too many open files.
-    EMFILE,
-    /// Too many links.
-    EMLINK,
-    /// Message too large.
-    EMSGSIZE,
-    /// Reserved.
-    EMULTIHOP,
-    /// Filename too long.
-    ENAMETOOLONG,
-    /// Network is down.
-    ENETDOWN,
-    /// Connection aborted by network.
-    ENETRESET,
-    /// Network unreachable.
-    ENETUNREACH,
-    /// Too many files open in system.
-    ENFILE,
-    /// No buffer space available.
-    ENOBUFS,
-    /// [XSR] No message is available on the STREAM head read queue. 
-    ENODATA,
-    /// No such device.
-    ENODEV,
-    /// No such file or directory.
-    ENOENT,
-    /// Executable file format error.
-    ENOEXEC,
-    /// No locks available.
-    ENOLCK,
-    /// Reserved.
-    ENOLINK,
-    /// Not enough space.
-    ENOMEM,
-    /// No message of the desired type.
-    ENOMSG,
-    /// Protocol not available.
-    ENOPROTOOPT,
-    /// No space left on device.
-    ENOSPC,
-    /// [XSR] No STREAM resources. 
-    ENOSR,
-    /// [XSR]  Not a STREAM. 
-    ENOSTR,
-    /// Function not supported.
-    ENOSYS,
-    /// The socket is not connected.
-    ENOTCONN,
-    /// Not a directory.
-    ENOTDIR,
-    /// Directory not empty.
-    ENOTEMPTY,
-    /// Not a socket.
-    ENOTSOCK,
-    /// Not supported.
-    ENOTSUP,
-    /// Inappropriate I/O control operation.
-    ENOTTY,
-    /// No such device or address.
-    ENXIO,
-    /// Operation not supported on socket.
-    EOPNOTSUPP,
-    /// Value too large to be stored in data type.
-    EOVERFLOW,
-    /// Operation not permitted.
-    EPERM,
-    /// Broken pipe.
-    EPIPE,
-    /// Protocol error.
-    EPROTO,
-    /// Protocol not supported.
-    EPROTONOSUPPORT,
-    /// Protocol wrong type for socket.
-    EPROTOTYPE,
-    /// Result too large.
-    ERANGE,
-    /// Read-only file system.
-    EROFS,
-    /// Invalid seek.
-    ESPIPE,
-    /// No such process.
-    ESRCH,
-    /// Reserved.
-    ESTALE,
-    /// [XSR]  Stream ioctl() timeout. 
-    ETIME,
-    /// Connection timed out.
-    ETIMEDOUT,
-    /// Text file busy.
-    ETXTBSY,
-    /// Operation would block.
-    EWOULDBLOCK,
-    /// Cross-device link.
-    EXDEV,
+    E2BIG,       ///< argument list too long
+    EACCESS,     ///< permission deined
+    EADDRINUSE,  ///< address in use
+    EADDRNOTAVAIL,///< address not available
+    EAFNOSUPPORT,///< address family not supported
+    EAGAIN,      ///< resource unavailable, try again
+    EALREADY,    ///< connection already in progress.
+    EBADF,       ///< bad file descriptor
+    EBADMSG,     ///< bad message
+    EBUSY,       ///< device or resource busy
+    ECANCELED,   ///< operation canceled
+    ECHILD,      ///< no child processes
+    ECONNABORTED,///< connection aborted.
+    ECONNREFUSED,///< Connection refused.
+    ECONNRESET,  ///< Connection reset.
+    EDEADLK,     ///< Resource deadlock would occur.
+    EDESTADDRREQ,///< Destination address required.
+    EDOM,        ///< Mathematics argument out of domain of function.
+    EDQUOT,      ///< Reserved.
+    EEXIST,      ///< File exists.
+    EFAULT,      ///< Bad address.
+    EFBIG,       ///< File too large.
+    EHOSTUNREACH,///< Host is unreachable.
+    EIDRM,       ///< Identifier removed.
+    EILSEQ,      ///< Illegal byte sequence.
+    EINPROGRESS, ///< Operation in progress.
+    EINTR,       ///< Interrupted function.
+    EINVAL,      ///< Invalid argument.
+    EIO,         ///< I/O error.
+    EISCONN,     ///< Socket is connected.
+    EISDIR,      ///< Is a directory.
+    ELOOP,       ///< Too many levels of symbolic links.
+    EMFILE,      ///< Too many open files.
+    EMLINK,      ///< Too many links.
+    EMSGSIZE,    ///< Message too large.
+    EMULTIHOP,   ///< Reserved.
+    ENAMETOOLONG,///< Filename too long.
+    ENETDOWN,    ///< Network is down.
+    ENETRESET,   ///< Connection aborted by network.
+    ENETUNREACH, ///< Network unreachable.
+    ENFILE,      ///< Too many files open in system.
+    ENOBUFS,     ///< No buffer space available.
+    ENODATA,     ///< [XSR] No message is available on the STREAM head read queue. 
+    ENODEV,      ///< No such device.
+    ENOENT,      ///< No such file or directory.
+    ENOEXEC,     ///< Executable file format error.
+    ENOLCK,      ///< No locks available.
+    ENOLINK,     ///< Reserved.
+    ENOMEM,      ///< Not enough space.
+    ENOMSG,      ///< No message of the desired type.
+    ENOPROTOOPT, ///< Protocol not available.
+    ENOSPC,      ///< No space left on device.
+    ENOSR,       ///< [XSR] No STREAM resources.
+    ENOSTR,      ///< [XSR]  Not a STREAM. 
+    ENOSYS,      ///< Function not supported.
+    ENOTCONN,    ///< The socket is not connected.
+    ENOTDIR,     ///< Not a directory.
+    ENOTEMPTY,   ///< Directory not empty.
+    ENOTSOCK,    ///< Not a socket.
+    ENOTSUP,     ///< Not supported.
+    ENOTTY,      ///< Inappropriate I/O control operation.
+    ENXIO,       ///< No such device or address.
+    EOPNOTSUPP,  ///< Operation not supported on socket.
+    EOVERFLOW,   ///< Value too large to be stored in data type.
+    EPERM,       ///< Operation not permitted.
+    EPIPE,       ///< Broken pipe.
+    EPROTO,      ///< Protocol error.
+    EPROTONOSUPPORT,///< Protocol not supported.
+    EPROTOTYPE,  ///< Protocol wrong type for socket.
+    ERANGE,      ///< Result too large.
+    EROFS,       ///< Read-only file system.
+    ESPIPE,      ///< Invalid seek.
+    ESRCH,       ///< No such process.
+    ESTALE,      ///< Reserved.
+    ETIME,       ///< [XSR]  Stream ioctl() timeout. 
+    ETIMEDOUT,   ///< Connection timed out.
+    ETXTBSY,     ///< Text file busy.
+    EWOULDBLOCK, ///< Operation would block.
+    EXDEV,       ///< Cross-device link.
     __POSIX_ERRNO_MAX
 };
 

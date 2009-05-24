@@ -94,7 +94,7 @@ typedef struct cpath cpath_t;
 
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
-#define VOP_CREATE(v, name) (v)->v_ops->vop_create((v), (name))
+#define VOP_CREATE(v, name, attr) (v)->v_ops->vop_create((v), (name),(attr))
 #define VOP_CLOSE(v) (v)->v_ops->vop_close((v))
 #define VOP_READ(v, uio) (v)->v_ops->vop_read((v), (uio))
 #define VOP_WRITE(v, uio) (v)->v_ops->vop_write((v), (uio))
@@ -106,7 +106,7 @@ typedef struct cpath cpath_t;
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
-typedef int vnode_create_t(vnode_t *v, char *name);
+typedef int vnode_create_t(vnode_t *v, char *name, vattr_t *attr);
 typedef int vnode_close_t(vnode_t *v);
 typedef int vnode_read_t(vnode_t *v, uio_t *u);
 typedef int vnode_write_t(vnode_t *v, uio_t *u);
@@ -137,9 +137,9 @@ struct vnode_ops {
 };
 
 
-int lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr);
-int lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
-int tmp_vnode_dev(devd_t *dev, vnode_t **vn);
+int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr);
+int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
+int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 vnode_t* vnode_alloc(void);
 void vrele(vnode_t *vn);

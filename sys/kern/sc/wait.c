@@ -72,7 +72,7 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
 
                 // zwracamy status procesu
                 if ( args->status != NULL ) 
-                    *(args->status) = p_iter->status;
+                    *(args->status) = p_iter->p_status;
 
                 // niszczymy dziecko
                 proc_destroy(p_iter);

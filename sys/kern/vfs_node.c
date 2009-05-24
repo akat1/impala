@@ -76,17 +76,17 @@ vnode_opendev(const char *devname, int mode, vnode_t **vn)
 }
 
 int
-lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
+vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
 {
     *vpp = NULL;
     cpath_t pc;
     pc.path = p;
     pc.now = p;
-    return lookupcp(sd, vpp, &pc, thr);
+    return vfs_lookupcp(sd, vpp, &pc, thr);
 }
 
 int
-lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
+vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
 {
     int errno = 0;
     vnode_t *tmp;

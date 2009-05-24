@@ -45,9 +45,9 @@
 struct vfs {
      vfs_ops_t    *vfs_ops;       ///< definicje operacji zwi±zanych z tym fs
      vnode_t      *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
-     devd_t      *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
+     devd_t       *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
      void         *vfs_private;   ///< prywatne dane systemu plików
-     list_node_t   L_mountlist;     ///< wêze³ z listy zamontowanych fs
+     list_node_t   L_mountlist;   ///< wêze³ z listy zamontowanych fs
 };
 
 int vfs_create(vfs_t **vsp, const char *type);
@@ -83,4 +83,3 @@ struct vfs_ops {
 
 #endif
 #endif
-

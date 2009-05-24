@@ -74,7 +74,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
 
                 // zwracamy status procesu
                 if ( args->status != NULL ) 
-                    *(args->status) = to_trace->status;
+                    *(args->status) = to_trace->p_status;
 
                 // niszczymy dziecko
                 proc_destroy(to_trace);

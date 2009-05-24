@@ -51,7 +51,7 @@ sc_exit(thread_t *t, syscall_result_t *r, sc_exit_args *args)
     thread_t *t_iter;
 
     // ustawiamy status procesu 
-    p->status = args->error;
+    p->p_status = args->error;
     r->result = args->error;
 
     t_iter = (thread_t *)list_head(&p->p_threads);
