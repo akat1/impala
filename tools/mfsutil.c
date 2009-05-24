@@ -53,7 +53,7 @@ struct node {
     node_t     *parent;
     node_t     *next;
     node_t     *childs;
-    FILE       *f;  //wiem, ¿e to tak nie wypada, ale tak ³atwiej i póki co ok.
+    char       *fullpath;
     int         childcnt;
 };
 
@@ -98,7 +98,7 @@ node_newdir(node_t *p, const char *fname)
 }
 
 void
-node_newfile(node_t *dir, const char *fname, size_t s)
+node_newfile(node_t *dir, const char *fname, size_t s, const char *path)
 {
     node_t *f = NEW_NODE();
     f->id = node_id++;
@@ -110,7 +110,8 @@ node_newfile(node_t *dir, const char *fname, size_t s)
     f->size = s;
     dir->childcnt++;
     f->next = dir->childs;
-    f->f = fopen(fname, "r");
+    f->fullpath = (char*)xmalloc(strlen(fname)+2+strlen(path));
+    sprintf(f->fullpath, "%s/%s", path, fname);
     dir->childs = f;
 }
 
@@ -123,7 +124,7 @@ int min(int a, int b)
 static int
 xscandir(node_t *dirn, const char *path)
 {
-    char newpath[MFS_MAX_FNAME];
+    char newpath[MFS_MAX_PATH];
     DIR *dird = opendir(".");
     struct stat entrystat;
     struct dirent *entry;
@@ -147,7 +148,7 @@ xscandir(node_t *dirn, const char *path)
         } else
         if (S_ISREG(entrystat.st_mode)) {
             printf("+file %s/%s\n", path, entry->d_name);
-            node_newfile(dirn, entry->d_name, entrystat.st_size);
+            node_newfile(dirn, entry->d_name, entrystat.st_size, path);
         } else {
             fprintf(stderr, "-skip %s/%s\n", path, entry->d_name);
         }
@@ -215,12 +216,15 @@ build(const char *arg)
     for(int i=0; i<ncount; i++) {
         node_t *p = npointers[i];
         int rest = p->size;
+        if(p->type != MFS_TYPE_REG) continue;
+        FILE *f2 = fopen(p->fullpath+1, "r");
         while(rest > 0) {
             char buf[1024];
-            int c=fread(buf, 1, min(1024, rest), p->f);
+            int c=fread(buf, 1, min(1024, rest), f2);
             fwrite(buf, 1, c, f);
             rest-=c;
         }
+        fclose(f2);
     }
     fclose(f);
     #undef ID_OFF
