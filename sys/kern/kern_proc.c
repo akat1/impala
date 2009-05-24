@@ -38,14 +38,14 @@
 #include <sys/vm.h>
 #include <sys/file.h>
 
-static pid_t last_pid = 1;
+static pid_t last_pid = 0;
 list_t procs_list;
 kmem_cache_t *proc_cache;
 static bool find_this_pid(proc_t *p, pid_t pid);
 static void proc_ctor(void *obj);
 static void proc_dtor(void *obj);
 proc_t proc0;
-
+proc_t *initproc;
 
 void
 proc_ctor(void *obj)
@@ -75,19 +75,17 @@ proc_init(void)
     proc_cache = kmem_cache_create("proc", sizeof(proc_t), proc_ctor,
         proc_dtor);
 
-    proc0.p_pid = 1;
+    proc0.p_pid = 0;
     proc0.p_ppid = 0;
     proc0.p_cred = NULL;
-    proc0.p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
-    proc0.p_cred->p_uid = 0;
     LIST_CREATE(&proc0.p_threads, thread_t, L_threads, FALSE);
     LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
     list_insert_head(&procs_list, &proc0);
     list_insert_head(&proc0.p_threads, curthread);
     curthread->thr_proc = &proc0;
-    proc0.vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+    proc0.vm_space = &vm_kspace;
     curthread->vm_space = proc0.vm_space;
-    vm_space_create(proc0.vm_space, VM_SPACE_USER);
+    initproc = proc_create();
 }
 
 /**
@@ -141,14 +139,13 @@ proc_destroy(proc_t *proc)
 }
 
 thread_t *
-proc_create_thread(proc_t *proc, size_t stack_size, addr_t entry)
+proc_create_thread(proc_t *proc, addr_t entry)
 {
-    thread_t *t = thread_create(THREAD_USER, entry, NULL);
+    thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
-    t->thr_stack_size = stack_size;
+    t->thr_entry_point = entry;
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
-    vm_space_create_stack(proc->vm_space, &t->thr_stack, stack_size);
     vm_space_create_stack(&vm_kspace, &t->thr_kstack, THREAD_KSTACK_SIZE);
     DEBUGF("user thread created");
     vm_space_print(t->vm_space);

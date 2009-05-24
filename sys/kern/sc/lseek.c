@@ -36,6 +36,7 @@
 #include <sys/utils.h>
 #include <sys/syscall.h>
 #include <sys/file.h>
+#include <sys/proc.h>
 
 typedef struct lseek_args  lseek_args;
 
@@ -50,7 +51,7 @@ errno_t sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args);
 errno_t
 sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args)
 {
-    file_t *f = fd_get(args->fd, p->thr_proc->p_fd);
+    file_t *f = f_get(p->thr_proc->p_fd, args.fd);
     
     if ( f == NULL )
     {
@@ -58,7 +59,7 @@ sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args)
         return EBADF;
     }
 
-    r->result = f_seek(f, offset, whenece);
+    r->result = f_seek(f, args.offset, args.whence);
 
     return EOK;
 }

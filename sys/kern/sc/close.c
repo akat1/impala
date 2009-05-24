@@ -35,6 +35,8 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/file.h>
+#include <sys/proc.h>
 
 typedef struct close_args close_args;
 
@@ -47,15 +49,15 @@ errno_t sc_close(thread_t *p, syscall_result_t *r, close_args *args);
 errno_t
 sc_close(thread_t *t, syscall_result_t *r, close_args *args)
 {
-    file_t *f = fd_get(t->thr_proc->p_fd, args->fd);
+    file_t *f = f_get(t->thr_proc->p_fd, args->fd);
     
     if ( f == NULL ) {
         r->result = -1;
         return EBADF;
     }
 
-    r->result = f_close(f);
-
+    r->result = 0;
+    f_close(f);
     return EOK;
 }
 

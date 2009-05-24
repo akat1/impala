@@ -68,12 +68,12 @@ struct proc {
 /// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
 /// Aktualnie wykonywany proces.
-extern proc_t *curproc; // <- to jest nam potrzebne ?
+extern proc_t *initproc;
 extern proc_t proc0;
 
 void proc_init(void);
 proc_t *proc_create(void);
-thread_t * proc_create_thread(proc_t *, size_t stack_size, addr_t entry);
+thread_t * proc_create_thread(proc_t *, addr_t entry);
 void proc_insert_child(proc_t *proc, proc_t *child);
 proc_t *proc_find(pid_t pid);
 void proc_destroy(proc_t *p);

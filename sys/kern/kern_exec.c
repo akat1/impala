@@ -111,10 +111,9 @@ aout_exec(thread_t *thr, const void *first_page)
         mem_zero(BSS, ex->a_bss);
     }
     vm_space_create_stack(vm_space, &thr->thr_stack, THREAD_STACK_SIZE);
-    vm_space_create_stack(&vm_kspace, &thr->thr_kstack, THREAD_KSTACK_SIZE);
-//     vm_space_print(vm_space);
+//    vm_space_create_stack(&vm_kspace, &thr->thr_kstack, THREAD_KSTACK_SIZE);
+     vm_space_print(vm_space);
 //     vm_space_print(&vm_kspace);
-    thr->thr_flags &= ~THREAD_KERNEL;
     thr->thr_stack_size = THREAD_STACK_SIZE;
     thr->thr_kstack_size = THREAD_KSTACK_SIZE;
     vm_pmap_switch(&vm_space->pmap);
