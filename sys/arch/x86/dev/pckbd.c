@@ -147,7 +147,7 @@ i8042_irq1()
         if (scancode <= MAX_SC_LINEAR) {
             keycode = scancode;
         } else {
-            //TODO: inne klawisze...
+            ///@TODO inne klawisze...
         }
     } else if(last_scancode == 0xe0) {
         last_scancode = 0;

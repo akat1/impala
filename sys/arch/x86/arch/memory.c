@@ -403,7 +403,7 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
-        ///@todo: mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
+        ///@TODO mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
         int prot = _pmap_page_prot(src_pmap, src_addr);
         vm_pmap_insert(dst_pmap, page, dst_addr, prot);
         src_addr += PAGE_SIZE;

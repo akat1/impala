@@ -37,7 +37,7 @@
  *
  * IEEE Std 1003.1-2001, Section 2.3, Error Numbers
  */
-///@TODO: Przerobiæ na #define
+///@TODO Przerobiæ na #define
 enum POSIX_ERRNO {
     __POSIX_ERRNO_START = 20,
     E2BIG,       ///< argument list too long
