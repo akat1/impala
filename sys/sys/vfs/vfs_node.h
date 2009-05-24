@@ -43,6 +43,7 @@
 
 struct vnode {
     int             v_type;        ///< typ vnode
+    int             v_flags;       ///< flagi vnode
     int             v_refcnt;      ///< licznik referencji
     vfs_t          *v_vfs_mounted_here; ///< system plików tutaj zamontowany
     vfs_t          *v_vfs;         ///< system plików tego vnode
@@ -52,6 +53,16 @@ struct vnode {
 };
 
 
+enum {
+    VNODE_TYPE_REG,
+    VNODE_TYPE_DIR,
+    VNODE_TYPE_DEV
+};
+
+enum {
+    VNODE_FLAG_ROOT = 1<<0
+};
+
 /**
  *  Struktura ta jest po¶rednikiem przy pobieraniu b±d¼ zmianie atrybutów vnode
  */
@@ -60,11 +71,27 @@ struct vattr {
     int     va_uid;     ///< identyfikator w³a¶ciciela pliku
     int     va_gid;     ///< identyfikator grupy pliku
     int     va_mode;    ///< prawa dostêpu do pliku
-    dev_t   va_dev;     ///< urz±dzenie reprezentowane przez ten plik
+    int     va_size;    ///< wielko¶æ pliku
+    devd_t *va_dev;     ///< urz±dzenie reprezentowane przez ten plik
     int     va_type;    ///< typ vnode
 };
-
 typedef struct vattr vattr_t;
+
+enum {
+    VATTR_UID  = 1<<0,
+    VATTR_GID  = 1<<1,
+    VATTR_MODE = 1<<2,
+    VATTR_DEV  = 1<<3,
+    VATTR_TYPE = 1<<4,
+    VATTR_SIZE = 1<<5
+};
+
+struct cpath {
+    const char *path;
+    const char *now;
+};
+typedef struct cpath cpath_t;
+
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
 #define VOP_CREATE(v, name) (v)->v_ops->vop_create((v), (name))
@@ -76,6 +103,7 @@ typedef struct vattr vattr_t;
 #define VOP_SEEK(v, off) (v)->v_ops->vop_seek((v), (off))
 #define VOP_GETATTR(v, attr) (v)->v_ops->vop_getattr((v), (attr))
 #define VOP_SETATTR(v, attr) (v)->v_ops->vop_setattr((v), (attr))
+#define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
 typedef int vnode_create_t(vnode_t *v, char *name);
@@ -87,6 +115,8 @@ typedef int vnode_truncate_t(vnode_t *v, off_t len);
 typedef int vnode_seek_t(vnode_t *v, off_t off);
 typedef int vnode_getattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_setattr_t(vnode_t *v, vattr_t *attr);
+typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, cpath_t *path);
+typedef int vnode_mkdir_t(vnode_t *v, char *path);
 
 
 struct vnode_ops {
@@ -100,24 +130,21 @@ struct vnode_ops {
     vnode_truncate_t  *vop_truncate;
     vnode_getattr_t   *vop_getattr;
     vnode_setattr_t   *vop_setattr;
-/*    
     vnode_lookup_t    *vop_lookup;
-    vnode_mkdir_t     *vop_mkdir;
-    vnode_link_t      *vop_link;
+    vnode_mkdir_t     *vop_mkdir; 
+/*    vnode_link_t      *vop_link;
     vnode_rmdir_t     *vop_rmdir; */
 };
 
 
-enum {
-    VNODE_TYPE_REG,
-    VNODE_TYPE_DIR,
-    VNODE_TYPE_DEV
-};
-
+int lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr);
+int lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
+int tmp_vnode_dev(devd_t *dev, vnode_t **vn);
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 vnode_t* vnode_alloc(void);
 void vrele(vnode_t *vn);
 void vref(vnode_t *vn);
+
 
 #endif
 #endif

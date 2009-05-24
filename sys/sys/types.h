@@ -45,7 +45,7 @@ typedef int bool;
 
 
 typedef uint32_t off_t;
-typedef uint32_t dev_t;
+//typedef uint32_t dev_t;
 typedef uint32_t blkno_t;
 typedef int gid_t;
 typedef int uid_t;

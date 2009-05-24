@@ -8,5 +8,6 @@ int
 main(int argc, char **argv)
 {
     write(0, data, strlen(data));
+    while(1);
     return 0;
 }

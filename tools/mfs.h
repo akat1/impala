@@ -42,7 +42,7 @@ enum {
 
 enum {
     MFS_MAX_PATH        = 256,
-    MFS_MAX_FILENAME    = 100
+    MFS_MAX_FNAME       = 64
 };
 
 enum {
@@ -64,6 +64,9 @@ enum {
     MFS_ATTR_OTHER_X  =   01
 };
 
+typedef unsigned int uint32_t;
+typedef unsigned short int uint16_t;
+
 struct mfs_header {
     uint32_t    magic0;
     uint32_t    magic1;
@@ -71,10 +74,14 @@ struct mfs_header {
 };
 
 struct mfs_data_entry {
-    char    name[MFS_MAX_PATH];
+    char    name[MFS_MAX_FNAME];
     size_t  size;
     int     type;
     int     attr;
+    int     data_off;
+    int     parent_id;
+    int     child_id;
+    int     next_id;
 };
 
 

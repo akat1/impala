@@ -183,17 +183,13 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
         case F_DUPFD:
             if ( param > ft->max_ds )    
                 return EINVAL;
-
             fc = _get_chunk_by_index(ft, (int)param);
-
             if ( fc == NULL ) {
                 _filetable_expand(ft, param - list_length(&(ft->chunks))
                                               / FILES_PER_CHUNK);
                 fc = _get_chunk_by_index(ft, param);
             }
-
             fd = param;
-
             while ( fc != NULL ) {
                 for (int i = param % FILES_PER_CHUNK; i < FILES_PER_CHUNK; i++){
                     if ( fc->files[i] == NULL ) {
@@ -207,9 +203,7 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                     return MAX_EXCEEDED; /// XXX
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
-
             break;
-
         case F_GETFL:
             return f->f_flags;
         case F_SETFL:

@@ -39,19 +39,26 @@
 #include <sys/fcntl.h>
 #include <fs/mfs/mfs.h>
 #include <sys/errno.h>
+#include <sys/device.h>
+#include <dev/md/md.h>
 
 static void register_fss(void);
 static bool is_this_fsname(const vfs_conf_t *conf, const char *known);
 
 static list_t   filesystems;
+static list_t   mounted_fs;
 static mutex_t  global_lock;
+
+vnode_t *rootvnode;
 
 void
 vfs_init()
 {
     mutex_init(&global_lock, MUTEX_NORMAL);
     list_create(&filesystems, offsetof(vfs_conf_t,L_confs), FALSE);
+    list_create(&mounted_fs, offsetof(vfs_t,L_mountlist), FALSE);
     register_fss();
+    vfs_mountroot();
 }
 
 void
@@ -95,7 +102,7 @@ vfs_create(vfs_t **fs, const char *fstype)
     *fs = NULL;
     vfs_conf_t *conf = vfs_byname(fstype);
     if (conf == NULL) return -EINVAL;
-    vfs_t *rfs = kmem_alloc(sizeof(*fs), KM_SLEEP);
+    vfs_t *rfs = kmem_alloc(sizeof(vfs_t), KM_SLEEP);
     if(!rfs)
         return -ENOMEM;
     rfs->vfs_private = NULL;
@@ -106,8 +113,6 @@ vfs_create(vfs_t **fs, const char *fstype)
     return 0;
 }
 
-vnode_t *rootvnode;
-
 
 //tylko taki schemacik, jak to w przysz³o¶ci mo¿e wygl±daæ..
 void
@@ -116,18 +121,48 @@ vfs_mountroot()
     // Na sztywno wpisane mfs:/dev/md0
     DEBUGF("Trying to mount from mfs:/dev/md0");
     vnode_t *devn = NULL;
-//    if (vnode_opendev("md0", O_RDWR, &devn) != 0) {
-//        panic("cannot find root device");
-//    }
+    if (vnode_opendev("md0", 0/*O_RDWR*/, &devn) != 0) {
+        panic("cannot find root device");
+    }
     vfs_t *fs;
     vfs_create(&fs, "mfs");
     if (!fs) {
         panic("cannot create root mount point");
     }
+    if(!devn) {
+        panic("cannot open device");
+    }
     fs->vfs_mdev = devn->v_dev;
     fs->vfs_mpoint = NULL;  //montuj nigdzie -> twórz samodzielne drzewko
+    
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");
     }
     rootvnode = VFS_GETROOT(fs);
+    list_insert_tail(&mounted_fs, fs);
+}
+
+int
+vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev);
+
+int
+vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
+{
+    vfs_t *fs;
+    if(mpoint->v_type != VNODE_TYPE_DIR)
+        return -ENOTDIR;
+    vfs_create(&fs, name);
+    if (!fs) 
+        return -1;
+    fs->vfs_mdev = dev;
+    fs->vfs_mpoint = mpoint;
+    if( VFS_MOUNT(fs) != 0 ) {
+        panic("cannot mount file system");
+    }
+    vnode_t *root = VFS_GETROOT(fs);
+    //lock
+    root->v_vfs_mounted_here = fs;
+    list_insert_tail(&mounted_fs, fs);
+    //unlock
+    return 0;
 }

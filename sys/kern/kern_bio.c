@@ -139,7 +139,7 @@ bio_read(vnode_t *vn, blkno_t blk, size_t bcount)
         bp = buf_alloc(vn, blk, bcount);
         bp->oper = BIO_READ;
         buf_assign(bp, vn);
-        DEBUGF("starting I/O operation for %s (%p+%u)",
+        DEBUGF("starting I/O operation for %p %s (%p+%u)", bp->dev->name,
             bp->dev->name, bp->addr, bp->bcount*512);
         devd_strategy(bp->dev, bp);
         bio_wait(bp);

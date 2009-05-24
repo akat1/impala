@@ -75,3 +75,81 @@ vnode_opendev(const char *devname, int mode, vnode_t **vn)
     return e;
 }
 
+int
+lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
+{
+    *vpp = NULL;
+    cpath_t pc;
+    pc.path = p;
+    pc.now = p;
+    return lookupcp(sd, vpp, &pc, thr);
+}
+
+int
+lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
+{
+    int errno = 0;
+    vnode_t *tmp;
+    *vpp = NULL;
+    vnode_t *cur = sd;
+    if(*(path->now) == '/') {
+        (path->now)++;
+        if(thr);
+            //cur = thr->thr_rootdir;
+        else
+            cur = rootvnode;
+    }
+    if(!cur)
+        return -1;
+    while(*(path->now)) {
+        if(cur->v_type != VNODE_TYPE_DIR)
+            return -ENOTDIR;
+        if(cur->v_vfs_mounted_here) {
+            cur = VFS_GETROOT(cur->v_vfs_mounted_here);
+        }
+        if(*(path->now) == '/') {
+            (path->now)++;
+            continue;
+        }
+        if(*(path->now) == '.') {
+            (path->now)++;
+            if(*(path->now) == '.') {
+                (path->now)++;
+                if(*(path->now) == '/') {
+                    //idziemy w górê..
+                    if(cur->v_flags & VNODE_FLAG_ROOT) {
+                        tmp = cur->v_vfs->vfs_mpoint;
+                        if(tmp!=NULL) // to nie jest korzeñ
+                            cur = tmp;
+                    }
+                }
+                (path->now)-=2;
+            } else  //brak drugiej kropki
+            if(*(path->now) == '/') { // zostajemy gdzie jeste¶my
+                (path->now)++;
+                continue;
+            } else  // co¶ innego z kropk±..
+                (path->now)--;
+        }
+        errno = VOP_LOOKUP(cur, &tmp, path);  //niech vnode dalej szuka...
+        if(errno)
+            break;
+        cur = tmp;            
+    }
+    if(errno)
+        return errno;
+    *vpp = cur;
+    return 0;
+}
+
+
+int
+tmp_vnode_dev(devd_t *dev, vnode_t **vn)
+{
+    vnode_t *v = vnode_alloc();
+    v->v_dev = dev;
+    v->v_type = VNODE_TYPE_DEV;
+    *vn = v;
+    return 0;
+}
+

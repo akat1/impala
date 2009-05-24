@@ -140,7 +140,7 @@ sched_insert(thread_t *thr)
     thr->thr_flags |= THREAD_RUN|THREAD_INRUNQ;
     list_insert_tail(&run_queue, thr);
     spinlock_unlock(&sprq);
-    ///@TODO: dodaæ prze³±czanie
+    ///@TODO dodaæ prze³±czanie
 }
 
 static void _mutex_wakeup(mutex_t *m);

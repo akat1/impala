@@ -43,16 +43,19 @@
  */
 
 struct vfs {
-     vfs_ops_t  *vfs_ops;       ///< definicje operacji zwi±zanych z tym fs
-     vnode_t    *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
-     devd_t     *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
-     void       *vfs_private;   ///< prywatne dane systemu plików
+     vfs_ops_t    *vfs_ops;       ///< definicje operacji zwi±zanych z tym fs
+     vnode_t      *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
+     devd_t      *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
+     void         *vfs_private;   ///< prywatne dane systemu plików
+     list_node_t   L_mountlist;     ///< wêze³ z listy zamontowanych fs
 };
 
 int vfs_create(vfs_t **vsp, const char *type);
 int vfs_destroy(vfs_t *vp);
 void vfs_init(void);
 void vfs_mountroot(void);
+
+extern vnode_t *rootvnode;
 
 #define VFS_MOUNT(fs) (fs)->vfs_ops->vfs_mount((fs))
 #define VFS_UNMOUNT(fs) (fs)->vfs_ops->vfs_unmount((fs))
@@ -72,7 +75,7 @@ typedef void vfs_sync_t(vfs_t *fs);
 struct vfs_ops {
     vfs_mount_t     *vfs_mount;
     vfs_unmount_t   *vfs_unmount;
-    vfs_getroot_t  *vfs_getroot;
+    vfs_getroot_t   *vfs_getroot;
     vfs_sync_t      *vfs_sync;
 };
 

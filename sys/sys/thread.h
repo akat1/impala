@@ -62,6 +62,8 @@ struct thread {
     size_t          thr_kstack_size;///< rozmiar stosu dla jadra
     proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
     int             thr_tid;
+    vnode_t        *thr_curdir;     ///< aktualny katalog w±tku
+    vnode_t        *thr_rootdir;     ///< aktualny katalog w±tku
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych

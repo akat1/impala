@@ -198,7 +198,7 @@ create_kernel_space()
 void
 initialize_internal()
 {
-    vm_pmap_t *kmap = &vm_kspace.pmap;
+//    vm_pmap_t *kmap = &vm_kspace.pmap;
     vm_seg_t *kdata = vm_kspace.seg_data;
 
     // przydzielamy miejsce na poczatkowe regiony
@@ -206,8 +206,8 @@ initialize_internal()
     vm_lpool_create_(&vm_unused_regions, offsetof(vm_region_t,L_regions),
             sizeof(vm_region_t), VM_LPOOL_NORMAL, (void*)page->kvirt_addr);
     page = _alloc_page();
-    vm_pmap_insert(kmap, page, page->kvirt_addr,
-                    VM_PROT_RWX | VM_PROT_SYSTEM);
+//    vm_pmap_insert(kmap, page, page->kvirt_addr,
+//                    VM_PROT_RWX | VM_PROT_SYSTEM);//ju¿ to_alloc robi?
     vm_lpool_insert_empty(&vm_unused_regions, (void*)page->kvirt_addr);
 
 

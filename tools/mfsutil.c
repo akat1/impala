@@ -40,35 +40,30 @@
 #include <stdlib.h>
 #include <sysexits.h>
 #include <dirent.h>
+#include "mfs.h"
 
-enum {
-    DEV_BLOCK = 512,
-    MAX_FILENAME = 100,
-    MAX_PATH = 255,
-};
-
-enum {
-    MFS_TYPE_REG,
-    MFS_TYPE_SPEC,
-    MFS_TYPE_DIR
-};
 
 typedef struct node node_t;
 struct node {
+    int         id;
     char       *filename;
     size_t      size;
     int         type;
+    int         attr;
     node_t     *parent;
     node_t     *next;
     node_t     *childs;
+    FILE       *f;  //wiem, ¿e to tak nie wypada, ale tak ³atwiej i póki co ok.
     int         childcnt;
 };
+
 #define NEW_NODE() ((node_t*)xmalloc(sizeof(node_t)))
 #define STREQ(s,e) (strcmp(s,e) == 0)
 const char *image_filename = NULL;
 const char *symbol_name = "mfs_image";
 const char *c_filename = NULL;
 node_t *root_node = NULL;
+int     node_id = 0;
 
 void *
 xmalloc(size_t s)
@@ -85,6 +80,7 @@ node_t *
 node_newdir(node_t *p, const char *fname)
 {
     node_t *d = NEW_NODE();
+    d->id = node_id++;
     d->filename = strdup(fname);
     d->type = MFS_TYPE_DIR;
     d->parent = p;
@@ -98,12 +94,14 @@ node_newdir(node_t *p, const char *fname)
         d->next = p->childs;
         p->childs = d;
     }
+    return d;
 }
 
 void
 node_newfile(node_t *dir, const char *fname, size_t s)
 {
     node_t *f = NEW_NODE();
+    f->id = node_id++;
     f->filename = strdup(fname);
     f->type = MFS_TYPE_REG;
     f->parent = dir;
@@ -112,13 +110,20 @@ node_newfile(node_t *dir, const char *fname, size_t s)
     f->size = s;
     dir->childcnt++;
     f->next = dir->childs;
+    f->f = fopen(fname, "r");
     dir->childs = f;
+}
+
+int min(int a, int b)
+{
+    if(a<b) return a;
+    return b;
 }
 
 static int
 xscandir(node_t *dirn, const char *path)
 {
-    char newpath[MAX_PATH];
+    char newpath[MFS_MAX_FNAME];
     DIR *dird = opendir(".");
     struct stat entrystat;
     struct dirent *entry;
@@ -136,7 +141,7 @@ xscandir(node_t *dirn, const char *path)
                 perror("cannot change directory");
                 return -1;
             }
-            snprintf(newpath, MAX_PATH, "%s/%s", path, entry->d_name);
+            snprintf(newpath, MFS_MAX_PATH, "%s/%s", path, entry->d_name);
             xscandir(dnext, newpath);
             chdir("..");
         } else
@@ -163,10 +168,62 @@ scan(const char *path)
     return xscandir(root_node, "");
 }
 
+static void
+fillptable(node_t **ptable, node_t *now)
+{
+    ptable[now->id] = now;
+    now = now->childs;
+    while(now) {
+        fillptable(ptable, now);
+        now = now->next;
+    }
+}
+
 
 static int
-build()
+build(const char *arg)
 {
+    mfs_header_t header;
+    int ncount = node_id;
+    mfs_data_entry_t ntable[ncount];
+    node_t *npointers[ncount];
+    #define ID_OFF(id) (id*sizeof(mfs_data_entry_t) + sizeof(header))
+    node_t *n = root_node;
+    fillptable(npointers, root_node);
+    int data_off = sizeof(header) + ncount * sizeof(mfs_data_entry_t);
+    for(int i=0; i<ncount; i++) {
+        node_t *p = npointers[i];
+        strncpy(ntable[i].name, p->filename, MFS_MAX_FNAME);
+        ntable[i].size = p->size;
+        ntable[i].type = p->type;
+        ntable[i].attr = p->attr;
+        ntable[i].data_off = p->size?data_off:0;
+        data_off += p->size;
+        ntable[i].parent_id = p->parent?p->parent->id+1:0;
+        ntable[i].child_id = p->childs?p->childs->id+1:0;
+        ntable[i].next_id = p->next?p->next->id+1:0;
+    }
+    
+    header.magic0 = MFS_MAGIC0;
+    header.magic1 = MFS_MAGIC1;
+    header.items = ncount;
+    chdir("..");
+    FILE *f = fopen(image_filename, "w+");
+    chdir(arg);
+    fwrite(&header, sizeof(header), 1, f);
+    fwrite(&ntable, sizeof(mfs_data_entry_t), ncount, f);
+    for(int i=0; i<ncount; i++) {
+        node_t *p = npointers[i];
+        int rest = p->size;
+        while(rest > 0) {
+            char buf[1024];
+            int c=fread(buf, 1, min(1024, rest), p->f);
+            fwrite(buf, 1, c, f);
+            rest-=c;
+        }
+    }
+    fclose(f);
+    #undef ID_OFF
 }
 
 static int

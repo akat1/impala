@@ -144,12 +144,12 @@ init_x86()
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop, //_unhnd_intrpt,
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop,//s_unhnd_intrpt,
             intrpt_attr);
     }
 
     for (i = 0; i < 0x20; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop, /*trap_table[i]*/ trap_attr);
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)trap_table[i], trap_attr);
     }
 
     for (i = 0; i <= 23; i++) {

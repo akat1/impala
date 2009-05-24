@@ -62,7 +62,7 @@
 .equ \name, \num*4
 .endm
 
-.equ KSTACKSIZE, 0x2000
+.equ KSTACKSIZE, 0x4000
 .comm kstack, KSTACKSIZE, 32
 
 offset32    CTX_ESP,    0

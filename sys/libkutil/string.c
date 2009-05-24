@@ -32,6 +32,7 @@
 
 #include <sys/types.h>
 #include <sys/string.h>
+#include <sys/kmem.h>
 
 /*
  * mem_move()
@@ -143,6 +144,15 @@ str_cat(char *str, const char *s)
 {
     while (*str) str++;
     return str_cpy(str, s);
+}
+
+char *
+str_dup(const char *s)
+{
+    int len = str_len(s);
+    char *res = kmem_alloc(len+1, KM_SLEEP);
+    str_cpy(res, s);
+    return res;
 }
 
 ///////////////////////////////////////////////////////

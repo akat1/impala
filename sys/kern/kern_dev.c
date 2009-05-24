@@ -54,6 +54,9 @@ dev_init()
     list_create(&devs, offsetof(devd_t, L_devs), FALSE);
     devd_cache = kmem_cache_create("devs", sizeof(devd_t), NULL, NULL);
     md_init();
+    extern unsigned char image[];
+    extern unsigned int image_size;
+    md_create(0, &image, image_size);
 }
 
 static bool find_this_dev(const devd_t *d, const char *name);
