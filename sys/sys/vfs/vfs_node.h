@@ -95,7 +95,7 @@ typedef struct cpath cpath_t;
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
 #define VOP_CREATE(v, name) (v)->v_ops->vop_create((v), (name))
-#define VOP_CLOSE(v, uio) (v)->v_ops->vop_close((v))
+#define VOP_CLOSE(v) (v)->v_ops->vop_close((v))
 #define VOP_READ(v, uio) (v)->v_ops->vop_read((v), (uio))
 #define VOP_WRITE(v, uio) (v)->v_ops->vop_write((v), (uio))
 #define VOP_IOCTL(v, cmd, arg) (v)->v_ops->vop_ioctl((v), (cmd), (arg))
