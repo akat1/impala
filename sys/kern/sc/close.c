@@ -36,12 +36,29 @@
 #include <sys/utils.h>
 #include <sys/syscall.h>
 
-errno_t sc_close(thread_t *p, syscall_result_t *r, va_list ap);
+typedef struct close_args close_args;
+
+struct close_args {
+    int fd;
+};
+
+errno_t sc_close(thread_t *p, syscall_result_t *r, close_args *args);
 
 errno_t
-sc_close(thread_t *p, syscall_result_t *r, va_list ap)
+sc_close(thread_t *t, syscall_result_t *r, close_args *args)
 {
+#if 0
+    file_t *f = fd_get(t->thr_proc->p_fd, args->fd);
+    
+    if ( f == NULL )
+       return EBADF;
+
+    r->result = f_close(f);
+
+    return EOK;
+#endif
     r->result = 0;
     return ENOSTR;
+  
 }
 

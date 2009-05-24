@@ -124,9 +124,12 @@ frele(file_t *f)
 off_t
 f_seek(file_t *f, off_t o, int whence)
 {
+    vattr_t attr;
+
     if ( f == NULL ) {
         return EBADF;
     }
+
     switch(whence) {
         case SEEK_SET:
             f->f_offset = o;
@@ -135,20 +138,26 @@ f_seek(file_t *f, off_t o, int whence)
             f->f_offset += o;
             break;
         case SEEK_END:
+            VOP_GETATTR(f->f_vnode, &attr);
+            if ( attr.va_size - o < 0 )
+                f->f_offset = 0;
+            else
+                f->f_offset = attr.va_size - o;
             break;
         default:
             return EINVAL;
     }
 
-    /* NOT REACHED */
-    return 0;
+    return f->f_offset;
 }
 
 int
 f_ioctl(file_t *f, int cmd, uintptr_t param)
 {
-    //return VOP_IOCTL(f->f_vnode, cmd, param);
-    return 0;
+    if ( f == NULL )
+        return EBADF;
+
+    return VOP_IOCTL(f->f_vnode, cmd, param);
 }
 
 ssize_t 
@@ -333,15 +342,17 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 void
 f_close(file_t *fp)
 {
-    frele(fp);
-    /// XXX: VOP_CLOSE + uio
+    if ( frele(fp) ) {
+        VOP_CLOSE(fp->f_vnode);
+    }
+    
     return;
 }
 
 filetable_t *
 filetable_alloc(void)
 {
-    filetable_t *t = kmem_alloc(sizeof(filetable_t), KM_SLEEP);
+    filetable_t *t = kmem_zalloc(sizeof(filetable_t), KM_SLEEP);
 
     LIST_CREATE(&(t->chunks), filetable_chunk_t, L_chunks, FALSE);
 
