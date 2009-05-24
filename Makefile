@@ -17,8 +17,10 @@ run: build-image
 	cd image && qemu -m 32 -fda floppy.img
 
 init: build
+	cd tools; g++ mfsutil.c -o mfsutil -O2;
+	./tools/mfsutil ./output -i ./tools/root.image
 	cd misc; gcc -std=c99 -o toC toC.c
-	./misc/toC usr/sbin/init/init > sys/kern/tmp_rootimage.c
+	./misc/toC tools/root.image > sys/kern/tmp_rootimage.c
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}

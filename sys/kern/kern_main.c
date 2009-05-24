@@ -104,11 +104,8 @@ start_init_process()
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
 #endif
-    //extern unsigned char image[];
-    //extern unsigned int image_size;
     vnode_t *fn;
-    lookup(rootvnode, &fn, "init", NULL);
-    kprintf("Test\n");
+    lookup(NULL, &fn, "/sbin/init", NULL);
     if(fn) {
         vattr_t attr;
         attr.va_mask = VATTR_SIZE;
@@ -126,7 +123,6 @@ start_init_process()
         u.oper = UIO_READ;
         u.space = UIO_SYSSPACE;
         u.offset = 0;
-        //u.owner = curproc;
         VOP_READ(fn, &u);
 //        kprintf("size: %u, mem: %02x%02x%02x\n", isize, *img, *(img+1), *(img+2));
         fake_execve(curthread, img, isize);
