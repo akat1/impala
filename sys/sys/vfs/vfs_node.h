@@ -68,10 +68,10 @@ enum {
  */
 struct vattr {
     int     va_mask;    ///< flagi wskazuj±ce które dane nas interesuj±
-    int     va_uid;     ///< identyfikator w³a¶ciciela pliku
-    int     va_gid;     ///< identyfikator grupy pliku
-    int     va_mode;    ///< prawa dostêpu do pliku
-    int     va_size;    ///< wielko¶æ pliku
+    uid_t   va_uid;     ///< identyfikator w³a¶ciciela pliku
+    gid_t   va_gid;     ///< identyfikator grupy pliku
+    mode_t  va_mode;    ///< prawa dostêpu do pliku
+    size_t  va_size;    ///< wielko¶æ pliku
     devd_t *va_dev;     ///< urz±dzenie reprezentowane przez ten plik
     int     va_type;    ///< typ vnode
 };
@@ -106,7 +106,7 @@ typedef struct cpath cpath_t;
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
-typedef int vnode_create_t(vnode_t *v, char *name, vattr_t *attr);
+typedef int vnode_create_t(vnode_t *v, const char *name, vattr_t *attr);
 typedef int vnode_close_t(vnode_t *v);
 typedef int vnode_read_t(vnode_t *v, uio_t *u);
 typedef int vnode_write_t(vnode_t *v, uio_t *u);
@@ -116,7 +116,7 @@ typedef int vnode_seek_t(vnode_t *v, off_t off);
 typedef int vnode_getattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_setattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, cpath_t *path);
-typedef int vnode_mkdir_t(vnode_t *v, char *path);
+typedef int vnode_mkdir_t(vnode_t *v, const char *path, vattr_t *attr);
 typedef int vnode_getdents_t(vnode_t *v, dirent_t* dents, int count);
 
 

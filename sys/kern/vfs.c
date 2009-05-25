@@ -38,6 +38,7 @@
 #include <sys/utils.h>
 #include <sys/fcntl.h>
 #include <fs/mfs/mfs.h>
+#include <fs/devfs/devfs.h>
 #include <sys/errno.h>
 #include <sys/device.h>
 #include <dev/md/md.h>
@@ -55,16 +56,23 @@ void
 vfs_init()
 {
     mutex_init(&global_lock, MUTEX_NORMAL);
-    list_create(&filesystems, offsetof(vfs_conf_t,L_confs), FALSE);
-    list_create(&mounted_fs, offsetof(vfs_t,L_mountlist), FALSE);
+    list_create(&filesystems, offsetof(vfs_conf_t, L_confs), FALSE);
+    list_create(&mounted_fs, offsetof(vfs_t, L_mountlist), FALSE);
     register_fss();
     vfs_mountroot();
+    vnode_t *devdir;
+    if(!vfs_lookup(NULL, &devdir, "/dev/", NULL))
+    {
+        vfs_mount("devfs", devdir, NULL);
+    } else kprintf("No /dev dir on root filesystem -> devfs not mounted\n");
+    
 }
 
 void
 register_fss()
 {
     fs_mfs_init();
+    fs_devfs_init();
 }
 
 void
@@ -130,11 +138,10 @@ vfs_mountroot()
         panic("cannot create root mount point");
     }
     if(!devn) {
-        panic("cannot open device");
+        panic("Internal error - opendev succeded and devn NULL");
     }
     fs->vfs_mdev = devn->v_dev;
     fs->vfs_mpoint = NULL;  //montuj nigdzie -> twórz samodzielne drzewko
-    
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");
     }
@@ -142,8 +149,6 @@ vfs_mountroot()
     list_insert_tail(&mounted_fs, fs);
 }
 
-int
-vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev);
 
 int
 vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)

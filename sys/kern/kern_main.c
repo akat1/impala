@@ -45,6 +45,7 @@
 #include <sys/string.h>
 #include <sys/exec.h>
 #include <dev/md/md.h>
+#include <fs/devfs/devfs.h>
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
 #include <sys/uio.h>
@@ -149,6 +150,7 @@ init_kernel()
     thread_init();
     sched_init();
     clock_init();
+    devfs_init();
     dev_init();
     bio_init();
     vfs_init();

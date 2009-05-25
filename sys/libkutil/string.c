@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/string.h>
 #include <sys/kmem.h>
+#include <sys/utils.h>
 
 /*
  * mem_move()

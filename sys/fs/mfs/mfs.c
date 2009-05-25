@@ -67,6 +67,7 @@ static vnode_truncate_t mfs_truncate;
 static vnode_getattr_t mfs_getattr;
 static vnode_setattr_t mfs_setattr;
 static vnode_lookup_t mfs_lookup;
+static vnode_mkdir_t mfs_mkdir;
 static vnode_getdents_t mfs_getdents;
 
 static vnode_ops_t mfs_vnode_ops = {
@@ -81,12 +82,14 @@ static vnode_ops_t mfs_vnode_ops = {
     .vop_getattr = mfs_getattr,
     .vop_setattr = mfs_setattr,
     .vop_lookup = mfs_lookup,
+    .vop_mkdir = mfs_mkdir,
     .vop_getdents = mfs_getdents,
 };
 
 static mfs_node_t* _alloc_node(void);
-int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
-int _get_vnode(mfs_node_t *node, vnode_t **vpp, vfs_t *fs);
+static int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
+static int _get_vnode(mfs_node_t *node, vnode_t **vpp, vfs_t *fs);
+static int _create(vnode_t *vn, const char *name, vattr_t *attr);
 
 mfs_node_t*
 _alloc_node()
@@ -103,7 +106,7 @@ mfs_open(vnode_t *vn, int flags, mode_t mode)
 }
 
 int
-mfs_create(vnode_t *vn, char *name, vattr_t *attr)
+_create(vnode_t *vn, const char *name, vattr_t *attr)
 {
     if(!vn || !name || !attr || vn->v_type != VNODE_TYPE_DIR)
         return -EINVAL;
@@ -122,6 +125,20 @@ mfs_create(vnode_t *vn, char *name, vattr_t *attr)
     pnode->child = node;
     return 0;
 }
+
+int
+mfs_create(vnode_t *vn, const char *name, vattr_t *attr)
+{
+    return _create(vn, name, attr);
+}
+
+int
+mfs_mkdir(vnode_t *vn, const char *name, vattr_t *attr)
+{
+    return _create(vn, name, attr);
+}
+    
+    
 
 int
 mfs_close(vnode_t *vn)
@@ -217,7 +234,7 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
     return 0;
 }
 
-bool pc_cmp(cpath_t *path, const char *fname);
+static int pc_cmp(cpath_t *path, const char *fname);
 
 int
 pc_cmp(cpath_t *path, const char *fname)
@@ -342,7 +359,6 @@ mfs_mount(vfs_t *fs)
         DEBUGF("cannot open dev");
         return -1;
     }
-    //devd_t *d = devd_find("md0");
     kprintf("Dev: %s\n", dv->v_dev->name);
     bp = bio_read(dv, 0, 1);
     if (!bp) {

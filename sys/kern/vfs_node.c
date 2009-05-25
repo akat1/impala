@@ -36,6 +36,7 @@
 #include <sys/errno.h>
 #include <sys/kmem.h>
 #include <sys/uio.h>
+#include <fs/devfs/devfs.h>
 
 
 vnode_t*
@@ -64,16 +65,18 @@ vrele(vnode_t *vn)
 int
 vnode_opendev(const char *devname, int mode, vnode_t **vn)
 {
-    devd_t *d = devd_find(devname);
-    if (!d) return -ENODEV;
-    int e = devd_open(d,mode);
-    if (e == 0) {
-        vnode_t *v = kmem_alloc( sizeof(*vn), KM_SLEEP );
-        v->v_dev = d;
-        v->v_type = VNODE_TYPE_DEV;
-        *vn = v;
-    }
-    return e;
+    vnode_t *tmp;
+    *vn = NULL;
+    int error = vfs_lookup(devfs_rootvnode(), &tmp, devname, NULL);
+    if(error)
+        return error;
+    if(tmp->v_type != VNODE_TYPE_DEV)
+        return -ENODEV;
+    error = VOP_OPEN(tmp, 0, mode);
+    if(error)
+        return error;
+    *vn = tmp;
+    return 0;
 }
 
 int
