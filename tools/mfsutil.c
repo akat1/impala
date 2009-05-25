@@ -76,6 +76,14 @@ xmalloc(size_t s)
     return x;
 }
 
+char *
+strdup(const char*s)
+{
+    char *res = xmalloc(strlen(s)+1);
+    strcpy(res, s);
+    return res;
+}
+
 node_t *
 node_newdir(node_t *p, const char *fname)
 {
