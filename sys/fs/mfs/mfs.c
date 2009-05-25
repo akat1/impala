@@ -1,3 +1,35 @@
+/* Impala Operating System
+ *
+ * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
+ *    http://www.ii.uni.wroc.pl/
+ * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
+ *    http://trzask.codepainters.com/impala/trac/
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *  notice, this list of conditions and the following disclaimer in the
+ *  documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * $Id$
+ */
+
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
@@ -35,6 +67,7 @@ static vnode_truncate_t mfs_truncate;
 static vnode_getattr_t mfs_getattr;
 static vnode_setattr_t mfs_setattr;
 static vnode_lookup_t mfs_lookup;
+static vnode_getdents_t mfs_getdents;
 
 static vnode_ops_t mfs_vnode_ops = {
     .vop_open = mfs_open,
@@ -48,6 +81,7 @@ static vnode_ops_t mfs_vnode_ops = {
     .vop_getattr = mfs_getattr,
     .vop_setattr = mfs_setattr,
     .vop_lookup = mfs_lookup,
+    .vop_getdents = mfs_getdents,
 };
 
 static mfs_node_t* _alloc_node(void);
@@ -243,6 +277,15 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, cpath_t *path)
         return 0;
     }
     return -ENOENT;
+}
+
+int
+mfs_getdents(vnode_t *vn, dirent_t *dents, int count)
+{
+    if(!vn)
+        return -EINVAL;
+    
+    return 0;
 }
 
 

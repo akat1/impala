@@ -117,6 +117,7 @@ typedef int vnode_getattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_setattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, cpath_t *path);
 typedef int vnode_mkdir_t(vnode_t *v, char *path);
+typedef int vnode_getdents_t(vnode_t *v, dirent_t* dents, int count);
 
 
 struct vnode_ops {
@@ -132,8 +133,15 @@ struct vnode_ops {
     vnode_setattr_t   *vop_setattr;
     vnode_lookup_t    *vop_lookup;
     vnode_mkdir_t     *vop_mkdir; 
+    vnode_getdents_t  *vop_getdents;   
 /*    vnode_link_t      *vop_link;
     vnode_rmdir_t     *vop_rmdir; */
+};
+
+#define MAX_NAME 128
+struct dirent {
+    int     d_ino;
+    char    d_name[MAX_NAME];
 };
 
 
@@ -141,6 +149,7 @@ int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr);
 int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
 int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
+int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 vnode_t* vnode_alloc(void);
 void vrele(vnode_t *vn);
 void vref(vnode_t *vn);

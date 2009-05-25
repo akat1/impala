@@ -143,7 +143,7 @@ void
 TRAP_pfault(interrupt_frame f)
 {
     vm_trap_frame_t vtf;
-    vm_disable_paging();
+//    vm_disable_paging();
     vtf.fault_addr = cpu_get_cr2();
     vtf.reason = (f.f_errno & PFE_PRESENT)?
              VM_PFAULT_NO_PERMISSION

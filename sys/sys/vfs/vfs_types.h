@@ -38,6 +38,7 @@ typedef struct vfs_conf vfs_conf_t;
 typedef struct vfs_ops vfs_ops_t;
 typedef struct vfs vfs_t;
 typedef struct vnode_ops vnode_ops_t;
+typedef struct dirent dirent_t;
 #endif
 #endif
 

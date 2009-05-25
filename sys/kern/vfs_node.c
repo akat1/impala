@@ -35,6 +35,7 @@
 #include <sys/device.h>
 #include <sys/errno.h>
 #include <sys/kmem.h>
+#include <sys/uio.h>
 
 
 vnode_t*
@@ -152,4 +153,27 @@ tmp_vnode_dev(devd_t *dev, vnode_t **vn)
     *vn = v;
     return 0;
 }
+
+int
+vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
+{
+    if(!vn || !addr)
+        return -EINVAL;
+    uio_t u;
+    iovec_t iov;
+    iov.iov_base = addr;
+    iov.iov_len = len;
+    u.iovs = &iov;
+    u.iovcnt = 1;
+    u.size = len;
+    u.offset = offset;
+    u.oper = rw;
+    u.space = UIO_SYSSPACE; //vn_rdwr bêdzie wykorzystywany gdzie¶ indziej?
+    if(u.oper == UIO_WRITE)
+        return VOP_WRITE(vn, &u);
+    else if(u.oper == UIO_READ)
+        return VOP_READ(vn, &u);
+    else return -EINVAL;
+}
+
 

@@ -112,18 +112,7 @@ start_init_process()
         VOP_GETATTR(fn, &attr);
         int isize = attr.va_size;
         unsigned char *img = kmem_alloc(isize, KM_SLEEP);
-        
-        uio_t u;
-        iovec_t iov;
-        iov.iov_base = img;
-        iov.iov_len = isize;
-        u.iovs = &iov;
-        u.iovcnt = 1;
-        u.size = isize;
-        u.oper = UIO_READ;
-        u.space = UIO_SYSSPACE;
-        u.offset = 0;
-        VOP_READ(fn, &u);
+        vnode_rdwr(UIO_READ, fn, img, isize, 0);
 //        kprintf("size: %u, mem: %02x%02x%02x\n", isize, *img, *(img+1), *(img+2));
         fake_execve(curthread, img, isize);
     }    
