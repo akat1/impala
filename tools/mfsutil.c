@@ -121,6 +121,25 @@ int min(int a, int b)
     return b;
 }
 
+const char *badnames[] = {
+    ".",
+    "..",
+    ".svn",
+    "CVS",
+    NULL
+};
+
+int
+is_badname(const char *e)
+{
+    const char **xs = badnames;
+    for (int i = 0; *xs != NULL; xs++) {
+        if (STREQ(e,*xs)) return 1;
+    }
+    return 0;
+}
+
+
 static int
 xscandir(node_t *dirn, const char *path)
 {
@@ -129,7 +148,7 @@ xscandir(node_t *dirn, const char *path)
     struct stat entrystat;
     struct dirent *entry;
     while ( (entry = readdir(dird)) != NULL) {
-        if (STREQ(entry->d_name,".") || STREQ(entry->d_name,".."))
+        if (is_badname(entry->d_name))
             continue;
         if (stat(entry->d_name, &entrystat) == -1) {
             perror("stat");
