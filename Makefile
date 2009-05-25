@@ -17,6 +17,7 @@ run: build-image
 	cd image && qemu -m 32 -fda floppy.img
 
 init: build
+	cp usr/sbin/init/init output/sbin/init
 	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
 	./tools/mfsutil -i ./tools/root.image ./output
 	cd misc; gcc -std=c99 -o toC toC.c
