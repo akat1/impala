@@ -113,10 +113,12 @@ start_init_process()
         int isize = attr.va_size;
         unsigned char *img = kmem_alloc(isize, KM_SLEEP);
         vnode_rdwr(UIO_READ, fn, img, isize, 0);
-//        kprintf("size: %u, mem: %02x%02x%02x\n", isize, *img, *(img+1), *(img+2));
-        fake_execve(curthread, img, isize);
+        //kprintf("size: %u, mem: %02x%02x%02x\n", isize, *img, *(img+1), *(img+2));
+        thread_t *t = proc_create_thread(initproc, 0);
+        fake_execve(t, img, isize);
+        panic("Cannot start init process");
     }    
-    panic("Cannot start init process");
+    panic("Cannot find init image");
 }
 
 void
