@@ -144,7 +144,7 @@ init_x86()
 
     // Ustawienie IDT
     for (i = 0; i < 0x100; i++) {
-        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)&megaloop,//s_unhnd_intrpt,
+        setidt(i, SEL_MK(SEL_CODE, SEL_DPL0), (uintptr_t)_unhnd_intrpt,
             intrpt_attr);
     }
 
