@@ -42,14 +42,14 @@ struct mfs_header {
 };
 
 struct mfs_data_entry {
-    char    name[MFS_MAX_FNAME];
-    size_t  size;
-    int     type;
-    int     attr;
-    int     data_off;
-    int     parent_id;
-    int     child_id;
-    int     next_id;
+    char     name[MFS_MAX_FNAME];
+    size_t   size;
+    uint32_t type;
+    uint32_t attr;
+    uint32_t data_off;
+    uint32_t parent_id;
+    uint32_t child_id;
+    uint32_t next_id;
 };
 
 struct mfs_node {

@@ -32,6 +32,8 @@
 #ifndef __SYS_FS_MFS_H
 #define __SYS_FS_MFS_H
 
+#include <stdint.h>
+
 typedef struct mfs_header mfs_header_t;
 typedef struct mfs_data_entry mfs_data_entry_t;
 
@@ -64,8 +66,6 @@ enum {
     MFS_ATTR_OTHER_X  =   01
 };
 
-typedef unsigned int uint32_t;
-typedef unsigned short int uint16_t;
 
 struct mfs_header {
     uint32_t    magic0;
@@ -74,14 +74,14 @@ struct mfs_header {
 };
 
 struct mfs_data_entry {
-    char    name[MFS_MAX_FNAME];
-    size_t  size;
-    int     type;
-    int     attr;
-    int     data_off;
-    int     parent_id;
-    int     child_id;
-    int     next_id;
+    char     name[MFS_MAX_FNAME];
+    uint32_t size;
+    uint32_t type;
+    uint32_t attr;
+    uint32_t data_off;
+    uint32_t parent_id;
+    uint32_t child_id;
+    uint32_t next_id;
 };
 
 
