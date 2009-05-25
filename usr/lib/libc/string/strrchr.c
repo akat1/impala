@@ -8,7 +8,7 @@ strrchr(const char *s, int c)
 
     for (; *s ; s++ ) {
         if ( *s == c ) {
-            last = s;
+            last = (char *)s;
         }
     }
 

@@ -4,9 +4,9 @@
 char *
 strchr(const char *s, int c)
 {
-    for(; *s ; s++ )
+    for(; *s ; s++ ) {
         if ( *s == c ) {
-            return s;
+            return (char *)s;
         }
     }
 

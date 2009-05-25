@@ -1,8 +1,8 @@
-#include <string.h>
 #include <sys/types.h>
+#include <string.h>
 
 void *
-mem_move(void *dst, void *src, size_t len)
+memmove(void *dst, const void *src, size_t len)
 {
     void *org = dst;
     int i;

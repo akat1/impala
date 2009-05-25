@@ -6,10 +6,9 @@ memset(void *s, int c, size_t n)
 {
     void *r = s;
 
-    while(n--)
-    {
-        *(s++) = (unsigned char)c;
+    while(n--) {
+        *((char *)s++) = (unsigned char)c;
     }
 
-    return s;
+    return r;
 }
