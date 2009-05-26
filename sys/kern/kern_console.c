@@ -458,7 +458,7 @@ ttyv_read(devd_t *d, uio_t *u)
     while((c = pckbd_get_char())!=-1 && b<BUF+511)
         *(b++) = c;
     *b = 0;
-    int n =  uio_move(BUF, b-BUF, u);
+    int n =  uio_move(BUF, b-BUF+1, u);
     return n;
 }
 
