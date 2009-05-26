@@ -5,7 +5,7 @@ INCDIR=-Iinclude -Iprivate
 SRCS=\
 	fcntl/open.c\
 	stdlib/atexit.c\
-        string/memchr.c\
+	string/memchr.c\
         string/memcmp.c\
         string/memcpy.c\
         string/memmove.c\
@@ -13,12 +13,18 @@ SRCS=\
         string/strcat.c\
         string/strchr.c\
         string/strcmp.c\
+        string/strcoll.c\
         string/strcpy.c\
+        string/strcspn.c\
         string/strlen.c\
         string/strncat.c\
         string/strncmp.c\
         string/strncpy.c\
+        string/strpbrk.c\
         string/strrchr.c\
+        string/strspn.c\
+        string/strtok.c\
+        string/strxfrm.c\
 	unistd/close.c\
 	unistd/lseek.c\
 	unistd/getpid.c\
