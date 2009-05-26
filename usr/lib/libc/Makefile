@@ -19,6 +19,12 @@ SRCS=\
         string/strncmp.c\
         string/strncpy.c\
         string/strrchr.c\
+	unistd/close.c\
+	unistd/lseek.c\
+	unistd/getpid.c\
+	unistd/getppid.c\
+	unistd/getuid.c\
+	unistd/setuid.c\
 	unistd/read.c\
 	unistd/write.c\
 

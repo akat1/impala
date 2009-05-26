@@ -57,6 +57,7 @@ enum {
     SYS_wait,
     SYS_waitpid,
     SYS_write,
+    SYS_close,
     SYS_MAX
 };
 

@@ -36,7 +36,12 @@
 
 ssize_t read(int fd, void *buf, size_t l);
 ssize_t write(int fd, const void *buf, size_t l);
-
+pid_t getpid(void);
+pid_t getppid(void);
+uid_t getuid(void);
+int close(int fd);
+int setuid(uid_t uid);
+off_t lseek(int fd, off_t offset, int whence);
 #endif
 
 

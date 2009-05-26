@@ -52,6 +52,7 @@ errno_t sc_sigaction(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_wait(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_waitpid(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_write(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_close(thread_t *proc, syscall_result_t *r, va_list ap);
 
 static sc_handler_f *syscall_table[] = {
     sc_execve,
@@ -70,7 +71,8 @@ static sc_handler_f *syscall_table[] = {
     sc_sigaction,
     sc_wait,
     sc_waitpid,
-    sc_write
+    sc_write,
+    sc_close
 };
 
 void
