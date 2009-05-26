@@ -27,6 +27,7 @@ SRCS=\
         string/strxfrm.c\
 	unistd/close.c\
 	unistd/lseek.c\
+	unistd/fork.c\
 	unistd/getpid.c\
 	unistd/getppid.c\
 	unistd/getuid.c\
