@@ -1,5 +1,7 @@
 #define _POSIX_C_SOURCE 200112L
 #include <stdio.h>
+#include <ctype.h>
+#define iscool(c) (c != '\\' && c != '\'' && isprint(c))
 
 int
 main(int argc, char **argv)
@@ -15,7 +17,9 @@ main(int argc, char **argv)
     printf("/* Generated from [%s] */\n", argv[1]);
     printf("unsigned char image[] = {\n    ");
     while ( !feof(source) && (ch = fgetc(source)) != -1 ) {
-       printf("%3u, ", ch);
+        if (iscool(ch)) 
+            printf("'%c', ", ch);
+            else printf("%3u, ", ch);
        if (col++ == COL_MAX) {
             col = 0;
             printf("\n    ");
