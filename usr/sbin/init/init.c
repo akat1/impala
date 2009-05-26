@@ -36,17 +36,17 @@ extern int errno;
 int
 main(int argc, char **argv)
 {
-    int fd = open("/dev", O_RDWR, 0);
+    int fd = open("/dev/ttyv0", O_RDWR, 0);
     int fd2 = open("/etc/passwd", O_RDWR, 0);
     char buf[128];
     read(fd2, buf, 127);
     char *b = itoa(fd);
     write(0, b, strlen(b));
     b = itoa(fd2);
-    write(0, b, strlen(b));
-    write(0, buf, strlen(buf));
-    write(0, data2, strlen(data2));
-    write(0, data, strlen(data));
+    write(fd, b, strlen(b));
+    write(fd, buf, strlen(buf));
+    write(fd, data2, strlen(data2));
+    write(fd, data, strlen(data));
     while(1);
     return 0;
 }

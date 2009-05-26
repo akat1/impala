@@ -76,7 +76,7 @@ static sc_handler_f *syscall_table[] = {
 void
 syscall(thread_t *thr, int n, syscall_result_t *r, va_list ap)
 {
-    kprintf("syscall %u!\n", n);
+//    kprintf("syscall %u!\n", n);
 
     if (n < SYS_MAX) {
         r->errno = syscall_table[n](thr, r, ap);

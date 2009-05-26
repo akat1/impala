@@ -30,7 +30,11 @@
  */
 
 #include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/file.h>
 #include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/uio.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
 #include <sys/console.h>
@@ -51,24 +55,19 @@ errno_t sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args);
 errno_t
 sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
 {
-//    kprintf("write(%u,%p,%p)\n", args->fd,args->data,args->size);
-    cons_tty(args->data);
-    return EOK;
-#if 0
-    // jak to mniej wiecej powinno moim zdaniem wygladac:
-    file_t *file = fd_get(args->fd, t->thr_proc->p_fd);
-    if (f == NULL) {
+    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
+    if (file == NULL) {
         return EBADF;
     }
     uio_t u;
     iovec_t iov;
     iov.iov_base = args->data;
     iov.iov_len = args->size;
+    u.size = args->size;
     u.iovs = &iov;
     u.iovcnt = 1;
     u.oper = UIO_WRITE;
-    u.space = UIO_SYSTEM;
-    u.owner = p;
+    u.space = UIO_SYSSPACE; //znowu ¶ciema
     r->result = f_write(file, &u);
-#endif
+    return EOK;
 }

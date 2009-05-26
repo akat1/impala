@@ -30,6 +30,7 @@
  * $Id$
  */
 
+#include <fs/devfs/devfs.h>
 #include <sys/types.h>
 #include <sys/console.h>
 #include <sys/kmem.h>
@@ -41,6 +42,7 @@
 #include <sys/uio.h>
 #include <machine/video.h>
 #include <machine/interrupt.h>
+#include <machine/pckbd.h>
 
 enum {
     DEFAULT_FG = COLOR_BRIGHTGRAY,
@@ -175,9 +177,11 @@ void
 cons_init()
 {
     consdev = devd_create(&conssw, -1, NULL);
+    devfs_register(consdev->name, consdev, 0, 0, 0777);
     for (int i = 0; i < VTTY_MAX; i++) {
         mutex_init(&vttys[i].mtx, MUTEX_NORMAL);
         vttys[i].dev = devd_create(&ttyvsw, i, &vttys[i]);
+        devfs_register(vttys[i].dev->name, vttys[i].dev, 0, 0, 0777);
         vttys[i].sattr = COLOR_BRIGHTGRAY;
         if (i > 0) {
             textscreen_clone(&vttys[i].screen);
@@ -446,17 +450,26 @@ ttyv_open(devd_t *d, int flags)
 int
 ttyv_read(devd_t *d, uio_t *u)
 {
-    vtty_t *vtty = d->priv;
+//    vtty_t *vtty = d->priv;
+    //tymczasowo, chyba na potrzeby demka 
+    char c;
     char BUF[512];
-    int n =  uio_move(BUF, 512, u);
-    vtty_data_out(vtty, BUF, n);
+    char *b = BUF;
+    while((c = pckbd_get_char())!=-1 && b<BUF+511)
+        *(b++) = c;
+    *b = 0;
+    int n =  uio_move(BUF, b-BUF, u);
     return n;
 }
 
 int
 ttyv_write(devd_t *d, uio_t *u)
 {
-    return -ENOTSUP;
+    vtty_t *vtty = d->priv;
+    char BUF[512];
+    int n =  uio_move(BUF, MIN(512, u->size), u);
+    vtty_data_out(vtty, BUF, MIN(512, u->size));
+    return n;
 }
 
 int

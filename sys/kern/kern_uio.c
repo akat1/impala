@@ -40,7 +40,7 @@ static int kernel_copy(char *buf, uio_t *uio, size_t len);
 int
 uio_move(void *buf, size_t len, uio_t *uio)
 {
-    TRACE_IN("buf=%p uio=%p len=%u", buf, uio, len);
+//    TRACE_IN("buf=%p uio=%p len=%u", buf, uio, len);
     KASSERT(len <= uio->size);
     if (uio->space == UIO_USERSPACE)
         panic("user space I/O not supported yet");
@@ -51,8 +51,8 @@ uio_move(void *buf, size_t len, uio_t *uio)
 int
 kernel_copy(char *buf, uio_t *uio, size_t len)
 {
-    DEBUGF("Kernel memory transfer: (%p+%u) (%p+%u)",
-            buf, len, uio->iovs[0].iov_base, uio->size);
+//    DEBUGF("Kernel memory transfer: (%p+%u) (%p+%u)",
+//            buf, len, uio->iovs[0].iov_base, uio->size);
     for (int i = 0; i < uio->iovcnt; i++) {
         size_t clen = uio->iovs[i].iov_len;
         if (clen < len) {

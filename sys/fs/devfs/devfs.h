@@ -33,6 +33,7 @@
 #ifndef __FS_DEVFS_H
 #define __FS_DEVFS_H
 
+#include <sys/types.h>
 
 void fs_devfs_init(void);   /// rejestracja devfs w VFS
 void devfs_init(void);      /// inicjalizacja devfs ( przed VFS )
