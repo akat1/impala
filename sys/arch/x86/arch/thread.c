@@ -62,6 +62,7 @@ thread_context_init(thread_context *ctx)
 void
 thread_switch(thread_t *t_to, thread_t * volatile t_from)
 {
+    KASSERT(t_to!=NULL);
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
 //        kprintf("esp0 sw to: %08x, %08x\n",t_to->thr_kstack, t_to->thr_kstack_size);

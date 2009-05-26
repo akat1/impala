@@ -36,8 +36,11 @@
 #include <sys/errno.h>
 #include <sys/kmem.h>
 #include <sys/uio.h>
+#include <sys/thread.h>
+#include <sys/proc.h>
 #include <fs/devfs/devfs.h>
 
+//#include <sys/utils.h>
 
 vnode_t*
 vnode_alloc()
@@ -83,6 +86,7 @@ int
 vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
 {
     *vpp = NULL;
+    if(!p) return -EINVAL;
     cpath_t pc;
     pc.path = p;
     pc.now = p;
@@ -98,13 +102,13 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
     vnode_t *cur = sd;
     if(*(path->now) == '/') {
         (path->now)++;
-        if(thr);
-            //cur = thr->thr_rootdir;
+        if(thr)
+            cur = thr->thr_proc->p_rootdir;
         else
             cur = rootvnode;
     }
     if(!cur)
-        return -1;
+        return -ENOENT;
     while(*(path->now)) {
         if(cur->v_type != VNODE_TYPE_DIR)
             return -ENOTDIR;

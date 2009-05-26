@@ -1,8 +1,8 @@
-SUBDIRS= sys usr
+SUBDIRS= usr sys
 IMAGE_FILE=image/floppy.img
 IMAGE_FILE_=image/_floppy.img
 FLOPPY_DEV?=/dev/fd0
-.PHONY: all build build-image run
+.PHONY: all build build-image run init
 
 all: build
 
@@ -16,7 +16,7 @@ build-image: ${IMAGE_FILE} build
 run: build-image
 	cd image && qemu -m 32 -fda floppy.img
 
-init: build
+init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/sbin/init/init output/sbin/init
 	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
 	./tools/mfsutil -i ./tools/root.image ./output

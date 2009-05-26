@@ -164,9 +164,10 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");
     }
-    vnode_t *root = VFS_GETROOT(fs);
+    VFS_GETROOT(fs);
     //lock
-    root->v_vfs_mounted_here = fs;
+    if(mpoint)
+        mpoint->v_vfs_mounted_here = fs;
     list_insert_tail(&mounted_fs, fs);
     //unlock
     return 0;

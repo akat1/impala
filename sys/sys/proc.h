@@ -58,8 +58,8 @@ struct proc {
     int             p_flags;     ///< flagi procesu
     int             p_status;    ///< status
     vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
-    vnode_t        *p_curdir;    ///< aktualny katalog w±tku
-    vnode_t        *p_rootdir;   ///< aktualny katalog w±tku
+    vnode_t        *p_curdir;    ///< aktualny katalog procesu
+    vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
     list_node_t     L_procs;     ///< wêze³ procesów
     list_node_t     L_children;  ///< wêze³ listy dzieci
 };

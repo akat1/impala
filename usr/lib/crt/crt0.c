@@ -6,6 +6,7 @@ int main(int argc, char **argv);
 void _start(void);
 
 int errno = 0;
+static int retval=0;
 
 int
 syscall(int SC, ...)
@@ -13,9 +14,10 @@ syscall(int SC, ...)
     __asm__ (
         "movl %%ebx, %%eax;"
         " int $0x80"
-        : : "b"(SC)
+        : "=a"(retval), "=c"(errno) 
+        : "b"(SC)
     );
-    return 0;
+    return retval;
 }
 
 void

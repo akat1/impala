@@ -159,7 +159,7 @@ str_dup(const char *s)
 ///////////////////////////////////////////////////////
 
 
-
+static char *convert_int32(char *b, int32_t arg_u32);
 static char *convert_uint32(char *b, uint32_t arg_u32);
 static char *convert_hexuint32(char *b, uint32_t arg_u32);
 static char *convert_binuint32(char *b, uint32_t arg_u32);
@@ -248,6 +248,10 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         arg_u32 = VA_ARG(ap, uint32_t);
                         pbuf = convert_uint32(buf, arg_u32);
                         break;
+                    case 'i':
+                        arg_u32 = VA_ARG(ap, int32_t);
+                        pbuf = convert_int32(buf, (int32_t)arg_u32);
+                        break;
                     case 'x':
                         arg_u32 = VA_ARG(ap, uint32_t);
                         pbuf = convert_hexuint32(buf, arg_u32);
@@ -313,6 +317,33 @@ from_string(char *dst, int *left, char *b, char sep, int fw,
     
     return dst-dst_orig;
 }
+
+char *
+convert_int32(char *buf, int32_t arg)
+{
+    bool min = FALSE;
+    buf += INTERNAL_BUF -1;
+    *buf = 0;
+    buf[-1] = '0';
+    /* jezeli argument jest zerem to wychodzimy */
+    if ( arg == 0 )
+        return buf-1;
+    if ( arg < 0 ) {
+        min = TRUE;
+        arg = -arg;
+    }
+
+    while (arg>0) {
+        buf--;
+        *buf = '0' + arg % 10;
+        arg /= 10;
+    }
+    if(min) {
+        *(--buf) = '-';
+    }
+    return buf;
+}
+
 
 char *
 convert_uint32(char *buf, uint32_t arg)

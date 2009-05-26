@@ -100,7 +100,9 @@ proc_create(void)
     new_p->p_pid = last_pid++;
     new_p->p_ppid = 0; // XXX: fork
     new_p->p_cred->p_uid = 0;  // XXX: fork
-
+    new_p->p_rootdir = rootvnode;
+    new_p->p_curdir = rootvnode;
+    KASSERT(rootvnode!=NULL);
     LIST_CREATE(&new_p->p_threads, thread_t, L_threads, FALSE);
     LIST_CREATE(&new_p->p_children, proc_t, L_children, FALSE);
     list_insert_head(&procs_list, new_p);

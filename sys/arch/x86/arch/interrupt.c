@@ -119,7 +119,7 @@ ISR_syscall(interrupt_frame frame)
     // result
     frame.f_eax = result.result;
     frame.f_ecx = result.errno;
-//    kprintf("result: %x  errno: %x\n", frame.f_eax, frame.f_ecx);
+//    kprintf("result: %i  errno: %i\n", frame.f_eax, frame.f_ecx);
 }
 
 void

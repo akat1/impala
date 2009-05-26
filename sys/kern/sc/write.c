@@ -51,7 +51,7 @@ errno_t sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args);
 errno_t
 sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
 {
-    kprintf("write(%u,%p,%p)\n", args->fd,args->data,args->size);
+//    kprintf("write(%u,%p,%p)\n", args->fd,args->data,args->size);
     cons_tty(args->data);
     return EOK;
 #if 0

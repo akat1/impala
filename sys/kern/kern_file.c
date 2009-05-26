@@ -138,6 +138,7 @@ f_seek(file_t *f, off_t o, int whence)
             f->f_offset += o;
             break;
         case SEEK_END:
+            attr.va_mask = VATTR_SIZE;
             VOP_GETATTR(f->f_vnode, &attr);
             if ( attr.va_size - o < 0 )
                 f->f_offset = 0;
@@ -160,7 +161,7 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
     return VOP_IOCTL(f->f_vnode, cmd, param);
 }
 
-ssize_t 
+ssize_t
 f_write(file_t *f, uio_t *u)
 {
     int error;
@@ -240,7 +241,8 @@ f_set(filetable_t *ft, file_t *fd, int index)
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
     if ( fc == NULL ) {
-        _filetable_expand(ft, index - list_length(&(ft->chunks))/FILES_PER_CHUNK);
+        _filetable_expand(ft, 1 + index/FILES_PER_CHUNK 
+                                - list_length(&(ft->chunks)));
         fc = _get_chunk_by_index(ft, index);
     }
 
@@ -307,8 +309,6 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     /* sprawdzamy czy to pierwszy deskyptor */
     if ( list_is_empty(&(p->p_fd->chunks)) ) {
         _filetable_expand(p->p_fd, 1);
-        fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
-        fp->f_vnode = vn;
     }
 
     /* szukamy miejsca dla nowego deskryptora w chunkach */
@@ -318,6 +318,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
         for (int i = 0 ; i < FILES_PER_CHUNK ; i++) {
             if ( fc->files[i] == NULL ) {
                 fp = file_alloc(vn);
+                fc->files[i] = fp;
                 *result = fdp;
                 *fpp = fp;
                 return OK;
@@ -335,7 +336,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     fp = file_alloc(vn);
     *result = fdp;
     *fpp = fp;
-
+    f_set(p->p_fd, fp, fdp);
     return OK;
 }
 

@@ -49,6 +49,7 @@
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
 #include <sys/uio.h>
+#include <machine/pckbd.h>
 
 void kmain(void);
 static void print_welcome(void);
@@ -117,6 +118,12 @@ start_init_process()
         //kprintf("size: %u, mem: %02x%02x%02x\n", isize, *img, *(img+1), *(img+2));
         thread_t *t = proc_create_thread(initproc, 0);
         fake_execve(t, img, isize);
+        char c;
+        while(1) {
+            c = pckbd_get_char();
+            if(c!=-1)
+                kprintf("%c", c);
+        }
         panic("Cannot start init process");
     }    
     panic("Cannot find init image");

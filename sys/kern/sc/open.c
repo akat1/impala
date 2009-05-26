@@ -35,13 +35,40 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/vfs.h>
+#include <sys/proc.h>
+#include <sys/file.h>
 
-errno_t sc_open(thread_t *p, syscall_result_t *r, va_list ap);
+typedef struct sc_open_args sc_open_args;
+
+struct sc_open_args {
+    addr_t fname;
+    int flags;
+    mode_t mode;
+};
+
+errno_t sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg);
 
 errno_t
-sc_open(thread_t *p, syscall_result_t *r, va_list ap)
+sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
 {
-    r->result = 0;
-    return ENOSTR;
+    int fd;
+    int error = 0;
+    r->result = -1;
+    vnode_t *node;
+    file_t  *file;
+    proc_t *proc = p->thr_proc;
+    //jeszcze weryfikacja adresu by siê przyda³a
+    KASSERT(proc->p_rootdir!=NULL);
+//    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, arg->flags,
+//             arg->mode);
+    if((error = vfs_lookup(proc->p_curdir, &node, arg->fname, p)))
+        return error;
+    if((error = f_alloc(proc, node, &file, &fd)))
+        return error;
+    if((error = VOP_OPEN(node, arg->flags, arg->mode)))
+        return error;
+    r->result = fd;
+    return -EOK;
 }
 

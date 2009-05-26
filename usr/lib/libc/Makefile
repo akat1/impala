@@ -3,6 +3,7 @@ PREFIX=${AOUT_PREFIX}
 CFLAGS=${_U_FLAGS}
 INCDIR=-Iinclude -Iprivate
 SRCS=\
+	fcntl/open.c\
 	stdlib/atexit.c\
         string/memchr.c\
         string/memcmp.c\
@@ -18,6 +19,7 @@ SRCS=\
         string/strncmp.c\
         string/strncpy.c\
         string/strrchr.c\
+	unistd/read.c\
 	unistd/write.c\
 
 include ${IMPALA_MK}/lib.mk

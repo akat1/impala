@@ -116,13 +116,17 @@ aout_exec(thread_t *thr, const void *first_page)
 //     vm_space_print(&vm_kspace);
     thr->thr_stack_size = THREAD_STACK_SIZE;
     thr->thr_kstack_size = THREAD_KSTACK_SIZE;
+  //  thr->thr_flags &= ~THREAD_KERNEL;
     vm_pmap_switch(&vm_space->pmap);
     mem_cpy(TEXT, (void*)text, ex->a_text);
     if (ex->a_data) {
         mem_cpy(DATA, (void*)data, ex->a_data);
     }
     vm_pmap_switch(&vm_kspace.pmap);
-    __thread_enter(thr);
+    //thread_switch(thr, NULL);
+    sched_insert(thr);
+    
+//    __thread_enter(thr);
     return 0;
 }
 

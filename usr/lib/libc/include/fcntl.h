@@ -1,4 +1,5 @@
-/*
+/* Impala Operating System
+ *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -29,45 +30,18 @@
  * $Id$
  */
 
+#ifndef __FNCTL_H
+#define __FNCTL_H
+
 #include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/utils.h>
-#include <sys/string.h>
-#include <sys/syscall.h>
-#include <machine/video.h>
-#include <sys/file.h>
-#include <sys/errno.h>
-#include <sys/proc.h>
-#include <sys/uio.h>
 
-typedef struct sc_read_args sc_read_args;
+#define O_RDWR 1
 
-struct sc_read_args {
-    int fd;
-    addr_t *data;
-    size_t size;
-};
+int  creat(const char *, mode_t);
+//int  fcntl(int, int);
+int  fcntl(int, int, long);
+//int  open(const char *, int);
+int  open(const char *, int, mode_t);
 
 
-errno_t sc_read(thread_t *p, syscall_result_t *r, sc_read_args *args);
-
-errno_t
-sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
-{
-    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
-    if (file == NULL) {
-        return -EBADF;
-    }
-    uio_t u;
-    iovec_t iov;
-    iov.iov_base = args->data;
-    iov.iov_len = args->size;
-    u.iovs = &iov;
-    u.iovcnt = 1;
-    u.size = args->size;
-    u.oper = UIO_READ;
-    u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
-    r->result = f_read(file, &u);
-    return EOK;
-}
-
+#endif

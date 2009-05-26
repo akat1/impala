@@ -215,7 +215,6 @@ build(const char *arg)
     int ncount = node_id;
     mfs_data_entry_t ntable[ncount];
     node_t *npointers[ncount];
-    #define ID_OFF(id) (id*sizeof(mfs_data_entry_t) + sizeof(header))
     node_t *n = root_node;
     fillptable(npointers, root_node);
     int data_off = sizeof(header) + ncount * sizeof(mfs_data_entry_t);

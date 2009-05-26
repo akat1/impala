@@ -86,13 +86,13 @@ enum {
 void filetable_free(filetable_t *fd);
 filetable_t *filetable_alloc(void);
 
-int f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
+int     f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
 ssize_t f_write(file_t *fd, uio_t *u);
 ssize_t f_read(file_t *fd, uio_t *u);
-int f_ioctl(file_t *fd, int cmd, uintptr_t param);
-int f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
-void f_close(file_t *fd);
-off_t f_seek(file_t *fd, off_t o, int whence);
+int     f_ioctl(file_t *fd, int cmd, uintptr_t param);
+int     f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
+void    f_close(file_t *fd);
+off_t   f_seek(file_t *fd, off_t o, int whence);
 
 // nie ma sensu ich dostêpniaæ moim zdaniem.
 file_t *f_get(filetable_t *ft, int index);
