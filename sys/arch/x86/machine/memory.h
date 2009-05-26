@@ -78,7 +78,7 @@ enum {
 
 
 #ifdef __KERNEL
-///@TODO Lepiej nazwaæ i dorobiæ kilka makr jeszcze.
+///@todo Lepiej nazwaæ i dorobiæ kilka makr jeszcze.
 
 /// Wyci±ga z adresu przesuniêcie na stronie.
 #define PAGE_OFF(p) (((uintptr_t)p) & 0xfff)

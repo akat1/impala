@@ -48,7 +48,7 @@ struct sc_nanosleep_args
 errno_t sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args );
 
 /**
- * XXX: ///@TODO sygna³y i rem
+ * XXX: ///@todo sygna³y i rem
  */
 
 errno_t

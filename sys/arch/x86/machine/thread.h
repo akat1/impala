@@ -40,7 +40,7 @@ struct thread_context {
     uint32_t c_ebp;
     uint32_t c_eflags;
     uint32_t c_cr3;
-    ///@TODO dodac koprocesor matematyczny
+    ///@todo dodac koprocesor matematyczny
 };
 
 #ifdef __KERNEL

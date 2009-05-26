@@ -403,7 +403,7 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
-        ///@TODO mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
+        ///@todo mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
         int prot = _pmap_page_prot(src_pmap, src_addr);
         vm_pmap_insert(dst_pmap, page, dst_addr, prot);
         src_addr += PAGE_SIZE;
@@ -442,9 +442,9 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     }
     if (pt->table[pte] & PTE_PRESENT) {
         pt->table[pte] = PTE_ADDR(pt->table[pte]);
-        ///@TODO VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
+        ///@todo VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
         ///      licznikach odniesieñ i deskryptorach stron.
-        ///@TODO zastanowiæ siê nad sensem poprzedniego TODO
+        ///@todo zastanowiæ siê nad sensem poprzedniego todo
         vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
         KASSERT(pg != NULL);
         pg->refcnt--;
