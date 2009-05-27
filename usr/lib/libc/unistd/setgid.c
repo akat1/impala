@@ -4,7 +4,7 @@
 #include "libc_syscall.h"
 
 int
-rmdir(const char *path)
+setgid(gid_t gid)
 {
-	return syscall(SYS_rmdir, path);
+    return syscall(SYS_setgid, gid);
 }

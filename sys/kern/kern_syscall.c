@@ -53,6 +53,16 @@ errno_t sc_wait(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_waitpid(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_write(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_close(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_link(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_unlink(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_symlink(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_rmdir(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_dup(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_dup2(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_chdir(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_getgid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_setgid(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_umask(thread_t *proc, syscall_result_t *r, va_list ap);
 
 static sc_handler_f *syscall_table[] = {
     sc_execve,
@@ -72,7 +82,17 @@ static sc_handler_f *syscall_table[] = {
     sc_wait,
     sc_waitpid,
     sc_write,
-    sc_close
+    sc_close,
+    sc_link,
+    sc_unlink,
+    sc_symlink,
+    sc_rmdir,
+    sc_dup,
+    sc_dup2,
+    sc_chdir,
+    sc_getgid,
+    sc_setgid,
+    sc_umask
 };
 
 void

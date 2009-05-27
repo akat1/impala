@@ -70,6 +70,7 @@ struct file {
 #define O_WRONLY      (1 << 2)
 #define O_RDWR        (1 << 3)
 #define O_CREAT       (1 << 4)
+#define O_TRUNC       (1 << 5)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)

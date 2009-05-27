@@ -37,11 +37,8 @@
 //TODO:
 //int          access(const char *, int);
 //unsigned     alarm(unsigned);
-//int          chdir(const char *);
 //int          chown(const char *, uid_t, gid_t);
 //size_t       confstr(int, char *, size_t);
-//int          dup(int);
-//int          dup2(int, int);
 //int          execl(const char *, const char *, ...);
 //int          execle(const char *, const char *, ...);
 //int          execlp(const char *, const char *, ...);
@@ -55,7 +52,6 @@
 //char        *getcwd(char *, size_t);
 //gid_t        getegid(void);
 //uid_t        geteuid(void);
-//gid_t        getgid(void);
 //int          getgroups(int, gid_t []);
 //int          gethostname(char *, size_t);
 //char        *getlogin(void);
@@ -63,34 +59,38 @@
 //int          getopt(int, char * const [], const char *);
 //pid_t        getpgrp(void);
 //int          isatty(int);
-//int          link(const char *, const char *);
 //long         pathconf(const char *, int);
 //int          pause(void);
 //int          pipe(int [2]);
 //ssize_t      readlink(const char *restrict, char *restrict, size_t);
-//int          rmdir(const char *);
 //int          setegid(gid_t);
 //int          seteuid(uid_t);
-//int          setgid(gid_t);
 //int          setpgid(pid_t, pid_t);
 //pid_t        setsid(void);
 //unsigned     sleep(unsigned);
-//int          symlink(const char *, const char *);
 //long         sysconf(int);
 //pid_t        tcgetpgrp(int);
 //int          tcsetpgrp(int, pid_t);
 //char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
-//int          unlink(const char *);
 
 ssize_t read(int fd, void *buf, size_t l);
 ssize_t write(int fd, const void *buf, size_t l);
+gid_t getgid(void);
 pid_t getpid(void);
 pid_t getppid(void);
 uid_t getuid(void);
 int close(int fd);
 int setuid(uid_t uid);
+int setgid(gid_t gid);
 off_t lseek(int fd, off_t offset, int whence);
 pid_t fork(void);
+int link(const char *oldpath, const char *newpath);
+int symlink(const char *oldpath, const char *newpath);
+int unlink(const char *pathname);
+int rmdir(const char *pathname);
+int dup(int fd);
+int chdir(const char *path);
+int dup2(int oldfd, int newfd);
 
 #endif

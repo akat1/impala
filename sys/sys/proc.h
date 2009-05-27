@@ -37,16 +37,11 @@
 #include <sys/vfs/vfs_node.h>
 #include <sys/vfs/vfs_types.h>
 
-// XXX: START - przenosimy to?
-
 struct pcred {
     uid_t           p_uid;       ///< identyfikator u¿ytkownika
     gid_t           p_gid;       ///< identyfikator grupy
     int             refcnt;      ///< licznik referencji
 };
-
-// XXX: KONIEC
-/// 
 
 struct proc {
     pid_t           p_pid;       ///< identyfikator procesu
@@ -60,6 +55,7 @@ struct proc {
     vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
+    mask_t          umask;       ///< maska tworzonych plików
     list_node_t     L_procs;     ///< wêze³ procesów
     list_node_t     L_children;  ///< wêze³ listy dzieci
 };

@@ -58,6 +58,16 @@ enum {
     SYS_waitpid,
     SYS_write,
     SYS_close,
+    SYS_link,
+    SYS_unlink,
+    SYS_symlink,
+    SYS_rmdir,
+    SYS_dup,
+    SYS_dup2,
+    SYS_chdir,
+    SYS_getgid,
+    SYS_setgid,
+    SYS_umask,
     SYS_MAX
 };
 

@@ -48,8 +48,6 @@ errno_t sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args);
 errno_t
 sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args)
 {
-    r->result = t->thr_proc->p_cred->p_uid;
-
     if ( t->thr_proc->p_cred->p_uid == 0 ) {
         t->thr_proc->p_cred->p_uid = args->uid;
         r->result = 0;
@@ -58,5 +56,7 @@ sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args)
         r->result = -1;
         return EPERM;
     }
+    
+    /* NOT REACHED */
 }
 

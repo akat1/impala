@@ -31,10 +31,12 @@ SRCS=\
 	vm_space.c\
 	vm_trap.c\
 	sc/brk.c\
+	sc/chdir.c\
 	sc/close.c\
 	sc/execve.c\
 	sc/exit.c\
 	sc/fork.c\
+	sc/getgid.c\
 	sc/getpid.c\
 	sc/getppid.c\
 	sc/getuid.c\
@@ -45,11 +47,19 @@ SRCS=\
 	sc/pause.c\
 	sc/read.c\
 	sc/sbrk.c\
+	sc/setgid.c\
 	sc/setuid.c\
 	sc/sigaction.c\
 	sc/wait.c\
 	sc/waitpid.c\
 	sc/write.c\
+	sc/link.c\
+	sc/unlink.c\
+	sc/symlink.c\
+	sc/rmdir.c\
+	sc/dup.c\
+	sc/dup2.c\
+	sc/umask.c\
 	tmp_rootimage.c\
 
 

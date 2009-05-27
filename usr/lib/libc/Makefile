@@ -4,6 +4,7 @@ CFLAGS=${_U_FLAGS}
 INCDIR=-Iinclude -Iprivate
 SRCS=\
 	fcntl/open.c\
+	fcntl/creat.c\
 	stdlib/atexit.c\
 	string/memchr.c\
         string/memcmp.c\
@@ -25,7 +26,10 @@ SRCS=\
         string/strspn.c\
         string/strtok.c\
         string/strxfrm.c\
+	unistd/chdir.c\
 	unistd/close.c\
+	unistd/dup.c\
+	unistd/dup2.c\
 	unistd/lseek.c\
 	unistd/fork.c\
 	unistd/getpid.c\

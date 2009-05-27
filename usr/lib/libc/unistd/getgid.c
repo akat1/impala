@@ -3,8 +3,8 @@
 
 #include "libc_syscall.h"
 
-int
-rmdir(const char *path)
+gid_t
+getgid(void)
 {
-	return syscall(SYS_rmdir, path);
+	return syscall(SYS_getgid);
 }
