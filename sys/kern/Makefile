@@ -36,6 +36,7 @@ SRCS=\
 	sc/execve.c\
 	sc/exit.c\
 	sc/fork.c\
+	sc/getdents.c\
 	sc/getgid.c\
 	sc/getpid.c\
 	sc/getppid.c\

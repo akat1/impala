@@ -35,6 +35,7 @@
 #include <sys/string.h>
 #include <sys/syscall.h>
 #include <machine/video.h>
+#include <machine/interrupt.h>
 #include <sys/file.h>
 #include <sys/errno.h>
 #include <sys/proc.h>
@@ -67,7 +68,10 @@ sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
     u.size = args->size;
     u.oper = UIO_READ;
     u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
+    int x = spltty();
     r->result = f_read(file, &u);
+    splx(x);
     return EOK;
 }
+
 

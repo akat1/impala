@@ -77,6 +77,7 @@ typedef bool irq_handler_f(void);
 typedef struct interrupt_frame interrupt_frame;
 struct interrupt_frame {
     // pusha
+    uint32_t test;
     uint32_t f_edi;
     uint32_t f_esi;
     uint32_t f_ebp;

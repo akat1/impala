@@ -301,8 +301,21 @@ mfs_getdents(vnode_t *vn, dirent_t *dents, int count)
 {
     if(!vn)
         return -EINVAL;
-    
-    return 0;
+    if(vn->v_type != VNODE_TYPE_DIR)
+        return -ENOTDIR;
+    count /= sizeof(dirent_t);
+    mfs_node_t *node = vn->v_private;
+    node = node->child;
+    int bcount = 0;
+    while(node && count>0) {
+        dents->d_ino = (int)node;
+        str_cpy(dents->d_name, node->name);
+        dents++;
+        count--;
+        node = node->next;
+        bcount += sizeof(dirent_t);
+    }
+    return bcount;
 }
 
 

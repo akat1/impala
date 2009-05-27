@@ -49,7 +49,7 @@
     pushl %fs
     pushl %gs
     pushal
-
+    push $0xdeadbeaf
 .endm
 
 .macro SET_KERNEL_REGS
@@ -61,6 +61,7 @@
 .endm
 
 .macro POP_FRAME
+    pop %eax
     popal
     pop %gs
     pop %fs
@@ -71,6 +72,9 @@
 .macro TRAP num, name, handler
 \name:
     cli
+#    pop %esi
+#    pop %esi
+#    jmp .
     push $\num
     PUSH_FRAME
     SET_KERNEL_REGS
@@ -97,7 +101,16 @@
 
 
 .macro ISR num, name, handler
-    TRAP \num, \name, \handler
+\name:
+    cli
+    push $\num
+    PUSH_FRAME
+    SET_KERNEL_REGS
+    call \handler
+    POP_FRAME
+    add $4, %esp
+    sti
+    iret
 .endm
 
 .global _unhnd_intrpt

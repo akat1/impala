@@ -151,6 +151,7 @@ TRAP_pfault(interrupt_frame f)
     vtf.in_kernel = !(f.f_errno & PFE_US);
     vtf.operation = (f.f_errno & PFE_WR)? VM_WRITE : VM_READ;
     vtf.preempted_addr = f.f_eip;
+    kprintf("CIPL: %i\n", CIPL);
     vm_trap_pfault(&vtf);
 }
 

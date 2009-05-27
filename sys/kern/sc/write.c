@@ -68,6 +68,8 @@ sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
     u.iovcnt = 1;
     u.oper = UIO_WRITE;
     u.space = UIO_SYSSPACE; //znowu ¶ciema
+    int x = spltty();
     r->result = f_write(file, &u);
+    splx(x);
     return EOK;
 }

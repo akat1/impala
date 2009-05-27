@@ -60,9 +60,10 @@ thread_context_init(thread_context *ctx)
  * @param t_from deskryptor obecnie dzia³aj±cego w±tku.
  */
 void
-thread_switch(thread_t *t_to, thread_t * volatile t_from)
+thread_switch(thread_t * t_to, thread_t * volatile t_from)
 {
-    KASSERT(t_to!=NULL);
+//    KASSERT(t_to!=NULL);
+//    __asm__ volatile ("":::"edi"); // edi jest psuty przez thr_ctx_str/ld...
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
 //        kprintf("esp0 sw to: %08x, %08x\n",t_to->thr_kstack, t_to->thr_kstack_size);

@@ -166,8 +166,7 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     }
     VFS_GETROOT(fs);
     //lock
-    if(mpoint)
-        mpoint->v_vfs_mounted_here = fs;
+    mpoint->v_vfs_mounted_here = fs;
     list_insert_tail(&mounted_fs, fs);
     //unlock
     return 0;

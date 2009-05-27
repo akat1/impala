@@ -312,8 +312,19 @@ devfs_getdents(vnode_t *vn, dirent_t *dents, int count)
 {
     if(!vn)
         return -EINVAL;
-    
-    return 0;
+    count /= sizeof(dirent_t);
+    devfs_node_t *node = vn->v_private;
+    node = node->i_child;
+    int bcount = 0;
+    while(node && count>0) {
+        dents->d_ino = (int)node;
+        str_cpy(dents->d_name, node->i_name);
+        dents++;
+        count--;
+        node = node->i_next;
+        bcount += sizeof(dirent_t);
+    }
+    return bcount;
 }
 
 devfs_node_t *devfs_rootinode = NULL;
@@ -380,6 +391,7 @@ int
 devfs_mount(vfs_t *fs)
 {
     devfs_data_t *devfs = kmem_zalloc(sizeof(devfs_data_t), KM_SLEEP);
+    KASSERT(devfs!=NULL);
     devfs->rootvnode = NULL;
     fs->vfs_private = devfs;
     return 0;

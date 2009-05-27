@@ -43,6 +43,7 @@ enum {
     SYS_execve,
     SYS_exit,
     SYS_fork,
+    SYS_getdents,
     SYS_getpid,
     SYS_getppid,
     SYS_getuid,

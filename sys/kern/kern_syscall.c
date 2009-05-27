@@ -38,6 +38,7 @@
 errno_t sc_execve(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_exit(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_fork(thread_t *proc, syscall_result_t *r, va_list ap);
+errno_t sc_getdents(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_getpid(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_getppid(thread_t *proc, syscall_result_t *r, va_list ap);
 errno_t sc_getuid(thread_t *proc, syscall_result_t *r, va_list ap);
@@ -68,6 +69,7 @@ static sc_handler_f *syscall_table[] = {
     sc_execve,
     sc_exit,
     sc_fork,
+    sc_getdents,
     sc_getpid,
     sc_getppid,
     sc_getuid,

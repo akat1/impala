@@ -145,8 +145,6 @@ print_welcome()
     kprintf("CPU: %s\n", cpu_i.vendor_string);
     kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
-
-
 }
 
 void
