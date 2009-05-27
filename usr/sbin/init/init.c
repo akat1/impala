@@ -39,7 +39,6 @@ main(int argc, char **argv)
     int fd = open("/dev/ttyv0", O_RDWR, 0);
     int fd2 = open("/etc/passwd", O_RDWR, 0);
     char buf[128];
-    write(0, data, strlen(data));
     read(fd2, buf, 127);
     char *b = itoa(fd);
     write(0, b, strlen(b));
@@ -48,8 +47,8 @@ main(int argc, char **argv)
     write(fd, buf, strlen(buf));
     write(fd, data2, strlen(data2));
     write(fd, data, strlen(data));
-   // while(1) {read(fd, buf, 127);
-   // write(fd, buf, strlen(buf)); }
+    while(1) {read(fd, buf, 127);
+    write(fd, buf, strlen(buf)); }
     while(1);
     return 0;
 }

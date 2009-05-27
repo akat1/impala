@@ -74,6 +74,15 @@
 //char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
 
+#define MAX_NAME 128
+
+struct dirent {
+    int     d_ino;
+    char    d_name[MAX_NAME];
+};
+
+typedef struct dirent dirent_t;
+
 ssize_t read(int fd, void *buf, size_t l);
 ssize_t write(int fd, const void *buf, size_t l);
 gid_t getgid(void);
@@ -92,5 +101,6 @@ int rmdir(const char *pathname);
 int dup(int fd);
 int chdir(const char *path);
 int dup2(int oldfd, int newfd);
+int getdents(int fd, dirent_t *data, size_t count);
 
 #endif
