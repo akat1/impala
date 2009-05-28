@@ -49,6 +49,23 @@ main(int argc, char **argv)
     write(0, buf, strlen(buf));
     write(0, data2, strlen(data2));
     write(0, data, strlen(data));
+    int fd3 = open("/", 0, 0);
+    dirent_t dents[20];
+    int w = getdents(fd3, dents, 20*sizeof(dirent_t));
+    for(int i=0; i<w/sizeof(dirent_t); i++) {
+        dirent_t *d = &dents[i];
+        write(0, d->d_name, strlen(d->d_name));
+        write(0, "\n", 1);
+    }
+    write(0, "A oto dev:\n", strlen("A oto dev:\n"));
+    fd3 = open("/dev/", 0, 0);
+    w = getdents(fd3, dents, 20*sizeof(dirent_t));
+    for(int i=0; i<w/sizeof(dirent_t); i++) {
+        dirent_t *d = &dents[i];
+        write(0, d->d_name, strlen(d->d_name));
+        write(0, "\n", 1);
+    }
+    
     while(1) {int l = read(fd, buf, 127);
     write(fd, buf, l); }
     while(1);
