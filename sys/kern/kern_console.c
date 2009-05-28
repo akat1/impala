@@ -457,9 +457,8 @@ ttyv_read(devd_t *d, uio_t *u)
     char *b = BUF;
     while((c = pckbd_get_char())!=-1 && b<BUF+511)
         *(b++) = c;
-    *b = 0;
-    int n =  uio_move(BUF, b-BUF+1, u);
-    return n;
+    uio_move(BUF, b-BUF, u);
+    return b-BUF;
 }
 
 int
@@ -467,9 +466,9 @@ ttyv_write(devd_t *d, uio_t *u)
 {
     vtty_t *vtty = d->priv;
     char BUF[512];
-    int n =  uio_move(BUF, MIN(512, u->size), u);
+    uio_move(BUF, MIN(512, u->size), u);
     vtty_data_out(vtty, BUF, MIN(512, u->size));
-    return n;
+    return MIN(512, u->size);
 }
 
 int

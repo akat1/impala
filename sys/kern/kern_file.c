@@ -164,24 +164,23 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
 ssize_t
 f_write(file_t *f, uio_t *u)
 {
-    int error;
     u->offset = f->f_offset;
-    error = VOP_WRITE(f->f_vnode, u);
-    if(error) 
-        return error;
-    f->f_offset += u->size;
-    return u->size;
+    int res = VOP_WRITE(f->f_vnode, u);
+    if(res < 0) 
+        return res;
+    f->f_offset += res;
+    return res;
 }
 
 ssize_t
 f_read(file_t *f, uio_t *u)
 {
     u->offset = f->f_offset;
-    int error = VOP_READ(f->f_vnode, u);
-    if(error)
-        return error;
-    f->f_offset += u->size;
-    return u->size;
+    int res = VOP_READ(f->f_vnode, u);
+    if(res < 0)
+        return res;
+    f->f_offset += res;
+    return res;
 }
 
 int

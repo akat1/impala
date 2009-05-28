@@ -69,8 +69,13 @@ sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
     u.oper = UIO_READ;
     u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
     int x = spltty();
-    r->result = f_read(file, &u);
+    int res = f_read(file, &u);
     splx(x);
+    if(res < 0) {
+        r->result = -1;
+        return res;
+    }
+    r->result = res;
     return EOK;
 }
 

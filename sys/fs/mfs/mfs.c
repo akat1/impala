@@ -155,7 +155,7 @@ mfs_read(vnode_t *vn, uio_t *u)
         return -1;
     size_t size = MIN(node->size-start, u->size);
     uio_move(node->data+start, size, u);
-    return 0;
+    return size;
 }
 
 int
@@ -163,7 +163,7 @@ mfs_write(vnode_t *vn, uio_t *u)
 {
     if(!vn || vn->v_type != VNODE_TYPE_REG)
         return -EINVAL;
-    return -ENOTSUP;    
+    return -ENOTSUP;
     return 0;
 }
 
