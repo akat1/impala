@@ -36,10 +36,6 @@
 #include <sys/cdefs.h>
 
 enum {
-    EOK = 0
-};
-
-enum {
     SYS_execve,
     SYS_exit,
     SYS_fork,

@@ -35,6 +35,7 @@
 #include <sys/string.h>
 #include <sys/syscall.h>
 #include <machine/video.h>
+#include <sys/errno.h>
 #include <sys/file.h>
 #include <sys/errno.h>
 #include <sys/proc.h>

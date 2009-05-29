@@ -37,6 +37,7 @@
 #include <sys/syscall.h>
 #include <sys/file.h>
 #include <sys/proc.h>
+#include <sys/errno.h>
 
 typedef struct link_args link_args;
 

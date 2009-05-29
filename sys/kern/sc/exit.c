@@ -35,6 +35,7 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/errno.h>
 
 typedef struct sc_exit_args sc_exit_args;
 

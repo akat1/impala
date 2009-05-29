@@ -49,6 +49,7 @@ vm_space_create(vm_space_t *vs, int space)
     vs->seg_text = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_data = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
+
 #if 0
     vm_seg_create(vs->seg_text, vs, VM_SPACE_UTEXT, 0, VM_SPACE_UTEXT_S,
         VM_PROT_RWX, VM_SEG_NORMAL);
@@ -64,6 +65,10 @@ vm_space_create(vm_space_t *vs, int space)
 void
 vm_space_destroy(vm_space_t *vs)
 {
+    ///@TODO Wybucha.
+    return;
+    TRACE_IN("vs=%p (%p, %p, %p)", vs, vs->seg_text, vs->seg_data, vs->seg_stack);
+    vm_space_print(vs);
     KASSERT(vs->space == VM_SPACE_USER);
     vm_seg_destroy(vs->seg_text);
     vm_seg_destroy(vs->seg_data);
@@ -71,6 +76,9 @@ vm_space_destroy(vm_space_t *vs)
     vm_lpool_free(&vm_lpool_segments, vs->seg_text);
     vm_lpool_free(&vm_lpool_segments, vs->seg_data);
     vm_lpool_free(&vm_lpool_segments, vs->seg_stack);
+
+    return;
+
 }
 
 int

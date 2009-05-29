@@ -274,6 +274,7 @@ vm_seg_map(vm_seg_t *dst, const vm_seg_t *src, vm_addr_t addr, vm_size_t size,
     vm_addr_t dstaddr;
     if (vm_seg_reserve(dst, size, &dstaddr)) return -1;
     vm_pmap_map(&dst->space->pmap, dstaddr, &src->space->pmap, addr, size);
+    *((vm_addr_t*) res) = dstaddr;
     return 0;
 }
 

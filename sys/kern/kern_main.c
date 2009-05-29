@@ -48,6 +48,7 @@
 #include <fs/devfs/devfs.h>
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
+#include <sys/errno.h>
 #include <sys/uio.h>
 #include <machine/pckbd.h>
 
@@ -106,29 +107,14 @@ start_init_process()
     DEBUGF("big fake: %p -> %p", PROC_init, entry);
     sched_insert(t);
 #endif
-    vnode_t *fn;
-    vfs_lookup(NULL, &fn, "/sbin/init", NULL);
-    if (fn) {
-        vattr_t attr;
-        attr.va_mask = VATTR_SIZE;
-        VOP_GETATTR(fn, &attr);
-        int isize = attr.va_size;
-        unsigned char *img = kmem_alloc(isize, KM_SLEEP);
-        vnode_rdwr(UIO_READ, fn, img, isize, 0);
-        thread_t *t = proc_create_thread(initproc, 0);
-        fake_execve(t, img, isize);
-        char c;
-        while(1) {
-            c = pckbd_get_char();
-            if(c!=-1)
-                kprintf("%c", c);
-        }
-        panic("Cannot start init process");
+    int err;
+    switch ( (err = execve(initproc, "/sbin/init", NULL, NULL)) ) {
+        case 0:
+            break;
+        case -ENOENT:
+            break;
     }
-    panic("Cannot find init image");
-
-
-
+    while(1);
 }
 
 void

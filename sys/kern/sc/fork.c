@@ -37,6 +37,7 @@
 #include <sys/string.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/errno.h>
 #include <machine/thread.h>
 
 errno_t sc_fork(thread_t *t, syscall_result_t *r);

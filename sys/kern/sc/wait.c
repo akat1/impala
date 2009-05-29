@@ -29,6 +29,7 @@
  * $Id$
  */
 
+#include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/proc.h>

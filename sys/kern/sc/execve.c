@@ -35,6 +35,7 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/errno.h>
 
 errno_t sc_execve(thread_t *p, syscall_result_t *r, va_list ap);
 

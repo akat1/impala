@@ -37,6 +37,7 @@
 #include <sys/syscall.h>
 #include <sys/file.h>
 #include <sys/proc.h>
+#include <sys/errno.h>
 
 typedef struct dup2_args dup2_args;
 

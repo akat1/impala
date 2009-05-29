@@ -149,17 +149,18 @@ proc_destroy_threads(proc_t *proc)
 void
 proc_destroy_vmspace(proc_t *p)
 {
+    TRACE_IN("p=%p vm_space=%p", p, p->vm_space);
     vm_space_destroy(p->vm_space);
     vm_space_create(p->vm_space, VM_SPACE_USER);
 }
 
 
 thread_t *
-proc_create_thread(proc_t *proc, addr_t entry)
+proc_create_thread(proc_t *proc, uintptr_t entry)
 {
     thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
-    t->thr_entry_point = entry;
+    t->thr_entry_point = (void*)entry;
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
     vm_space_create_stack(&vm_kspace, &t->thr_kstack, THREAD_KSTACK_SIZE);

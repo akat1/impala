@@ -32,6 +32,8 @@
 #ifndef __SYS_ERRNO_H
 #define __SYS_ERRNO_H
 
+#define EOK             0  ///< no error
+
 /**
  * Numery b³êdów zgodne z POSIX.
  *
@@ -80,7 +82,7 @@
 #define ENETUNREACH     59 ///< Network unreachable.
 #define ENFILE          60 ///< Too many files open in system.
 #define ENOBUFS         61 ///< No buffer space available.
-#define ENODATA         62 ///< [XSR] No message is available on the STREAM head read queue. 
+#define ENODATA         62 ///< [XSR] No message is available on the STREAM head read queue.
 #define ENODEV          63 ///< No such device.
 #define ENOENT          64 ///< No such file or directory.
 #define ENOEXEC         65 ///< Executable file format error.
@@ -91,7 +93,7 @@
 #define ENOPROTOOPT     70 ///< Protocol not available.
 #define ENOSPC          71 ///< No space left on device.
 #define ENOSR           72 ///< [XSR] No STREAM resources.
-#define ENOSTR          73 ///< [XSR] Not a STREAM. 
+#define ENOSTR          73 ///< [XSR] Not a STREAM.
 #define ENOSYS          74 ///< Function not supported.
 #define ENOTCONN        75 ///< The socket is not connected.
 #define ENOTDIR         76 ///< Not a directory.
@@ -112,7 +114,7 @@
 #define ESPIPE          92 ///< Invalid seek.
 #define ESRCH           93 ///< No such process.
 #define ESTALE          94 ///< Reserved.
-#define ETIME           95 ///< [XSR]  Stream ioctl() timeout. 
+#define ETIME           95 ///< [XSR]  Stream ioctl() timeout.
 #define ETIMEDOUT       96 ///< Connection timed out.
 #define ETXTBSY         97 ///< Text file busy.
 #define EWOULDBLOCK     98 ///< Operation would block.

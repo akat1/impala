@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/sched.h>
+#include <sys/errno.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
 
