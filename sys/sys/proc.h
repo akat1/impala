@@ -71,6 +71,8 @@ extern proc_t proc0;
 void proc_init(void);
 proc_t *proc_create(void);
 thread_t * proc_create_thread(proc_t *, addr_t entry);
+void proc_destroy_threads(proc_t *proc);
+void proc_destroy_vmspace(proc_t *proc);
 void proc_insert_child(proc_t *proc, proc_t *child);
 proc_t *proc_find(pid_t pid);
 void proc_destroy(proc_t *p);

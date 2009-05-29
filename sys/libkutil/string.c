@@ -40,7 +40,7 @@
  * kopiuje len bajtow z src do dst
  */
 addr_t
-mem_move(addr_t dst, addr_t src, size_t len)
+mem_move(addr_t dst, const addr_t src, size_t len)
 {
     addr_t org = dst;
     ssize_t i;
@@ -63,7 +63,7 @@ mem_move(addr_t dst, addr_t src, size_t len)
  */
 
 addr_t
-mem_cpy(addr_t _dst, addr_t _src, size_t len)
+mem_cpy(addr_t _dst, const addr_t _src, size_t len)
 {
     addr_t org = _dst;
     char *dst = (char*)_dst;
@@ -163,7 +163,7 @@ static char *convert_int32(char *b, int32_t arg_u32);
 static char *convert_uint32(char *b, uint32_t arg_u32);
 static char *convert_hexuint32(char *b, uint32_t arg_u32);
 static char *convert_binuint32(char *b, uint32_t arg_u32);
-static int from_string(char *dst, int *left, char *b, char sep, int fw, 
+static int from_string(char *dst, int *left, char *b, char sep, int fw,
                         bool to_right);
 
 #define DEFAULT_ATTRIBUTE (COLOR_WHITE)
@@ -195,7 +195,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
     uint32_t arg_u32;
     if(!dst || !fmt)
         return -1;  // -EBLEBLE ?
-    
+
     for (; *fmt; fmt++) {
         pbuf = 0;
         switch (*fmt) {
@@ -216,7 +216,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                     case '0':
                         if(field_width == 0)
                             separator = '0';
-                        else 
+                        else
                             field_width *= 10;
                         fmt++;
                         break;
@@ -278,7 +278,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                 if (pbuf)
                     dst += from_string(dst, &left, pbuf, separator,
                                         field_width, pad_to_right);
-                break; 
+                break;
             }
 
             default:
@@ -293,7 +293,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
 }
 
 int
-from_string(char *dst, int *left, char *b, char sep, int fw, 
+from_string(char *dst, int *left, char *b, char sep, int fw,
                         bool to_right)
 {
     char *dst_orig=dst;
@@ -301,20 +301,20 @@ from_string(char *dst, int *left, char *b, char sep, int fw,
     if(fw < len)
         fw = len;
     int pad_count = fw - len;
-    
+
     if(to_right) {
-        while(pad_count--) 
+        while(pad_count--)
             if((*left)-- > 0)
                 *(dst++) = sep;
     }
     while (*b != 0)
         if((*left)-- > 0)
             *(dst++) = *(b++);
-    
-    while(pad_count-- > 0) 
+
+    while(pad_count-- > 0)
         if((*left)-- > 0)
             *(dst++) = sep;
-    
+
     return dst-dst_orig;
 }
 

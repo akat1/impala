@@ -48,6 +48,12 @@ extern bool SYSTEM_DEBUG;
 void kprintf(const char *fmt, ...);
 void vkprintf(const char *fmt, va_list ap);
 
+ssize_t copyin(void *kaddr, const void *uaddr, size_t len);
+ssize_t copyout(void *uaddr, const void *kaddr, size_t len);
+
+ssize_t copyinstr(void *kaddr, const void *uaddr, size_t limit);
+ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
+
 #define TRACE_IN(fmt, args...)\
     do { \
         if (!SYSTEM_DEBUG) break;\

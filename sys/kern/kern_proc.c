@@ -118,27 +118,41 @@ proc_create(void)
 void
 proc_destroy(proc_t *proc)
 {
-    thread_t *t_iter;
-    proc_t *p_iter;
+    proc_t *p;
     proc_t *init = proc_find(INIT_PID);
 
     kprintf("%x - dlugosc\n", list_length(&proc->p_threads));
 
-    /* niszczymy w±tki */
-    while ( (t_iter = (thread_t *)list_extract_first(&(proc->p_threads))) )
-        thread_destroy(t_iter);
+    proc_destroy_threads(proc);
+    proc_destroy_vmspace(proc);
 
-    /* przepinamy dzieci */
-    while ( (p_iter = (proc_t *)list_extract_first(&(proc->p_children))) )
+    while ( (p = list_extract_first(&(proc->p_children))) )
     {
             // przepinamy dziecko pod INIT_PID
-            proc_insert_child(init, p_iter);
+            proc_insert_child(init, p);
     }
 
     kmem_free(proc->p_cred);
     kmem_cache_free(proc_cache, proc);
     return;
 }
+
+
+void
+proc_destroy_threads(proc_t *proc)
+{
+    thread_t *t;
+    while ( (t = list_extract_first(&(proc->p_threads))) )
+        thread_destroy(t);
+}
+
+void
+proc_destroy_vmspace(proc_t *p)
+{
+    vm_space_destroy(p->vm_space);
+    vm_space_create(p->vm_space, VM_SPACE_USER);
+}
+
 
 thread_t *
 proc_create_thread(proc_t *proc, addr_t entry)

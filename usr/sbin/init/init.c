@@ -3,6 +3,7 @@
 #include <string.h>
 #include <fcntl.h>
 
+#if 0
 const char data[] = "Hello, World\n";
 const char data2[] = "OK\n";
 static char sbuf[32];
@@ -34,10 +35,12 @@ char
 }
 
 extern int errno;
+#endif 
 
 int
 main(int argc, char **argv)
 {
+#if 0
     int fd = open("/dev/ttyv0", 0, 0);
     int fd2 = open("/etc/passwd", 0, 0);
     char buf[128];
@@ -68,6 +71,7 @@ main(int argc, char **argv)
     
     while(1) {int l = read(fd, buf, 127);
     write(fd, buf, l); }
+#endif
     while(1);
     return 0;
 }

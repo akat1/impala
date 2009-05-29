@@ -77,3 +77,31 @@ vkprintf(const char *fmt, va_list ap)
     cons_msg(big_buf);
 }
 
+
+ssize_t
+copyin(void *kaddr, const void *uaddr, size_t len)
+{
+    mem_cpy(kaddr, uaddr, len);
+    return len;
+}
+
+ssize_t
+copyout(void *uaddr, const void *kaddr, size_t len)
+{
+    mem_cpy(uaddr, kaddr, len);
+    return len;
+}
+
+
+ssize_t
+copyinstr(void *kaddr, const void *uaddr, size_t limit)
+{
+    return -1;
+}
+
+ssize_t
+copyoutstr(void *uaddr, const void *kaddr, size_t limit)
+{
+    return -1;
+}
+

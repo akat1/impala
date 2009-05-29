@@ -38,35 +38,122 @@
 #include <sys/proc.h>
 #include <sys/string.h>
 #include <sys/vm.h>
+#include <sys/errno.h>
+#include <sys/uio.h>
+#include <sys/vfs.h>
 #include <machine/cpu.h>
 #include <machine/thread.h>
 
 typedef struct progam program_t;
 
-static int aout_exec(thread_t *thr, const void *first_page);
-
 void __thread_enter(thread_t *t);
+
+typedef struct exec_info exec_info_t;
+struct exec_info {
+    const char *path;
+    char *const *argv;
+    char *const *envp;
+    vnode_t *vp;
+    void    *header;
+    size_t  header_size;
+    size_t  image_size;
+};
+
+static int aout_exec(proc_t *, exec_info_t *einfo);
+static int intrp_exec(proc_t *, exec_info_t *einfo);
 
 
 /*========================================================================
  * EXEC
  */
 
-void
-fake_execve(thread_t *thr, const void *image, size_t size)
-{
-    TRACE_IN("image=%p size=%u", image, size);
-    aout_exec(thr, image);
+int aout_fexec(thread_t *thr, void *first_page);
 
+void
+fake_execve(thread_t *t, const void *image, size_t size)
+{
+     aout_fexec(t, (void*)image);
 }
 
+
+int
+execve(thread_t *t, const char *path, char *const argv[], char *const envp[])
+{
+    proc_t *p = t->thr_proc;
+    exec_info_t einfo;
+    int err;
+    enum {
+        HEADER_SIZE = 1024
+    };
+    char header[HEADER_SIZE];
+    ssize_t len = HEADER_SIZE;
+    vnode_t *vp = NULL;
+    mem_zero(header, HEADER_SIZE);
+    if ( (err = vfs_lookup(NULL, &vp, path, NULL)) ) {
+        return err;
+    }
+    vattr_t attr;
+
+    ///@TODO sprawdziæ prawa dostêpu
+    attr.va_mask = VATTR_SIZE;
+    VOP_GETATTR(vp, &attr);
+    einfo.image_size = attr.va_size;
+    if (attr.va_size < HEADER_SIZE)
+        len = attr.va_size;
+
+    len = vnode_rdwr(UIO_READ, vp, header, len, 0);
+    if (len < 0) {
+        err = len;
+        goto fail;
+    }
+    if (len == 0) {
+        err = -EINVAL;
+    }
+
+    einfo.path = path;
+    einfo.vp = vp;
+    einfo.argv = argv;
+    einfo.envp = envp;
+    einfo.header = header;
+    einfo.header_size = len;
+
+    if ((err = intrp_exec(p, &einfo))) {
+        if (err == -EINVAL) {
+            if ( (err = aout_exec(p, &einfo)) )
+                goto fail;
+        }
+    }
+
+    vrele(vp);
+    sched_exit(t);
+    return 0;
+fail:
+    vrele(vp);
+    return err;
+}
 
 /*========================================================================
  * Obsluga formatu a.out (ZMAGIC)
  */
 
+
+
+
 int
-aout_exec(thread_t *thr, const void *first_page)
+aout_exec(proc_t *p, exec_info_t *einfo)
+{
+
+    if (einfo->header_size < PAGE_SIZE) return -EINVAL;
+    exec_t *exec = einfo->header;
+    if (N_BADMAG(*exec)) return -EINVAL;
+
+
+    return -EINVAL;
+}
+
+
+int
+aout_fexec(thread_t *thr, void *first_page)
 {
     const exec_t * ex = first_page;
     vm_space_t *vm_space = thr->vm_space;
@@ -111,25 +198,31 @@ aout_exec(thread_t *thr, const void *first_page)
         mem_zero(BSS, ex->a_bss);
     }
     vm_space_create_stack(vm_space, &thr->thr_stack, THREAD_STACK_SIZE);
-//    vm_space_create_stack(&vm_kspace, &thr->thr_kstack, THREAD_KSTACK_SIZE);
-     vm_space_print(vm_space);
-//     vm_space_print(&vm_kspace);
     thr->thr_stack_size = THREAD_STACK_SIZE;
     thr->thr_kstack_size = THREAD_KSTACK_SIZE;
-  //  thr->thr_flags &= ~THREAD_KERNEL;
     vm_pmap_switch(&vm_space->pmap);
     mem_cpy(TEXT, (void*)text, ex->a_text);
     if (ex->a_data) {
         mem_cpy(DATA, (void*)data, ex->a_data);
     }
     vm_pmap_switch(&vm_kspace.pmap);
-    //thread_switch(thr, NULL);
     sched_insert(thr);
-    
-//    __thread_enter(thr);
+
     return 0;
 }
+
 
 /*========================================================================
  * Obsluga interpretera
  */
+
+int
+intrp_exec(proc_t *p, exec_info_t *einfo)
+{
+    char *bytes = einfo->header;
+    if (einfo->header_size < 4) return -EINVAL;
+    if (bytes[0] != '#' || bytes[1] != '!') return -EINVAL;
+
+    return 0;
+}
+
