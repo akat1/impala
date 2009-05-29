@@ -54,6 +54,7 @@ void vm_space_destroy(vm_space_t *space);
 void vm_space_print(vm_space_t *vs);
 int vm_space_create_stack(vm_space_t *, void *addr, vm_size_t s);
 int vm_space_destroy_stack(vm_space_t *, vm_addr_t, vm_size_t);
+int vm_space_is_avail(vm_space_t *vs, vm_addr_t addr, vm_size_t s);
 
 
 #endif

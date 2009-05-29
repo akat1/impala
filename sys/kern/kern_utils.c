@@ -34,6 +34,7 @@
 #include <sys/utils.h>
 #include <sys/string.h>
 #include <sys/console.h>
+#include <sys/vm.h>
 #include <machine/interrupt.h>
 
 /**

@@ -30,12 +30,8 @@
  * $Id$
  */
 
-#ifndef __SYS_EXEC_H
-#define __SYS_EXEC_H
-#ifdef __KERNEL
+#ifndef __SYS__H
+#define __SYS__H
 
-void fake_execve(thread_t *thr, const void *image, size_t size);
-int execve(proc_t *, const char *, char *[], char * []);
 
-#endif
 #endif

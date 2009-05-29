@@ -20,6 +20,7 @@ SRCS=\
 	kern_proc.c\
 	kern_sched.c\
 	kern_syscall.c\
+	kern_sysvipc.c\
 	kern_thread.c\
 	kern_uio.c\
 	kern_utils.c\

@@ -116,8 +116,8 @@ void
 thread_destroy(thread_t *t)
 {
     KASSERT(t->thr_flags & THREAD_ZOMBIE);
-    kprintf("NISZCZE: %p\n",t);
     kmem_cache_free(thread_cache, t);
+    if (t != curthread) sched_exit(t);
     return;
 }
 

@@ -36,13 +36,26 @@
 #include <sys/utils.h>
 #include <sys/syscall.h>
 #include <sys/errno.h>
+#include <sys/exec.h>
 
-errno_t sc_execve(thread_t *p, syscall_result_t *r, va_list ap);
+typedef struct execve_args execve_args_t;
+struct execve_args {
+    char *path;
+    char **argv;
+    char **envp;
+};
+
+errno_t sc_execve(thread_t *p, syscall_result_t *r, execve_args_t ap);
 
 errno_t
-sc_execve(thread_t *p, syscall_result_t *r, va_list ap)
+sc_execve(thread_t *t, syscall_result_t *r, execve_args_t ap)
 {
-    r->result = 0;
-    return ENOSTR;
+    const char path[256];
+//    copyinstr(path, ap.path, 256);
+    r->result = -execve(t->thr_proc, path, ap.argv, ap.envp);
+    if (r->result == 0) {
+        sched_exit(t);
+    }
+    return 0;
 }
 

@@ -70,7 +70,7 @@ static void prepare_process(proc_t *p);
  */
 
 int
-execve(proc_t *p, const char *path, char *const argv[], char *const envp[])
+execve(proc_t *p, const char *path, char *argv[], char *envp[])
 {
     exec_info_t einfo;
     int err;

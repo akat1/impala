@@ -30,12 +30,27 @@
  * $Id$
  */
 
-#ifndef __SYS_EXEC_H
-#define __SYS_EXEC_H
+#ifndef __SYS_MSG_H
+#define __SYS_MSG_H
+
+struct msqid_ds {
+    struct ipc_perm     msg_perm;
+    msgqnum_t           msg_qnum;
+    msglen_t            msg_qbytes;
+    pid_t               msg_lspid;
+    pid_t               msg_lrpid;
+    time_t              msg_stime, msg_rtime, msg_ctime;
+};
+
+
 #ifdef __KERNEL
 
-void fake_execve(thread_t *thr, const void *image, size_t size);
-int execve(proc_t *, const char *, char *[], char * []);
+#else /* __KERNEL */
+
+int msgget(key_t , int);
+int msgctl(int , int , struct msgid_ds *);
+int msgrcv(int, void *, size_t, long, int);
+int msgsnd(int, const void *, size_t , int );
 
 #endif
 #endif

@@ -30,12 +30,34 @@
  * $Id$
  */
 
-#ifndef __SYS_EXEC_H
-#define __SYS_EXEC_H
-#ifdef __KERNEL
+#ifndef __SYS_IPC_H
+#define __SYS_IPC_H
 
-void fake_execve(thread_t *thr, const void *image, size_t size);
-int execve(proc_t *, const char *, char *[], char * []);
+struct ipc_perm {
+    uid_t   uid;
+    gid_t   gid;
+    uid_t   cuid;
+    gid_t   guid;
+    mode_t  mode;
+};
+
+typedef unsigned int    msgqnum_t;
+typedef unsigned int    msglen_t;
+
+#define IPC_CREAT   (1 << 12)
+#define IPC_EXCL    (1 << 13)
+#define IPC_NOWAIT  (1 << 14)
+
+#define IPC_PRIVATE 0
+
+#define IPC_RMID    1
+#define IPC_SET     2
+#define IPC_STAT    3
+
+#ifndef __KERNEL
+
+key_t   ftok(const char *, int);
 
 #endif
+
 #endif

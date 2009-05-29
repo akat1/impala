@@ -57,7 +57,6 @@ vm_page_t *vm_alloc_page(void);
 void vm_free_page(vm_page_t *p);
 
 vm_paddr_t vm_space_phys(const vm_space_t *vms, vm_addr_t addr);
-bool vm_space_is_avail(const vm_space_t *vms, vm_addr_t addr);
 void vm_space_switch(const vm_space_t *sp);
 vm_page_t *vm_kernel_alloc_page(void);
 vm_addr_t vm_ptov(vm_paddr_t v);
@@ -67,6 +66,8 @@ int vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res);
 int vm_physmap(vm_addr_t paddr, vm_size_t s, void *res);
 int vm_remap(vm_addr_t vaddr, vm_size_t s, void *res);
 void vm_unmap(vm_addr_t addr, vm_size_t size);
+
+#define vm_is_avail(vms, addr) vm_space_is_avail(vms, (vm_addr_t) addr)
 
 #endif
 #endif

@@ -104,11 +104,6 @@ vm_space_phys(const vm_space_t *vms, vm_addr_t addr)
     return vm_pmap_phys(&vms->pmap, addr);
 }
 
-bool
-vm_space_is_avail(const vm_space_t *vms, vm_addr_t addr)
-{
-    return vm_pmap_is_avail(&vms->pmap, addr);
-}
 
 void
 vm_space_switch(const vm_space_t *vms)
@@ -122,6 +117,7 @@ vm_vtop(vm_addr_t va)
 {
     return vm_pmap_phys(&vm_kspace.pmap, va);
 }
+
 
 int
 vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res)
