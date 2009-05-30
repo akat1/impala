@@ -162,10 +162,6 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
     vm_space_create_stack(&vm_kspace, &t->thr_kstack, THREAD_KSTACK_SIZE);
-    DEBUGF("user thread created");
-    vm_space_print(t->vm_space);
-    DEBUGF("   KSTACK  %p-%p (+%p)", t->thr_kstack, t->thr_kstack
-        + t->thr_kstack_size, t->thr_kstack_size);
     return t;
 }
 

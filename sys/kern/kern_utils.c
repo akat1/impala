@@ -82,6 +82,7 @@ vkprintf(const char *fmt, va_list ap)
 ssize_t
 copyin(void *kaddr, const void *uaddr, size_t len)
 {
+    if (vm_is_avail((vm_addr_t)uaddr, len)) return -1;
     mem_cpy(kaddr, uaddr, len);
     return len;
 }
@@ -89,6 +90,7 @@ copyin(void *kaddr, const void *uaddr, size_t len)
 ssize_t
 copyout(void *uaddr, const void *kaddr, size_t len)
 {
+    if (vm_is_avail((vm_addr_t)uaddr, len)) return -1;
     mem_cpy(uaddr, kaddr, len);
     return len;
 }

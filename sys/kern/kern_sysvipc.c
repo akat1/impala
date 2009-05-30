@@ -68,6 +68,9 @@ struct msqmsg {
 static bool find_msq_eq_type(const msqmsg_t *msg, uintptr_t type);
 static bool find_msq_le_type(const msqmsg_t *msg, uintptr_t type);
 static void ipc_msg_create(ipcmsq_t *msq);
+// static void ipc_msg_open(ipcmsq_t *msq);
+static void ipc_msg_destroy(ipcmsq_t *msq);
+static void ipc_msg_flush(ipcmsq_t *msq);
 
 ipcmsq_t msgs[SYSVMSG_MAX];
 
@@ -87,10 +90,33 @@ ipc_msg_create(ipcmsq_t *msq)
 {
     LIST_CREATE(&msq->msq_data, msqmsg_t, L_data, FALSE);
     msq->msq_refcnt = 0;
+    msq->msq_working = FALSE;
     mutex_init(&msq->msq_mtx, MUTEX_CONDVAR);
 }
 
+void
+ipc_msg_flush(ipcmsq_t *msq)
+{
+    msqmsg_t *msg = NULL;
+    while ( (msg = list_next(&msq->msq_data, msg)) ) {
+        kmem_cache_free(msg_cache, msg);
+    }
+    msq->msq_working = FALSE;
+}
 
+void
+ipc_msg_destroy(ipcmsq_t *msq)
+{
+    mutex_lock(&msq->msq_mtx);
+    KASSERT(msq->msq_refcnt > 0);
+    msq->msq_refcnt--;
+    mutex_unlock(&msq->msq_mtx);
+    if (msq->msq_refcnt == 0) {
+        if (msq->msq_key == IPC_PRIVATE) {
+
+        }
+    }
+}
 
 ipcmsq_t *
 ipc_msg_get(proc_t *p, key_t key, int flags, int *id)
@@ -98,21 +124,37 @@ ipc_msg_get(proc_t *p, key_t key, int flags, int *id)
     ipcmsq_t *msq;
     if (key == IPC_PRIVATE) {
         *id = SYSVMSG_MAX;
-        if (p->p_ipc_msq) {
+        if (p->p_ipc_msq && p->p_ipc_msq->msq_working) {
             msq = p->p_ipc_msq;
         } else
         if (flags & IPC_CREAT) {
             msq = p->p_ipc_msq = kmem_alloc(sizeof(ipcmsq_t), KM_SLEEP);
             ipc_msg_create(p->p_ipc_msq);
+            p->p_ipc_msq->msq_key = key;
         }
     }
     return 0;
 }
 
 int
-ipc_msg_ctl(ipcmsq_t *msq, struct msqid_ds *uds)
+ipc_msg_ctl(ipcmsq_t *msq, int cmd, struct msqid_ds *uds)
 {
-    return -ENOTSUP;
+    int err = 0;
+    mutex_lock(&msq->msq_mtx);
+    if (cmd == IPC_STAT) {
+        copyout(uds, &msq->msq_ds, sizeof(msq->msq_ds));
+    } else
+    if (cmd == IPC_SET) {
+    } else
+    if (cmd == IPC_RMID) {
+        ipc_msg_flush(msq);
+        mutex_unlock(&msq->msq_mtx);
+        ipc_msg_destroy(msq);
+        return 0;
+    }
+    mutex_unlock(&msq->msq_mtx);
+
+    return err;
 }
 
 int

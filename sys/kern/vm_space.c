@@ -130,12 +130,3 @@ vm_space_print(vm_space_t *vs)
         vs->seg_stack->limit, vs->seg_stack->size/1024);
 }
 
-int
-vm_space_is_avail(vm_space_t *vs, vm_addr_t addr, vm_size_t s)
-{
-    s = PAGE_ROUND(s);
-    for (s += addr; addr < s; addr += PAGE_SIZE) {
-        if (!vm_pmap_is_avail(&vs->pmap, addr)) return -1;
-    }
-    return 0;
-}
