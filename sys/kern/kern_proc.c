@@ -86,10 +86,11 @@ proc_init(void)
     initproc = proc_create();
 }
 
-proc_t *
-proc_fork(proc_t *p)
+int
+proc_fork(proc_t *p, proc_t **child)
 {
-    return 0;
+    *child = NULL;
+    return -ENOTSUP;
 }
 
 /**
