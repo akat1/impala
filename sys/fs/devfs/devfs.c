@@ -66,6 +66,7 @@ static vnode_setattr_t devfs_setattr;
 static vnode_lookup_t devfs_lookup;
 static vnode_mkdir_t devfs_mkdir;
 static vnode_getdents_t devfs_getdents;
+static vnode_inactive_t devfs_inactive;
 
 static vnode_ops_t devfs_vnode_ops = {
     .vop_open = devfs_open,
@@ -81,10 +82,14 @@ static vnode_ops_t devfs_vnode_ops = {
     .vop_lookup = devfs_lookup,
     .vop_mkdir = devfs_mkdir,
     .vop_getdents = devfs_getdents,
+    .vop_inactive = devfs_inactive,
 };
 
 static int _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs);
 static int _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr);
+///@todo mo¿na by pewno wydzieliæ tê funkcjê gdzie¶
+static int pc_cmp(lkp_state_t *path, const char *fname);
+
 
 int
 _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
@@ -120,7 +125,6 @@ _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
     *vpp = res;
     return 0;    
 }
-
 
 int
 devfs_open(vnode_t *vn, int flags, mode_t mode)
@@ -266,8 +270,16 @@ devfs_setattr(vnode_t *vn, vattr_t *attr)
     return 0;
 }
 
-///@todo mo¿na by pewno wydzieliæ tê funkcjê gdzie¶
-static int pc_cmp(lkp_state_t *path, const char *fname);
+int
+devfs_inactive(vnode_t *vn)
+{
+    devfs_node_t *n = vn->v_private;
+    //nie zwalniamy n, on sobie bytuje a¿ do deregister
+    if(vn->v_type == VNODE_TYPE_DIR) {
+        n->i_dirvnode = NULL;
+    }
+    return 0;
+}
 
 int
 pc_cmp(lkp_state_t *path, const char *fname)

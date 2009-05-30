@@ -63,6 +63,7 @@ vrele(vnode_t *vn)
 {
     vn->v_refcnt--;
     if(vn->v_refcnt == 0) {
+        VOP_INACTIVE(vn);
         kmem_free(vn);
     }
 }

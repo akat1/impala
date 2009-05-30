@@ -69,6 +69,7 @@ static vnode_setattr_t mfs_setattr;
 static vnode_lookup_t mfs_lookup;
 static vnode_mkdir_t mfs_mkdir;
 static vnode_getdents_t mfs_getdents;
+static vnode_inactive_t mfs_inactive;
 
 static vnode_ops_t mfs_vnode_ops = {
     .vop_open = mfs_open,
@@ -84,12 +85,15 @@ static vnode_ops_t mfs_vnode_ops = {
     .vop_lookup = mfs_lookup,
     .vop_mkdir = mfs_mkdir,
     .vop_getdents = mfs_getdents,
+    .vop_inactive = mfs_inactive,
 };
 
 static mfs_node_t* _alloc_node(void);
 static int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
 static int _get_vnode(mfs_node_t *node, vnode_t **vpp, vfs_t *fs);
 static int _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr);
+static int pc_cmp(lkp_state_t *path, const char *fname);
+
 
 mfs_node_t*
 _alloc_node()
@@ -138,8 +142,6 @@ mfs_mkdir(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
     return _create(vn, vpp, name, attr);
 }
-
-
 
 int
 mfs_close(vnode_t *vn)
@@ -235,7 +237,13 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
     return 0;
 }
 
-static int pc_cmp(lkp_state_t *path, const char *fname);
+int
+mfs_inactive(vnode_t *vn)
+{
+    mfs_node_t *n = vn->v_private;
+    n->vnode = NULL;
+    return 0;
+}
 
 int
 pc_cmp(lkp_state_t *path, const char *fname)

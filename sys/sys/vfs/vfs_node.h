@@ -113,6 +113,7 @@ enum {
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 #define VOP_MKDIR(v, vpp, p, a) (v)->v_ops->vop_mkdir((v), (vpp), (p), (a))
 #define VOP_GETDENTS(v, d, c) (v)->v_ops->vop_getdents((v), (d), (c))
+#define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
 typedef int vnode_create_t(vnode_t *v, vnode_t **vpp, const char *name,
@@ -129,6 +130,7 @@ typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, lkp_state_t *path);
 typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
                            vattr_t *attr);
 typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int count);
+typedef int vnode_inactive_t(vnode_t *v);
 
 
 struct vnode_ops {
@@ -143,8 +145,9 @@ struct vnode_ops {
     vnode_getattr_t   *vop_getattr;
     vnode_setattr_t   *vop_setattr;
     vnode_lookup_t    *vop_lookup;
-    vnode_mkdir_t     *vop_mkdir; 
-    vnode_getdents_t  *vop_getdents;   
+    vnode_mkdir_t     *vop_mkdir;
+    vnode_getdents_t  *vop_getdents;
+    vnode_inactive_t  *vop_inactive;
 /*    vnode_link_t      *vop_link;
     vnode_rmdir_t     *vop_rmdir; */
 };
