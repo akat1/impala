@@ -49,50 +49,23 @@ void teest(void);
 void teest(void)
 {
     for(;;)
-    kprintf("!"); 
+    kprintf("!");
 }
 
-#if 0
-thread_t *
-__copy_thread(thread_t *t)
-{
-    thread_t *t_copy;
-    /* XXX */
-    t_copy = thread_create(t->thr_priv, teest, 0); //t->thr_entry_point, t->thr_entry_arg);
-    mem_cpy(&(t_copy->thr_context), &(t->thr_context), sizeof(thread_context));
-    t_copy->thr_flags = t->thr_flags & (~THREAD_SYSCALL);
-    t_copy->thr_wakeup_time = t->thr_wakeup_time;
-    mem_cpy(&(t_copy->thr_stack), &(t->thr_stack), THREAD_STACK_SIZE);
-//    (t->thr_context).c_esp = 
-
-    return t_copy;
-}
-#endif
 
 errno_t
 sc_fork(thread_t *t, syscall_result_t *r)
 {
-#if 0
-    proc_t *p;
-    thread_t *thr, *thr_copy;
-
-    /* tworzymy nowy proces */
-    p = proc_create();
-    p->p_ppid = t->thr_proc->p_pid;
-    p->p_cred->p_uid = t->thr_proc->p_cred->p_uid;
-
-    #define NEXT_THR() (thread_t*) list_next(&(t->thr_proc->p_threads), thr)
-
-    thr = (thread_t *)list_head(&(t->thr_proc->p_threads));
-
-    {
-        thr_copy = __copy_thread(thr);
-        thr_copy->thr_proc = p;
-        proc_insert_thread(p, thr_copy);
-        sched_insert(thr_copy);
-    } while ( (thr = NEXT_THR()) );
-    #undef NEXT_THR
-#endif
-    return -ENOTSUP;
+    proc_t *p = t->thr_proc;
+    proc_t *child = proc_fork(p);
+    if (child == 0) {
+        return -EAGAIN;
+    }
+    if (curthread == t) {
+        r->result = child->p_pid;
+    } else {
+        r->result = 0;
+    }
+    return -EAGAIN;
 }
 

@@ -3,6 +3,30 @@
 #include <string.h>
 #include <fcntl.h>
 
+#define print(fd, str) write(fd, str, strlen(str))
+
+#if 1
+const char *msg = "fork () test\n";
+int
+main(int argc, char **v)
+{
+    int fd = open("/dev/ttyv0", 0, 0);
+    print(fd, msg);
+    pid_t p = fork();
+    if (p == 0) {
+        print(fd, "I am father\n");
+    } else
+    if (p == -1) {
+        print(fd, "error\n");
+    } else {
+        print(fd, "child\n");
+    }
+    while(1);
+    return 0;
+}
+
+
+#else
 const char data[] = "Hello, World\n";
 const char data2[] = "OK\n";
 static char sbuf[32];
@@ -65,9 +89,10 @@ main(int argc, char **argv)
         write(0, d->d_name, strlen(d->d_name));
         write(0, "\n", 1);
     }
-    
+
     while(1) {int l = read(fd, buf, 127);
     write(fd, buf, l); }
     while(1);
     return 0;
 }
+#endif

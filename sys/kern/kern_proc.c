@@ -86,6 +86,12 @@ proc_init(void)
     initproc = proc_create();
 }
 
+proc_t *
+proc_fork(proc_t *p)
+{
+    return 0;
+}
+
 /**
  * Przydziela deskryptor procesu.
  */
