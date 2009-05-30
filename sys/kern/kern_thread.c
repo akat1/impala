@@ -83,10 +83,9 @@ thread_init()
 
 /**
  * Przydziela deskryptor w±tku.
- * @param priv Poziom uprzywilejowania.
+ * @param type Poziom uprzywilejowania.
  * @param entry Adres procedury wej¶ciowej.
  * @param arg Adres argumentu przekazywany do procedury wej¶ciowej.
- * @param ssize Rozmiar stosu.
  *
  * Procedura przydziela ogólny deskryptor w±tku. W±tek przydzielony
  * w ten sposób znajduje siê w stanie surowym.

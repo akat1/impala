@@ -103,7 +103,7 @@ main(int argc, char **argv)
         write(0, d->d_name, strlen(d->d_name));
         write(0, "\n", 1);
     }
-    recur(3);
+//    recur(10);
     while(1) {int l = read(fd, buf, 127);
     write(fd, buf, l); }
     while(1);

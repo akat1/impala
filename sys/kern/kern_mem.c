@@ -440,7 +440,7 @@ get_slab_from_cache(kmem_cache_t *cache)
 /**
  * Rezerwuje element z p³yty.
  * @param cache wska¼nik do schowka.
- * @param slan wska¼nik do u¿ytecznej p³yty.
+ * @param slab wska¼nik do u¿ytecznej p³yty.
  * @return opis bufora
  */
 kmem_bufctl_t *

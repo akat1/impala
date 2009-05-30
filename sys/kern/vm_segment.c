@@ -61,6 +61,7 @@ enum {
  * @param base adres pierwszej strony w segmencie.
  * @param size rozmiar.
  * @param limit ograniczenie górne na rozmiar segmentu.
+ * @param p poziom ochrony stron segmentu.
  * @param flags dodatkowe opcje.
  */
 void
@@ -223,9 +224,9 @@ vm_seg_release(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
 
 /**
  * Tworzy kopiê segmentu.
- * @param vseg deskryptor segmentu.
- * @param vaddr adres pierwszej strony w obszarze.
- * @param size rozmiar.
+ * @param dst deskryptor segmentu docelowego.
+ * @param space przestrzeñ adresowa segmentu docelowego.
+ * @param src segment ¼ród³owy.
  */
 int
 vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)

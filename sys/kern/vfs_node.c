@@ -43,6 +43,8 @@
 //#include <sys/utils.h>
 
 static bool _last_component(lkp_state_t *st);
+static int _rdwr(int space, int rw, vnode_t *vn, void *addr, int len,
+                  off_t offset);
 
 vnode_t*
 vnode_alloc()
@@ -194,8 +196,10 @@ tmp_vnode_dev(devd_t *dev, vnode_t **vn)
     return 0;
 }
 
+
+
 int
-vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
+_rdwr(int space, int rw, vnode_t *vn, void *addr, int len, off_t offset)
 {
     if(!vn || !addr)
         return -EINVAL;
@@ -208,7 +212,7 @@ vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
     u.size = len;
     u.offset = offset;
     u.oper = rw;
-    u.space = UIO_SYSSPACE; //vn_rdwr bêdzie wykorzystywany gdzie¶ indziej?
+    u.space = space;
     if(u.oper == UIO_WRITE)
         return VOP_WRITE(vn, &u);
     else if(u.oper == UIO_READ)
@@ -216,4 +220,14 @@ vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
     else return -EINVAL;
 }
 
+int
+vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
+{
+    return _rdwr(UIO_SYSSPACE, rw, vn, addr, len, offset);
+}
 
+int
+vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
+{
+    return _rdwr(UIO_USERSPACE, rw, vn, addr, len, offset);
+}

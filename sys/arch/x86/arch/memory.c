@@ -309,6 +309,7 @@ vm_pmap_init0(vm_pmap_t *vpm)
  * @param vpm odwzorowanie stron.
  * @param p strona.
  * @param va wirtualny adres strony.
+ * @param prot poziom ochrony strony.
  * @return FALSE wtedy i tylko wtedy gdy mo¿na by³o przydzieliæ pamiêci
  *         na now± tablicê stron.
  */
@@ -336,8 +337,9 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
 /**
  * Ustawia odwzorowywanie strony.
  * @param vpm odwzorowanie stron.
- * @param vp adres fizyczny strony.
+ * @param pa adres fizyczny strony.
  * @param va wirtualny adres strony.
+ * @param prot poziom ochrony strony.
  * @return FALSE wtedy i tylko wtedy gdy mo¿na by³o przydzieliæ pamiêci
  *         na now± tablicê stron.
  *
@@ -520,19 +522,7 @@ _pmap_page_prot(const vm_pmap_t *pmap, vm_addr_t addr)
     return PTEFLAGS_TO_PROT(flags);
 }
 
-/**
- * Wstawia tablicê stron w katalog.
- * @param vpm odwzorowanie stron.
- * @param p przydzielona strona do tablicy.
- * @param va pocz±tek 4MB przedzia³u t³umaczonego przez dan± tablicê.
- */
-/*
-void
-_pmap_insert_pte(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va)
-{
-    _pmap_insert_pte_(vpm, (vm_ptable_t*)p->phys_addr, va);
-}
-*/
+
 /**
  * Wstawia tablicê stron w katalog.
  * @param vpm odwzorowanie stron.

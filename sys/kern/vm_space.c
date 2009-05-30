@@ -65,7 +65,7 @@ vm_space_create(vm_space_t *vs, int space)
 void
 vm_space_destroy(vm_space_t *vs)
 {
-    ///@TODO Wybucha.
+    ///@todo Wybucha.
     return;
     TRACE_IN("vs=%p (%p, %p, %p)", vs, vs->seg_text, vs->seg_data, vs->seg_stack);
     vm_space_print(vs);

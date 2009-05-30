@@ -209,7 +209,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
             msg = list_find(&msq->msq_data, find_msq_le_type, type);
         } while (wait && msg == NULL);
     }
-    ///@TODO MSG_NOERROR trzeba obs³ugiwaæ (a raczej nie obs³ugiwaæ)
+    ///@todo MSG_NOERROR trzeba obs³ugiwaæ (a raczej nie obs³ugiwaæ)
     if (msg) {
         copyout(uaddr, msg->data, MIN(size,msg->size));
         err = 0;

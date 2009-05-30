@@ -87,7 +87,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     }
     vattr_t attr;
 
-    ///@TODO sprawdziæ prawa dostêpu
+    ///@todo sprawdziæ prawa dostêpu
     attr.va_mask = VATTR_SIZE;
     VOP_GETATTR(vp, &attr);
     einfo.image_size = attr.va_size;
