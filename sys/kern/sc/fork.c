@@ -57,7 +57,8 @@ errno_t
 sc_fork(thread_t *t, syscall_result_t *r)
 {
     proc_t *p = t->thr_proc;
-    proc_t *child = proc_fork(p);
+    proc_t *child;
+    proc_fork(p, &child);
     if (child == 0) {
         return -EAGAIN;
     }

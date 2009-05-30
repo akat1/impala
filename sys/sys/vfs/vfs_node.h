@@ -86,15 +86,22 @@ enum {
     VATTR_SIZE = 1<<5
 };
 
-struct cpath {
+struct lkp_state {
+    int flags;
     const char *path;
     const char *now;
 };
-typedef struct cpath cpath_t;
+typedef struct lkp_state lkp_state_t;
+
+enum {
+    LKP_NORMAL = 0,
+    LKP_GET_PARENT = 1<<0
+};
 
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
-#define VOP_CREATE(v, name, attr) (v)->v_ops->vop_create((v), (name),(attr))
+#define VOP_CREATE(v, vpp, name, attr) (v)->v_ops->vop_create((v), (vpp), \
+                                                    (name),(attr))
 #define VOP_CLOSE(v) (v)->v_ops->vop_close((v))
 #define VOP_READ(v, uio) (v)->v_ops->vop_read((v), (uio))
 #define VOP_WRITE(v, uio) (v)->v_ops->vop_write((v), (uio))
@@ -104,11 +111,12 @@ typedef struct cpath cpath_t;
 #define VOP_GETATTR(v, attr) (v)->v_ops->vop_getattr((v), (attr))
 #define VOP_SETATTR(v, attr) (v)->v_ops->vop_setattr((v), (attr))
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
-#define VOP_MKDIR(v, p, a) (v)->v_ops->vop_mkdir((v), (p), (a))
+#define VOP_MKDIR(v, vpp, p, a) (v)->v_ops->vop_mkdir((v), (vpp), (p), (a))
 #define VOP_GETDENTS(v, d, c) (v)->v_ops->vop_getdents((v), (d), (c))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
-typedef int vnode_create_t(vnode_t *v, const char *name, vattr_t *attr);
+typedef int vnode_create_t(vnode_t *v, vnode_t **vpp, const char *name,
+                            vattr_t *attr);
 typedef int vnode_close_t(vnode_t *v);
 typedef int vnode_read_t(vnode_t *v, uio_t *u);
 typedef int vnode_write_t(vnode_t *v, uio_t *u);
@@ -117,8 +125,9 @@ typedef int vnode_truncate_t(vnode_t *v, off_t len);
 typedef int vnode_seek_t(vnode_t *v, off_t off);
 typedef int vnode_getattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_setattr_t(vnode_t *v, vattr_t *attr);
-typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, cpath_t *path);
-typedef int vnode_mkdir_t(vnode_t *v, const char *path, vattr_t *attr);
+typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, lkp_state_t *path);
+typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
+                           vattr_t *attr);
 typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int count);
 
 
@@ -147,7 +156,8 @@ struct dirent {
 };
 
 
-int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr);
+int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr);
+int vfs_lookup_parent(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
 int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
 int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);

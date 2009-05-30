@@ -42,11 +42,13 @@
 
 //#include <sys/utils.h>
 
+static bool _last_component(lkp_state_t *st);
+
 vnode_t*
 vnode_alloc()
 {
     vnode_t *res = kmem_alloc(sizeof(vnode_t), KM_SLEEP);
-    res->v_refcnt++;
+    res->v_refcnt=1;
     return res;
 }
 
@@ -87,14 +89,40 @@ vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
 {
     *vpp = NULL;
     if(!p) return -EINVAL;
-    cpath_t pc;
+    lkp_state_t pc;
+    pc.flags = 0;
     pc.path = p;
     pc.now = p;
     return vfs_lookupcp(sd, vpp, &pc, thr);
 }
 
+// mo¿na to jako¶ zgrupowaæ... np. wzoruj±c siê na namei
+
 int
-vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
+vfs_lookup_parent(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
+{
+    *vpp = NULL;
+    if(!p) return -EINVAL;
+    lkp_state_t pc;
+    pc.flags = LKP_GET_PARENT;
+    pc.path = p;
+    pc.now = p;
+    return vfs_lookupcp(sd, vpp, &pc, thr);
+}
+
+bool
+_last_component(lkp_state_t *st)
+{
+    const char *cur = st->now;
+    while(*cur) {
+        if(*(cur++) == '/')
+            return FALSE;
+    }
+    return TRUE;
+}
+
+int
+vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
 {
     int errno = 0;
     vnode_t *tmp;
@@ -140,7 +168,11 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, cpath_t *path, thread_t *thr)
                 (path->now)--;
         }
         errno = VOP_LOOKUP(cur, &tmp, path);  //niech vnode dalej szuka...
-        if(errno)
+        if(errno == -ENOENT) {
+            if((path->flags & LKP_GET_PARENT) && _last_component(path))
+                errno = 0;                
+            break;
+        } else if(errno)
             break;
         cur = tmp;            
     }

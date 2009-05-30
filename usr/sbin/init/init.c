@@ -5,7 +5,7 @@
 
 #define print(fd, str) write(fd, str, strlen(str))
 
-#if 1
+#if 0
 const char *msg = "fork () test\n";
 int
 main(int argc, char **v)
@@ -59,11 +59,24 @@ char
 
 extern int errno;
 
+void recur(int times);
+
+void
+recur(int times)
+{
+    if(times == 0)
+        return;
+    int tab[1024];
+    for(int i=1; i<10; i++)
+        tab[i]+=tab[i+1]+tab[i-1];
+    recur(times-1);
+}
+
 int
 main(int argc, char **argv)
 {
-    int fd = open("/dev/ttyv0", 0, 0);
-    int fd2 = open("/etc/passwd", 0, 0);
+    int fd = open("/dev/ttyv0", O_RDWR, 0);
+    int fd2 = open("/etc/passwd", O_RDONLY, 0);
     char buf[128];
     read(fd2, buf, 127);
     char *b = itoa(fd);
@@ -73,6 +86,7 @@ main(int argc, char **argv)
     write(0, buf, strlen(buf));
     write(0, data2, strlen(data2));
     write(0, data, strlen(data));
+    close(open("pliczek", O_CREAT, 0744));
     int fd3 = open("/", 0, 0);
     dirent_t dents[20];
     int w = getdents(fd3, dents, 20*sizeof(dirent_t));
@@ -89,7 +103,7 @@ main(int argc, char **argv)
         write(0, d->d_name, strlen(d->d_name));
         write(0, "\n", 1);
     }
-
+    recur(3);
     while(1) {int l = read(fd, buf, 127);
     write(fd, buf, l); }
     while(1);

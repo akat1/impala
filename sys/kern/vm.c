@@ -37,6 +37,7 @@
 #include <sys/vm/vm_internal.h>
 #include <sys/thread.h>
 #include <sys/utils.h>
+#include <sys/errno.h>
 
 /// Globalny zamek pamiêci wirtualnej.
 static spinlock_t vm_sp;
@@ -152,6 +153,23 @@ void
 vm_unmap(vm_addr_t addr, vm_size_t size)
 {
     vm_seg_free(vm_kspace.seg_data, addr, size);
+}
+
+int
+vm_validate_string(const char *str, int maxlen)
+{
+    vm_pmap_t *pmap = &curthread->vm_space->pmap;
+    int old_page = PAGE_NUM(str);
+    
+    for(int i=0; i<maxlen; i++) {
+        if(old_page != PAGE_NUM(str+i)) {
+            old_page = PAGE_NUM(str+i);
+            if(!vm_pmap_is_avail(pmap, (vm_addr_t)&str[i])) return -EFAULT;
+        }
+        if(str[i] == 0)
+            return 0;
+    }
+    return -ENAMETOOLONG;
 }
 
 int

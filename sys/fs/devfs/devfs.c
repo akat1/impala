@@ -84,7 +84,7 @@ static vnode_ops_t devfs_vnode_ops = {
 };
 
 static int _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs);
-static int _create(vnode_t *vn, const char *name, vattr_t *attr);
+static int _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr);
 
 int
 _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
@@ -132,9 +132,10 @@ devfs_open(vnode_t *vn, int flags, mode_t mode)
 
 
 int
-_create(vnode_t *vn, const char *name, vattr_t *attr)
+_create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
     int error;
+    *vpp = NULL;
     if(!vn || !name || !attr || vn->v_type != VNODE_TYPE_DIR)
         return -EINVAL;
     ///@todo check for invalid name
@@ -161,19 +162,19 @@ _create(vnode_t *vn, const char *name, vattr_t *attr)
     n->i_child = NULL;
     n->i_next = pn->i_child;
     pn->i_child = n;
-    return 0;
+    return _get_vnode(n, vpp, vn->v_vfs);
 }
 
 int
-devfs_create(vnode_t *vn, const char *name, vattr_t *attr)
+devfs_create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
-    return _create(vn, name, attr);
+    return _create(vn, vpp, name, attr);
 }
 
 int
-devfs_mkdir(vnode_t *vn, const char *path, vattr_t *attr)
+devfs_mkdir(vnode_t *vn, vnode_t **vpp, const char *path, vattr_t *attr)
 {
-    return _create(vn, path, attr);
+    return _create(vn, vpp, path, attr);
 }
 
 int
@@ -266,10 +267,10 @@ devfs_setattr(vnode_t *vn, vattr_t *attr)
 }
 
 ///@todo mo¿na by pewno wydzieliæ tê funkcjê gdzie¶
-static int pc_cmp(cpath_t *path, const char *fname);
+static int pc_cmp(lkp_state_t *path, const char *fname);
 
 int
-pc_cmp(cpath_t *path, const char *fname)
+pc_cmp(lkp_state_t *path, const char *fname)
 {
     const char *c = path->now;
     while(*c && *c!='/' && *fname)
@@ -281,7 +282,7 @@ pc_cmp(cpath_t *path, const char *fname)
 }
 
 int
-devfs_lookup(vnode_t *vn, vnode_t **vpp, cpath_t *path)
+devfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 {
     *vpp = NULL;
     devfs_node_t *en = vn->v_private;
@@ -377,7 +378,8 @@ devfs_register(const char *name, devd_t *device, uid_t def_uid, gid_t def_gid,
     attr.va_gid = def_gid;
     attr.va_mode = def_mode;
     attr.va_type = VNODE_TYPE_DEV;
-    _create(devfs_rootvnode(), name, &attr);
+    vnode_t *tmp_node;
+    _create(devfs_rootvnode(), &tmp_node, name, &attr);
     return 0;
 }
 

@@ -49,9 +49,9 @@ errno_t sc_umask(thread_t *p, syscall_result_t *r, umask_args *args);
 errno_t
 sc_umask(thread_t *p, syscall_result_t *r, umask_args *args)
 {
-    r->result = p->thr_proc->umask;
+    r->result = p->thr_proc->p_umask;
     
-    p->thr_proc->umask = args->mask & 0777;
+    p->thr_proc->p_umask = args->mask & 0777;
 
     return EOK;
 }

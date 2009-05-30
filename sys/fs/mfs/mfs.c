@@ -89,7 +89,7 @@ static vnode_ops_t mfs_vnode_ops = {
 static mfs_node_t* _alloc_node(void);
 static int mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size);
 static int _get_vnode(mfs_node_t *node, vnode_t **vpp, vfs_t *fs);
-static int _create(vnode_t *vn, const char *name, vattr_t *attr);
+static int _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr);
 
 mfs_node_t*
 _alloc_node()
@@ -106,8 +106,9 @@ mfs_open(vnode_t *vn, int flags, mode_t mode)
 }
 
 int
-_create(vnode_t *vn, const char *name, vattr_t *attr)
+_create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
+    *vpp = NULL;
     if(!vn || !name || !attr || vn->v_type != VNODE_TYPE_DIR)
         return -EINVAL;
     mfs_node_t *pnode = vn->v_private;
@@ -123,22 +124,22 @@ _create(vnode_t *vn, const char *name, vattr_t *attr)
     node->child = NULL;
     node->next = pnode->child;
     pnode->child = node;
-    return 0;
+    return _get_vnode(node, vpp, vn->v_vfs);
 }
 
 int
-mfs_create(vnode_t *vn, const char *name, vattr_t *attr)
+mfs_create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
-    return _create(vn, name, attr);
+    return _create(vn, vpp, name, attr);
 }
 
 int
-mfs_mkdir(vnode_t *vn, const char *name, vattr_t *attr)
+mfs_mkdir(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
-    return _create(vn, name, attr);
+    return _create(vn, vpp, name, attr);
 }
-    
-    
+
+
 
 int
 mfs_close(vnode_t *vn)
@@ -234,10 +235,10 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
     return 0;
 }
 
-static int pc_cmp(cpath_t *path, const char *fname);
+static int pc_cmp(lkp_state_t *path, const char *fname);
 
 int
-pc_cmp(cpath_t *path, const char *fname)
+pc_cmp(lkp_state_t *path, const char *fname)
 {
     const char *c = path->now;
     while(*c && *c!='/' && *fname)
@@ -262,13 +263,13 @@ _get_vnode(mfs_node_t *en, vnode_t **vpp, vfs_t *fs)
                         VNODE_TYPE_DIR:VNODE_TYPE_REG;
         res->v_private = en;
         en->vnode = res;
-    }
+    } else vref(en->vnode);
     *vpp = en->vnode;
     return 0;
 }
 
 int
-mfs_lookup(vnode_t *vn, vnode_t **vpp, cpath_t *path)
+mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 {
     *vpp = NULL;
     mfs_node_t *en = vn->v_private;

@@ -66,6 +66,7 @@ int vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res);
 int vm_physmap(vm_addr_t paddr, vm_size_t s, void *res);
 int vm_remap(vm_addr_t vaddr, vm_size_t s, void *res);
 void vm_unmap(vm_addr_t addr, vm_size_t size);
+int vm_validate_string(const char *str, int maxlen);
 int vm_is_avail(vm_addr_t addr, vm_size_t s);
 
 
