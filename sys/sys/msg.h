@@ -45,10 +45,22 @@ struct msqid_ds {
 
 #ifdef __KERNEL
 
+struct ipcmsq {
+    struct msqid_ds     msq_ds;
+    mutex_t             msq_mtx;
+    list_t              msq_data;
+    int                 msq_refcnt;
+};
+
+ipcmsq_t *ipc_msg_get(proc_t *proc, key_t key, int flags, int *id);
+int ipc_msg_ctl(ipcmsq_t *, struct msqid_ds *);
+int ipc_msg_snd(ipcmsq_t *, const void *, size_t , int );
+int ipc_msg_rcv(ipcmsq_t *, void *, size_t, long type, int );
+
 #else /* __KERNEL */
 
 int msgget(key_t , int);
-int msgctl(int , int , struct msgid_ds *);
+int msgctl(int , int , struct msqid_ds *);
 int msgrcv(int, void *, size_t, long, int);
 int msgsnd(int, const void *, size_t , int );
 

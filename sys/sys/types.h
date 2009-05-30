@@ -47,12 +47,14 @@ typedef int bool;
 typedef uint32_t off_t;
 //typedef uint32_t dev_t;
 typedef uint32_t blkno_t;
-typedef int gid_t;
-typedef int uid_t;
-typedef int mode_t;
-typedef int pid_t;
+typedef unsigned int gid_t;
+typedef unsigned int uid_t;
+typedef unsigned int mode_t;
+typedef unsigned int pid_t;
 typedef int errno_t;
-typedef int time_t;
+typedef unsigned int time_t;
+typedef unsigned int mask_t;
+typedef unsigned int key_t;
 
 // Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS
@@ -76,7 +78,7 @@ typedef struct pcred pcred_t;
 typedef struct filetable filetable_t;
 typedef struct filetable_chunk filetable_chunk_t;
 typedef struct file file_t;
-typedef uint mask_t;
+typedef struct ipcmsq ipcmsq_t;
 #include <sys/vm/vm_types.h>
 #endif
 

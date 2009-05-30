@@ -30,46 +30,20 @@
  * $Id$
  */
 
-#ifndef __SYS_UTILS_H
-#define __SYS_UTILS_H
-
-#ifdef __KERNEL
-void panic(const char* msg, ...);
-extern bool SYSTEM_DEBUG;
-
-#define KASSERT(x) if(!(x)) \
-    panic("Assertion failed\n expr: %s\n in file: %s:%u\n in function: %s",\
-        #x , __FILE__, __LINE__,  __func__);
-
-
-#define MIN(a,b) ( (a) < (b) )? (a) : (b)
-#define MAX(a,b) ( (a) < (b) )? (b) : (a)
-
-void kprintf(const char *fmt, ...);
-void vkprintf(const char *fmt, va_list ap);
-
-ssize_t copyin(void *kaddr, const void *uaddr, size_t len);
-ssize_t copyout(void *uaddr, const void *kaddr, size_t len);
-
-ssize_t copyinstr(void *kaddr, const void *uaddr, size_t limit);
-ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
-
-#define TRACE_IN(fmt, args...)\
-    do { \
-        if (!SYSTEM_DEBUG) break;\
-        kprintf("@ %s (", __func__);\
-        kprintf(fmt, ## args);\
-        kprintf(")\n");\
-        for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
-    } while (0);
-
-#define DEBUGF(fmt, a...) do {\
-    kprintf("%s: " fmt "\n", __FILE__, ## a );\
-    } while (0)
-
-#define TRACE_IN0() TRACE_IN("");
-
-
-#endif
+#ifndef __SYS_KERNEL_H
+#define __SYS_KERNEL_H
+#ifndef __KERNEL
+#error  "This header is only for kernel code"
 #endif
 
+#include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/sched.h>
+#include <sys/kmem.h>
+#include <sys/utils.h>
+#include <sys/errno.h>
+#include <sys/uio.h>
+#include <sys/string.h>
+#include <sys/param.h>
+
+#endif

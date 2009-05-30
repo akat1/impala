@@ -34,11 +34,11 @@
 #define __SYS_IPC_H
 
 struct ipc_perm {
-    uid_t   uid;
-    gid_t   gid;
-    uid_t   cuid;
-    gid_t   guid;
-    mode_t  mode;
+    uid_t       uid;
+    gid_t       gid;
+    uid_t       cuid;
+    gid_t       guid;
+    mode_t      mode;
 };
 
 typedef unsigned int    msgqnum_t;
@@ -54,10 +54,12 @@ typedef unsigned int    msglen_t;
 #define IPC_SET     2
 #define IPC_STAT    3
 
-#ifndef __KERNEL
+#ifdef __KERNEL
 
+void    sysvipc_init(void);
+
+#else /* __KERNEL */
 key_t   ftok(const char *, int);
-
 #endif
 
 #endif

@@ -55,6 +55,7 @@ struct proc {
     vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
+    ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci.
     mask_t          umask;       ///< maska tworzonych plików
     list_node_t     L_procs;     ///< wêze³ procesów
     list_node_t     L_children;  ///< wêze³ listy dzieci

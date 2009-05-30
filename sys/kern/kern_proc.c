@@ -30,13 +30,10 @@
  */
 
 #include <sys/types.h>
-#include <sys/utils.h>
-#include <sys/proc.h>
-#include <sys/thread.h>
-#include <sys/utils.h>
-#include <sys/kmem.h>
+#include <sys/kernel.h>
 #include <sys/vm.h>
 #include <sys/file.h>
+#include <sys/ipc.h>
 
 static pid_t last_pid = 0;
 list_t procs_list;
@@ -80,6 +77,7 @@ proc_init(void)
     proc0.p_cred = NULL;
     LIST_CREATE(&proc0.p_threads, thread_t, L_threads, FALSE);
     LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
+
     list_insert_head(&procs_list, &proc0);
     list_insert_head(&proc0.p_threads, curthread);
     curthread->thr_proc = &proc0;

@@ -29,27 +29,22 @@
  * $Id$
  */
 
+
 #include <sys/types.h>
+#include <sys/kernel.h>
 #include <sys/kthread.h>
 #include <sys/clock.h>
-#include <sys/sched.h>
 #include <sys/device.h>
 #include <sys/bio.h>
 #include <sys/console.h>
-#include <sys/proc.h>
 #include <sys/vm.h>
-#include <sys/utils.h>
-#include <sys/kmem.h>
+#include <sys/ipc.h>
 #include <sys/vfs.h>
-#include <sys/proc.h>
-#include <sys/string.h>
 #include <sys/exec.h>
 #include <dev/md/md.h>
 #include <fs/devfs/devfs.h>
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
-#include <sys/errno.h>
-#include <sys/uio.h>
 #include <machine/pckbd.h>
 
 void kmain(void);
@@ -149,6 +144,7 @@ init_kernel()
     vfs_init();
     proc_init();
     cons_init();
+    sysvipc_init();
     ssleep(1);
     kprintf("kernel initialized\n");
 }
