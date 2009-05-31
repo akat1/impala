@@ -111,11 +111,9 @@ int lstat(const char *path, struct stat *buf); //
 
 //getopt
 
-
-int getopt(int argc, char * const argv[], const char *optstring);
 extern char *optarg;
 extern int optind, opterr, optopt, optreset;
-#define S_ISDIR(X) (X)
+
 
 
 #endif

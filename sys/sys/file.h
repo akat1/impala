@@ -37,6 +37,27 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+
+#define SEEK_SET    0
+#define SEEK_CUR    1
+#define SEEK_END    2
+
+
+#define O_RDONLY      (1 << 1)
+#define O_WRONLY      (1 << 2)
+#define O_RDWR        (1 << 3)
+#define O_CREAT       (1 << 4)
+#define O_TRUNC       (1 << 5)
+#define O_EXCL        (1 << 6)
+
+#define F_DUPFD       (1 << 0)
+#define F_GETFL       (1 << 1)
+#define F_SETFL       (1 << 2)
+
+#define PATH_MAX    4096
+
+#ifdef __KERNEL
+
 enum {
     FILES_PER_CHUNK = 32
 };
@@ -60,26 +81,6 @@ struct file {
     //pcred_t   *f_pcred;
 };
 
-
-
-#define SEEK_SET    0
-#define SEEK_CUR    1
-#define SEEK_END    2
-
-
-#define O_RDONLY      (1 << 1)
-#define O_WRONLY      (1 << 2)
-#define O_RDWR        (1 << 3)
-#define O_CREAT       (1 << 4)
-#define O_TRUNC       (1 << 5)
-#define O_EXCL        (1 << 6)
-
-#define F_DUPFD       (1 << 0)
-#define F_GETFL       (1 << 1)
-#define F_SETFL       (1 << 2)
-
-
-#ifdef __KERNEL
 /* XXX */
 enum {
     OK,

@@ -100,4 +100,6 @@ mode_t umask(mode_t mask);
 
 #endif /* __KERNEL */
 
+#include <sys/file.h>
+
 #endif

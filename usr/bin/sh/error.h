@@ -67,10 +67,8 @@ extern volatile sig_atomic_t exception;
  * more fun than worrying about efficiency and portability. :-))
  */
 
-extern volatile int suppressint;
-//extern volatile sig_atomic_t suppressint;
-extern volatile int intpending;
-//extern volatile sig_atomic_t intpending;
+extern volatile sig_atomic_t suppressint;
+extern volatile sig_atomic_t intpending;
 
 #define INTOFF suppressint++
 #define INTON { if (--suppressint == 0 && intpending) onint(); }
