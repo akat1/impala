@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #define print(fd, str) write(fd, str, strlen(str))
 

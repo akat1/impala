@@ -1,4 +1,4 @@
-/* Impala Operating System
+/* Impala C Library
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
@@ -29,27 +29,22 @@
  *
  * $Id$
  */
+#ifndef __SETJMP_H
+#define __SETJMP_H
 
-#ifndef __SYS_CDEFS_H
-#define __SYS_CDEFS_H
+typedef int jmp_buf[6];
+struct sigjmp_buf{
+    jmp_buf env;
+    int sth;
+};
+typedef struct sigjmp_buf sigjmp_buf;
 
+void   longjmp(jmp_buf, int);
+void   siglongjmp(sigjmp_buf, int);
+void  _longjmp(jmp_buf, int);
 
-#define __packed __attribute__((packed))
-
-#ifndef NULL
-#   define NULL (void*)0
-#endif
-
-#define __P(args) args
-
-// piekny triczek, rodem z Solarisa
-#define offsetof(str, memb) ((size_t)(&(((str *)0)->memb)))
-
-#define CXX_BEGIN   extern "C" {
-#define CXX_END     }
-
-#include <machine/cdefs.h>
+int    setjmp(jmp_buf);
+int    sigsetjmp(sigjmp_buf, int);
+int   _setjmp(jmp_buf);
 
 #endif
-
-

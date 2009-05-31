@@ -34,6 +34,7 @@
 #define __SYS_VFS_VFS_NODE_H
 
 #include <sys/vfs.h>
+#include <sys/stat.h>
 
 #ifdef __KERNEL
 
@@ -154,7 +155,7 @@ struct vnode_ops {
 
 #define MAX_NAME 128
 struct dirent {
-    int     d_ino;
+    ino_t   d_ino;
     char    d_name[MAX_NAME];
 };
 

@@ -41,4 +41,12 @@ struct timespec
 	int tv_nsec;
 };
 
+struct timeval
+{
+    time_t tv_sec;
+    int tv_usec;
+};
+typedef struct timeval timeval_t;
+
+
 #endif

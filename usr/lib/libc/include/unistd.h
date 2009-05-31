@@ -1,4 +1,4 @@
-/* Impala Operating System
+/* Impala C Library
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
@@ -32,9 +32,11 @@
 #ifndef __UNISTD_H
 #define __UNISTD_H
 
+#include <stdlib.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
-//TODO:
+//TODO: odkomentowa³em rzeczy wymagane przez ash
 //int          access(const char *, int);
 //unsigned     alarm(unsigned);
 //int          chown(const char *, uid_t, gid_t);
@@ -43,29 +45,29 @@
 //int          execle(const char *, const char *, ...);
 //int          execlp(const char *, const char *, ...);
 //int          execv(const char *, char *const []);
-//int          execve(const char *, char *const [], char *const []);
+int          execve(const char *, char *const [], char *const []);
 //int          execvp(const char *, char *const []);
 //void         _exit(int);
 //int          fchown(int, uid_t, gid_t);
 //long         fpathconf(int, int);
 //int          ftruncate(int, off_t);
 //char        *getcwd(char *, size_t);
-//gid_t        getegid(void);
-//uid_t        geteuid(void);
+gid_t        getegid(void);
+uid_t        geteuid(void);
 //int          getgroups(int, gid_t []);
 //int          gethostname(char *, size_t);
 //char        *getlogin(void);
 //int          getlogin_r(char *, size_t);
 //int          getopt(int, char * const [], const char *);
-//pid_t        getpgrp(void);
-//int          isatty(int);
+pid_t        getpgrp(void);
+int          isatty(int);
 //long         pathconf(const char *, int);
 //int          pause(void);
 //int          pipe(int [2]);
 //ssize_t      readlink(const char *restrict, char *restrict, size_t);
 //int          setegid(gid_t);
 //int          seteuid(uid_t);
-//int          setpgid(pid_t, pid_t);
+int          setpgid(pid_t, pid_t);
 //pid_t        setsid(void);
 //unsigned     sleep(unsigned);
 //long         sysconf(int);

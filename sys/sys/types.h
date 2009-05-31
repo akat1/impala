@@ -45,12 +45,6 @@ typedef int bool;
 
 
 typedef uint32_t off_t;
-//typedef uint32_t dev_t;
-typedef uint32_t blkno_t;
-typedef unsigned int gid_t;
-typedef unsigned int uid_t;
-typedef unsigned int mode_t;
-typedef unsigned int pid_t;
 typedef int errno_t;
 typedef unsigned int time_t;
 typedef unsigned int mask_t;

@@ -34,6 +34,7 @@
 #define __FNCTL_H
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #define O_RDONLY      (1 << 1)
 #define O_WRONLY      (1 << 2)
@@ -43,10 +44,8 @@
 #define O_EXCL        (1 << 6)
 
 int  creat(const char *, mode_t);
-//int  fcntl(int, int);
-int  fcntl(int, int, long);
-//int  open(const char *, int);
-int  open(const char *, int, mode_t);
+int  fcntl(int, int, ...);
+int  open(const char *, int, ...);
 
 
 #endif

@@ -31,6 +31,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/device.h>
 #include <sys/utils.h>
 #include <sys/kmem.h>

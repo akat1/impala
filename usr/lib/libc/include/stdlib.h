@@ -1,4 +1,4 @@
-/* Impala Operating System
+/* Impala C Library
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
@@ -29,27 +29,16 @@
  *
  * $Id$
  */
+#ifndef __STDLIB_H
+#define __STDLIB_H
 
-#ifndef __SYS_CDEFS_H
-#define __SYS_CDEFS_H
+#include <sys/types.h>
 
+//void *calloc(size_t nmemb, size_t size);
+//void *malloc(size_t size);
+void free(void *ptr);
+//void *realloc(void *ptr, size_t size);
+void abort(void);
 
-#define __packed __attribute__((packed))
-
-#ifndef NULL
-#   define NULL (void*)0
-#endif
-
-#define __P(args) args
-
-// piekny triczek, rodem z Solarisa
-#define offsetof(str, memb) ((size_t)(&(((str *)0)->memb)))
-
-#define CXX_BEGIN   extern "C" {
-#define CXX_END     }
-
-#include <machine/cdefs.h>
 
 #endif
-
-

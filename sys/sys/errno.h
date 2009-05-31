@@ -41,7 +41,7 @@
  */
 
 #define E2BIG           20 ///< argument list too long
-#define EACCESS         21 ///< permission deined
+#define EACCES          21 ///< permission deined
 #define EADDRINUSE      22 ///< address in use
 #define EADDRNOTAVAIL   23 ///< address not available
 #define EAFNOSUPPORT    24 ///< address family not supported

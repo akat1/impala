@@ -35,6 +35,7 @@
 
 #include <sys/list.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 enum {
     FILES_PER_CHUNK = 32
