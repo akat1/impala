@@ -6,6 +6,7 @@ SRCS=\
 	fcntl/open.c\
 	fcntl/creat.c\
 	stdlib/atexit.c\
+	stdlib/qsort.c\
 	string/memchr.c\
         string/memcmp.c\
         string/memcpy.c\

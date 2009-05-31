@@ -35,7 +35,7 @@
 #include <sys/types.h>
 
 //void *calloc(size_t nmemb, size_t size);
-//void *malloc(size_t size);
+void *malloc(size_t size); // todo
 void free(void *ptr);
 //void *realloc(void *ptr, size_t size);
 void abort(void);
