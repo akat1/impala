@@ -1,4 +1,3 @@
-<<<<<<< .mine
 /* Impala Operating System
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
@@ -40,17 +39,9 @@ void va_start(va_list ap, const char *last);
 void va_end(va_list ap);
 void va_copy(va_list dest, va_list src);
 
-
-
-#endif
-=======
-#ifndef __STDARG_H
-#define __STDARG_H
-
 //ash tego chce
 #define __printflike(a, b)
 #define __printf0like __printflike
 #define __unused
 
 #endif
->>>>>>> .r301
