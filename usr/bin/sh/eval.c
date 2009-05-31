@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)eval.c	8.9 (Berkeley) 6/8/95";
 #endif
 #endif /* not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 #include <paths.h>
 #include <signal.h>
@@ -1029,6 +1029,8 @@ commandcmd(int argc, char **argv)
 	 * ksh also does this.
 	 */
 	exit(0);
+
+    return 0;
 }
 
 
@@ -1088,6 +1090,8 @@ execcmd(int argc, char **argv)
 int
 timescmd(int argc __unused, char **argv __unused)
 {
+#if 0
+XXX:bzdura
 	struct rusage ru;
 	long shumins, shsmins, chumins, chsmins;
 	double shusecs, shssecs, chusecs, chssecs;
@@ -1106,5 +1110,6 @@ timescmd(int argc __unused, char **argv __unused)
 	chssecs = ru.ru_stime.tv_sec % 60 + ru.ru_stime.tv_usec / 1000000.;
 	out1fmt("%ldm%.3fs %ldm%.3fs\n%ldm%.3fs %ldm%.3fs\n", shumins,
 	    shusecs, shsmins, shssecs, chumins, chusecs, chsmins, chssecs);
+#endif
 	return 0;
 }

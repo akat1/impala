@@ -38,6 +38,13 @@
 
 #include <sys/types.h>
 
+/* todo: bzdura */
+#define __unused
+#define __printf0like(X,Y) 
+typedef int sig_atomic_t;
+#define _PATH_STDPATH "/"
+
+
 /*
  * The follow should be set to reflect the type of system you have:
  *	JOBS -> 1 if you have Berkeley job control, 0 otherwise.

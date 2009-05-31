@@ -161,7 +161,7 @@ exverror(int cond, const char *msg, va_list ap)
 void
 error(const char *msg, ...)
 {
-	va_list ap;
+	va_list ap = NULL;
 	va_start(ap, msg);
 	exverror(EXERROR, msg, ap);
 	va_end(ap);
@@ -171,7 +171,7 @@ error(const char *msg, ...)
 void
 exerror(int cond, const char *msg, ...)
 {
-	va_list ap;
+	va_list ap = NULL;
 	va_start(ap, msg);
 	exverror(cond, msg, ap);
 	va_end(ap);

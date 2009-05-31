@@ -47,7 +47,8 @@
 //int          execv(const char *, char *const []);
 int          execve(const char *, char *const [], char *const []);
 //int          execvp(const char *, char *const []);
-//void         _exit(int);
+void         _exit(int);
+void         exit(int);
 //int          fchown(int, uid_t, gid_t);
 //long         fpathconf(int, int);
 //int          ftruncate(int, off_t);
@@ -63,7 +64,7 @@ pid_t        getpgrp(void);
 int          isatty(int);
 //long         pathconf(const char *, int);
 //int          pause(void);
-//int          pipe(int [2]);
+int          pipe(int [2]);
 //ssize_t      readlink(const char *restrict, char *restrict, size_t);
 //int          setegid(gid_t);
 //int          seteuid(uid_t);

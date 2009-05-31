@@ -51,7 +51,7 @@ struct jmploc {
 };
 
 extern struct jmploc *handler;
-//extern volatile sig_atomic_t exception;
+extern volatile sig_atomic_t exception;
 
 /* exceptions */
 #define EXINT 0		/* SIGINT received */
