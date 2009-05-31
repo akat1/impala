@@ -116,7 +116,5 @@ extern char *optarg;
 extern int optind, opterr, optopt, optreset;
 
 
-// todo:
-#define S_ISDIR(x) (x)
 
 #endif
