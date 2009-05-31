@@ -51,7 +51,7 @@ struct jmploc {
 };
 
 extern struct jmploc *handler;
-extern volatile sig_atomic_t exception;
+//extern volatile sig_atomic_t exception;
 
 /* exceptions */
 #define EXINT 0		/* SIGINT received */
@@ -67,8 +67,10 @@ extern volatile sig_atomic_t exception;
  * more fun than worrying about efficiency and portability. :-))
  */
 
-extern volatile sig_atomic_t suppressint;
-extern volatile sig_atomic_t intpending;
+extern volatile int suppressint;
+//extern volatile sig_atomic_t suppressint;
+extern volatile int intpending;
+//extern volatile sig_atomic_t intpending;
 
 #define INTOFF suppressint++
 #define INTON { if (--suppressint == 0 && intpending) onint(); }
@@ -78,8 +80,8 @@ extern volatile sig_atomic_t intpending;
 
 void exraise(int);
 void onint(void);
-void error(const char *, ...) __printf0like(1, 2);
-void exerror(int, const char *, ...) __printf0like(2, 3);
+void error(const char *, ...);// __printf0like(1, 2);
+void exerror(int, const char *, ...);// __printf0like(2, 3);
 
 
 /*

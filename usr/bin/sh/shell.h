@@ -36,7 +36,7 @@
 #ifndef SHELL_H_
 #define SHELL_H_
 
-#include <inttypes.h>
+#include <sys/types.h>
 
 /*
  * The follow should be set to reflect the type of system you have:
@@ -55,7 +55,7 @@
 /*
  * Type of used arithmetics. SUSv3 requires us to have at least signed long.
  */
-typedef intmax_t arith_t;
+typedef long int arith_t;
 #define	ARITH_FORMAT_STR  "%" PRIdMAX
 #define	atoarith_t(arg)  strtoimax(arg, NULL, 0)
 #define	strtoarith_t(nptr, endptr, base)  strtoimax(nptr, endptr, base)

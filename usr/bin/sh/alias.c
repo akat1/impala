@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)alias.c	8.3 (Berkeley) 5/4/95";
 #endif
 #endif /* not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 #include <stdlib.h>
 #include "shell.h"
@@ -260,7 +260,7 @@ aliascmd(int argc, char **argv)
 }
 
 int
-unaliascmd(int argc __unused, char **argv __unused)
+unaliascmd(int argc, char **argv)
 {
 	int i;
 
