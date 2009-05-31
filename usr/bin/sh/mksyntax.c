@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)mksyntax.c	8.2 (Berkeley) 5/4/95";
 #endif /* not lint */
 #endif
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 /*
  * This program creates syntax.h and syntax.c.
@@ -115,7 +115,7 @@ static void output_type_macros(void);
 static void digit_convert(void);
 
 int
-main(int argc __unused, char **argv __unused)
+main(int argc, char **argv)
 {
 	char c;
 	char d;

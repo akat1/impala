@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)mknodes.c	8.2 (Berkeley) 5/4/95";
 #endif /* not lint */
 #endif
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 /*
  * This program reads the nodetypes file and nodes.c.pat file.  It generates
@@ -103,7 +103,7 @@ static void indent(int, FILE *);
 static int nextfield(char *);
 static void skipbl(void);
 static int readline(void);
-static void error(const char *, ...) __printf0like(1, 2) __dead2;
+static void error(const char *, ...);// __printf0like(1, 2) __dead2;
 static char *savestr(const char *);
 
 
