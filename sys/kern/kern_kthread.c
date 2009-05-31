@@ -50,7 +50,7 @@ static void setup_vmspace(thread_t *arg);
 void
 kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
 {
-    thread_t *thr = thread_create(0, (void*)__kthr, kthr);
+    thread_t *thr = thread_create(THREAD_KERNEL, (void*)__kthr, kthr);
     if (!thr) panic("cannot create kernel thread");
     setup_vmspace(thr);
     kthr->kt_arg = arg;
@@ -73,8 +73,7 @@ void
 setup_vmspace(thread_t *thr)
 {
     thr->vm_space = &vm_kspace;
-    vm_space_create_stack(thr->vm_space, &thr->thr_stack,
-        THREAD_KSTACK_SIZE);
-    thr->thr_stack_size = THREAD_KSTACK_SIZE;
+    thr->thr_stack = thr->thr_kstack;
+    thr->thr_stack_size = thr->thr_kstack_size;
     DEBUGF("new stack %p+%u", thr->thr_stack, thr->thr_stack_size);
 }

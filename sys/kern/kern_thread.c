@@ -78,7 +78,7 @@ thread_init()
         thread_ctor, thread_dtor);
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN | THREAD_KERNEL;
-    //curthread->vm_space = &vm_kspace;
+    curthread->vm_space = &vm_kspace;
 }
 
 /**
@@ -104,6 +104,10 @@ thread_create(int type, addr_t entry, addr_t arg)
         t->vm_space = NULL;
         thread_context_init(&t->thr_context);
         list_insert_tail(&threads_list, t);
+        vm_space_create_stack(&vm_kspace, &t->thr_kstack,
+                    THREAD_KSTACK_SIZE);
+        t->thr_kstack_size = THREAD_KSTACK_SIZE;
+
         return t;
     } else {
         kprintf("ERROR: no free threads!\n");
@@ -120,6 +124,26 @@ thread_destroy(thread_t *t)
     return;
 }
 
+
+void
+thread_clone(thread_t *dst, thread_t *src)
+{
+#define SC(dst,src,entry) dst->entry = src->entry
+//     SC(dst, src, thr_entry_point);
+//     SC(dst, src, thr_entry_arg);
+//     SC(dst, src, thr_flags);
+    SC(dst, src, vm_space);
+    SC(dst, src, thr_proc);
+    SC(dst, src, thr_wakeup_time);
+    SC(dst, src, thr_tid);
+    SC(dst, src, thr_stack);
+    SC(dst, src, thr_stack_size);
+    mem_cpy(dst->thr_kstack, src->thr_kstack, src->thr_kstack_size);
+    mem_cpy(&dst->thr_context, &src->thr_context, sizeof(src->thr_context));
+    kprintf("[%p,%p]\n", dst->vm_space, src->vm_space);
+
+#undef SC
+}
 
 
 /*=============================================================================

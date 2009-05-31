@@ -168,7 +168,6 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
     t->thr_entry_point = (void*)entry;
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
-    vm_space_create_stack(&vm_kspace, &t->thr_kstack, THREAD_KSTACK_SIZE);
     return t;
 }
 

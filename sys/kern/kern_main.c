@@ -63,53 +63,28 @@ kmain()
     start_init_process();
 }
 
+
 void
 prepare_root()
 {
 }
 
-#if 0
-
-static void PROC_init(void);
-
-void
-PROC_init()
-{
-    __asm__(
-        "movl $3, %eax;"
-        "int $0x80"
-    );
-
-    for (   ;;); __asm__(
-        "movl $3, %eax;"
-        "int $0x80"
-    );
-}
-
-char buf[THREAD_STACK_SIZE];
-char kbuf[THREAD_KSTACK_SIZE];
-#endif
-
 void
 start_init_process()
 {
-#if 0
-    proc_t *p = proc_create();
-    void *entry = (void*) (VM_SPACE_UTEXT + PAGE_OFF(PROC_init));
-    thread_t *t = proc_create_thread(p, THREAD_STACK_SIZE, entry);
-    vm_pmap_map(&t->vm_space->pmap, VM_SPACE_UTEXT, &vm_kspace.pmap,
-        PTE_ADDR(PROC_init), 2*PAGE_SIZE);
-    DEBUGF("big fake: %p -> %p", PROC_init, entry);
-    sched_insert(t);
-#endif
     int err;
     switch ( (err = execve(initproc, "/sbin/init", NULL, NULL)) ) {
         case 0:
             break;
         case -ENOENT:
+            panic("Cannot found init image at /sbin/init");
+            break;
+        default:
+            panic("Cannot execute init process");
             break;
     }
     while(1);
+
 }
 
 void
