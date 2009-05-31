@@ -38,10 +38,88 @@
 #define DEFEDITOR	"ed"	/* default editor *should* be $EDITOR */
 #undef  editing
 #define editing (Eflag || Vflag)
+#undef  ATABSIZE
+#define ATABSIZE 39
+#undef  EV_EXIT
+#define EV_EXIT 01		/* exit after evaluating tree */
+#undef  EV_TESTED
+#define EV_TESTED 02		/* exit status is checked; ignore -e flag */
+#undef  EV_BACKCMD
+#define EV_BACKCMD 04		/* command executing within back quotes */
 #undef  CMDTABLESIZE
 #define CMDTABLESIZE 31		/* should be prime */
 #undef  ARB
 #define ARB 1			/* actual size determined at run time */
+#undef  MAXHISTLOOPS
+#define MAXHISTLOOPS	4	/* max recursions through fc */
+#undef  DEFEDITOR
+#define DEFEDITOR	"ed"	/* default editor *should* be $EDITOR */
+#undef  editing
+#define editing (Eflag || Vflag)
+#undef  CMDTABLESIZE
+#define CMDTABLESIZE 31		/* should be prime */
+#undef  ARB
+#define ARB 1			/* actual size determined at run time */
+#undef  EOF_NLEFT
+#define EOF_NLEFT -99		/* value of parsenleft when EOF pushed back */
+#undef  MAXCMDTEXT
+#define MAXCMDTEXT	200
+#undef  MAXMBOXES
+#define MAXMBOXES 10
+#undef  MINSIZE
+#define MINSIZE 496		/* minimum size of a block. */
+#undef  OUTFILE
+#define OUTFILE "init.c"
+#undef  OUTTEMP
+#define OUTTEMP "init.c.new"
+#undef  BLOCKSIZE
+#define BLOCKSIZE 512
+#undef  MAXTYPES
+#define MAXTYPES 50		/* max number of node types */
+#undef  MAXFIELDS
+#define MAXFIELDS 20		/* max fields in a structure */
+#undef  BUFLEN
+#define BUFLEN 100		/* size of character buffers */
+#undef  T_NODE
+#define T_NODE 1		/* union node *field */
+#undef  T_NODELIST
+#define T_NODELIST 2		/* struct nodelist *field */
+#undef  T_STRING
+#define T_STRING 3
+#undef  T_INT
+#define T_INT 4			/* int field */
+#undef  T_OTHER
+#define T_OTHER 5		/* other */
+#undef  T_TEMP
+#define T_TEMP 6		/* don't copy this field */
+#undef  OUTBUFSIZ
+#define OUTBUFSIZ BUFSIZ
+#undef  BLOCK_OUT
+#define BLOCK_OUT -2		/* output to a fixed block of memory */
+#undef  MEM_OUT
+#define MEM_OUT -3		/* output to dynamically allocated memory */
+#undef  OUTPUT_ERR
+#define OUTPUT_ERR 01		/* error occurred on output */
+#undef 	EOFMARKLEN
+#define	EOFMARKLEN	79
+#undef 	PROMPTLEN
+#define	PROMPTLEN	128
+#undef  EMPTY
+#define EMPTY -2		/* marks an unused slot in redirtab */
+#undef  PIPESIZE
+#define PIPESIZE 4096		/* amount of buffering in a pipe */
+#undef  S_DFL
+#define S_DFL 1			/* default signal handling (SIG_DFL) */
+#undef  S_CATCH
+#define S_CATCH 2		/* signal is caught */
+#undef  S_IGN
+#define S_IGN 3			/* signal is ignored (SIG_IGN) */
+#undef  S_HARD_IGN
+#define S_HARD_IGN 4		/* signal is ignored permanently */
+#undef  S_RESET
+#define S_RESET 5		/* temporary - to reset a hard ignored sig */
+#undef  VTABSIZE
+#define VTABSIZE 39
 #undef  EOF_NLEFT
 #define EOF_NLEFT -99		/* value of parsenleft when EOF pushed back */
 #undef  MAXCMDTEXT

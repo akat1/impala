@@ -49,7 +49,8 @@
  */
 
 
-#define	JOBS 1
+#define	JOBS 0
+#define NO_HISTORY
 /* #define DEBUG 1 */
 
 /*

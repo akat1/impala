@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)cd.c	8.2 (Berkeley) 5/4/95";
 #endif
 #endif /* not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -341,7 +341,7 @@ pwdcmd(int argc, char **argv)
 		out1str(curdir);
 		out1c('\n');
 	} else {
-		if (getcwd(buf, sizeof(buf)) == NULL)
+		if (getcwd(buf, sizeof(buf)) == (char *)NULL)
 			error(".: %s", strerror(errno));
 		out1str(buf);
 		out1c('\n');

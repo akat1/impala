@@ -51,7 +51,7 @@ int          execve(const char *, char *const [], char *const []);
 //int          fchown(int, uid_t, gid_t);
 //long         fpathconf(int, int);
 //int          ftruncate(int, off_t);
-//char        *getcwd(char *, size_t);
+char        *getcwd(char *, size_t);
 gid_t        getegid(void);
 uid_t        geteuid(void);
 //int          getgroups(int, gid_t []);
@@ -104,5 +104,17 @@ int dup(int fd);
 int chdir(const char *path);
 int dup2(int oldfd, int newfd);
 int getdents(int fd, dirent_t *data, size_t count);
+int lstat(const char *path, struct stat *buf); //
+
+//getopt
+
+
+int getopt(int argc, char * const argv[], const char *optstring);
+extern char *optarg;
+extern int optind, opterr, optopt, optreset;
+
+
+// todo:
+#define S_ISDIR(x) (x)
 
 #endif

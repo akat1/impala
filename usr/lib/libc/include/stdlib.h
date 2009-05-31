@@ -40,7 +40,8 @@ void free(void *ptr);
 //void *realloc(void *ptr, size_t size);
 void abort(void);
 void qsort(void *base, size_t nmemb, size_t size,
-    int(*compar)(const void *, const void *));
+    int(*compar)(const void *, const void *)); //
+char *getenv(const char *name); //
 
 
 #endif
