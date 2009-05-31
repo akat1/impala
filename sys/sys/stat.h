@@ -87,13 +87,14 @@ struct stat {
 #define S_IXOTH    00001
 
 #define S_ISREG(m) (m&S_IFREG)
+#define S_ISDIR(m) (m&S_IFDIR)
 
 #ifdef __KERNEL
 #else
 
 int stat(const char *path, struct stat *buf);
 //int fstat(int filedes, struct stat *buf);
-//int lstat(const char *path, struct stat *buf);
+int lstat(const char *path, struct stat *buf);
 mode_t umask(mode_t mask);
 
 

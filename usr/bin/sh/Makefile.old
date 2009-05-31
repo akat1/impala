@@ -62,5 +62,5 @@ syntax.c syntax.h: mksyntax
 token.h: mktokens
 	sh ${.CURDIR}/mktokens
 
-.include <bsd.prog.mk>
+#.include <bsd.prog.mk>
 

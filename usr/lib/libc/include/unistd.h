@@ -58,7 +58,7 @@ uid_t        geteuid(void);
 //int          gethostname(char *, size_t);
 //char        *getlogin(void);
 //int          getlogin_r(char *, size_t);
-//int          getopt(int, char * const [], const char *);
+int          getopt(int, char * const [], const char *);
 pid_t        getpgrp(void);
 int          isatty(int);
 //long         pathconf(const char *, int);
@@ -75,6 +75,8 @@ int          setpgid(pid_t, pid_t);
 //int          tcsetpgrp(int, pid_t);
 //char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
+
+extern int optind, opterr, optopt;
 
 #define MAX_NAME 128
 

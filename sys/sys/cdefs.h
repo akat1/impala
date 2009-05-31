@@ -41,6 +41,7 @@
 #endif
 
 #define __P(args) args
+#define __FBSDID(arg)
 
 // piekny triczek, rodem z Solarisa
 #define offsetof(str, memb) ((size_t)(&(((str *)0)->memb)))

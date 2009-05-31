@@ -9,6 +9,8 @@
 
 extern const char *const sys_siglist[NSIG]; //niby stare, ale ash chce
 
+typedef int sig_atomic_t;
+
 int kill(pid_t pid, int sig);
 int killpg(int pgrp, int sig);
 
