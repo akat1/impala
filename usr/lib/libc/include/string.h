@@ -57,6 +57,11 @@ char  *strstr(const char *haystack, const char *needle); //
 char  *strtok(char *s, const char *delim); 
 size_t strxfrm(char *dest, const char *src, size_t n);
 
+//strings.h bardziej... no ale:
+
+int strcasecmp(const char *s1, const char *s2);
+int strncasecmp(const char *s1, const char *s2, size_t n);
+
 
 #endif
 

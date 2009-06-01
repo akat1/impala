@@ -104,7 +104,9 @@ STATIC struct parsefile *parsefile = &basepf;	/* current input file */
 int init_editline = 0;		/* editline library initialized? */
 int whichprompt;		/* 1 == PS1, 2 == PS2 */
 
+#ifndef NO_HISTORY
 EditLine *el;			/* cookie for editline package */
+#endif
 
 STATIC void pushfile(void);
 static int preadfd(void);

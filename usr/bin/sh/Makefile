@@ -24,7 +24,7 @@ SRCS=\
 	syntax.c\
 	trap.c\
 	var.c\
-#	input.c\
+	input.c\
 
 
 

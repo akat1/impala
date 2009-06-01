@@ -8,7 +8,7 @@
 #define NSIG _NSIG
 
 extern const char *const sys_siglist[NSIG]; //niby stare, ale ash chce
-const int sys_nsig = NSIG; //co te¿ ten ash wymy¶la..
+const static int sys_nsig = NSIG; //co te¿ ten ash wymy¶la..
 
 typedef int sig_atomic_t;
 typedef long int sigset_t;

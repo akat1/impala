@@ -50,10 +50,15 @@
 #define O_TRUNC       (1 << 5)
 #define O_EXCL        (1 << 6)
 #define O_APPEND      (1 << 7)
+#define O_NONBLOCK    (1 << 8)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)
 #define F_SETFL       (1 << 2)
+#define F_GETFD       (1 << 3)
+#define F_SETFD       (1 << 4)
+
+#define FD_CLOEXEC     1
 
 #define PATH_MAX    4096
 
