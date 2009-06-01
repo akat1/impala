@@ -25,6 +25,8 @@ SRCS=\
 	trap.c\
 	var.c\
 	input.c\
+	y.tab.c\
+	lex.yy.c\
 
 
 

@@ -38,6 +38,7 @@
 void    abort(void); //
 int     atoi(const char *nptr); //
 //void *calloc(size_t nmemb, size_t size);
+void    exit(int status);
 void    free(void *ptr); //
 char   *getenv(const char *name); //
 void   *malloc(size_t size); // todo
