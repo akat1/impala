@@ -35,9 +35,9 @@
 
 #include <sys/cdefs.h>
 
-void va_start(va_list ap, const char *last);
-void va_end(va_list ap);
-void va_copy(va_list dest, va_list src);
+#define va_start(ap, last) VA_START(ap, last)
+#define va_end(ap)
+//#define va_copy(dest, src);
 
 //ash tego chce
 #define __printflike(a, b)

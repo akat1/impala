@@ -2,6 +2,8 @@
 #define __LIMITS_H
 
 #define FILENAME_MAX 4096
-#define PATH_MAX 4096
+#define PATH_MAX     4096
+#define CHAR_BIT        8
+
 
 #endif

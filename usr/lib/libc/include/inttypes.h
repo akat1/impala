@@ -3,4 +3,6 @@
 
 #include <stdint.h>
 
+#define PRIdMAX "ll" "d"
+
 #endif

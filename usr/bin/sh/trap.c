@@ -55,7 +55,9 @@ __FBSDID("$FreeBSD$");
 #include "error.h"
 #include "trap.h"
 #include "mystring.h"
+#ifndef NO_HISTORY
 #include "myhistedit.h"
+#endif
 
 
 /*

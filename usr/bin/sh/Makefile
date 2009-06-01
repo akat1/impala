@@ -9,7 +9,6 @@ SRCS=\
 	expand.c\
 	histedit.c\
 	init.c\
-	input.c\
 	jobs.c\
 	mail.c\
 	main.c\
@@ -25,6 +24,7 @@ SRCS=\
 	syntax.c\
 	trap.c\
 	var.c\
+#	input.c\
 
 
 

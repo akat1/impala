@@ -7,6 +7,14 @@
 #define   WUNTRACED       1<<1
 
 
+///@todo wype³niæ
+#define WIFSTOPPED(st) 1
+#define WIFSIGNALED(st) 1
+#define WIFEXITED(st) 1
+#define WEXITSTATUS(st) 1
+#define WTERMSIG(st) 1
+#define WCOREDUMP(st) 1
+
 #ifdef __KERNEL
 #else
 

@@ -1,6 +1,11 @@
 #ifndef __SIGNUM_H
 #define __SIGNUM_H
 
+// #define SIG_DFL
+#define SIG_ERR (void*)-1
+// #define SIG_HOLD
+#define SIG_IGN (void*)1
+
 
 #define SIGHUP          1
 #define SIGINT          2

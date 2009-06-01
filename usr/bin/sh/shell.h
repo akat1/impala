@@ -36,7 +36,7 @@
 #ifndef SHELL_H_
 #define SHELL_H_
 
-#include <sys/types.h>
+#include <inttypes.h>
 
 /* todo: bzdura */
 #define _PATH_STDPATH "/"
@@ -60,7 +60,7 @@
 /*
  * Type of used arithmetics. SUSv3 requires us to have at least signed long.
  */
-typedef long int arith_t;
+typedef intmax_t arith_t;
 #define	ARITH_FORMAT_STR  "%" PRIdMAX
 #define	atoarith_t(arg)  strtoimax(arg, NULL, 0)
 #define	strtoarith_t(nptr, endptr, base)  strtoimax(nptr, endptr, base)

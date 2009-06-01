@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 //TODO: odkomentowa³em rzeczy wymagane przez ash
 //int          access(const char *, int);
@@ -55,8 +56,9 @@ void         exit(int);
 char        *getcwd(char *, size_t);
 gid_t        getegid(void);
 uid_t        geteuid(void);
+pid_t        getpgid(pid_t pid);
 //int          getgroups(int, gid_t []);
-//int          gethostname(char *, size_t);
+int          gethostname(char *, size_t);
 //char        *getlogin(void);
 //int          getlogin_r(char *, size_t);
 int          getopt(int, char * const [], const char *);
@@ -76,17 +78,13 @@ int          setpgid(pid_t, pid_t);
 //int          tcsetpgrp(int, pid_t);
 //char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
+int eaccess(const char *pathname, int mode);
 
-extern int optind, opterr, optopt;
+#define X_OK    1
+#define STDIN_FILENO   0
+#define STDOUT_FILENO  1
+#define STDERR_FILENO  2
 
-#define MAX_NAME 128
-
-struct dirent {
-    int     d_ino;
-    char    d_name[MAX_NAME];
-};
-
-typedef struct dirent dirent_t;
 
 ssize_t read(int fd, void *buf, size_t l);
 ssize_t write(int fd, const void *buf, size_t l);
@@ -107,13 +105,13 @@ int dup(int fd);
 int chdir(const char *path);
 int dup2(int oldfd, int newfd);
 int getdents(int fd, dirent_t *data, size_t count);
-int lstat(const char *path, struct stat *buf); //
 
 //getopt
 
 extern char *optarg;
 extern int optind, opterr, optopt, optreset;
 
+#include <sys/select.h>
 
 
 #endif

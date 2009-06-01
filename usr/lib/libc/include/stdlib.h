@@ -33,16 +33,23 @@
 #define __STDLIB_H
 
 #include <sys/types.h>
+#include <stdio.h>
 
+void    abort(void); //
+int     atoi(const char *nptr); //
 //void *calloc(size_t nmemb, size_t size);
-void *malloc(size_t size); // todo
-void free(void *ptr);
-//void *realloc(void *ptr, size_t size);
-void abort(void);
-void qsort(void *base, size_t nmemb, size_t size,
-    int(*compar)(const void *, const void *)); //
-char *getenv(const char *name); //
+void    free(void *ptr); //
+char   *getenv(const char *name); //
+void   *malloc(size_t size); // todo
+void   *realloc(void *ptr, size_t size);
+long int strtol(const char *nptr, char **endptr, int base);
+void    qsort(void *base, size_t nmemb, size_t size,
+                int(*compar)(const void *, const void *)); //
 
+
+
+
+#define ALIGN(x) x //sam nie wiem co to ;)
 
 
 #endif

@@ -49,6 +49,7 @@
 #define O_CREAT       (1 << 4)
 #define O_TRUNC       (1 << 5)
 #define O_EXCL        (1 << 6)
+#define O_APPEND      (1 << 7)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)
@@ -101,6 +102,8 @@ off_t   f_seek(file_t *fd, off_t o, int whence);
 // nie ma sensu ich dostêpniaæ moim zdaniem.
 file_t *f_get(filetable_t *ft, int index);
 void f_set(filetable_t *ft, file_t *fd, int index);
+
+#else /* ifdef __KERNEL */
 
 #endif
 
