@@ -78,4 +78,3 @@
 // `_unsetenv'
 // `_vfprintf'
 // `_wait3'
-// `_yywrap'

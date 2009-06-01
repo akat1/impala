@@ -350,3 +350,10 @@ exitcmd(int argc, char **argv)
 	/*NOTREACHED*/
 	return 0;
 }
+
+int
+yywrap()
+{
+	return 1;
+}
+
