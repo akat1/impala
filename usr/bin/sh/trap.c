@@ -41,7 +41,6 @@ __FBSDID("$FreeBSD$");
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
-
 #include "shell.h"
 #include "main.h"
 #include "nodes.h"	/* for other headers */
@@ -59,6 +58,8 @@ __FBSDID("$FreeBSD$");
 #include "myhistedit.h"
 #endif
 
+
+typedef sighandler_t sig_t;
 
 /*
  * Sigmode records the current value of the signal handlers for the various
@@ -107,8 +108,8 @@ sigstring_to_signum(char *sig)
 		if (strncasecmp(sig, "sig", 3) == 0)
 			sig += 3;
 		for (n = 1; n < sys_nsig; n++)
-			if (sys_signame[n] &&
-			    strcasecmp(sys_signame[n], sig) == 0)
+			if (sys_siglist[n] &&
+			    strcasecmp(sys_siglist[n], sig) == 0)
 				return (n);
 	}
 	return (-1);
@@ -125,9 +126,9 @@ printsignals(void)
 
 	outlen = 0;
 	for (n = 1; n < sys_nsig; n++) {
-		if (sys_signame[n]) {
-			out1fmt("%s", sys_signame[n]);
-			outlen += strlen(sys_signame[n]);
+		if (sys_siglist[n]) {
+			out1fmt("%s", sys_siglist[n]);
+			outlen += strlen(sys_siglist[n]);
 		} else {
 			out1fmt("%d", n);
 			outlen += 3;	/* good enough */
@@ -159,8 +160,8 @@ trapcmd(int argc, char **argv)
 				out1qstr(trap[signo]);
 				if (signo == 0) {
 					out1str(" exit\n");
-				} else if (sys_signame[signo]) {
-					out1fmt(" %s\n", sys_signame[signo]);
+				} else if (sys_siglist[signo]) {
+					out1fmt(" %s\n", sys_siglist[signo]);
 				} else {
 					out1fmt(" %d\n", signo);
 				}
