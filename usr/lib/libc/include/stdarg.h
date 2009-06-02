@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: fcntl.h 298 2009-05-31 14:33:58Z shm $
+ * $Id$
  */
 
 #ifndef __STDARG_H

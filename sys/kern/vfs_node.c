@@ -38,6 +38,7 @@
 #include <sys/uio.h>
 #include <sys/thread.h>
 #include <sys/proc.h>
+#include <sys/utils.h>
 #include <fs/devfs/devfs.h>
 
 //#include <sys/utils.h>
@@ -50,6 +51,7 @@ vnode_t*
 vnode_alloc()
 {
     vnode_t *res = kmem_alloc(sizeof(vnode_t), KM_SLEEP);
+    res->v_vfs_mounted_here = NULL;
     res->v_refcnt=1;
     return res;
 }
@@ -173,11 +175,11 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
         errno = VOP_LOOKUP(cur, &tmp, path);  //niech vnode dalej szuka...
         if(errno == -ENOENT) {
             if((path->flags & LKP_GET_PARENT) && _last_component(path))
-                errno = 0;                
+                errno = 0;
             break;
         } else if(errno)
             break;
-        cur = tmp;            
+        cur = tmp;
     }
     if(errno)
         return errno;

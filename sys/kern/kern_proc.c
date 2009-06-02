@@ -84,6 +84,7 @@ proc_init(void)
     proc0.vm_space = &vm_kspace;
     curthread->vm_space = proc0.vm_space;
     initproc = proc_create();
+    initproc->p_rootdir = rootvnode;
 }
 
 void
