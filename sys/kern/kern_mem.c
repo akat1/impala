@@ -151,7 +151,7 @@ void *
 kmem_zalloc(size_t s, int flags)
 {
     void *x;
-    
+
     x = kmem_alloc(s, flags);
     mem_zero(x, s);
 
@@ -357,6 +357,9 @@ kmem_init()
 
     mutex_init(&global_lock, MUTEX_NORMAL);
     alloc_init();
+
+    vm_kspace.mtx = kmem_alloc(sizeof(mutex_t), KM_SLEEP);
+    mutex_init(vm_kspace.mtx, MUTEX_NORMAL);
 }
 
 

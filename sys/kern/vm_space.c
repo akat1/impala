@@ -31,6 +31,8 @@
  */
 
 #include <sys/types.h>
+#include <sys/kmem.h>
+#include <sys/thread.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_lpool.h>
 #include <sys/vm/vm_internal.h>
@@ -49,7 +51,8 @@ vm_space_create(vm_space_t *vs, int space)
     vs->seg_text = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_data = vm_lpool_alloc(&vm_lpool_segments);
     vs->seg_stack = vm_lpool_alloc(&vm_lpool_segments);
-
+    vs->mtx = kmem_alloc(sizeof(mutex_t), KM_SLEEP);
+    mutex_init(vs->mtx, MUTEX_NORMAL);
 #if 0
     vm_seg_create(vs->seg_text, vs, VM_SPACE_UTEXT, 0, VM_SPACE_UTEXT_S,
         VM_PROT_RWX, VM_SEG_NORMAL);
@@ -65,10 +68,7 @@ vm_space_create(vm_space_t *vs, int space)
 void
 vm_space_destroy(vm_space_t *vs)
 {
-    ///@todo Wybucha.
-    return;
-    TRACE_IN("vs=%p (%p, %p, %p)", vs, vs->seg_text, vs->seg_data, vs->seg_stack);
-    vm_space_print(vs);
+//     TRACE_IN("vs=%p (%p, %p, %p)", vs, vs->seg_text, vs->seg_data, vs->seg_stack);
     KASSERT(vs->space == VM_SPACE_USER);
     vm_seg_destroy(vs->seg_text);
     vm_seg_destroy(vs->seg_data);
@@ -81,15 +81,21 @@ vm_space_destroy(vm_space_t *vs)
 
 }
 
+#include <machine/interrupt.h>
+
 int
 vm_space_clone(vm_space_t *dst, const vm_space_t *src)
 {
     KASSERT(src->space == VM_SPACE_USER);
-    vm_pmap_init(&dst->pmap);
+//     mutex_lock(src->mtx);
+//     mutex_lock(dst->mtx);
+//     vm_pmap_init(&dst->pmap);
     dst->space = src->space;
     vm_seg_clone(dst->seg_text, dst, src->seg_text);
     vm_seg_clone(dst->seg_data, dst, src->seg_data);
     vm_seg_clone(dst->seg_stack, dst, src->seg_stack);
+//     mutex_unlock(dst->mtx);
+//     mutex_unlock(src->mtx);
     return 0;
 }
 
@@ -120,7 +126,6 @@ set_stack(vm_space_t *vs, vm_seg_t *STACK, vm_seg_t *DATA,
 void
 vm_space_print(vm_space_t *vs)
 {
-    extern void ssleep(int);
     DEBUGF("vm_space_t %p", vs);
     DEBUGF("    TEXT    %p-%p %p (%ukB)", vs->seg_text->base,
         vs->seg_text->end, vs->seg_text->limit, vs->seg_text->size/1024);

@@ -58,8 +58,10 @@ struct exec_info {
     void    *header;
     size_t  header_size;
     size_t  image_size;
+    bool    interpreted;
 };
 
+static int image_exec(proc_t *, exec_info_t *einfo);
 static int aout_exec(proc_t *, exec_info_t *einfo);
 static int intrp_exec(proc_t *, exec_info_t *einfo);
 static void prepare_process(proc_t *p);
@@ -106,20 +108,15 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
         goto fail;
     }
 
+
+    einfo.interpreted = FALSE;
     einfo.path = path;
     einfo.vp = vp;
     einfo.argv = argv;
     einfo.envp = envp;
     einfo.header = header;
     einfo.header_size = len;
-
-    if ((err = intrp_exec(p, &einfo))) {
-        if (err == -EINVAL) {
-            if ( (err = aout_exec(p, &einfo)) )
-                goto fail;
-        }
-    }
-
+    image_exec(p, &einfo);
     vrele(vp);
     return 0;
 fail:
@@ -132,8 +129,20 @@ void
 prepare_process(proc_t *p)
 {
     proc_destroy_threads(p);
-    proc_destroy_vmspace(p);
+    proc_reset_vmspace(p);
 }
+
+int
+image_exec(proc_t *p, exec_info_t *einfo)
+{
+    int err = -EINVAL;
+    if (!einfo->interpreted)
+        err = intrp_exec(p, einfo);
+    if (err == -EINVAL)
+        err = aout_exec(p, einfo);
+    return err;
+}
+
 
 /*========================================================================
  * Obsluga formatu a.out (ZMAGIC)
@@ -151,6 +160,7 @@ aout_exec(proc_t *p, exec_info_t *einfo)
 
     prepare_process(p);
 
+
     vm_space_t *vm_space = p->vm_space;
     vm_seg_create(vm_space->seg_text, vm_space, 0, 0, exec->a_text,
         VM_PROT_RWX|VM_PROT_USER, VM_SEG_NORMAL);
@@ -162,6 +172,7 @@ aout_exec(proc_t *p, exec_info_t *einfo)
 
     uintptr_t _TEXT, _DATA;
     void *TEXT, *DATA;
+
     vm_seg_alloc(vm_space->seg_text, exec->a_text, &_TEXT);
     vm_seg_alloc(vm_space->seg_data, exec->a_data + exec->a_bss, &_DATA);
 
@@ -175,7 +186,8 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     thread_t *t = proc_create_thread(p, exec->a_entry);
     vm_space_create_stack(vm_space, &t->thr_stack, THREAD_STACK_SIZE);
     t->thr_stack_size = THREAD_STACK_SIZE;
-    t->thr_kstack_size = THREAD_KSTACK_SIZE;
+    thread_prepare(t);
+
     sched_insert(t);
 
     return 0;

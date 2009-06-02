@@ -18,6 +18,7 @@ run: build-image
 
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/sbin/init/init output/sbin/init
+	cp usr/bin/test/test output/bin/test
 	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
 	./tools/mfsutil -i ./tools/root.image ./output
 	cd misc; gcc -std=c99 -o toC toC.c

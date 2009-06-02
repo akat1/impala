@@ -99,6 +99,9 @@ copyout(void *uaddr, const void *kaddr, size_t len)
 ssize_t
 copyinstr(void *kaddr, const void *uaddr, size_t limit)
 {
+    int n = str_len((char*)uaddr);
+    if (vm_is_avail((vm_addr_t)uaddr, n)) return -1;
+    str_cpy(kaddr, uaddr);
     return -1;
 }
 

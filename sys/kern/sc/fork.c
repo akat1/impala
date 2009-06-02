@@ -58,15 +58,9 @@ sc_fork(thread_t *t, syscall_result_t *r)
 {
     proc_t *p = t->thr_proc;
     proc_t *child;
-    proc_fork(p, &child);
-    if (child == 0) {
-        return -EAGAIN;
-    }
-    if (curthread == t) {
-        r->result = child->p_pid;
-    } else {
-        r->result = 0;
-    }
-    return -EAGAIN;
+    int err = proc_fork(p, &child);
+    if (err) return err;
+    r->result = child->p_pid;
+    return 0;
 }
 

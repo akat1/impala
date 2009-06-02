@@ -53,6 +53,10 @@ int volatile CIPL;    ///< current interrupt priority level
 
 irq_handler_f *irq_handlers[MAX_IRQ];
 
+#define UPDATE(f) do {\
+        if (curthread)\
+        curthread->thr_context.c_frame = f;\
+    } while(0);
 
 void
 irq_install_handler(int irq, irq_handler_f *f, int ipl)
@@ -87,7 +91,7 @@ irq_done()
 void
 ISR_irq(interrupt_frame frame)
 {
-    int opl=CIPL;
+   int opl=CIPL;
     if (frame.f_n < MAX_IRQ) {
         if(irq_handlers[frame.f_n] != NULL)
         {
@@ -105,6 +109,7 @@ ISR_irq(interrupt_frame frame)
 void
 ISR_syscall(interrupt_frame frame)
 {
+    UPDATE(&frame);
     va_list ap;
     syscall_result_t result;
 
@@ -119,7 +124,6 @@ ISR_syscall(interrupt_frame frame)
     // result
     frame.f_eax = result.result;
     frame.f_ecx = result.errno;
-//    kprintf("result: %i  errno: %i\n", frame.f_eax, frame.f_ecx);
 }
 
 void

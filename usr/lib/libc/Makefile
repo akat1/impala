@@ -29,10 +29,12 @@ SRCS=\
         string/strspn.c\
         string/strtok.c\
         string/strxfrm.c\
+	time/nanosleep.c\
 	unistd/chdir.c\
 	unistd/close.c\
 	unistd/dup.c\
 	unistd/dup2.c\
+	unistd/execve.c\
 	unistd/getdents.c\
 	unistd/lseek.c\
 	unistd/fork.c\
@@ -40,6 +42,7 @@ SRCS=\
 	unistd/getppid.c\
 	unistd/getuid.c\
 	unistd/setuid.c\
+	unistd/sleep.c\
 	unistd/read.c\
 	unistd/umask.c\
 	unistd/write.c\

@@ -48,7 +48,7 @@ void
 proc_ctor(void *obj)
 {
     proc_t *proc = obj;
-    proc->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+    proc->vm_space = 0;
     proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
     proc->p_fd = filetable_alloc();
 }
@@ -72,10 +72,10 @@ proc_init(void)
     proc_cache = kmem_cache_create("proc", sizeof(proc_t), proc_ctor,
         proc_dtor);
 
-    proc0.p_pid = 0;
+    proc0.p_pid = last_pid++;
     proc0.p_ppid = 0;
     proc0.p_cred = NULL;
-    LIST_CREATE(&proc0.p_threads, thread_t, L_threads, FALSE);
+    LIST_CREATE(&proc0.p_threads, thread_t, L_pthreads, FALSE);
     LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
 
     list_insert_head(&procs_list, &proc0);
@@ -86,11 +86,68 @@ proc_init(void)
     initproc = proc_create();
 }
 
+void
+proc_exit(proc_t *p, int exit)
+{
+    TRACE_IN("p=%p",p);
+    thread_t *t = NULL;
+    while ( (t = list_next(&p->p_threads, t)) ) {
+        if (t != curthread) sched_exit(t);
+    }
+    p->p_flags = PROC_ZOMBIE;
+    p->p_status = exit;
+    proc_destroy(p);
+    sched_exit(curthread);
+}
+
+#include <machine/thread.h>
+#include <machine/interrupt.h>
+
+
 int
 proc_fork(proc_t *p, proc_t **child)
 {
-    *child = NULL;
-    return -ENOTSUP;
+    thread_t *t = curthread;
+    proc_t *cp = proc_create();
+    proc_insert_child(p, cp);
+    proc_reset_vmspace(cp);
+    vm_space_clone(cp->vm_space, p->vm_space);
+
+    // tablica deskryptorów (czkemay na clone)
+    cp->p_fd = p->p_fd;
+    // CWD
+    cp->p_rootdir = p->p_rootdir;
+    vref(cp->p_rootdir);
+
+    // Kopia IPC SystemV MSG
+    // Reset clock
+
+
+
+    thread_t *ct = proc_create_thread(cp, thread_get_pc(t));
+    thread_fork(t, ct);
+#if 0
+    interrupt_frame *frame = ct->thr_context.c_frame;
+
+    kprintf("%p %p %p %p %p\n", frame->f_cs, frame->f_ds, frame->f_eip,
+        frame->f_esp, frame->f_ebp);
+#endif
+    *child = cp;
+
+#if 0
+    TRACE_IN("present %u %u",
+        vm_pmap_is_avail(&t->vm_space->pmap, 0xbfffffff),
+        vm_pmap_is_avail(&ct->vm_space->pmap, 0xbfffffff)
+    );
+#endif
+    sched_insert(ct);
+#if 0
+    TRACE_IN("present %u %u",
+        vm_pmap_is_avail(&t->vm_space->pmap, 0xbfffffff),
+        vm_pmap_is_avail(&ct->vm_space->pmap, 0xbfffffff)
+    );
+#endif
+    return 0;
 }
 
 /**
@@ -108,11 +165,10 @@ proc_create(void)
     new_p->p_rootdir = rootvnode;
     new_p->p_curdir = rootvnode;
     KASSERT(rootvnode!=NULL);
-    LIST_CREATE(&new_p->p_threads, thread_t, L_threads, FALSE);
+    LIST_CREATE(&new_p->p_threads, thread_t, L_pthreads, FALSE);
     LIST_CREATE(&new_p->p_children, proc_t, L_children, FALSE);
     list_insert_head(&procs_list, new_p);
 
-    vm_space_create(new_p->vm_space, VM_SPACE_USER);
     return new_p;
 }
 
@@ -129,8 +185,10 @@ proc_destroy(proc_t *proc)
     kprintf("%x - dlugosc\n", list_length(&proc->p_threads));
 
     proc_destroy_threads(proc);
-    proc_destroy_vmspace(proc);
-
+    if (proc->vm_space) {
+        vm_space_destroy(proc->vm_space);
+        proc->vm_space = 0;
+    }
     while ( (p = list_extract_first(&(proc->p_children))) )
     {
             // przepinamy dziecko pod INIT_PID
@@ -152,10 +210,13 @@ proc_destroy_threads(proc_t *proc)
 }
 
 void
-proc_destroy_vmspace(proc_t *p)
+proc_reset_vmspace(proc_t *p)
 {
-    TRACE_IN("p=%p vm_space=%p", p, p->vm_space);
-    vm_space_destroy(p->vm_space);
+    if (p->vm_space) {
+        vm_space_destroy(p->vm_space);
+    } else {
+        p->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+    }
     vm_space_create(p->vm_space, VM_SPACE_USER);
 }
 

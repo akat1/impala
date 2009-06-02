@@ -26,9 +26,9 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
+#
 #  $Id$
-#  
+#
 
 #
 # isr.s (interrupt service routine)
@@ -49,7 +49,7 @@
     pushl %fs
     pushl %gs
     pushal
-    push $0xdeadbeaf
+    push $0xdeadbabe
 .endm
 
 .macro SET_KERNEL_REGS

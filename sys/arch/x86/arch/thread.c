@@ -36,7 +36,9 @@
 #include <sys/string.h>
 #include <sys/vm.h>
 #include <machine/cpu.h>
+#include <machine/descriptor.h>
 #include <machine/interrupt.h>
+#include <machine/i8259a.h>
 
 void setesp0(void* a);
 void __thread_enter(thread_t *t);
@@ -48,10 +50,58 @@ void __enter_arg_esp(void* entry, void* arg, uint32_t esp);
  */
 
 void
-thread_context_init(thread_context *ctx)
+thread_context_init(thread_t *t, thread_context *ctx)
 {
+    uintptr_t frame = (uintptr_t)t->thr_kstack;
     mem_zero(ctx, sizeof(thread_context));
     ctx->c_eflags = EFLAGS_BITS;
+    ctx->c_frame = (interrupt_frame*)frame;
+}
+
+void
+thread_prepare(thread_t *t)
+{
+    uint32_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - 4;
+    interrupt_frame *frame = t->thr_context.c_frame;
+    mem_zero(t->thr_kstack, t->thr_kstack_size);
+    if (t->thr_flags & THREAD_USER) {
+        frame->f_cs = SEL_MK(SEL_UCODE, SEL_DPL3);
+        frame->f_ds = SEL_MK(SEL_UDATA, SEL_DPL3);
+        frame->f_es = SEL_MK(SEL_UDATA, SEL_DPL3);
+        frame->f_fs = SEL_MK(SEL_UDATA, SEL_DPL3);
+        frame->f_gs = SEL_MK(SEL_UDATA, SEL_DPL3);
+        frame->f_ss = SEL_MK(SEL_UDATA, SEL_DPL3);
+    }
+    t->thr_context.c_esp = ESP;
+    t->thr_context.c_eflags |= EFLAGS_IF|0x200;
+    frame->f_eip = (uint32_t)t->thr_entry_point;
+    frame->f_eflags = t->thr_context.c_eflags;
+    frame->f_esp = ESP;
+#if 0
+    kprintf("[%p] %p %p %p %p %p\n", frame, frame->f_cs, frame->f_ds, frame->f_eip,
+        frame->f_esp, frame->f_ebp);
+    kprintf(".\n");
+#endif
+}
+
+uintptr_t
+thread_get_pc(thread_t *t)
+{
+    return t->thr_context.c_frame->f_eip;
+}
+
+void
+thread_fork(thread_t *t, thread_t *ct)
+{
+    uintptr_t frame = (uintptr_t)ct->thr_kstack;
+    mem_cpy(&ct->thr_context, &t->thr_context, sizeof(t->thr_context));
+    ct->thr_context.c_frame = (interrupt_frame*)frame;
+    mem_cpy(ct->thr_context.c_frame, t->thr_context.c_frame,
+        sizeof(interrupt_frame));
+    ct->thr_stack = t->thr_stack;
+    ct->thr_stack_size = t->thr_stack_size;
+    ct->thr_context.c_frame->f_eax = 0;
+    ct->thr_context.c_frame->f_ecx = 0;
 }
 
 /**
@@ -62,22 +112,40 @@ thread_context_init(thread_context *ctx)
 void
 thread_switch(thread_t * t_to, thread_t * volatile t_from)
 {
-//    KASSERT(t_to!=NULL);
-//    __asm__ volatile ("":::"edi"); // edi jest psuty przez thr_ctx_str/ld...
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
-//        kprintf("esp0 sw to: %08x, %08x\n",t_to->thr_kstack, t_to->thr_kstack_size);
-//        kprintf("thr: %08x, from: %08x\n",t_to, t_from);
         setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
         if (t_to->thr_flags & THREAD_NEW) {
-            __thread_enter(t_to);
+            thread_resume(t_to);
+            if (0) __thread_enter(t_to);
         } else {
             thread_context_load(&t_to->thr_context);
         }
     } else {
-//        __asm__ volatile ("":::"memory", "eax", "ebx", "ecx", "edx", "esi", "edi");
-        // Jestesmy ponownie w watku t_from
         curthread = t_from;
+    }
+}
+
+
+void
+thread_resume(thread_t *t)
+{
+    CIPL = 0;
+    i8259a_reset_mask();
+
+    if (t->thr_flags & THREAD_NEW) {
+        t->thr_flags &= ~THREAD_NEW;
+    }
+    vm_pmap_switch(&t->vm_space->pmap);
+    if (t->thr_flags & THREAD_USER) {
+        cpu_resume(t->thr_context.c_frame);
+    } else {
+        __asm__ volatile (
+            "movl %1, %%esp;"
+            "jmp *%0" :
+            : "r"(t->thr_entry_point), "r"(t->thr_context.c_esp)
+        );
+
     }
 }
 
@@ -87,7 +155,6 @@ thread_switch(thread_t * t_to, thread_t * volatile t_from)
  *
  * Procedura wchodzi w kod w±tku, który nie zosta³ dot±d uruchomiony
  */
-
 void
 __thread_enter(thread_t *t_to)
 {
@@ -95,9 +162,7 @@ __thread_enter(thread_t *t_to)
     t_to->thr_flags &= ~THREAD_NEW;
             //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
 
-    setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
     vm_pmap_switch(&t_to->vm_space->pmap);
-
     void *arg = t_to->thr_entry_arg;
     entry_point entry = (entry_point) t_to->thr_entry_point;
     uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
@@ -105,7 +170,8 @@ __thread_enter(thread_t *t_to)
     CIPL = 0;       // proces ma dzia³aæ z CIPL = 0
     extern void i8259a_reset_mask(void);
     i8259a_reset_mask();
-    if (!(t_to->thr_flags & THREAD_KERNEL)) {
+
+    if (t_to->thr_flags & THREAD_USER) {
         cpu_user_mode();
     }
     else

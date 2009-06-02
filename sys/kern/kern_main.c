@@ -56,17 +56,24 @@ static void start_init_process(void);
 void
 kmain()
 {
-    SYSTEM_DEBUG = 1;
+    SYSTEM_DEBUG = 0;
     print_welcome();
     init_kernel();
     prepare_root();
     start_init_process();
 }
 
+void f(void *a);
+
+void
+f(void *a)
+{
+}
 
 void
 prepare_root()
 {
+
 }
 
 void
@@ -108,6 +115,7 @@ print_welcome()
 void
 init_kernel()
 {
+    SYSTEM_DEBUG = 1;
     vm_init();
     kmem_init();
     thread_init();

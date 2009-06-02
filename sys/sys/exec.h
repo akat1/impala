@@ -34,7 +34,6 @@
 #define __SYS_EXEC_H
 #ifdef __KERNEL
 
-void fake_execve(thread_t *thr, const void *image, size_t size);
 int execve(proc_t *, const char *, char *[], char * []);
 
 #endif

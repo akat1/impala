@@ -96,7 +96,7 @@ __sched_yield()
     if (n == curthread) {
         return; // jednak nie zmieniamy
     }
-   
+
     end_ticks = clock_ticks + sched_quantum;
     wantSched = FALSE;
     irq_disable();
@@ -193,9 +193,9 @@ sched_unlock_and_wait(mutex_t *m)
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     __mutex_unlock(m);
-    
+
     int old=splbio();
-    KASSERT(old==0);    
+    KASSERT(old==0);
     __sched_yield();
     spl0();
 }
@@ -209,7 +209,7 @@ sched_wait()
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     int old=splbio();
-    KASSERT(old==0);    
+    KASSERT(old==0);
     __sched_yield();
     spl0();
 }
@@ -221,7 +221,7 @@ _sched_wakeup(thread_t *n)
     if (!(n->thr_flags & THREAD_INRUNQ)) {
         curthread->thr_flags |= THREAD_INRUNQ;
         list_insert_tail(&run_queue, n);
-    } 
+    }
 
     n->thr_flags |= THREAD_RUN;
     n->thr_flags &= ~THREAD_SLEEP;
@@ -275,23 +275,40 @@ sched_exit(thread_t *t)
     if ( t == curthread )
         curthread = NULL;
     int old=splbio();
-    KASSERT(old==0);    
+    KASSERT(old==0);
     __sched_yield();
     spl0();
+}
+
+void sched_dump(void);
+
+void
+sched_dump()
+{
+    spinlock_lock(&sprq);
+    thread_t *c = curthread;
+    do {
+        kprintf("<%p>\n", c);
+        c = list_next(&run_queue, c);
+    } while (c != curthread);
+    spinlock_unlock(&sprq);
 }
 
 /// Wybiera nastêpny w±tek do obs³ugi.
 thread_t *
 select_next_thread()
 {
-#define NEXTTHR() (thread_t*)list_next(&run_queue, p)
+#define NEXTTHR() list_next(&run_queue, p)
     thread_t *p = curthread;
+
     while ((p = NEXTTHR())) {
         if (p->thr_flags & THREAD_RUN) {
+//             kprintf("p=%p\n",p);
+
             return p;
         } else
         if( p->thr_flags & THREAD_SLEEP
-                && p->thr_wakeup_time!=0 
+                && p->thr_wakeup_time!=0
                 && p->thr_wakeup_time <= clock_ticks ) {
             p->thr_flags |= THREAD_RUN;
             p->thr_flags &= ~THREAD_SLEEP;

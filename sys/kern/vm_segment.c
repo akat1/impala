@@ -231,21 +231,21 @@ vm_seg_release(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
 int
 vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
 {
-    dst->space = space;
-    dst->prot = src->prot;
-    dst->base = src->base;
-    dst->size = src->size;
-    dst->end = src->end;
+    vm_seg_create(dst, space, src->base, src->size, src->limit,
+        src->prot, src->flags);
     vm_region_t *reg = NULL;
     vm_region_t *clonereg;
+//     TRACE_IN("dst=%p space=%p src=%p", dst, space, src);
     while ( (reg = list_next(&src->regions, reg)) ) {
         clonereg = vm_lpool_alloc(&vm_unused_regions);
         clonereg->begin = reg->begin;
         clonereg->size = reg->size;
         clonereg->end = reg->end;
         list_insert_tail(&dst->regions, clonereg);
+//         TRACE_IN("%p-%p", clonereg->begin, clonereg->end);
         vm_pmap_fill(&space->pmap, clonereg->begin, clonereg->size,
             dst->prot);
+
         vm_addr_t SRC,DST;
         vm_segmap(dst, clonereg->begin, clonereg->size, &DST);
         vm_segmap(src, reg->begin, reg->size, &SRC);
@@ -253,6 +253,12 @@ vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
         vm_unmap(DST, reg->size);
         vm_unmap(SRC, reg->size);
     }
+#if 0
+    TRACE_IN("present %u %u",
+        vm_pmap_is_avail(&dst->space->pmap, 0xbfffff00),
+        vm_pmap_is_avail(&src->space->pmap, 0xbfffff00)
+    );
+#endif
     return 0;
 }
 

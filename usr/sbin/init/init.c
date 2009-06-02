@@ -3,11 +3,101 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/syscall.h>
 
 #define print(fd, str) write(fd, str, strlen(str))
 
-#if 0
 const char *msg = "fork () test\n";
+void
+tmain()
+{
+    print(0, "thread\n");
+    while(1);
+}
+
+
+static int retval=0;
+
+char hex[] = "0123456789abcdefGH";
+
+void
+print32(char *str, uint32_t val)
+{
+    str[0] = '0';
+    str[1] = 'x';
+    int i = 9;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+}
+
+void
+printstack(uint32_t *v, int n)
+{
+    static char string[128];
+    char *str = string;
+    memset(string, 0, 128);
+    for (int i = 0; i < n; i++) {
+        print32(str, v[i]);
+        str += 10;
+        *str = ' ';
+        str++;
+    }
+    *str = '\n';
+    print(0, string);
+}
+
+
+uint32_t
+getesp()
+{
+    uint32_t r;
+    __asm__ ( "movl %%esp, %0"
+                : "=rm"(r));
+    return r;
+}
+
+
+int
+_syscall(int SC, ...)
+{
+    enum { N = 6 };
+    uint32_t x;
+#ifdef __Impala__
+    __asm__ (
+        "movl %%ebx, %%eax;"
+        " int $0x80"
+        : "=a"(retval), "=c"(errno)
+        : "b"(SC)
+    );
+#else
+    retval = fork();
+#endif
+    __asm__( "movl %%ebp, %0" : "=rm"(x));
+
+    if (retval == 0) {
+        print(0, "child ret\n");
+        printstack(getesp(), N);
+        printstack(&x, 1);
+    } else {
+        print(0, "fath ret\n");
+        printstack(getesp(), N);
+        printstack(&x, 1);
+    }
+    return retval;
+}
+
+pid_t
+_fork()
+{
+    return _syscall(SYS_fork, tmain);    
+}
+
 int
 main(int argc, char **v)
 {
@@ -15,99 +105,14 @@ main(int argc, char **v)
     print(fd, msg);
     pid_t p = fork();
     if (p == 0) {
-        print(fd, "I am father\n");
+        print(0, "child\n");
+        execve("/bin/test", NULL, NULL);
     } else
     if (p == -1) {
-        print(fd, "error\n");
+        print(0, "error\n");
     } else {
-        print(fd, "child\n");
+        print(0, "father\n");
     }
     while(1);
     return 0;
 }
-
-
-#else
-const char data[] = "Hello, World\n";
-const char data2[] = "OK\n";
-static char sbuf[32];
-
-char *itoa(int num);
-#define TRUE 1
-#define FALSE 0
-
-char
-*itoa(int num)
-{
-    char *c=sbuf+31;
-    bool min = FALSE;
-    *c = 0;
-    c[-1] = '0';
-    if(num == 0)
-        return c-1;
-    if(num < 0) {
-        min = TRUE;
-        num = -num;
-    }
-    while(num>0) {
-        *(--c) = '0' + num%10;
-        num/=10;
-    }
-    if(min)
-        *(--c) = '-';
-    return c;
-}
-
-extern int errno;
-
-void recur(int times);
-
-void
-recur(int times)
-{
-    if(times == 0)
-        return;
-    int tab[1024];
-    for(int i=1; i<10; i++)
-        tab[i]+=tab[i+1]+tab[i-1];
-    recur(times-1);
-}
-
-int
-main(int argc, char **argv)
-{
-    int fd = open("/dev/ttyv0", O_RDWR, 0);
-    int fd2 = open("/etc/passwd", O_RDONLY, 0);
-    char buf[128];
-    read(fd2, buf, 127);
-    char *b = itoa(fd);
-    write(0, b, strlen(b));
-    b = itoa(fd2);
-    write(0, b, strlen(b));
-    write(0, buf, strlen(buf));
-    write(0, data2, strlen(data2));
-    write(0, data, strlen(data));
-    close(open("pliczek", O_CREAT, 0744));
-    int fd3 = open("/", 0, 0);
-    dirent_t dents[20];
-    int w = getdents(fd3, dents, 20*sizeof(dirent_t));
-    for(int i=0; i<w/sizeof(dirent_t); i++) {
-        dirent_t *d = &dents[i];
-        write(0, d->d_name, strlen(d->d_name));
-        write(0, "\n", 1);
-    }
-    write(0, "A oto dev:\n", strlen("A oto dev:\n"));
-    fd3 = open("/dev/", 0, 0);
-    w = getdents(fd3, dents, 20*sizeof(dirent_t));
-    for(int i=0; i<w/sizeof(dirent_t); i++) {
-        dirent_t *d = &dents[i];
-        write(0, d->d_name, strlen(d->d_name));
-        write(0, "\n", 1);
-    }
-//    recur(10);
-    while(1) {int l = read(fd, buf, 127);
-    write(fd, buf, l); }
-    while(1);
-    return 0;
-}
-#endif

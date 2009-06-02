@@ -38,7 +38,7 @@
 #include <sys/vm.h>
 
 /// Wej¶ciowa procedura dla obs³ugi w±tku.
-static void __kthr(kthread_t *arg);
+static void __kthr(void);
 static void setup_vmspace(thread_t *arg);
 /**
  * Tworzy nowy w±tek po stronie j±dra.
@@ -50,19 +50,23 @@ static void setup_vmspace(thread_t *arg);
 void
 kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
 {
-    thread_t *thr = thread_create(THREAD_KERNEL, (void*)__kthr, kthr);
+    thread_t *thr = thread_create(0, __kthr, kthr);
     if (!thr) panic("cannot create kernel thread");
     setup_vmspace(thr);
+//     TRACE_IN("kthr=%p f=%p arg=%p thr=%p",
+//         kthr, f, arg, thr);
     kthr->kt_arg = arg;
     kthr->kt_entry = f;
     kthr->kt_thread = thr;
-    kthr->kt_thread->thr_flags |= THREAD_KERNEL;
+    thread_prepare(thr);
     sched_insert(kthr->kt_thread);
 }
 
 void
-__kthr(kthread_t *arg)
+__kthr()
 {
+
+    kthread_t *arg = curthread->thr_entry_arg;
 //    TRACE_IN("elo");
 //    TRACE_IN("arg=%p entry=%p entry_arg=%p", arg, arg->kt_entry, arg->kt_arg);
     arg->kt_entry(arg->kt_arg);
@@ -75,5 +79,5 @@ setup_vmspace(thread_t *thr)
     thr->vm_space = &vm_kspace;
     thr->thr_stack = thr->thr_kstack;
     thr->thr_stack_size = thr->thr_kstack_size;
-    DEBUGF("new stack %p+%u", thr->thr_stack, thr->thr_stack_size);
+//     DEBUGF("new stack %p+%u", thr->thr_stack, thr->thr_stack_size);
 }

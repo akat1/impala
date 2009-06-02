@@ -8,7 +8,7 @@ AOUT_CC=${AOUT_PREFIX}gcc
 __INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
 _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -nostdinc -Wall -Wstrict-prototypes\
-	-Wmissing-prototypes ${_INCDIR} -nostdlib
+	-Wmissing-prototypes ${_INCDIR} -nostdlib -D__Impala__
 _K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
     -D__KERNEL -Werror
 _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_SRCROOT}/usr/lib/libc/include

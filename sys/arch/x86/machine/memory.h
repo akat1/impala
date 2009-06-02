@@ -97,7 +97,7 @@ enum {
                 | ((x&PTE_US)?VM_PROT_USER:VM_PROT_SYSTEM))
 
 #define PROT_TO_PTEFLAGS(x) (((x&VM_PROT_WRITE)?PTE_RW:0) | \
-                ((x&VM_PROT_SYSTEM)?PTE_US:PTE_US)) // PTE_US da³em dwa razy
+                ((x&VM_PROT_SYSTEM)?0:PTE_US)) // PTE_US da³em dwa razy
 
 
 /**

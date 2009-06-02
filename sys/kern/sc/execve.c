@@ -45,14 +45,16 @@ struct execve_args {
     char **envp;
 };
 
-errno_t sc_execve(thread_t *p, syscall_result_t *r, execve_args_t ap);
+errno_t sc_execve(thread_t *p, syscall_result_t *r, execve_args_t *ap);
 
 errno_t
-sc_execve(thread_t *t, syscall_result_t *r, execve_args_t ap)
+sc_execve(thread_t *t, syscall_result_t *r, execve_args_t *ap)
 {
-    const char path[256];
-//    copyinstr(path, ap.path, 256);
-    r->result = -execve(t->thr_proc, path, ap.argv, ap.envp);
+    char path[256];
+    copyinstr(path, ap->path, 256);
+    TRACE_IN("t=%p path=%s", t, path);
+
+    r->result = -execve(t->thr_proc, path, ap->argv, ap->envp);
     if (r->result == 0) {
         sched_exit(t);
     }

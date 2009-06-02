@@ -72,7 +72,7 @@ int          pipe(int [2]);
 //int          seteuid(uid_t);
 int          setpgid(pid_t, pid_t);
 //pid_t        setsid(void);
-//unsigned     sleep(unsigned);
+unsigned int   sleep(unsigned int);
 //long         sysconf(int);
 //pid_t        tcgetpgrp(int);
 //int          tcsetpgrp(int, pid_t);

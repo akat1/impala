@@ -41,6 +41,7 @@ struct vm_space {
     vm_seg_t    *seg_stack;
     list_node_t     L_spaces;
     int             space;
+    mutex_t         *mtx;
 };
 
 enum {

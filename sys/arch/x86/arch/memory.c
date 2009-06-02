@@ -76,6 +76,18 @@ extern int kernel_end;
 extern int KERNEL_BOOTSTRAP;
 extern int KERNEL_START;
 #define _GLOBAL(a,f) (VM_SPACE_KERNEL <= a && a < VM_SPACE_KERNEL_E)? f : 0
+static void tlb_flush(vm_addr_t );
+
+
+void
+tlb_flush(vm_addr_t va)
+{
+    __asm__ volatile(
+        "invlpg (%0)"
+        :
+        : "r" (va)
+        : "memory");
+}
 
 /*========================================================================
  * Stronicowanie,
@@ -139,12 +151,13 @@ void
 create_kernel_space()
 {
     enum {
-        PTE_ATTR = PTE_PRESENT | PTE_US | PTE_RW | PTE_G
+        PTE_ATTR = PTE_PRESENT | PTE_RW | PTE_G
     };
     // ustaw segmenty.
     vm_kspace.seg_text = &kseg_text;
     vm_kspace.seg_data = &kseg_data;
     vm_kspace.seg_stack = &kseg_stack;
+    vm_kspace.mtx = NULL;
     vm_seg_create(vm_kspace.seg_text, &vm_kspace, kstart,
         ktextend-kstart, ktextend-kstart, VM_PROT_RWX | VM_PROT_SYSTEM,
         VM_SEG_NORMAL);
@@ -174,7 +187,7 @@ create_kernel_space()
     for (vaddr = kstart; vaddr < kseg_data.end ; vaddr += PAGE_SIZE) {
         int i = PAGE_NUM(paddr);
         vm_pmap_insert(kmap, &vm_pages[i], vaddr,
-            VM_PROT_RWX|VM_PROT_SYSTEM|VM_PROT_USER);
+            VM_PROT_RWX|VM_PROT_SYSTEM);
         paddr += PAGE_SIZE;
     }
 
@@ -320,6 +333,7 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
     vm_addr_t pa = p->phys_addr;
     int pte = PAGE_TBL(va);
     vm_ptable_t *pt = _pmap_pde(vpm, va);
+    tlb_flush(va);
     if (pt == NULL) {
         pt = _alloc_ptable(NULL);
         if (pt == NULL) return FALSE;

@@ -47,12 +47,12 @@ static void biodaemon_sync(void);
 
 static kthread_t biodaemon_thread;
 
-static list_t   bufs_lru;
-static list_t   bufs_age0;
-static list_t   bufs_age1;
-static list_t  *bufs_age;
-static list_t  *bufs_out;
-static mutex_t  list_lock;
+static list_t  bufs_lru;
+static list_t  bufs_age0;
+static list_t  bufs_age1;
+static list_t *bufs_age;
+static list_t *bufs_out;
+static mutex_t list_lock;
 
 static kmem_cache_t *physbuf_cache;
 static void physbuf_ctor(iobuf_t *b);
@@ -62,7 +62,7 @@ static void buf_create(iobuf_t *b);
 static void buf_destroy(iobuf_t *b);
 static void buf_assign(iobuf_t *b, vnode_t *v);
 static iobuf_t *buf_alloc(vnode_t *vn, blkno_t b, size_t bcount);
-   
+
 void
 bio_init()
 {
@@ -80,7 +80,7 @@ bio_init()
 
     if (0) // w±tki wy³±czone s± z powodu niepoprawnej obs³ugi stosu
     kthread_create(&biodaemon_thread, biodaemon_main, NULL);
- 
+
 }
 
 /*============================================================================
@@ -208,7 +208,7 @@ physio(devd_t *dev, uio_t *uio, int bioflags)
         bp->flags |= bioflags;
         e = -1;
     }
-    kmem_cache_free(physbuf_cache, bp); 
+    kmem_cache_free(physbuf_cache, bp);
     return e;
 }
 
@@ -221,7 +221,7 @@ physio(devd_t *dev, uio_t *uio, int bioflags)
 void
 biodaemon_main(void *arg)
 {
-    DEBUGF("biodaemon started"); 
+    DEBUGF("biodaemon started");
     for (;;) {
         ssleep(30);
         biodaemon_sync();

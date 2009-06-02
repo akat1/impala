@@ -104,8 +104,8 @@ syscall(thread_t *thr, int n, syscall_result_t *r, va_list ap)
 
     if (n < SYS_MAX) {
         r->errno = syscall_table[n](thr, r, ap);
+        if (r->errno) r->result = -1;
     }
-
     return;
 }
 

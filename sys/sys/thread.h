@@ -64,6 +64,7 @@ struct thread {
     int             thr_tid;
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
+    list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
 };
 
@@ -92,7 +93,6 @@ struct cqueue {
 
 
 enum THREAD_FLAGS {
-    THREAD_USER      = 0,      // w±tek u¿ytkownika (sztuczna flaga)
     THREAD_NEW       = 1 << 0, // in-creating
     THREAD_ZOMBIE    = 1 << 1, // in-destroying
     THREAD_RUN       = 1 << 2, // are running
@@ -100,7 +100,8 @@ enum THREAD_FLAGS {
     THREAD_SLEEP     = 1 << 4, // sleeped
     THREAD_INPROC    = 1 << 5, // connected to user process
     THREAD_INRUNQ    = 1 << 6, // are in run-queue
-    THREAD_KERNEL    = 1 << 7  // kernel thread
+    THREAD_USER      = 1 << 7, // w±tek u¿ytkownika
+    THREAD_PREPARED  = 1 << 8  // pomocnicza flaga
 };
 
 enum {
@@ -123,7 +124,7 @@ enum {
 #ifdef __KERNEL
 extern thread_t * volatile curthread;     // nie lepiej curthread ?
 extern thread_t *thread_idle;
-extern list_t threads_list;     // thread_t.L_threads
+extern list_t threads_list;              // thread_t.L_threads
 
 void thread_init(void);
 thread_t *thread_create(int space, addr_t entry, addr_t arg);
@@ -131,6 +132,8 @@ void thread_destroy(thread_t *t);
 void thread_clone(thread_t *dst, thread_t *src);
 // do wywalenia
 void thread_suspend(thread_t *t);
+uintptr_t thread_get_pc(thread_t *t);
+void thread_fork(thread_t *t, thread_t *ct);
 
 void mutex_init(mutex_t *m, int flags);
 void mutex_lock(mutex_t *m);

@@ -66,10 +66,10 @@ void textscreen_init(struct hw_textscreen *ts);
 
 void textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute);
-void textscreen_put(struct hw_textscreen *screen, char c, 
+void textscreen_put(struct hw_textscreen *screen, char c,
         int8_t attr);
 void textscreen_scroll(struct hw_textscreen *screen);
-void textscreen_update_cursor(struct hw_textscreen *screen, int8_t col, 
+void textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
         int8_t row);
 void textscreen_next_line(struct hw_textscreen *screen);
 void textscreen_reset(struct hw_textscreen *screen);

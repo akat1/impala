@@ -36,7 +36,7 @@
 
 /// Opis bitów rejestru EFLAGS
 enum CPU_EFLAGS {
-    EFLAGS_CS   = 1,
+    EFLAGS_CS   = 1 << 1,
     EFLAGS_PF   = 1 << 2,
     EFLAGS_AF   = 1 << 4,
     EFLAGS_ZF   = 1 << 6,
@@ -172,6 +172,8 @@ enum CPU_CPUID_OPTIONS {
 
 
 #ifdef __KERNEL
+struct interrupt_frame;
+
 void cpu_user_mode(void);
 uint32_t cpu_get_cr0(void);
 uint32_t cpu_get_cr2(void);
@@ -179,6 +181,10 @@ uint32_t cpu_get_cr3(void);
 void cpu_set_cr0(uint32_t r);
 void cpu_set_cr2(uint32_t r);
 void cpu_set_cr3(uint32_t r);
+
+uint32_t cpu_get_eflags(void);
+
+void cpu_resume(struct interrupt_frame *);
 
 struct cpuid_result {
     unsigned int r_eax;

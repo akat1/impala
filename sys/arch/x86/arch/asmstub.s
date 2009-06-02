@@ -55,8 +55,10 @@
 .global cpu_set_cr2
 .global cpu_set_cr3
 .global cpu_set_cr4
+.global cpu_get_eflags
 .global kernel_startup
 .global kstack
+.global cpu_resume
 
 .macro offset32 name, num
 .equ \name, \num*4
@@ -96,6 +98,23 @@ cpu_user_mode:
     mov %ax, %fs
     mov %ax, %gs
     ret
+
+
+# void cpu_resume(interrupt_frame *f);
+cpu_resume:
+    movl 4(%esp), %eax
+    movl %eax, %esp
+    pop %eax
+    popal
+    pop %gs
+    pop %fs
+    pop %es
+    pop %ds
+    add $4, %esp
+    add $4, %esp
+    sti
+    iret
+
 
 thread_context_load:
     enter $0, $0
@@ -192,6 +211,10 @@ cpu_set_cr4:
     movl %eax, %cr4
     ret
 
+cpu_get_eflags:
+    pushf
+    popl %eax
+    ret
 
 cpu_jmp_sel:
     movl 4(%esp), %eax
