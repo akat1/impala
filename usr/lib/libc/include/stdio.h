@@ -8,10 +8,12 @@
 #define SEEK_CUR    1
 #define SEEK_END    2
 #define NULL (void*)0
-#define EOF 0
+#define EOF -22
 
 struct FILE {
-    
+    int fd;
+    int err;
+    char buf[BUFSIZ];
 };
 typedef struct FILE FILE;
 
@@ -37,7 +39,7 @@ int      fclose(FILE *);
 // char    *fgets(char *restrict, int, FILE *restrict);
 int      fileno(FILE *);
 // void     flockfile(FILE *);
-// FILE    *fopen(const char *restrict, const char *restrict);
+FILE    *fopen(const char *restrict, const char *restrict);
 int      fprintf(FILE *restrict, const char *restrict, ...);
 // int      fputc(int, FILE *);
 // int      fputs(const char *restrict, FILE *restrict);

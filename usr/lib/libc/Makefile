@@ -5,6 +5,8 @@ INCDIR=-Iinclude -Iprivate
 SRCS=\
 	fcntl/open.c\
 	fcntl/creat.c\
+	stdio/fileno.c\
+	stdio/fopen.c\
 	stdlib/atexit.c\
 	stdlib/qsort.c\
 	string/memchr.c\
@@ -39,6 +41,7 @@ SRCS=\
 	unistd/getuid.c\
 	unistd/setuid.c\
 	unistd/read.c\
+	unistd/umask.c\
 	unistd/write.c\
 
 include ${IMPALA_MK}/lib.mk
