@@ -178,7 +178,7 @@ vm_is_avail(vm_addr_t addr, vm_size_t s)
     vm_pmap_t *pmap = &curthread->vm_space->pmap;
     s = PAGE_ROUND(s);
     for (s += addr; addr < s; addr += PAGE_SIZE) {
-        if (!vm_pmap_is_avail(pmap, addr)) return -1;
+        if (!vm_pmap_is_avail(pmap, addr)) return -EFAULT;
     }
     return 0;
 }

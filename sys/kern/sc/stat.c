@@ -38,18 +38,21 @@
 #include <sys/file.h>
 #include <sys/proc.h>
 #include <sys/errno.h>
+#include <sys/stat.h>
 #include <sys/vm.h>
 
-typedef struct chdir_args chdir_args;
+typedef struct stat_args stat_args;
 
-struct chdir_args {
-    char *pathname;
+struct stat_args {
+    int          mode;
+    char        *pathname;
+    struct stat *buf;
 };
 
-errno_t sc_chdir(thread_t *p, syscall_result_t *r, chdir_args *args);
+errno_t sc_stat(thread_t *p, syscall_result_t *r, stat_args *args);
 
 errno_t
-sc_chdir(thread_t *t, syscall_result_t *r, chdir_args *args)
+sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
 {
     int res=0;
     r->result = -1;
@@ -57,16 +60,33 @@ sc_chdir(thread_t *t, syscall_result_t *r, chdir_args *args)
     vnode_t *node;
     if((res = vm_validate_string(args->pathname, PATH_MAX)))
         return res;
-    res = vfs_lookup(p->p_curdir, &node, args->pathname, t, LKP_NORMAL);
+    if((res = vm_is_avail((vm_addr_t)args->buf, sizeof(struct stat))))
+        return res;
+    res = vfs_lookup(p->p_curdir, &node, args->pathname, t,
+                      (args->mode == STAT_LINK)?LKP_NO_FOLLOW:LKP_NORMAL);
     if(res)
         return res;
-    if(node->v_type!=VNODE_TYPE_DIR) {
-        vrele(node);
-        return -ENOTDIR;
-    }
-    vnode_t *old = p->p_curdir;
-    p->p_curdir = node;
-    vrele(old);
+    vattr_t va;
+    va.va_mask = VATTR_ALL;
+    res = VOP_GETATTR(node, &va);
+    vrele(node);
+    if(res)
+        return res;
+    struct stat *buf = args->buf;
+    buf->st_dev = 0;
+    buf->st_ino = 0;
+    buf->st_mode = va.va_mode | VATYPE_TO_SMODE(va.va_type);
+    buf->st_nlink = va.va_nlink;
+    buf->st_uid = va.va_uid;
+    buf->st_gid = va.va_gid;
+    buf->st_rdev = /*ID(va.va_dev)*/ 0;
+    buf->st_size = va.va_size;
+    buf->st_blksize = va.va_blksize;
+    buf->st_blocks = va.va_blocks;
+    buf->st_atimespec = va.va_atime;
+    buf->st_mtimespec = va.va_mtime;
+    buf->st_ctimespec = va.va_ctime;
+    
     r->result = 0;
     return EOK;
 }

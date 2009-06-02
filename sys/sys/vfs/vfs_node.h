@@ -57,7 +57,8 @@ struct vnode {
 enum {
     VNODE_TYPE_REG,
     VNODE_TYPE_DIR,
-    VNODE_TYPE_DEV
+    VNODE_TYPE_DEV,
+    VNODE_TYPE_LNK
 };
 
 enum {
@@ -68,13 +69,19 @@ enum {
  *  Struktura ta jest po¶rednikiem przy pobieraniu b±d¼ zmianie atrybutów vnode
  */
 struct vattr {
-    int     va_mask;    ///< flagi wskazuj±ce które dane nas interesuj±
-    uid_t   va_uid;     ///< identyfikator w³a¶ciciela pliku
-    gid_t   va_gid;     ///< identyfikator grupy pliku
-    mode_t  va_mode;    ///< prawa dostêpu do pliku
-    size_t  va_size;    ///< wielko¶æ pliku
-    devd_t *va_dev;     ///< urz±dzenie reprezentowane przez ten plik
-    int     va_type;    ///< typ vnode
+    int        va_mask;    ///< flagi wskazuj±ce które dane nas interesuj±
+    uid_t      va_uid;     ///< identyfikator w³a¶ciciela pliku
+    gid_t      va_gid;     ///< identyfikator grupy pliku
+    mode_t     va_mode;    ///< prawa dostêpu do pliku
+    size_t     va_size;    ///< wielko¶æ pliku
+    devd_t    *va_dev;     ///< urz±dzenie reprezentowane przez ten plik
+    blksize_t  va_blksize; ///< rozmiar bloku systemu plików
+    blkcnt_t   va_blocks;  ///< liczba zajêtych bloków
+    nlink_t    va_nlink;   ///< ilo¶æ dowi±zañ do pliku ///@todo robiæ co¶ z tym
+    timespec_t va_atime;   ///< czas ostatniego dostêpu do pliku
+    timespec_t va_mtime;   ///< czas ostatniej modyfikacji
+    timespec_t va_ctime;   ///< czas utworzenia pliku
+    int        va_type;    ///< typ vnode
 };
 typedef struct vattr vattr_t;
 
@@ -84,11 +91,16 @@ enum {
     VATTR_MODE = 1<<2,
     VATTR_DEV  = 1<<3,
     VATTR_TYPE = 1<<4,
-    VATTR_SIZE = 1<<5
+    VATTR_SIZE = 1<<5,
+    VATTR_TIME = 1<<6, //atime, ctime, mtime
+    VATTR_BLK  = 1<<7,    //blksize, blocks
+    VATTR_NLINK = 1<<8,
+    VATTR_ALL = ~0
 };
 
 struct lkp_state {
     int flags;
+    int max_link_cnt;
     const char *path;
     const char *now;
 };
@@ -96,7 +108,8 @@ typedef struct lkp_state lkp_state_t;
 
 enum {
     LKP_NORMAL = 0,
-    LKP_GET_PARENT = 1<<0
+    LKP_GET_PARENT = 1<<0,
+    LKP_NO_FOLLOW = 1<<1,   //je¿eli ostatnia czê¶æ path to link - nie pod±¿aj
 };
 
 
@@ -114,6 +127,8 @@ enum {
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 #define VOP_MKDIR(v, vpp, p, a) (v)->v_ops->vop_mkdir((v), (vpp), (p), (a))
 #define VOP_GETDENTS(v, d, c) (v)->v_ops->vop_getdents((v), (d), (c))
+#define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
+#define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
@@ -131,7 +146,10 @@ typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, lkp_state_t *path);
 typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
                            vattr_t *attr);
 typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int count);
+typedef int vnode_readlink_t(vnode_t *v, char *buf, int bsize);
+typedef int vnode_symlink_t(vnode_t *v, char *name, char *dst);
 typedef int vnode_inactive_t(vnode_t *v);
+
 
 
 struct vnode_ops {
@@ -148,6 +166,8 @@ struct vnode_ops {
     vnode_lookup_t    *vop_lookup;
     vnode_mkdir_t     *vop_mkdir;
     vnode_getdents_t  *vop_getdents;
+    vnode_readlink_t  *vop_readlink;
+    vnode_symlink_t  *vop_symlink;
     vnode_inactive_t  *vop_inactive;
 /*    vnode_link_t      *vop_link;
     vnode_rmdir_t     *vop_rmdir; */
@@ -162,7 +182,7 @@ struct dirent {
 
 int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr);
 int vfs_lookup_parent(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
-int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
+int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr, int f);
 int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);

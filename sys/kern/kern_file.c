@@ -114,6 +114,7 @@ frele(file_t *f)
     f->f_refcnt--;
 
     if ( f->f_refcnt == 0 ) {
+        vrele(f->f_vnode);
         kmem_free(f);
         return TRUE;
     }
@@ -342,10 +343,8 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 void
 f_close(file_t *fp)
 {
-    if ( frele(fp) ) {
-        VOP_CLOSE(fp->f_vnode);
-    }
-    
+    VOP_CLOSE(fp->f_vnode);
+    frele(fp);
     return;
 }
 

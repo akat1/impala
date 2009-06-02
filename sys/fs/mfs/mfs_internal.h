@@ -57,6 +57,8 @@ struct mfs_node {
     size_t      size;
     int         type;
     int         attr;
+    uid_t    uid;
+    gid_t    gid;
     unsigned char *data;
     mfs_node_t *parent;
     mfs_node_t *child;

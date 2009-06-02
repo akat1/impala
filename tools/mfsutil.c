@@ -85,7 +85,7 @@ strdup(const char*s)
 }
 
 node_t *
-node_newdir(node_t *p, const char *fname)
+node_newdir(node_t *p, const char *fname, int m)
 {
     node_t *d = NEW_NODE();
     d->id = node_id++;
@@ -95,6 +95,7 @@ node_newdir(node_t *p, const char *fname)
     d->childs = NULL;
     d->childcnt = 0;
     d->size = 0;
+    d->attr = m;
     if (p == NULL) {
         d->next = NULL;
     } else {
@@ -106,7 +107,7 @@ node_newdir(node_t *p, const char *fname)
 }
 
 void
-node_newfile(node_t *dir, const char *fname, size_t s, const char *path)
+node_newfile(node_t *dir, const char *fname, size_t s, const char *path, int m)
 {
     node_t *f = NEW_NODE();
     f->id = node_id++;
@@ -116,6 +117,7 @@ node_newfile(node_t *dir, const char *fname, size_t s, const char *path)
     f->childs = NULL;
     f->childcnt = 0;
     f->size = s;
+    f->attr = m;
     dir->childcnt++;
     f->next = dir->childs;
     f->fullpath = (char*)xmalloc(strlen(fname)+2+strlen(path));
@@ -164,7 +166,8 @@ xscandir(node_t *dirn, const char *path)
         }
         if (S_ISDIR(entrystat.st_mode)) {
             printf("+dir %s/%s\n", path, entry->d_name);
-            node_t *dnext = node_newdir(dirn, entry->d_name);
+            node_t *dnext = node_newdir(dirn, entry->d_name,
+                                         entrystat.st_mode & 0777);
             if (chdir(entry->d_name) == -1) {
                 perror("cannot change directory");
                 return -1;
@@ -175,7 +178,8 @@ xscandir(node_t *dirn, const char *path)
         } else
         if (S_ISREG(entrystat.st_mode)) {
             printf("+file %s/%s\n", path, entry->d_name);
-            node_newfile(dirn, entry->d_name, entrystat.st_size, path);
+            node_newfile(dirn, entry->d_name, entrystat.st_size, path,
+                          entrystat.st_mode & 0777);
         } else {
             fprintf(stderr, "-skip %s/%s\n", path, entry->d_name);
         }
@@ -192,7 +196,7 @@ scan(const char *path)
         perror("cannot change directory");
         return -1;
     }
-    root_node = node_newdir(NULL, "");
+    root_node = node_newdir(NULL, "", 0777);
     return xscandir(root_node, "");
 }
 

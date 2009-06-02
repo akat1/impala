@@ -67,6 +67,8 @@ static vnode_lookup_t devfs_lookup;
 static vnode_mkdir_t devfs_mkdir;
 static vnode_getdents_t devfs_getdents;
 static vnode_inactive_t devfs_inactive;
+static vnode_readlink_t devfs_readlink;
+static vnode_symlink_t devfs_symlink;
 
 static vnode_ops_t devfs_vnode_ops = {
     .vop_open = devfs_open,
@@ -82,6 +84,8 @@ static vnode_ops_t devfs_vnode_ops = {
     .vop_lookup = devfs_lookup,
     .vop_mkdir = devfs_mkdir,
     .vop_getdents = devfs_getdents,
+    .vop_readlink = devfs_readlink,
+    .vop_symlink = devfs_symlink,
     .vop_inactive = devfs_inactive,
 };
 
@@ -107,7 +111,7 @@ _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
             res->v_dev = NULL;
             res->v_private = node;
             node->i_dirvnode = res;            
-        }
+        } else vref(node->i_dirvnode);
         *vpp = node->i_dirvnode;
         return 0;
     }
@@ -146,7 +150,7 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     //check
     vnode_t *tmp;
     ///@todo w ca³ym VFS i fs-ach trzeba przemy¶leæ strategiê blokowania...
-    error = vfs_lookup(vn, &tmp, name, NULL);
+    error = vfs_lookup(vn, &tmp, name, NULL, LKP_NORMAL);
     if(error != -ENOENT) {
         vrele(tmp);
         return -EEXIST; // a mo¿e raczej powinni¶my zmodyfikowaæ ist. plik?
@@ -270,6 +274,18 @@ devfs_setattr(vnode_t *vn, vattr_t *attr)
     if(attr->va_mask & VATTR_DEV)
         vn->v_dev = node->i_dev = attr->va_dev;
     return 0;
+}
+
+int
+devfs_readlink(vnode_t *v, char *buf, int bsize)
+{
+    return -ENOTSUP;
+}
+
+int
+devfs_symlink(vnode_t *v, char *name, char *dst)
+{
+    return -ENOTSUP;
 }
 
 int
@@ -430,7 +446,7 @@ devfs_getroot(vfs_t *fs)
     devfs_data_t *devfs = fs->vfs_private;
     if(!devfs->rootvnode) {
         _get_vnode(devfs_rootinode, &(devfs->rootvnode), fs);
-    }
+    } else vref(devfs->rootvnode);
     return devfs->rootvnode;
 }
 

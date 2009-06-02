@@ -44,12 +44,14 @@ SRCS=\
 	unistd/getdents.c\
 	unistd/ioctl.c\
 	unistd/lseek.c\
+	unistd/lstat.c\
 	unistd/fork.c\
 	unistd/getpid.c\
 	unistd/getppid.c\
 	unistd/getuid.c\
 	unistd/setuid.c\
 	unistd/sleep.c\
+	unistd/stat.c\
 	unistd/read.c\
 	unistd/umask.c\
 	unistd/write.c\

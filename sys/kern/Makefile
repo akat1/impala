@@ -58,6 +58,7 @@ SRCS=\
 	sc/setgid.c\
 	sc/setuid.c\
 	sc/sigaction.c\
+	sc/stat.c\
 	sc/wait.c\
 	sc/waitpid.c\
 	sc/write.c\

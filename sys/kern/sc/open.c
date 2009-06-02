@@ -80,7 +80,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     KASSERT(proc->p_rootdir!=NULL);
 //    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, arg->flags,
 //             arg->mode);
-    error = vfs_lookup(proc->p_curdir, &node, arg->fname, p);
+    error = vfs_lookup(proc->p_curdir, &node, arg->fname, p, LKP_NORMAL);
     if(error) {
         if(!(flags & O_CREAT))
             return error;

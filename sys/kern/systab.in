@@ -20,6 +20,7 @@ SYS write
 SYS close
 SYS link
 SYS unlink
+SYS stat
 SYS symlink
 SYS rmdir
 SYS dup

@@ -61,7 +61,7 @@ vfs_init()
     register_fss();
     vfs_mountroot();
     vnode_t *devdir;
-    if(!vfs_lookup(NULL, &devdir, "/dev/", NULL))
+    if(!vfs_lookup(NULL, &devdir, "/dev", NULL, LKP_NORMAL))
     {
         vfs_mount("devfs", devdir, NULL);
     } else kprintf("No /dev dir on root filesystem -> devfs not mounted\n");

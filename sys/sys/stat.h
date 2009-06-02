@@ -88,7 +88,16 @@ struct stat {
 #define S_ISSOCK(m) (m&S_IFSOCK)
 #define S_ISLNK(m) (m&S_IFLNK)
 
+#define STAT_NORMAL 0
+#define STAT_LINK   1
+
 #ifdef __KERNEL
+
+#define VATYPE_TO_SMODE(t) ((t==VNODE_TYPE_DIR)?S_IFDIR:\
+                           ((t==VNODE_TYPE_REG)?S_IFREG:\
+                           ((t==VNODE_TYPE_DEV)?S_IFBLK:\
+                           ((t==VNODE_TYPE_LNK)?S_IFLNK:0))))
+
 #else
 
 int stat(const char *path, struct stat *buf);
