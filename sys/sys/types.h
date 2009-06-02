@@ -46,9 +46,19 @@ typedef int bool;
 
 typedef uint32_t off_t;
 typedef int errno_t;
-typedef unsigned int time_t;
-typedef unsigned int mask_t;
-typedef unsigned int key_t;
+typedef uint time_t;
+typedef uint mask_t;
+typedef uint key_t;
+typedef uint gid_t;
+typedef uint uid_t;
+typedef uint dev_t;
+typedef uint32_t ino_t;
+typedef uint32_t blkno_t;
+typedef uint32_t blksize_t;
+typedef uint32_t blkcnt_t;
+typedef uint mode_t;
+typedef uint nlink_t;
+typedef uint pid_t;
 
 // Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS

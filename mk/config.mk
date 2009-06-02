@@ -26,4 +26,5 @@ LD=${PREFIX}ld
 LIBDIR?=
 LD_FLAGS=-nostdlib -T ${LD_SCRIPT} --cref -Map ${LD_MAP} ${LIBDIR}
 INSTALL=cp
+AWK=awk
 

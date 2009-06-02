@@ -29,6 +29,11 @@ SRCS=\
         string/strspn.c\
         string/strtok.c\
         string/strxfrm.c\
+	sysvipc/ftok.c\
+	sysvipc/msgctl.c\
+	sysvipc/msgget.c\
+	sysvipc/msgrcv.c\
+	sysvipc/msgsnd.c\
 	time/nanosleep.c\
 	unistd/chdir.c\
 	unistd/close.c\

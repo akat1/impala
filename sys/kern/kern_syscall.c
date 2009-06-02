@@ -35,73 +35,11 @@
 #include <sys/syscall.h>
 #include <sys/utils.h>
 
-errno_t sc_execve(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_exit(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_fork(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_getdents(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_getpid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_getppid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_getuid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_kill(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_lseek(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_nanosleep(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_open(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_pause(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_read(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_setuid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_sigaction(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_wait(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_waitpid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_write(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_close(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_link(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_unlink(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_symlink(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_rmdir(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_dup(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_dup2(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_chdir(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_getgid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_setgid(thread_t *proc, syscall_result_t *r, va_list ap);
-errno_t sc_umask(thread_t *proc, syscall_result_t *r, va_list ap);
-
-static sc_handler_f *syscall_table[] = {
-    sc_execve,
-    sc_exit,
-    sc_fork,
-    sc_getdents,
-    sc_getpid,
-    sc_getppid,
-    sc_getuid,
-    sc_kill,
-    sc_lseek,
-    sc_nanosleep,
-    sc_open,
-    sc_pause,
-    sc_read,
-    sc_setuid,
-    sc_sigaction,
-    sc_wait,
-    sc_waitpid,
-    sc_write,
-    sc_close,
-    sc_link,
-    sc_unlink,
-    sc_symlink,
-    sc_rmdir,
-    sc_dup,
-    sc_dup2,
-    sc_chdir,
-    sc_getgid,
-    sc_setgid,
-    sc_umask
-};
+#include "systab.c"
 
 void
-syscall(thread_t *thr, int n, syscall_result_t *r, va_list ap)
+syscall(thread_t *thr, uint n, syscall_result_t *r, va_list ap)
 {
-//    kprintf("syscall %u!\n", n);
-
     if (n < SYS_MAX) {
         r->errno = syscall_table[n](thr, r, ap);
         if (r->errno) r->result = -1;

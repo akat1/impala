@@ -7,6 +7,16 @@ work() {
     then
         touch .depend
     fi
+    if [ -e syscall.h ]
+    then
+        touch systab.h
+    fi
+    if [ -e gensystab.awk ]
+    then
+        touch systab.c
+        sleep 1
+        touch -am systab.in
+    fi
 }
 
 
@@ -15,7 +25,7 @@ recur() {
     do
         if [ -d $entry ]
         then
-            echo "===> $cpath$entry (config)"
+            # echo "===> $cpath$entry (config)"
             cd $entry
             work
             cpath="$cpath$entry/" recur

@@ -1,4 +1,4 @@
-SUBDIRS= usr sys
+SUBDIRS= sys usr
 IMAGE_FILE=image/floppy.img
 IMAGE_FILE_=image/_floppy.img
 FLOPPY_DEV?=/dev/fd0

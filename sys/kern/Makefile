@@ -2,6 +2,7 @@ LIBS=-larch -lkutil -ldev -lfs
 KERNEL=impala
 KERNEL_MAIN= main.c
 LIBDEPS=\
+    systab.c\
 	../arch/${IMPALA_ARCH}/libarch.a\
 	../libkutil/libkutil.a\
 	../dev/libdev.a\
@@ -44,6 +45,10 @@ SRCS=\
 	sc/getuid.c\
 	sc/kill.c\
 	sc/lseek.c\
+	sc/msgctl.c\
+	sc/msgget.c\
+	sc/msgrcv.c\
+	sc/msgsnd.c\
 	sc/nanosleep.c\
 	sc/open.c\
 	sc/pause.c\
@@ -64,6 +69,9 @@ SRCS=\
 	sc/umask.c\
 	tmp_rootimage.c\
 
-
-
 include ../../mk/kernel.mk 
+
+systab.c: systab.in
+	@echo " GEN systab"
+	@${AWK} -f gensystab.awk < systab.in
+

@@ -35,39 +35,7 @@
 
 #include <sys/cdefs.h>
 
-enum {
-    SYS_execve,
-    SYS_exit,
-    SYS_fork,
-    SYS_getdents,
-    SYS_getpid,
-    SYS_getppid,
-    SYS_getuid,
-    SYS_kill,
-    SYS_lseek,
-    SYS_nanosleep,
-    SYS_open,
-    SYS_pause,
-    SYS_read,
-    SYS_setuid,
-    SYS_sigaction,
-    SYS_wait,
-    SYS_waitpid,
-    SYS_write,
-    SYS_close,
-    SYS_link,
-    SYS_unlink,
-    SYS_symlink,
-    SYS_rmdir,
-    SYS_dup,
-    SYS_dup2,
-    SYS_chdir,
-    SYS_getgid,
-    SYS_setgid,
-    SYS_umask,
-    SYS_MAX
-};
-
+#include <sys/systab.h>
 #ifdef __KERNEL
 
 /// struktura s³u¿±ca do zwracania wyników z wywo³añ systemowych
@@ -78,9 +46,9 @@ struct syscall_result {
 
 typedef struct syscall_result syscall_result_t;
 
-void syscall(thread_t *proc, int n, syscall_result_t *r, va_list ap);
+void syscall(thread_t *t, uint n, syscall_result_t *r, va_list ap);
 
-typedef errno_t sc_handler_f(thread_t *proc, syscall_result_t *r, va_list ap);
+typedef int  sc_handler_f(thread_t *t, syscall_result_t *r, va_list ap);
 
 #endif
 

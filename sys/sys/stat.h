@@ -34,17 +34,6 @@
 
 #include <sys/types.h>
 
-typedef uint32_t dev_t;
-typedef uint32_t blkno_t;
-typedef uint32_t blksize_t;
-typedef uint32_t blkcnt_t;
-typedef unsigned int ino_t;
-typedef unsigned int gid_t;
-typedef unsigned int uid_t;
-typedef unsigned int mode_t;
-typedef unsigned int nlink_t;
-typedef unsigned int pid_t;
-
 struct stat {
     dev_t     st_dev;
     ino_t     st_ino;
