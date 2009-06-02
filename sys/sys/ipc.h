@@ -33,22 +33,27 @@
 #ifndef __SYS_IPC_H
 #define __SYS_IPC_H
 
+/*
+ * POSIX nie wymaga pola key, ale jest ono na BSD. Zatem niektóre
+ * programy mog± z tego korzystaæ.
+ */
 struct ipc_perm {
     uid_t       uid;
     gid_t       gid;
     uid_t       cuid;
-    gid_t       guid;
+    gid_t       cgid;
     mode_t      mode;
+    key_t       key;
 };
 
 typedef unsigned int    msgqnum_t;
 typedef unsigned int    msglen_t;
 
-#define IPC_CREAT   (1 << 12)
-#define IPC_EXCL    (1 << 13)
-#define IPC_NOWAIT  (1 << 14)
+#define IPC_CREAT   (1 << 20)
+#define IPC_EXCL    (1 << 21)
+#define IPC_NOWAIT  (1 << 22)
 
-#define IPC_PRIVATE 0
+#define IPC_PRIVATE (0-1)
 
 #define IPC_RMID    1
 #define IPC_SET     2

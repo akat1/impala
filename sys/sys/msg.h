@@ -54,10 +54,11 @@ struct ipcmsq {
     key_t               msq_key;
 };
 
-ipcmsq_t *ipc_msg_get(proc_t *proc, key_t key, int flags, int *id);
+int ipc_msg_get(proc_t *proc, key_t key, int flags, int *id, ipcmsq_t **);
 int ipc_msg_ctl(ipcmsq_t *, int, struct msqid_ds *);
 int ipc_msg_snd(ipcmsq_t *, const void *, size_t , int );
 int ipc_msg_rcv(ipcmsq_t *, void *, size_t, long type, int );
+ipcmsq_t *ipc_msg_find(proc_t *p, int id);
 
 #else /* __KERNEL */
 

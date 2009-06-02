@@ -42,11 +42,27 @@ static void ipc_msg_init(void);
  * Komunikacja miêdzy procesami Systemu V
  */
 
+typedef struct ipckey ipckey_t;
+struct ipckey {
+    key_t key;
+    int id;
+    list_node_t L_keys;
+};
+
+static bool find_key_eq(const ipckey_t *key, key_t k);
+static mutex_t key_lock;
 
 void
 sysvipc_init(void)
 {
+    mutex_init(&key_lock, MUTEX_NORMAL);
     ipc_msg_init();
+}
+
+bool
+find_key_eq(const ipckey_t *key, key_t k)
+{
+    return (key->key == k);
 }
 
 /*========================================================================
@@ -67,13 +83,13 @@ struct msqmsg {
 
 static bool find_msq_eq_type(const msqmsg_t *msg, uintptr_t type);
 static bool find_msq_le_type(const msqmsg_t *msg, uintptr_t type);
-static void ipc_msg_create(ipcmsq_t *msq);
-// static void ipc_msg_open(ipcmsq_t *msq);
+static void msq_create(ipcmsq_t *msq);
+static int msq_open(proc_t *, ipcmsq_t **, mode_t , key_t);
 static void ipc_msg_destroy(ipcmsq_t *msq);
 static void ipc_msg_flush(ipcmsq_t *msq);
 
-ipcmsq_t msgs[SYSVMSG_MAX];
-
+ipcmsq_t msqs[SYSVMSG_MAX];
+static list_t msq_keys;
 
 
 void
@@ -81,17 +97,33 @@ ipc_msg_init()
 {
     msg_cache = kmem_cache_create("sysvipc_msg", sizeof(msqmsg_t), NULL, NULL);
     for (int i = 0; i < SYSVMSG_MAX; i++) {
-        ipc_msg_create(&msgs[i]);
+        msq_create(&msqs[i]);
     }
+    LIST_CREATE(&msq_keys, ipckey_t, L_keys, FALSE);
 }
 
 void
-ipc_msg_create(ipcmsq_t *msq)
+msq_create(ipcmsq_t *msq)
 {
     LIST_CREATE(&msq->msq_data, msqmsg_t, L_data, FALSE);
     msq->msq_refcnt = 0;
     msq->msq_working = FALSE;
     mutex_init(&msq->msq_mtx, MUTEX_CONDVAR);
+}
+
+
+ipcmsq_t *
+ipc_msg_find(proc_t *p, int id)
+{
+    ipcmsq_t *m = NULL;
+    if (id < 0 && SYSVMSG_MAX < id) return NULL;
+    mutex_lock(&key_lock);
+    if (id == SYSVMSG_MAX)
+        m = p->p_ipc_msq;
+        else m = &msqs[id];
+    if (m && !m->msq_working) m = NULL;
+    mutex_unlock(&key_lock);
+    return m;
 }
 
 void
@@ -118,22 +150,77 @@ ipc_msg_destroy(ipcmsq_t *msq)
     }
 }
 
-ipcmsq_t *
-ipc_msg_get(proc_t *p, key_t key, int flags, int *id)
+int
+msq_open(proc_t *p, ipcmsq_t **m, mode_t mode, key_t k)
 {
-    ipcmsq_t *msq;
+    for (int i = 0; i < SYSVMSG_MAX; i++)
+        if (!msqs[i].msq_working) {
+            msqs[i].msq_working = TRUE;
+            *m = &msqs[i];
+            struct ipc_perm *ip = &msqs[i].msq_ds.msg_perm;
+            ip->cuid = p->p_cred->p_euid;
+            ip->uid = p->p_cred->p_euid;
+            ip->mode = mode;
+            ip->cgid = p->p_cred->p_egid;
+            ip->gid = p->p_cred->p_egid;
+            ip->key = k;
+            ipckey_t *ik = kmem_alloc(sizeof(*ik), KM_SLEEP);
+            ik->key = k;
+            ik->id = i;
+            list_insert_tail(&msq_keys, ik);
+            TRACE_IN("found %u", i);
+            return i;
+        }
+    return -1;
+}
+
+int
+ipc_msg_get(proc_t *p, key_t key, int flags, int *id, ipcmsq_t **r)
+{
+    TRACE_IN("p=%p key=%p flags=%p", p, key, flags & ~0777);
+    TRACE_IN("flags<%s,%s>",
+            (flags & IPC_CREAT)? "IPC_CREAT" : "",
+            (flags & IPC_EXCL)? "IPC_EXCL" : ""
+    );
+    int err = 0;
+    int mid = -1;
+    ipcmsq_t *msq = 0;
     if (key == IPC_PRIVATE) {
-        *id = SYSVMSG_MAX;
-        if (p->p_ipc_msq && p->p_ipc_msq->msq_working) {
+        mid = SYSVMSG_MAX;
+        if (p->p_ipc_msq) {
             msq = p->p_ipc_msq;
         } else
         if (flags & IPC_CREAT) {
             msq = p->p_ipc_msq = kmem_alloc(sizeof(ipcmsq_t), KM_SLEEP);
-            ipc_msg_create(p->p_ipc_msq);
+            msq_create(p->p_ipc_msq);
             p->p_ipc_msq->msq_key = key;
+        } else err = -ENOENT;
+    } else {
+        mutex_lock(&key_lock);
+        ipckey_t *ipck = list_find(&msq_keys, find_key_eq, key);
+        TRACE_IN("ipck = %p", ipck);
+        if (ipck && flags & IPC_EXCL) {
+            TRACE_IN("exlusive!");
+            err = -EEXIST;
+        } else
+        if (ipck) {
+            TRACE_IN("OK");
+            mid = ipck->id;
+            msq = &msqs[ipck->id];
+        } else
+        if (flags & IPC_CREAT) {
+            TRACE_IN("open!");
+            mid = msq_open(p, &msq, flags & 0777, key);
+            if (mid == -1) err = -ENOSPC;
+        } else {
+            TRACE_IN("not found");
+            err = -ENOENT;
         }
+        mutex_unlock(&key_lock);
     }
-    return 0;
+    *id = mid;
+    *r = msq;
+    return err;
 }
 
 int

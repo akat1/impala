@@ -39,7 +39,9 @@
 
 struct pcred {
     uid_t           p_uid;       ///< identyfikator u¿ytkownika
+    uid_t           p_euid;      ///< efektywny identyfikator u¿ytkownika
     gid_t           p_gid;       ///< identyfikator grupy
+    gid_t           p_egid;      ///< efektywnty identyfikator grupy
     int             refcnt;      ///< licznik referencji
 };
 
