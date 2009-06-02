@@ -42,6 +42,7 @@ SRCS=\
 	unistd/dup2.c\
 	unistd/execve.c\
 	unistd/getdents.c\
+	unistd/ioctl.c\
 	unistd/lseek.c\
 	unistd/fork.c\
 	unistd/getpid.c\

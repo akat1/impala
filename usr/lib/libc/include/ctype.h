@@ -33,19 +33,23 @@
 #ifndef __CTYPE_H
 #define __CTYPE_H
 
-int isalnum(int c);
-int isalpha(int c);
-/*int isascii(int c);
-int isblank(int c);
-int iscntrl(int c);*/
-int isdigit(int c);
-// int isgraph(int c);
-// int islower(int c);
-// int isprint(int c);
-// int ispunct(int c);
-int isspace(int c);
-// int isupper(int c);
-// int isxdigit(int c);
+//is in range
+#define __iir(c, a, b) ((a<=(c)) && ((c)<=b))
+
+#define isalnum(c) (isalpha(c) || isdigit(c))
+#define isalpha(c) (isupper(c) || islower(c))
+#define isascii(c) (!((c)&(~0x7f)))
+#define isblank(c) ((c)==' ' || (c)=='\t')
+//#define iscntrl(c) 
+#define isdigit(c) __iir((c), '0', '9')
+//#define isgraph(c) 
+#define islower(c) __iir((c), 'a', 'z')
+//#define isprint(c)
+//#define ispunct(c) 
+#define isspace(c) ((c)==' ' || (c)=='\f' || (c)=='\n' || (c)=='\r' \
+                    || (c)=='\t' || (c)=='\v')
+#define isupper(c) __iir((c), 'A', 'Z')
+#define isxdigit(c) (isdigit(c) || __iir((c), 'a', 'f') || __iir((c), 'A', 'F'))
 
 
 

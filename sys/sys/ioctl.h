@@ -8,7 +8,7 @@
 
 #ifdef __KERNEL
 #else
-int ioctl(int fd, unsigned long int request, ...);
+int ioctl(int fd, int request, ...);
 #endif
 
 #endif
