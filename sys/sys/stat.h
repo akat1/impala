@@ -33,22 +33,27 @@
 #define __SYS_STAT_H
 
 #include <sys/types.h>
+#include <sys/time.h>
 
 struct stat {
-    dev_t     st_dev;
-    ino_t     st_ino;
-    mode_t   st_mode;
-    nlink_t   st_nlink;
-    uid_t     st_uid;
-    gid_t     st_gid;
-    dev_t     st_rdev;
-    off_t     st_size;
-    blksize_t st_blksize;
-    blkcnt_t  st_blocks;
-    time_t    st_atime;
-    time_t    st_mtime;
-    time_t    st_ctime;
+    dev_t       st_dev;
+    ino_t       st_ino;
+    mode_t      st_mode;
+    nlink_t     st_nlink;
+    uid_t       st_uid;
+    gid_t       st_gid;
+    dev_t       st_rdev;
+    off_t       st_size;
+    blksize_t   st_blksize;
+    blkcnt_t    st_blocks;
+    timespec_t  st_atimespec;
+    timespec_t  st_mtimespec;
+    timespec_t  st_ctimespec;
 };
+
+#define st_atime st_atimespec.tv_sec
+#define st_mtime st_mtimespec.tv_sec
+#define st_ctime st_ctimespec.tv_sec
 
 
 #define S_IFMT     0170000
@@ -77,6 +82,11 @@ struct stat {
 
 #define S_ISREG(m) (m&S_IFREG)
 #define S_ISDIR(m) (m&S_IFDIR)
+#define S_ISCHR(m) (m&S_IFCHR)
+#define S_ISBLK(m) (m&S_IFBLK)
+#define S_ISFIFO(m) (m&S_IFIFO)
+#define S_ISSOCK(m) (m&S_IFSOCK)
+#define S_ISLNK(m) (m&S_IFLNK)
 
 #ifdef __KERNEL
 #else

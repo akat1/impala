@@ -18,12 +18,15 @@ struct rlimit {
 
 #define RLIM_INFINITY 1000000000
 
+#define RUSAGE_SELF     0
+#define RUSAGE_CHILDREN 1
+
 #ifdef __KERNEL
 #else
 
 // int  getpriority(int, id_t);
 int  getrlimit(int, struct rlimit *);
-// int  getrusage(int, struct rusage *);
+int  getrusage(int, struct rusage *);
 // int  setpriority(int, id_t, int);
 int  setrlimit(int, const struct rlimit *);
 

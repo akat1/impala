@@ -74,13 +74,17 @@ int          setpgid(pid_t, pid_t);
 //pid_t        setsid(void);
 unsigned int   sleep(unsigned int);
 //long         sysconf(int);
-//pid_t        tcgetpgrp(int);
-//int          tcsetpgrp(int, pid_t);
+pid_t        tcgetpgrp(int);
+int          tcsetpgrp(int, pid_t);
 //char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
-int eaccess(const char *pathname, int mode);
+int eaccess(const char *pathname, int mode);    //chc±, to dajemy
 
-#define X_OK    1
+#define R_OK (1<<0)
+#define W_OK (1<<1)
+#define X_OK (1<<2)
+#define F_OK (1<<3)
+
 #define STDIN_FILENO   0
 #define STDOUT_FILENO  1
 #define STDERR_FILENO  2

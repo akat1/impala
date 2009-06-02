@@ -65,7 +65,7 @@ size_t   fwrite(const void *restrict, size_t, size_t, FILE *restrict);
 // FILE    *popen(const char *, const char *);
 // int      printf(const char *restrict, ...);
 // int      putc(int, FILE *);
-// int      putchar(int);
+int      putchar(int);
 // int      putc_unlocked(int, FILE *);
 // int      putchar_unlocked(int);
 // int      puts(const char *);

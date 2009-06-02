@@ -29,6 +29,7 @@ SRCS=\
         string/strspn.c\
         string/strtok.c\
         string/strxfrm.c\
+	termios/tcgetattr.c\
 	sysvipc/ftok.c\
 	sysvipc/msgctl.c\
 	sysvipc/msgget.c\

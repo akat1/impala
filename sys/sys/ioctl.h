@@ -1,9 +1,10 @@
 #ifndef __SYS_IOCTL_H
 #define __SYS_IOCTL_H
 
-//tymaczosowo tutaj:
-#define TIOCSPGRP 1
-#define TIOCGPGRP 2
+//tymczasowo tutaj:
+//#define TIOCSPGRP 1
+//#define TIOCGPGRP 2
+#define TIOCGETS 3
 
 #ifdef __KERNEL
 #else
