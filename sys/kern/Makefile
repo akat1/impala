@@ -43,6 +43,7 @@ SRCS=\
 	sc/getpid.c\
 	sc/getppid.c\
 	sc/getuid.c\
+	sc/ioctl.c\
 	sc/kill.c\
 	sc/lseek.c\
 	sc/msgctl.c\

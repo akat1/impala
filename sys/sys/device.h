@@ -81,6 +81,7 @@ devd_t *devd_find(const char *name);
 
 int devd_open(devd_t *d, int flags);
 int devd_close(devd_t *d);
+int devd_ioctl(devd_t *d, int cmd, uintptr_t param);
 int devd_read(devd_t *d, uio_t *u);
 int devd_write(devd_t *d, uio_t *u);
 int devd_strategy(devd_t *d, iobuf_t *bp);

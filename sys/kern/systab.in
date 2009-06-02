@@ -5,6 +5,7 @@ SYS getdents
 SYS getpid
 SYS getppid
 SYS getuid
+SYS ioctl
 SYS kill
 SYS lseek
 SYS nanosleep

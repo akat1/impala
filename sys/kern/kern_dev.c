@@ -115,6 +115,12 @@ devd_write(devd_t *d, uio_t *u)
 }
 
 int
+devd_ioctl(devd_t *d, int cmd, uintptr_t param)
+{
+    return d->devsw->d_ioctl(d, cmd, param);
+}
+
+int
 devd_close(devd_t *d)
 {
     return d->devsw->d_close(d);

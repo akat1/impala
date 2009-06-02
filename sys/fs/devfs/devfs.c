@@ -208,7 +208,9 @@ devfs_write(vnode_t *vn, uio_t *u)
 int
 devfs_ioctl(vnode_t *vn, int cmd, uintptr_t arg)
 {
-    return -ENOTSUP;
+    if(!vn->v_dev)
+        return 0;
+    return devd_ioctl(vn->v_dev, cmd, arg);
 }
 
 int
