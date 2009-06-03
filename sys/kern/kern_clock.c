@@ -51,6 +51,9 @@ volatile timespec_t curtime;
 const int HZ = 100;
 const int TICK = 1000000000/100; // 10^9 / HZ
 
+const int mdays[] = {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 
+                    365};
+
 static void load_cmos_time(void);
 static uint8_t read_bcd_cmos(uint8_t index);
 
@@ -61,21 +64,27 @@ uint8_t read_bcd_cmos(uint8_t index)
     return ((r&0xf0)>>4)*10 + (r&0x0f);
 }
 
+#include <sys/utils.h>
+
 /// Pobiera aktualny czas z NVRAM
 void
 load_cmos_time(void)
 {
+    int DAYS = 0;
     int yh = read_bcd_cmos(0x32);
     int yl = read_bcd_cmos(0x9);
     int year = yh*100+yl;
+    int yearD = year - 1970;
+    DAYS += yearD*365 + (yearD+1)/4 - (yearD+69)/100 + (yearD+369)/400;
     int mon = read_bcd_cmos(0x8);
+    DAYS += mdays[mon] + ((mon>2 && !(year%4) && ((year%100) || !(year%400)))?
+                                    1:0);
     int day = read_bcd_cmos(0x7);
+    DAYS += day-1;
     int hou = read_bcd_cmos(0x4);
     int min = read_bcd_cmos(0x2);
     int sec = read_bcd_cmos(0x0);
-    ///@todo napisaæ prawdziw± konwersjê daty ;)
-    int res = ((((year-1970)*365 + (mon-1)*31 + day-1)*24+hou)*60+min)*60+sec;
-    curtime.tv_sec = res;
+    curtime.tv_sec = ((DAYS*24+hou)*60+min)*60+sec;
     curtime.tv_nsec = 0;
 }
 

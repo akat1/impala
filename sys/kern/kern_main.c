@@ -128,7 +128,6 @@ init_kernel()
     proc_init();
     cons_init();
     sysvipc_init();
-    kprintf("current time: %i\n", curtime.tv_sec);
     ssleep(1);
     kprintf("kernel initialized\n");
     kprintf("current time: %i\n", curtime.tv_sec);
