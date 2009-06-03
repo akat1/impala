@@ -9,7 +9,9 @@ SRCS=\
 	stdio/fopen.c\
 	stdio/fclose.c\
 	stdlib/atexit.c\
+	stdlib/atoi.c\
 	stdlib/qsort.c\
+	stdlib/strtol.c\
 	string/index.c\
 	string/rindex.c\
 	string/memchr.c\

@@ -41,15 +41,14 @@ int     atoi(const char *nptr); //
 void    exit(int status);
 void    free(void *ptr); //
 char   *getenv(const char *name); //
-void   *malloc(size_t size); // todo
+void   *malloc(size_t size); //
 void   *realloc(void *ptr, size_t size);
 int     setenv(const char *name, const char *value, int overwrite);
 int     unsetenv(const char *name);
 long int strtol(const char *nptr, char **endptr, int base);
 void    qsort(void *base, size_t nmemb, size_t size,
                 int(*compar)(const void *, const void *)); //
-
-
+long int strotl(const char *nptr, char **endptr, int base);
 
 
 #define ALIGN(x) x //sam nie wiem co to ;)

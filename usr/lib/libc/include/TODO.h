@@ -2,7 +2,6 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
 // `_abort'
-// `_atoi'
 // `_cfmakeraw'
 // `_closedir'
 // `_eaccess'
@@ -54,7 +53,6 @@
 // `_sprintf'
 // `_strerror'
 // `_strtoimax'
-// `_strtol'
 // `_sys_siglist' // SIG
 // `_tcgetpgrp'
 // `_tcsetattr'
