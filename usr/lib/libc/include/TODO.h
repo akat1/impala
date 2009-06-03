@@ -2,7 +2,7 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
 // `_abort'
-// `_cfmakeraw'
+// `_cfmakeraw'   //tty
 // `_closedir'
 // `_eaccess'
 // `_environ'
@@ -54,9 +54,9 @@
 // `_strerror'
 // `_strtoimax'
 // `_sys_siglist' // SIG
-// `_tcgetpgrp'
-// `_tcsetattr'
-// `_tcsetpgrp'
+// `_tcgetpgrp'   //tty
+// `_tcsetattr'   //tty
+// `_tcsetpgrp'   //tty
 // `_unsetenv'
 // `_vfprintf'
 // `_wait3'

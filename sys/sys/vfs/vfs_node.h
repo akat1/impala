@@ -129,6 +129,7 @@ enum {
 #define VOP_GETDENTS(v, d, c) (v)->v_ops->vop_getdents((v), (d), (c))
 #define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
 #define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
+//#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
@@ -148,6 +149,7 @@ typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
 typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int count);
 typedef int vnode_readlink_t(vnode_t *v, char *buf, int bsize);
 typedef int vnode_symlink_t(vnode_t *v, char *name, char *dst);
+//typedef int vnode_rmdir_t(vnode_t *v);
 typedef int vnode_inactive_t(vnode_t *v);
 
 
@@ -169,8 +171,9 @@ struct vnode_ops {
     vnode_readlink_t  *vop_readlink;
     vnode_symlink_t  *vop_symlink;
     vnode_inactive_t  *vop_inactive;
+//    vnode_rmdir_t     *vop_rmdir;
 /*    vnode_link_t      *vop_link;
-    vnode_rmdir_t     *vop_rmdir; */
+     */
 };
 
 #define MAX_NAME 128

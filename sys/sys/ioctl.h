@@ -4,7 +4,7 @@
 //tymczasowo tutaj:
 //#define TIOCSPGRP 1
 //#define TIOCGPGRP 2
-#define TIOCGETS 3
+#define TCGETS 3
 
 #ifdef __KERNEL
 #else

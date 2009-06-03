@@ -65,6 +65,7 @@ vref(vnode_t *vn)
 void
 vrele(vnode_t *vn)
 {
+    KASSERT(vn->v_refcnt>0);
     vn->v_refcnt--;
     if(vn->v_refcnt == 0) {
         VOP_INACTIVE(vn);
