@@ -50,7 +50,7 @@
                     || (c)=='\t' || (c)=='\v')
 #define isupper(c) __iir((c), 'A', 'Z')
 #define isxdigit(c) (isdigit(c) || __iir((c), 'a', 'f') || __iir((c), 'A', 'F'))
-
+#define tolower(c) ((c) <= 'A'&& (c) <= 'Z'?(c-('A'-'a'+1)):(c))
 
 
 #endif
