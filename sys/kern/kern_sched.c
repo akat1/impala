@@ -274,8 +274,8 @@ sched_exit(thread_t *t)
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
     if ( t == curthread )
         curthread = NULL;
-    int old=splbio();
-    KASSERT(old==0);
+    int old = splbio();
+    KASSERT(old == 0);
     __sched_yield();
     spl0();
 }
@@ -298,13 +298,10 @@ sched_dump()
 thread_t *
 select_next_thread()
 {
-#define NEXTTHR() list_next(&run_queue, p)
     thread_t *p = curthread;
 
-    while ((p = NEXTTHR())) {
+    while ((p = list_next(&run_queue,p))) {
         if (p->thr_flags & THREAD_RUN) {
-//             kprintf("p=%p\n",p);
-
             return p;
         } else
         if( p->thr_flags & THREAD_SLEEP
@@ -316,8 +313,8 @@ select_next_thread()
             return p;
         }
     }
-    panic("Impossible to get here! runq=%u, curthr: %p, p: %p", list_length(&run_queue), curthread, p);
-#undef NEXTTHR
+    panic("Impossible to get here! runq=%u, curthr: %p, p: %p",
+        list_length(&run_queue), curthread, p);
     return 0;
 }
 

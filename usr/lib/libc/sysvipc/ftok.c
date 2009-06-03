@@ -6,5 +6,6 @@
 key_t
 ftok(const char *path, int id)
 {
-    return (key_t)path + id;
+    ///@todo czekamy na stat
+    return id;
 }

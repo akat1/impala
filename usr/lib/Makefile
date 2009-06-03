@@ -1,4 +1,4 @@
-SUBDIRS= crt libc
+SUBDIRS= crt libc libpthread
 
 include ${IMPALA_MK}/subdir.mk
 

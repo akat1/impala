@@ -37,11 +37,16 @@ SRCS=\
 	string/strstr.c\
 	termios/tcgetattr.c\
 	signal/kill.c\
-	sysvipc/ftok.c\
+    sys/sched_yield.c\
+    sysvipc/ftok.c\
 	sysvipc/msgctl.c\
 	sysvipc/msgget.c\
 	sysvipc/msgrcv.c\
 	sysvipc/msgsnd.c\
+	thr/thr_cancel.c\
+	thr/thr_create.c\
+	thr/thr_destroy.c\
+	thr/thr_getarg.c\
 	time/nanosleep.c\
 	unistd/chdir.c\
 	unistd/close.c\

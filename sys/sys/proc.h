@@ -58,7 +58,9 @@ struct proc {
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
     ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci.
+    mutex_t         p_mtx;
     mask_t          p_umask;     ///< maska tworzonych plików
+    list_t          p_umtxs;     ///< lista zamków u¿ytkownika
     list_node_t     L_procs;     ///< wêze³ procesów
     list_node_t     L_children;  ///< wêze³ listy dzieci
 };
@@ -74,6 +76,7 @@ extern proc_t proc0;
 void proc_init(void);
 proc_t *proc_create(void);
 thread_t * proc_create_thread(proc_t *, uintptr_t entry);
+bool proc_has_thread(proc_t *, thread_t *ut);
 void proc_destroy_threads(proc_t *proc);
 void proc_reset_vmspace(proc_t *proc);
 void proc_insert_child(proc_t *proc, proc_t *child);
@@ -83,7 +86,6 @@ bool proc_is_zombie(proc_t *p);
 bool proc_is_parent(proc_t *parent, proc_t *child);
 int proc_fork(proc_t *p, proc_t **child);
 void proc_exit(proc_t *p, int e);
-
 enum PROC_FLAGS
 {
     PROC_NEW    = 1<<0, // proces zosta³ utworzony

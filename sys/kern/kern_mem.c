@@ -85,7 +85,7 @@ enum {
     LARGE_SIZE  = PAGE_SIZE/8,
     BIG_SIZE = (1<<15),
     /// Pomocnik przy rozpoznawaniu uszkodzonia struktur
-    KMEM_BUFCTL_MAGIC = 0xdeadbabe,
+    KMEM_BUFCTL_MAGIC = 0xdeadbaaa,
 };
 
 
@@ -401,7 +401,7 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
     }
     KASSERT(data != NULL);
     slab->addr = data;
-    slab->items = cache->slab_size / ( sizeof(kmem_bufctl_t) + cache->elem_size );
+    slab->items = cache->slab_size/(sizeof(kmem_bufctl_t)+cache->elem_size);
     for (int i = 0; i < slab->items; i++) {
         kmem_bufctl_t *bctl = (kmem_bufctl_t*) data;
         bctl->addr = data + sizeof(kmem_bufctl_t);

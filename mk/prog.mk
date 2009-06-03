@@ -12,8 +12,8 @@ include ${IMPALA_SRCROOT}/mk/build.mk
 ${_PROG_BUILD}: ${PROG}
 
 ${PROG}: ${OBJS} ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${IMPALA_SRCROOT}/usr/lib/crt/crt0.o
-	@echo " LINK ${PROG}.a"
-	${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS}
+	@echo " LINK ${PROG}"
+	@${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS}
 
 ${_PROG_CLEAN}:
 	@rm -f ${OBJS} ${PROGRARY}.a

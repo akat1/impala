@@ -70,8 +70,15 @@ struct devd {
     char         name[DEVD_MAXNAME];
     char         descr[DEVD_MAXDESCR];
     void        *priv;
+    int          type;
     devsw_t     *devsw;
     list_node_t  L_devs;
+};
+
+enum {
+    DEV_CDEV,
+    DEV_BDEV,
+    DEV_TTY
 };
 
 devd_t *devd_create(devsw_t *dsw, int unit, void *pr);

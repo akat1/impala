@@ -36,7 +36,7 @@
 
 /*
  * Standardowy UNIXowy model mo¿na powiedzieæ.
- *  
+ *
  */
 
 struct iobuf {
@@ -49,33 +49,45 @@ struct iobuf {
     semaph_t     sem;
     list_node_t  L_bioq;
     list_node_t  L_bufs;
+    list_node_t  L_hash;
+    list_node_t  L_free;
+};
+
+struct biohash {
+    int         bh_n;
+    list_t     *bh_queues;
+    mutex_t     bh_mtx;
+    list_t      bh_freebufs;
+    sleepq_t    bh_sleepq;
 };
 
 enum BUF_FLAGS {
-    IOB_BUSY      = 0x00001,
-    IOB_DONE      = 0x00002,
-    IOB_WRITE     = 0x00004,
-    IOB_READ      = 0x00008,
-    IOB_ERROR     = 0x00020,
-    IOB_DIRTY     = 0x00040,
-    IOB_CACHE     = 0x00080,
-    IOB_NOCACHE   = 0x00100
-};
-
-enum {
-    BIO_READ,
-    BIO_WRITE
+    BIO_BUSY      = 0x00001,    ///< bufor jest u¿ywany
+    BIO_DONE      = 0x00002,    ///< operacja I/O zakoñczona
+    BIO_WRITE     = 0x00004,    ///< bufor zaw. dane do zapisu
+    BIO_READ      = 0x00008,    ///< bufor do odczytu
+    BIO_ERROR     = 0x00020,    ///< b³±d
+    BIO_DIRTY     = 0x00040,    ///< bufor jest brudny
+    BIO_CACHE     = 0x00080,    ///< bufor jest w CACHE
+    BIO_DELWRITE  = 0x00100,    ///< opó¼niony zapis
 };
 
 void bio_init(void);
 
-iobuf_t *bio_getblk(vnode_t *v, blkno_t blkno, size_t count);
-iobuf_t *bio_read(vnode_t *v, blkno_t blkno, size_t count);
-void bio_wait(iobuf_t *b);
-void bio_wakeup(iobuf_t *b);
-void bio_done(iobuf_t *b);
+iobuf_t *bio_getblk(vnode_t *v, blkno_t n);
+iobuf_t *bio_read(vnode_t *v, blkno_t n);
+void bio_write(iobuf_t *bp);
+void bio_delwrite(iobuf_t *bp);
+void bio_rele(iobuf_t *bp);
+void bio_wait(iobuf_t *bp);
+void bio_wakeup(iobuf_t *bp);
+void bio_done(iobuf_t *bp);
 
 size_t physio(devd_t *dev, uio_t *uio, int bioflags);
+
+void biohash_init(biohash_t *h, int n);
+iobuf_t *biohash_find(biohash_t *h, blkno_t n);
+void biohash_insert(biohash_t *h, iobuf_t *b);
 
 #endif
 #endif

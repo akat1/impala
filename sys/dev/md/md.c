@@ -107,7 +107,7 @@ mdstrategy(devd_t *dev, iobuf_t *b)
     off_t off = b->blkno*512;
     size_t len = MIN(b->bcount*512, md->size - off);
     if (len < 0) {
-        b->flags |= IOB_ERROR;
+        b->flags |= BIO_ERROR;
     }
     if (b->oper == BIO_READ) {
 /*

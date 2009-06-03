@@ -435,7 +435,7 @@ mfs_mount(vfs_t *fs)
         return -1;
     }
     kprintf("Dev: %s\n", dv->v_dev->name);
-    bp = bio_read(dv, 0, 1);
+    bp = bio_read(dv, 0);
     if (!bp) {
         DEBUGF("cannot start I/O operation");
         return -1;

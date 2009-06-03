@@ -37,7 +37,6 @@
 
 #include <sys/systab.h>
 #ifdef __KERNEL
-
 /// struktura s³u¿±ca do zwracania wyników z wywo³añ systemowych
 struct syscall_result {
     int result;
@@ -49,7 +48,8 @@ typedef struct syscall_result syscall_result_t;
 void syscall(thread_t *t, uint n, syscall_result_t *r, va_list ap);
 
 typedef int  sc_handler_f(thread_t *t, syscall_result_t *r, va_list ap);
-
+#else
+int syscall(int sc,...);
 #endif
 
 #endif

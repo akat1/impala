@@ -48,9 +48,9 @@ typedef uint32_t off_t;
 typedef int errno_t;
 typedef uint time_t;
 typedef uint mask_t;
-typedef uint key_t;
-typedef uint gid_t;
-typedef uint uid_t;
+typedef int key_t;
+typedef int gid_t;
+typedef int uid_t;
 typedef uint dev_t;
 typedef uint32_t ino_t;
 typedef uint32_t blkno_t;
@@ -58,7 +58,8 @@ typedef uint32_t blksize_t;
 typedef uint32_t blkcnt_t;
 typedef uint mode_t;
 typedef uint nlink_t;
-typedef uint pid_t;
+typedef int pid_t;
+typedef uintptr_t tid_t;
 
 // Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS
@@ -68,6 +69,7 @@ typedef struct spinlock spinlock_t;
 typedef struct mutex mutex_t;
 typedef struct semaph semaph_t;
 typedef struct cqueue cqueue_t;
+typedef struct sleepq sleepq_t;
 typedef struct proc proc_t;
 typedef struct kmem_cache kmem_cache_t;
 typedef struct device device_t;
@@ -83,6 +85,8 @@ typedef struct filetable filetable_t;
 typedef struct filetable_chunk filetable_chunk_t;
 typedef struct file file_t;
 typedef struct ipcmsq ipcmsq_t;
+typedef struct biohash biohash_t;
+
 #include <sys/vm/vm_types.h>
 #endif
 

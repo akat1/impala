@@ -33,6 +33,7 @@
 #ifndef __SYS_THREAD_H
 #define __SYS_THREAD_H
 
+#ifdef __KERNEL
 #include <sys/list.h>
 #include <sys/sched.h>
 #include <machine/thread.h>
@@ -48,6 +49,20 @@ struct spinlock {
     volatile int    _dlock;
 };
 
+/// zamek typu mutex.
+struct mutex {
+    thread_t     *mtx_owner;   ///< w±tek bêd±cy w³a¶cicielem zamka.
+    int           mtx_locked;  ///< stan zamka.
+    int           mtx_flags;   ///< opcje.
+    spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
+    /// lista w±tków oczekuj±cych na wej¶cie
+    list_t        mtx_locking; // thread_t.L_wait
+    /// lista w±tków oczekuj±cych na poinformowanie
+    list_t        mtx_waiting; // thread_t.L_wait
+    list_node_t   L_user;
+};
+
+
 /// w±tek procesora.
 struct thread {
     thread_context  thr_context;    ///< kontekst
@@ -61,23 +76,22 @@ struct thread {
     addr_t          thr_kstack;     ///< stos dla jadra
     size_t          thr_kstack_size;///< rozmiar stosu dla jadra
     proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
-    int             thr_tid;
+    sleepq_t       *thr_sleepq;     ///< kolejka w której ¶pi w±tek
+    mutex_t         thr_mtx;        ///< do synchronizacji
+    bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
     list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
 };
 
-/// zamek typu mutex.
-struct mutex {
-    thread_t     *mtx_owner;   ///< w±tek bêd±cy w³a¶cicielem zamka.
-    int           mtx_locked;  ///< stan zamka.
-    int           mtx_flags;   ///< opcje.
-    spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
-    /// lista w±tków oczekuj±cych na wej¶cie
-    list_t        mtx_locking; // thread_t.L_wait
-    /// lista w±tków oczekuj±cych na poinformowanie
-    list_t        mtx_waiting; // thread_t.L_wait
+struct sleepq {
+    mutex_t     sq_mtx;
+    list_t      sq_waiting;
+};
+
+enum {
+    SLEEPQ_INTR = (1<<0)
 };
 
 struct semaph {
@@ -93,15 +107,15 @@ struct cqueue {
 
 
 enum THREAD_FLAGS {
-    THREAD_NEW       = 1 << 0, // in-creating
-    THREAD_ZOMBIE    = 1 << 1, // in-destroying
-    THREAD_RUN       = 1 << 2, // are running
-    THREAD_SYSCALL   = 1 << 3, // are in syscall handler
-    THREAD_SLEEP     = 1 << 4, // sleeped
-    THREAD_INPROC    = 1 << 5, // connected to user process
-    THREAD_INRUNQ    = 1 << 6, // are in run-queue
-    THREAD_USER      = 1 << 7, // w±tek u¿ytkownika
-    THREAD_PREPARED  = 1 << 8  // pomocnicza flaga
+    THREAD_NEW       = 1 << 0, //< w trakcie tworzenia
+    THREAD_ZOMBIE    = 1 << 1, //< zombie
+    THREAD_RUN       = 1 << 2, //< dzia³a
+    THREAD_SYSCALL   = 1 << 3, //< jest w obs³udze wywo³ania
+    THREAD_SLEEP     = 1 << 4, //< u¶piony
+    THREAD_INTRPT    = 1 << 5, //< przerwano spanie
+    THREAD_INRUNQ    = 1 << 6, //< 
+    THREAD_USER      = 1 << 7, //< w±tek u¿ytkownika
+    THREAD_SLEEPQ    = 1 << 8  //< u¶piony przez sleepq
 };
 
 enum {
@@ -121,7 +135,6 @@ enum {
     SPINLOCK_LOCK
 };
 
-#ifdef __KERNEL
 extern thread_t * volatile curthread;     // nie lepiej curthread ?
 extern thread_t *thread_idle;
 extern list_t threads_list;              // thread_t.L_threads
@@ -134,6 +147,7 @@ void thread_clone(thread_t *dst, thread_t *src);
 void thread_suspend(thread_t *t);
 uintptr_t thread_get_pc(thread_t *t);
 void thread_fork(thread_t *t, thread_t *ct);
+void thread_join(thread_t *t);
 
 void mutex_init(mutex_t *m, int flags);
 void mutex_lock(mutex_t *m);
@@ -154,6 +168,12 @@ void semaph_post(semaph_t *s);
 void semaph_wait(semaph_t *s);
 void semaph_destroy(semaph_t *s);
 
+void sleepq_init(sleepq_t *q);
+void sleepq_destroy(sleepq_t *q);
+void sleepq_wait(sleepq_t *q);
+int sleepq_wait_i(sleepq_t *q);
+void sleepq_wakeup(sleepq_t *q);
+void sleepq_intrpt(thread_t *td);
 
 /// Inicjalizuje wiruj±cy zamek.
 static inline void
@@ -190,6 +210,21 @@ spinlock_destroy(spinlock_t *sp)
 {
 }
 
+#else
+tid_t thr_create(void *entry, uintptr_t stackaddr, size_t stacksize, uintptr_t arg);
+int thr_destroy(tid_t tid);
+int thr_cancel(tid_t tid);
+tid_t thr_getid(void);
+void* thr_getarg(void);
+
+int thr_mtx_create(void);
+int thr_mtx_destroy(void);
+int thr_mtx_lock(int mid);
+int thr_mtx_unlock(int mid);
+int thr_mtx_trylock(int mid);
+int thr_mtx_wait(int mid);
+
 #endif
+
 #endif
 

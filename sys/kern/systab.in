@@ -1,3 +1,6 @@
+# Z poni¿szej tabeli s± generowane tablice wywo³an systemowych:
+# kern/systab.c oraz sys/systab.h
+
 SYS execve
 SYS exit
 SYS fork
@@ -33,3 +36,10 @@ SYS msgget
 SYS msgctl
 SYS msgsnd
 SYS msgrcv
+SYS thr_create
+SYS thr_destroy
+SYS thr_cancel
+SYS thr_getid
+SYS thr_getarg
+SYS sched_yield
+

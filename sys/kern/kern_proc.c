@@ -44,6 +44,8 @@ static void proc_dtor(void *obj);
 proc_t proc0;
 proc_t *initproc;
 
+///@todo synchronizacja na globalnych strukturach, jak lista procesów itp.
+
 void
 proc_ctor(void *obj)
 {
@@ -51,6 +53,8 @@ proc_ctor(void *obj)
     proc->vm_space = 0;
     proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
     proc->p_fd = filetable_alloc();
+    mutex_init(&proc->p_mtx, MUTEX_NORMAL);
+    LIST_CREATE(&proc->p_umtxs, mutex_t, L_user, FALSE);
 }
 
 void
@@ -59,6 +63,7 @@ proc_dtor(void *obj)
     proc_t *proc = obj;
     kmem_free(proc->p_cred);
     kmem_free(proc->vm_space);
+    mutex_destroy(&proc->p_mtx);
     filetable_free(proc->p_fd);
 }
 
@@ -83,6 +88,7 @@ proc_init(void)
     curthread->thr_proc = &proc0;
     proc0.vm_space = &vm_kspace;
     curthread->vm_space = proc0.vm_space;
+    mutex_init(&proc0.p_mtx, MUTEX_NORMAL);
     initproc = proc_create();
     initproc->p_rootdir = rootvnode;
 }
@@ -123,31 +129,10 @@ proc_fork(proc_t *p, proc_t **child)
     // Kopia IPC SystemV MSG
     // Reset clock
 
-
-
     thread_t *ct = proc_create_thread(cp, thread_get_pc(t));
     thread_fork(t, ct);
-#if 0
-    interrupt_frame *frame = ct->thr_context.c_frame;
-
-    kprintf("%p %p %p %p %p\n", frame->f_cs, frame->f_ds, frame->f_eip,
-        frame->f_esp, frame->f_ebp);
-#endif
     *child = cp;
-
-#if 0
-    TRACE_IN("present %u %u",
-        vm_pmap_is_avail(&t->vm_space->pmap, 0xbfffffff),
-        vm_pmap_is_avail(&ct->vm_space->pmap, 0xbfffffff)
-    );
-#endif
     sched_insert(ct);
-#if 0
-    TRACE_IN("present %u %u",
-        vm_pmap_is_avail(&t->vm_space->pmap, 0xbfffffff),
-        vm_pmap_is_avail(&ct->vm_space->pmap, 0xbfffffff)
-    );
-#endif
     return 0;
 }
 
@@ -181,7 +166,6 @@ void
 proc_destroy(proc_t *proc)
 {
     proc_t *p;
-    proc_t *init = proc_find(INIT_PID);
 
     kprintf("%x - dlugosc\n", list_length(&proc->p_threads));
 
@@ -192,8 +176,7 @@ proc_destroy(proc_t *proc)
     }
     while ( (p = list_extract_first(&(proc->p_children))) )
     {
-            // przepinamy dziecko pod INIT_PID
-            proc_insert_child(init, p);
+            proc_insert_child(initproc, p);
     }
 
     kmem_free(proc->p_cred);
@@ -205,32 +188,48 @@ proc_destroy(proc_t *proc)
 void
 proc_destroy_threads(proc_t *proc)
 {
+    mutex_lock(&proc->p_mtx);
     thread_t *t;
     while ( (t = list_extract_first(&(proc->p_threads))) )
         thread_destroy(t);
+    mutex_unlock(&proc->p_mtx);
 }
 
 void
 proc_reset_vmspace(proc_t *p)
 {
+    mutex_lock(&p->p_mtx);
     if (p->vm_space) {
         vm_space_destroy(p->vm_space);
     } else {
         p->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
     }
     vm_space_create(p->vm_space, VM_SPACE_USER);
+    mutex_unlock(&p->p_mtx);
 }
 
 
 thread_t *
 proc_create_thread(proc_t *proc, uintptr_t entry)
 {
+    mutex_lock(&proc->p_mtx);
     thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
     t->thr_entry_point = (void*)entry;
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
+    mutex_unlock(&proc->p_mtx);
     return t;
+}
+
+
+bool
+proc_has_thread(proc_t *p, thread_t *t)
+{
+    mutex_lock(&p->p_mtx);
+    bool x = list_is_member(&p->p_threads, t);
+    mutex_unlock(&p->p_mtx);
+    return x;
 }
 
 /**
@@ -252,8 +251,10 @@ proc_is_zombie(proc_t *p)
 void
 proc_insert_child(proc_t *proc, proc_t *child)
 {
+    mutex_lock(&proc->p_mtx);
     list_insert_tail(&(proc->p_children), child);
     child->p_ppid = proc->p_pid;
+    mutex_unlock(&proc->p_mtx);
     return;
 }
 

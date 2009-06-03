@@ -57,9 +57,9 @@ ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
 #define TRACE_IN(fmt, args...)\
     do { \
         if (!SYSTEM_DEBUG) break;\
-        kprintf("@ %s (", __func__);\
+        kprintf("@ %s: ", __func__);\
         kprintf(fmt, ## args);\
-        kprintf(")\n");\
+        kprintf("\n");\
         for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
     } while (0);
 

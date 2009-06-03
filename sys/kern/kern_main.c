@@ -63,17 +63,9 @@ kmain()
     start_init_process();
 }
 
-void f(void *a);
-
-void
-f(void *a)
-{
-}
-
 void
 prepare_root()
 {
-
 }
 
 void

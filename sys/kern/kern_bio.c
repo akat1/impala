@@ -61,7 +61,7 @@ static int physbuf_init(iobuf_t *b, uio_t *uio);
 static void buf_create(iobuf_t *b);
 static void buf_destroy(iobuf_t *b);
 static void buf_assign(iobuf_t *b, vnode_t *v);
-static iobuf_t *buf_alloc(vnode_t *vn, blkno_t b, size_t bcount);
+static iobuf_t *buf_alloc(vnode_t *vn, blkno_t b);
 
 void
 bio_init()
@@ -78,7 +78,6 @@ bio_init()
         sizeof(iobuf_t), (kmem_ctor_t*) physbuf_ctor,
         (kmem_dtor_t*)physbuf_dtor);
 
-    if (0) // w±tki wy³±czone s± z powodu niepoprawnej obs³ugi stosu
     kthread_create(&biodaemon_thread, biodaemon_main, NULL);
 
 }
@@ -104,40 +103,39 @@ buf_assign(iobuf_t *b, vnode_t *vn)
 {
     KASSERT(vn->v_type = VNODE_TYPE_DEV);
     b->dev = vn->v_dev;
-    b->flags |= IOB_BUSY;
+    b->flags |= BIO_BUSY;
 }
 
 iobuf_t *
-buf_alloc(vnode_t *vn, blkno_t blk, size_t bcount)
+buf_alloc(vnode_t *vn, blkno_t blk)
 {
     iobuf_t *bp = kmem_alloc(sizeof(*bp), KM_SLEEP);
     buf_create(bp);
-    bp->addr = kmem_alloc(bcount*512, KM_SLEEP);
-    bp->bcount = bcount;
+    bp->addr = kmem_alloc(1*512, KM_SLEEP);
+    bp->bcount = 1;
     bp->flags = 0;
     bp->blkno = blk;
     return bp;
 }
 
 iobuf_t *
-bio_getblk(vnode_t *vn, blkno_t blk, size_t bcount)
+bio_getblk(vnode_t *vn, blkno_t blk)
 {
-    KASSERT(bcount == 1);
     return NULL;
 }
 
 iobuf_t *
-bio_read(vnode_t *vn, blkno_t blk, size_t bcount)
+bio_read(vnode_t *vn, blkno_t blk)
 {
     iobuf_t *bp;
 
-    bp = bio_getblk(vn, blk, bcount);
+    bp = bio_getblk(vn, blk);
     // znaleziono blok w cache
     if (bp) {
         DEBUGF("found buffer in cache");
         buf_assign(bp, vn);
     } else {
-        bp = buf_alloc(vn, blk, bcount);
+        bp = buf_alloc(vn, blk);
         bp->oper = BIO_READ;
         buf_assign(bp, vn);
 //        DEBUGF("starting I/O operation for %p %s (%p+%u)", bp->dev->name,
@@ -163,7 +161,7 @@ bio_wakeup(iobuf_t *b)
 void
 bio_done(iobuf_t *b)
 {
-    b->flags |= IOB_DONE;
+    b->flags |= BIO_DONE;
 //    DEBUGF("I/O operation done (%p+%u)",
 //        b->addr, b->bcount*512 );
     bio_wakeup(b);
@@ -192,7 +190,7 @@ physbuf_init(iobuf_t *bp, uio_t *uio)
     if (uio->space == UIO_USERSPACE) return -1;
     if (uio->iovcnt != 1) return -1;
     if (uio->size != 512) return -1;
-    bp->flags = IOB_NOCACHE;
+    bp->flags = 0;
     bp->bcount = 1;
     bp->addr = uio->iovs[0].iov_base;
     bp->oper = (uio->oper == UIO_READ)? BIO_READ: BIO_WRITE;
@@ -213,6 +211,43 @@ physio(devd_t *dev, uio_t *uio, int bioflags)
 }
 
 
+/*============================================================================
+ * Proces systemowy biodaemon
+ */
+
+void
+biohash_init(biohash_t *h , int n)
+{
+    h->bh_n = n;
+    h->bh_queues = kmem_alloc(n*sizeof(list_t), KM_SLEEP);
+    for (int i = 0; i < n; i++) {
+        LIST_CREATE(&h->bh_queues[i], iobuf_t, L_hash, FALSE);
+    }
+    LIST_CREATE(&h->bh_freebufs, iobuf_t, L_free, FALSE);
+    mutex_init(&h->bh_mtx, MUTEX_NORMAL);
+}
+
+iobuf_t *
+biohash_find(biohash_t *h, blkno_t n)
+{
+    mutex_lock(&h->bh_mtx);
+    list_t *q = &h->bh_queues[n%h->bh_n];
+    iobuf_t *bp = NULL;
+    while ( (bp = list_next(q, bp)) ) {
+        if (bp->blkno == n) break;
+    }
+    mutex_unlock(&h->bh_mtx);
+    return bp;
+}
+
+void
+biohash_insert(biohash_t *h, iobuf_t *bp)
+{
+    mutex_lock(&h->bh_mtx);
+    list_t *l = &h->bh_queues[bp->blkno%h->bh_n];
+    list_insert_head(l, bp);
+    mutex_unlock(&h->bh_mtx);
+}
 
 /*============================================================================
  * Proces systemowy biodaemon
@@ -231,17 +266,6 @@ biodaemon_main(void *arg)
 void
 biodaemon_sync()
 {
-    DEBUGF("syncing input-output bufs");
-    // Aby zmniejszyæ czas synchronizacji przy dostêpe do bufs_age
-    // podmnieniamy tylko wska¼niki do list.
-    mutex_lock(&list_lock);
-    list_t *c = bufs_age;
-    bufs_age = bufs_out;
-    bufs_out = c;
-    mutex_unlock(&list_lock);
-    for (iobuf_t *b = NULL; (b = list_extract_first(bufs_out)); ) {
-        DEBUGF("Syncing buf=%p dev=%p", b, b->dev? b->dev->name : "[file]");
-    }
 }
 
 

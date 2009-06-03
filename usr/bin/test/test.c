@@ -1,4 +1,6 @@
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
@@ -7,20 +9,59 @@
 
 #define print(fd, str) write(fd, str, strlen(str))
 
-const char *msg = "bin/test: Poczekaj 5 sekund, zrobie rozwidlenie.\n"
-                    "Potem jedna z moich osobowosci zrobi cos brzydkiego.\n";
+char hex[] = "0123456789abcdefGH";
+
+void
+print32(char *str, uint32_t val)
+{
+    str[0] = '0';
+    str[1] = 'x';
+    int i = 10;
+    str[i--] = 0;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+    str[i--] = hex[val % 0x10]; val /= 0x10;
+}
+void
+printV(const char *msg, int v)
+{
+    char val[10];
+    print(0, msg);
+    print32(val, v);
+    print(0, val);
+    print(0, "\n");
+}
+
+#define _E(ret, msg) if (ret == -1) {\
+    print(0, msg);\
+    return -1;\
+    }
 
 int
 main(int argc, char **v)
 {
-    int fd = open("/dev/ttyv0", 0, 0);
-    print(fd, msg);
-    int i = fork();
-    sleep(5);
-    print(fd, "and wait demo?\n");
-    if (i == 0) {
-        char *d = 0xfffffff0;
-        *d = 5;
-    }
+    char msg[100];
+    int fd = 0;
+#ifdef __Impala__
+    fd = open("/dev/ttyv0", 0, 0);
+#endif
+    key_t k = ftok("/sbin/init", 1);
+
+    int msg_id = msgget(k, IPC_CREAT|S_IRWXU|S_IRWXG|S_IRWXO);
+    _E(msg_id, "msgget error\n");
+    _E(msgrcv(msg_id, msg, sizeof(msg), 0,  0), "msgsnd error\n");
+    printV("key: ", k);
+    printV("msg id: ", msg_id);
+    print(0, "msg: ");
+    print(0, msg);
+    print(0, "\n");
+#ifdef __Impala__
+    while(1);
+#endif
     return 0;
 }

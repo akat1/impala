@@ -283,6 +283,17 @@ _list_find_rev(list_t *ls, list_pred_f *pred, uintptr_t parg)
     return list_find_rev_next(ls, NULL, pred, parg);
 }
 
+static inline bool
+list_is_member(list_t *ls, const void *elem)
+{
+    void *x = NULL;
+    while ( (x = list_next(ls, x)) ) {
+        if (x == elem) return TRUE;
+    }
+    return FALSE;
+    
+}
+
 #undef __elem_node
 #undef __next_node
 #undef __prev_node

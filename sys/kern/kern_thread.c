@@ -42,7 +42,6 @@ thread_t *thread_idle;
 
 list_t threads_list;
 
-static uint last_pid;
 static kmem_cache_t *thread_cache;
 
 static void thread_ctor(void *_thr);
@@ -57,22 +56,21 @@ static void thread_dtor(void *_thr);
 void
 thread_ctor(void *_thr)
 {
-//     thread_t *thr = _thr;
-//     thr->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
+        thread_t *t = _thr;
+        mutex_init(&t->thr_mtx, MUTEX_NORMAL);
 }
 
 void
 thread_dtor(void *_thr)
 {
-//     thread_t *thr = _thr;
-//     kmem_free(thr->vm_space);
+        thread_t *t = _thr;
+        mutex_destroy(&t->thr_mtx);
 }
 
 /// Inicjalizuje obs³ugê w±tków.
 void
 thread_init()
 {
-    last_pid = 0;
     list_create(&threads_list, offsetof(thread_t, L_threads), FALSE);
     thread_cache = kmem_cache_create("thread", sizeof(thread_t),
         thread_ctor, thread_dtor);
@@ -97,11 +95,11 @@ thread_create(int type, addr_t entry, addr_t arg)
     if (free_thr) {
         thread_t *t = free_thr;
         t->thr_flags = THREAD_NEW | type;
-        t->thr_tid = last_pid++;
         t->thr_entry_point = entry;
         t->thr_entry_arg = arg;
         t->thr_wakeup_time = 0;
         t->vm_space = NULL;
+        t->thr_sleepq = NULL;
         list_insert_tail(&threads_list, t);
 
         vm_space_create_stack(&vm_kspace, &t->thr_kstack,
@@ -394,4 +392,111 @@ void
 semaph_destroy(semaph_t *sem)
 {
     mutex_destroy(&sem->mtx);
+}
+
+/*============================================================================
+ * ¦pi±ce królew.. tzn kolejki.
+ */
+
+static void sleepq_waiting(sleepq_t *q, thread_t *t);
+static void sleepq_insert(sleepq_t *q, thread_t *t);
+static void sleepq_remove(sleepq_t *q, thread_t *T);
+
+void
+sleepq_init(sleepq_t *q)
+{
+    mutex_init(&q->sq_mtx, MUTEX_NORMAL);
+    LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
+}
+
+void
+sleepq_wait(sleepq_t *q)
+{
+    thread_t *t = curthread;
+    mutex_lock(&t->thr_mtx);
+    sleepq_insert(q, t);
+    sleepq_waiting(q, t);
+    sleepq_remove(q,t);
+    mutex_unlock(&t->thr_mtx);
+}
+
+int
+sleepq_wait_i(sleepq_t *q)
+{
+    int r;
+    thread_t *t = curthread;
+    mutex_lock(&t->thr_mtx);
+    sleepq_insert(q, t);
+    mutex_unlock(&t->thr_mtx);
+    sleepq_waiting(q, t);
+    mutex_lock(&t->thr_mtx);
+    r = t->thr_flags & THREAD_INTRPT;
+    sleepq_remove(q, t);
+    mutex_unlock(&t->thr_mtx);
+    return r;
+}
+
+void
+sleepq_wakeup(sleepq_t *q)
+{
+    mutex_lock(&q->sq_mtx);
+    thread_t *t = NULL;
+    while ( (t = list_next(&q->sq_waiting, t)) ) {
+        TRACE_IN("q=%p t=%p [waking up]", q, t);
+        KASSERT(t->thr_sleepq == q);
+        t->thr_flags &= ~THREAD_SLEEPQ;
+        sched_wakeup(t);
+    }
+    mutex_unlock(&q->sq_mtx);
+}
+
+void
+sleepq_intrpt(thread_t *t)
+{
+    sleepq_t *sq = NULL;
+    mutex_lock(&t->thr_mtx);
+    sq = t->thr_sleepq;
+    mutex_unlock(&t->thr_mtx);
+    if (sq == NULL) return;
+    t->thr_flags |= THREAD_INTRPT;
+    t->thr_flags &= ~THREAD_SLEEPQ;
+    sched_wakeup(t);
+}
+
+void
+sleepq_waiting(sleepq_t *q, thread_t *t)
+{
+    t->thr_flags |= THREAD_SLEEPQ;
+    while (t->thr_flags & THREAD_SLEEPQ && !(t->thr_flags & THREAD_INTRPT)) {
+        TRACE_IN("q=%p t=%p [sleep]", q, t);
+        sched_wait();
+    }
+    TRACE_IN("q=%p t=%p [%s]", q, t,
+            (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
+}
+
+void
+sleepq_insert(sleepq_t *q, thread_t *t)
+{
+    mutex_lock(&q->sq_mtx);
+    list_insert_tail(&q->sq_waiting, t);
+    t->thr_sleepq = q;
+    mutex_unlock(&q->sq_mtx);
+}
+
+void
+sleepq_remove(sleepq_t *q, thread_t *t)
+{
+    mutex_lock(&q->sq_mtx);
+    t->thr_sleepq = NULL;
+    list_remove(&q->sq_waiting, t);
+    t->thr_flags &= ~(THREAD_INTRPT|THREAD_SLEEPQ);
+    mutex_unlock(&q->sq_mtx);
+}
+
+void
+sleepq_destroy(sleepq_t *q)
+{
+    sleepq_wakeup(q);
+    mutex_destroy(&q->sq_mtx);
 }

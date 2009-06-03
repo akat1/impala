@@ -187,6 +187,9 @@ ipc_msg_get(proc_t *p, key_t key, int flags, int *id, ipcmsq_t **r)
     ipcmsq_t *msq = 0;
     if (key == IPC_PRIVATE) {
         mid = SYSVMSG_MAX;
+        if (p->p_ipc_msq && flags & IPC_EXCL) {
+            err = -EEXIST;
+        }
         if (p->p_ipc_msq) {
             msq = p->p_ipc_msq;
         } else
