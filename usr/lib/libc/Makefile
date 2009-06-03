@@ -7,8 +7,11 @@ SRCS=\
 	fcntl/creat.c\
 	stdio/fileno.c\
 	stdio/fopen.c\
+	stdio/fclose.c\
 	stdlib/atexit.c\
 	stdlib/qsort.c\
+	string/index.c\
+	string/rindex.c\
 	string/memchr.c\
         string/memcmp.c\
         string/memcpy.c\
@@ -29,7 +32,9 @@ SRCS=\
         string/strspn.c\
         string/strtok.c\
         string/strxfrm.c\
+	string/strstr.c\
 	termios/tcgetattr.c\
+	signal/kill.c\
 	sysvipc/ftok.c\
 	sysvipc/msgctl.c\
 	sysvipc/msgget.c\
@@ -46,9 +51,11 @@ SRCS=\
 	unistd/lseek.c\
 	unistd/lstat.c\
 	unistd/fork.c\
+	unistd/getgid.c\
 	unistd/getpid.c\
 	unistd/getppid.c\
 	unistd/getuid.c\
+	unistd/setgid.c\
 	unistd/setuid.c\
 	unistd/sleep.c\
 	unistd/stat.c\

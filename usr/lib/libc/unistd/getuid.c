@@ -4,7 +4,7 @@
 #include "libc_syscall.h"
 
 uid_t
-getpid(void)
+getuid(void)
 {
 	return syscall(SYS_getuid);
 }
