@@ -33,8 +33,10 @@
 #include <sys/types.h>
 #include <sys/clock.h>
 #include <sys/list.h>
+#include <sys/time.h>
 #include <sys/sched.h>
 #include <sys/thread.h>
+#include <machine/io.h>
 #include <machine/interrupt.h>
 #include <machine/atomic.h>
 
@@ -43,15 +45,46 @@ static spinlock_t soft_guard = { SPINLOCK_LOCK };
 
 /// Licznik tykniêæ.
 volatile uint clock_ticks;
+volatile timespec_t curtime;
 
 /// Czêstotliwo¶æ zegara systemowego
 const int HZ = 100;
+const int TICK = 1000000000/100; // 10^9 / HZ
+
+static void load_cmos_time(void);
+static uint8_t read_bcd_cmos(uint8_t index);
+
+uint8_t read_bcd_cmos(uint8_t index)
+{
+    io_out8(0x70, index);
+    uint8_t r = io_in8(0x71);
+    return ((r&0xf0)>>4)*10 + (r&0x0f);
+}
+
+/// Pobiera aktualny czas z NVRAM
+void
+load_cmos_time(void)
+{
+    int yh = read_bcd_cmos(0x32);
+    int yl = read_bcd_cmos(0x9);
+    int year = yh*100+yl;
+    int mon = read_bcd_cmos(0x8);
+    int day = read_bcd_cmos(0x7);
+    int hou = read_bcd_cmos(0x4);
+    int min = read_bcd_cmos(0x2);
+    int sec = read_bcd_cmos(0x0);
+    ///@todo napisaæ prawdziw± konwersjê daty ;)
+    int res = ((((year-1970)*365 + (mon-1)*31 + day-1)*24+hou)*60+min)*60+sec;
+    curtime.tv_sec = res;
+    curtime.tv_nsec = 0;
+}
 
 /// Inicjalizuje obs³ugê tykniêæ zegara systemowego.
 void
 clock_init()
 {
      spinlock_init(&soft_guard);
+     load_cmos_time();
 }
 
 
@@ -65,6 +98,11 @@ void
 clock_hardtick()
 {
     clock_ticks++;
+    curtime.tv_nsec+=TICK;
+    if(curtime.tv_nsec >= 1000000000) {
+        curtime.tv_nsec -= 1000000000;
+        curtime.tv_sec++;
+    }
 }
 
 /**

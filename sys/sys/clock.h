@@ -36,7 +36,9 @@
 #ifdef __KERNEL
 
 extern volatile uint clock_ticks;
+extern volatile timespec_t curtime;
 extern const int HZ; //mo¿e siê okazaæ, ¿e tutaj lepiej daæ #define
+extern const int TICK;
 
 void clock_init(void);
 void clock_softtick(void);
