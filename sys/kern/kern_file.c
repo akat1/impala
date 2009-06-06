@@ -47,51 +47,6 @@ filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
 static file_t *file_alloc(vnode_t *vn);
 static void fref(file_t *);
 static bool frele(file_t *);
-/*
-ssize_t
-fdev_read(file_t *fd, uio_t *u)
-{
-    ssize_t l;
-    if (u->offset == -1) u->offset = fd->data.devd.curpos;
-    l = devd_read(fd->data.devd.dev, u);
-    if (l > 0) {
-        fd->data.devd.curpos += l;
-    }
-    return l;
-}
-
-ssize_t
-fdev_write(file_t *fd, uio_t *u)
-{
-    ssize_t l;
-    if (u->offset == -1) u->offset = fd->data.devd.curpos;
-    l = devd_write(fd->data.devd.dev, u);
-    if (l > 0) {
-        fd->data.devd.curpos += l;
-    }
-    return l;
-}
-
-
-file_t *
-f_opendev(const char *name, int flags)
-{
-    TRACE_IN("name=%s flags=%x", name, flags);
-    devd_t *dev = devd_find(name);
-    if (dev == NULL) return NULL;
-    file_t *fd = kmem_alloc(sizeof(file_t), KM_SLEEP);
-    if (devd_open(dev, flags)!=0) {
-        TRACE_IN("cannot open dev for fd=%p(%s)", fd, name);
-        // free(fd);
-        return NULL;
-    }
-    fd->data.devd.dev = dev;
-    fd->data.devd.curpos = 0;
-    fd->fd_read = fdev_read;
-    fd->fd_write = fdev_write;
-    return fd;
-}
-*/
 
 file_t*
 file_alloc(vnode_t *vn)
@@ -165,6 +120,8 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
 ssize_t
 f_write(file_t *f, uio_t *u)
 {
+    if(!(f->f_flags & O_WRONLY || f->f_flags & O_RDWR))
+        return -EBADF;
     u->offset = f->f_offset;
     int res = VOP_WRITE(f->f_vnode, u, f->f_flags);
     if(res < 0) 
@@ -176,6 +133,8 @@ f_write(file_t *f, uio_t *u)
 ssize_t
 f_read(file_t *f, uio_t *u)
 {
+    if(!(f->f_flags & O_RDONLY || f->f_flags & O_RDWR))
+        return -EBADF;
     u->offset = f->f_offset;
     int res = VOP_READ(f->f_vnode, u, f->f_flags);
     if(res < 0)

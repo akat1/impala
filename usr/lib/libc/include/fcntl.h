@@ -35,16 +35,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 
-//zduplikowane z sys/file.h
-#define O_RDONLY      (1 << 1)
-#define O_WRONLY      (1 << 2)
-#define O_RDWR        (1 << 3)
-#define O_CREAT       (1 << 4)
-#define O_TRUNC       (1 << 5)
-#define O_EXCL        (1 << 6)
-#define O_APPEND      (1 << 7)
-#define O_NONBLOCK    (1 << 8)
 
 int  creat(const char *, mode_t);
 int  fcntl(int, int, ...);

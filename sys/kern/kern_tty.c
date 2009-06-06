@@ -139,7 +139,7 @@ tty_read(devd_t *d, uio_t *u, int flags)
     if(tty->t_conf.c_lflag & ICANON) {
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)
-                return 0; //are u sure?
+                return -EAGAIN;
             //sleepq();
         }
         size_t to_go = MIN(need, clist_size(tty->t_inq));
@@ -169,7 +169,6 @@ int
 tty_write(devd_t *d, uio_t *u, int flags)
 {
     tty_t *tty = d->priv;
-    //na razie olewamy buforowanie... "may provide a buffering mechanism;"
     if(u->size == 0)
         return 0;
     char *buf = kmem_alloc(u->size, KM_SLEEP);
@@ -178,7 +177,7 @@ tty_write(devd_t *d, uio_t *u, int flags)
     uio_move(buf, u->size, u);
     for(int i=0; i<u->size; i++)
         tty_output(tty, buf[i]);
-    //tty->t_lowops->tty_write(tty->t_private, buf, u->size);
+
     kmem_free(buf);
     return u->size;
 }
@@ -294,6 +293,7 @@ tty_input(tty_t *tty, int ch)
 void
 tty_output(tty_t *tty, char c)
 {
+    //na razie olewamy buforowanie... "may provide a buffering mechanism;"
     tty->t_lowops->tty_write(tty->t_private, &c, 1);
 }
 
@@ -301,7 +301,6 @@ tty_output(tty_t *tty, char c)
 void
 tty_erase(tty_t *tty)
 {
-//    int old_size = clist_size(tty->t_clq);
     clist_unpush(tty->t_clq);
     if(tty->t_conf.c_lflag & ECHOE) {
         tty_output(tty, '\b');
@@ -315,7 +314,11 @@ tty_erase(tty_t *tty)
 void
 tty_kill(tty_t *tty)
 {
-    clist_flush(tty->t_clq);
+    if(tty->t_conf.c_lflag & ECHOK) {
+        while(clist_size(tty->t_clq) > 0)
+            tty_erase(tty);
+    } else
+        clist_flush(tty->t_clq);
 }
 
 //=========== temp place for clist

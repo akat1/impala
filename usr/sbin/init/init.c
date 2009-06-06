@@ -60,7 +60,7 @@ main(int argc, char **v)
 {
     int fd = 0;
 #ifdef __Impala__
-    fd = open("/dev/ttyv1", 0 /* | O_NOCTTY*/, 0);
+    fd = open("/dev/ttyv1", O_RDWR /* | O_NOCTTY*/, 0);
 #endif
     tid_t t = thr_create(tmain, 0, 0, 0);
     printV("Utw. w±tek:", t);
