@@ -53,6 +53,7 @@ struct devsw {
     d_read_t        *d_read;
     d_write_t       *d_write;
     d_strategy_t    *d_strategy;
+    int              type;
     const char      *name;
 };
 

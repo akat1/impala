@@ -9,7 +9,6 @@ all: build
 
 build-image: ${IMAGE_FILE} build
 	touch image/root/boot/impala
-	cp image/root/boot/impala image/root/boot/impala.old
 	cp sys/kern/impala image/root/boot/
 	cd image && ./mtools.sh
 

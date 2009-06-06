@@ -57,6 +57,7 @@ static devsw_t md_devsw = {
     mdread,
     mdwrite,
     mdstrategy,
+    DEV_BDEV,
     "md"
 };
 

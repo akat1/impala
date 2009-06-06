@@ -22,22 +22,16 @@ union sigval {
 };
 typedef union sigval sigval_t;
 
-//To siginfo pochodzi z mana Linuksa... pewno wypada³o by mieæ w³asnes
 struct siginfo {
-    int      si_signo;  /* Numer sygna3u */
-    int      si_errno;  /* Warto9|ae errno */
-    int      si_code;   /* Kod sygna3u */
-    pid_t    si_pid;    /* Id procesu wysy3aj+-cego */
-    uid_t    si_uid;    /* Rzeczywisty ID ucytkownika wysy3aj+-cego procesu */
-    int      si_status; /* Kod zakonczenia lub sygna3 */
-    clock_t  si_utime;  /* Czas spedzony w przestrzeni ucytkownika */
-    clock_t  si_stime;  /* Czas spedzony w przestrzeni systemu */
-    sigval_t si_value;  /* Warto9|ae sygna3u */
-    int      si_int;    /* sygna3 POSIX.1b */
-    void *   si_ptr;    /* sygna3 POSIX.1b */
-    void *   si_addr;   /* Adres pamieci, ktory spowodowa3 b3+-d */
-    int      si_band;   /* Zdarzenie grupy (band event) */
-    int      si_fd;     /* Deskryptor pliku */
+    int      si_signo;
+    int      si_errno;
+    int      si_code;
+    pid_t    si_pid;
+    uid_t    si_uid;
+    int      si_status;
+    sigval_t si_value;
+    void *   si_addr;
+    int      si_band;
 };
 
 typedef struct siginfo siginfo_t;
@@ -54,12 +48,11 @@ int killpg(int pgrp, int sig);
 int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 int sigemptyset(sigset_t *set);
 sighandler_t signal(int signum, sighandler_t handler);
-int sigaction(int, const struct sigaction *restrict,
-                         struct sigaction *restrict);
+int sigaction(int, const struct sigaction *,
+                         struct sigaction *);
 
 
 
-#define SIG_DFL 0
 #define SIG_SETMASK 0
 
 #endif

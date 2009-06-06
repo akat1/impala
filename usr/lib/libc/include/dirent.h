@@ -19,8 +19,8 @@ typedef struct dirent dirent_t;
 int       closedir(DIR *);
 DIR      *opendir(const char *);
 dirent_t *readdir(DIR *);
-//int     readdir_r(DIR *restrict, struct dirent *restrict,
-//                        struct dirent **restrict);
+//int     readdir_r(DIR *, struct dirent *,
+//                        struct dirent **);
 //void    rewinddir(DIR *);
 //void    seekdir(DIR *, long);
 //long    telldir(DIR *);

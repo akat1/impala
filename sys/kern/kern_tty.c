@@ -65,6 +65,7 @@ static devsw_t ttysw = {
     tty_read,
     tty_write,
     nostrategy,
+    DEV_TTY,
     "ttyv"
 };
 

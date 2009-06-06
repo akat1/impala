@@ -66,6 +66,7 @@ static devsw_t cttysw = {
     ctty_read,
     ctty_write,
     nostrategy,
+    DEV_TTY,
     "tty"
 };
 
