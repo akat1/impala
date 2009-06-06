@@ -103,15 +103,15 @@ devd_open(devd_t *d, int flags)
 }
 
 int
-devd_read(devd_t *d, uio_t *u)
+devd_read(devd_t *d, uio_t *u, int flags)
 {
-    return d->devsw->d_read(d, u);
+    return d->devsw->d_read(d, u, flags);
 }
 
 int
-devd_write(devd_t *d, uio_t *u)
+devd_write(devd_t *d, uio_t *u, int flags)
 {
-    return d->devsw->d_write(d, u);
+    return d->devsw->d_write(d, u, flags);
 }
 
 int

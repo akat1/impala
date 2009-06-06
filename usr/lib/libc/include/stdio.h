@@ -8,7 +8,7 @@
 #define SEEK_CUR    1
 #define SEEK_END    2
 #define NULL (void*)0
-#define EOF -22
+#define EOF (-1)
 
 struct FILE {
     int fd;

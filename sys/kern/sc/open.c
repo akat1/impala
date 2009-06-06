@@ -109,6 +109,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         return error;
     if((error = VOP_OPEN(node, arg->flags, arg->mode)))
         return error;
+    file->f_flags = flags;
     r->result = fd;
     return -EOK;
 }

@@ -40,8 +40,8 @@ enum {
 };
 
 typedef int d_open_t(devd_t *d, int flags);
-typedef int d_read_t(devd_t *d, uio_t *u);
-typedef int d_write_t(devd_t *d, uio_t *u);
+typedef int d_read_t(devd_t *d, uio_t *u, int flags);
+typedef int d_write_t(devd_t *d, uio_t *u, int flags);
 typedef int d_close_t(devd_t *d);
 typedef int d_ioctl_t(devd_t *d, int cmd, uintptr_t param);
 typedef int d_strategy_t(devd_t *d, iobuf_t *b);
@@ -89,8 +89,8 @@ devd_t *devd_find(const char *name);
 int devd_open(devd_t *d, int flags);
 int devd_close(devd_t *d);
 int devd_ioctl(devd_t *d, int cmd, uintptr_t param);
-int devd_read(devd_t *d, uio_t *u);
-int devd_write(devd_t *d, uio_t *u);
+int devd_read(devd_t *d, uio_t *u, int flags);
+int devd_write(devd_t *d, uio_t *u, int flags);
 int devd_strategy(devd_t *d, iobuf_t *bp);
 void devd_printf(devd_t *d, const char *fmt, ...);
 

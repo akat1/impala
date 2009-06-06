@@ -161,7 +161,7 @@ mfs_close(vnode_t *vn)
 }
 
 int
-mfs_read(vnode_t *vn, uio_t *u)
+mfs_read(vnode_t *vn, uio_t *u, int flags)
 {
     mfs_node_t *node = vn->v_private;
     off_t start = u->offset;
@@ -173,7 +173,7 @@ mfs_read(vnode_t *vn, uio_t *u)
 }
 
 int
-mfs_write(vnode_t *vn, uio_t *u)
+mfs_write(vnode_t *vn, uio_t *u, int flags)
 {
     if(!vn || vn->v_type != VNODE_TYPE_REG)
         return -EINVAL;

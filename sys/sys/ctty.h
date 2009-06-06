@@ -27,29 +27,17 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: md.h 189 2009-05-09 18:31:20Z wieczyk $
  */
 
-#ifndef __SYS_CONSOLE_H
-#define __SYS_CONSOLE_H
+#ifndef __CTTY_H
+#define __CTTY_H
+
 #ifdef __KERNEL
 
-enum {
-    CONS_TTY,
-    CONS_ERROR,
-    CONS_MSG
-};
+int ctty_create(void);
 
-void cons_init(void);
-void cons_output(int msgt, const char *str);
-void cons_input_char(int ch);
-void cons_input_string(const char *str);
-
-#define cons_tty(msg) cons_output(CONS_TTY, msg)
-#define cons_msg(msg) cons_output(CONS_MSG, msg)
-#define cons_err(msg) cons_output(CONS_ERROR, msg)
+#endif
 
 
 #endif
-#endif
-

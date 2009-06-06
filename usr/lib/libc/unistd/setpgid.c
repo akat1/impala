@@ -1,0 +1,11 @@
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+int
+setpgid(pid_t pid, pid_t pgid)
+{
+    return syscall(SYS_setpgid, pid, pgid);
+}
+
+

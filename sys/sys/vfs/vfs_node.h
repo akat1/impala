@@ -117,8 +117,8 @@ enum {
 #define VOP_CREATE(v, vpp, name, attr) (v)->v_ops->vop_create((v), (vpp), \
                                                     (name),(attr))
 #define VOP_CLOSE(v) (v)->v_ops->vop_close((v))
-#define VOP_READ(v, uio) (v)->v_ops->vop_read((v), (uio))
-#define VOP_WRITE(v, uio) (v)->v_ops->vop_write((v), (uio))
+#define VOP_READ(v, uio, fl) (v)->v_ops->vop_read((v), (uio), (fl))
+#define VOP_WRITE(v, uio, fl) (v)->v_ops->vop_write((v), (uio), (fl))
 #define VOP_IOCTL(v, cmd, arg) (v)->v_ops->vop_ioctl((v), (cmd), (arg))
 #define VOP_TRUNCATE(v, len) (v)->v_ops->vop_truncate((v), (len))
 #define VOP_SEEK(v, off) (v)->v_ops->vop_seek((v), (off))
@@ -132,12 +132,13 @@ enum {
 //#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
+///@todo chyba wypada dodaæ proces otwieraj±cy
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
 typedef int vnode_create_t(vnode_t *v, vnode_t **vpp, const char *name,
                             vattr_t *attr);
 typedef int vnode_close_t(vnode_t *v);
-typedef int vnode_read_t(vnode_t *v, uio_t *u);
-typedef int vnode_write_t(vnode_t *v, uio_t *u);
+typedef int vnode_read_t(vnode_t *v, uio_t *u, int flags);
+typedef int vnode_write_t(vnode_t *v, uio_t *u, int flags);
 typedef int vnode_ioctl_t(vnode_t *v, int cmd, uintptr_t arg);
 typedef int vnode_truncate_t(vnode_t *v, off_t len);
 typedef int vnode_seek_t(vnode_t *v, off_t off);
@@ -190,6 +191,7 @@ int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 int vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
+bool vnode_isatty(vnode_t *vn);
 
 vnode_t* vnode_alloc(void);
 void vrele(vnode_t *vn);

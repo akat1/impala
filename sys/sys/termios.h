@@ -1,15 +1,24 @@
 #ifndef __SYS_TERMIOS_H
 #define __SYS_TERMIOS_H
 
+#define MAX_INPUT 4096
 
-#define ICRNL 1
+typedef unsigned int cc_t;
+typedef unsigned int speed_t;
+typedef unsigned int tcflag_t;
+
 #define TCSANOW 1
 //#define TCSADRAIN 2
 //#define TCSAFLUSH 3
 
+#define CTRL(x) ((x)&037)
+#define EOF    (-1)
+#define NL     '\n'
+#define CR     '\r'
+
 //c_cc index:
 
-#define VEOF     0
+#define VEOF    0
 #define VEOL    1
 #define VERASE  2
 #define VINTR   3
@@ -20,12 +29,12 @@
 #define VSTOP   8
 #define VSUSP   9
 #define VTIME   10
-#define NCCS 11
+#define NCCS    11
 
 //input flags:
 
 #define BRKINT (1<<0)
-#define ICRNL  (1<<1)
+#define ICRNL  (1<<1)   //ta flaga potrzebna
 #define IGNBRK (1<<2)
 #define IGNCR  (1<<3)
 #define IGNPAR (1<<4)
@@ -89,17 +98,13 @@
 #define ECHO    (1<<0)
 #define ECHOE   (1<<1)
 #define ECHOK   (1<<2)
+#define ECHOKE  (ECHOK | ECHOE)
 #define ECHONL  (1<<3)
 #define ICANON  (1<<4)
 #define IEXTEN  (1<<5)
 #define ISIG    (1<<6)
 #define NOFLSH  (1<<7)
 #define TOSTOP  (1<<8)
-
-
-typedef unsigned int cc_t;
-typedef unsigned int speed_t;
-typedef unsigned int tcflag_t;
 
 
 struct termios {
@@ -109,10 +114,59 @@ struct termios {
     tcflag_t c_lflag;
     cc_t     c_cc[NCCS];
 };
-
+typedef struct termios termios_t;
 
 
 #ifdef __KERNEL
+
+// XXX:tymczasowo tutaj
+
+struct clist {
+    int     *buf;       ///< bufor na dane
+    int      beg;       ///< miejsce gdzie zaczyna siê kolejka
+    int      end;       ///< koniec kolejki (najstarsze dane)
+    int      size;      ///< aktualnie wykorzystana przestrzeñ
+    int      buf_size;  ///< wielko¶æ ca³ego bufora
+    mutex_t *mtx;
+};
+typedef struct clist clist_t;
+
+clist_t *clist_create(size_t size);
+void clist_push(clist_t *l, int ch);
+void clist_unpush(clist_t *l);
+int  clist_pop(clist_t *l);
+void clist_unpop(clist_t *l, int ch);
+void clist_move(clist_t *dst, clist_t *src);
+void clist_flush(clist_t *dst);
+int  clist_size(clist_t *l);
+// XXX:
+
+typedef int tty_write_t(void* priv, char *ch, size_t size);
+
+struct tty_lowops {
+    tty_write_t *tty_write;    ///< zapisuje znak do urz±dzenia
+};
+typedef struct tty_lowops tty_lowops_t;
+
+struct tty {
+    termios_t     t_conf;     ///< ustawienia terminala
+    clist_t      *t_inq;      ///< kolejka danych wej¶ciowych
+    clist_t      *t_clq;      ///< kolejka aktualnej lini wej¶cia
+//    clist_t      *t_outq;     ///< kolejka danych wyj¶ciowych
+    tty_lowops_t *t_lowops;   ///< funkcje obs³ugi urz±dzenia komunikacyjnego
+    pid_t         t_session;  ///< sesja zwi±zana z terminalem
+    pid_t         t_group;    ///< grupa procesów pierwszoplanowych
+    void*         t_private;  ///< prywatne dane urz±dzenia komunikacyjnego
+    devd_t       *t_dev;      ///< zarejestrowane urz±dzenie terminala
+};
+typedef struct tty tty_t;
+
+/// tworzy nowe urz±dzenie tty na podstawie urz±dzenia komunikacyjnego
+tty_t *tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops);
+/// wywo³ywane przez urz±dzenie, gdy dostêpny jest kolejny znak na wej¶ciu
+void tty_input(tty_t *tty, int ch);
+void tty_output(tty_t *tty, char ch);
+
 
 
 

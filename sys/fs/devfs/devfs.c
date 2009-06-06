@@ -194,19 +194,19 @@ devfs_close(vnode_t *vn)
 }
 
 int
-devfs_read(vnode_t *vn, uio_t *u)
+devfs_read(vnode_t *vn, uio_t *u, int flags)
 {
     if(!vn->v_dev)
         return 0;
-    return devd_read(vn->v_dev, u);
+    return devd_read(vn->v_dev, u, flags);
 }
 
 int
-devfs_write(vnode_t *vn, uio_t *u)
+devfs_write(vnode_t *vn, uio_t *u, int flags)
 {
     if(!vn->v_dev)
         return 0;
-    return devd_write(vn->v_dev, u);
+    return devd_write(vn->v_dev, u, flags);
 }
 
 int

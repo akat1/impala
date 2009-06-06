@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,29 +26,42 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: read.c 281 2009-05-28 16:04:04Z takeshi $
  */
 
-#ifndef __SYS_CONSOLE_H
-#define __SYS_CONSOLE_H
-#ifdef __KERNEL
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/utils.h>
+#include <sys/string.h>
+#include <sys/syscall.h>
+#include <machine/video.h>
+#include <machine/interrupt.h>
+#include <sys/file.h>
+#include <sys/errno.h>
+#include <sys/proc.h>
+#include <sys/uio.h>
 
-enum {
-    CONS_TTY,
-    CONS_ERROR,
-    CONS_MSG
+typedef struct sc_isatty_args sc_isatty_args;
+
+struct sc_isatty_args {
+    int fd;
 };
 
-void cons_init(void);
-void cons_output(int msgt, const char *str);
-void cons_input_char(int ch);
-void cons_input_string(const char *str);
 
-#define cons_tty(msg) cons_output(CONS_TTY, msg)
-#define cons_msg(msg) cons_output(CONS_MSG, msg)
-#define cons_err(msg) cons_output(CONS_ERROR, msg)
+errno_t sc_isatty(thread_t *p, syscall_result_t *r, sc_isatty_args *args);
 
+errno_t
+sc_isatty(thread_t *t, syscall_result_t *r, sc_isatty_args *args)
+{
+    r->result = 0;
+    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
+    if (file == NULL) {
+        return -EBADF;
+    }
+    if(!vnode_isatty(file->f_vnode))
+        return -ENOTTY;
+    r->result = 1;    
+    return EOK;
+}
 
-#endif
-#endif
 

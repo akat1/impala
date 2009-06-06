@@ -51,6 +51,7 @@
 #define O_EXCL        (1 << 6)
 #define O_APPEND      (1 << 7)
 #define O_NONBLOCK    (1 << 8)
+#define O_NOCTTY      (1 << 9)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)

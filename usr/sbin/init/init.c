@@ -46,7 +46,12 @@ printV(const char *msg, int v)
 void
 tmain()
 {
-    print(0,"elo");
+    int fd = open("/dev/tty", O_RDWR);
+    int err = errno;
+    printV("fd w w±tku: ", fd);
+    printV("errno: ", err);
+    print(fd,"elo320\n\n");
+    print(fd,"\tSiemanizator ;D... 1234567890\n\n");
     while(1);
 }
 
@@ -55,8 +60,15 @@ main(int argc, char **v)
 {
     int fd = 0;
 #ifdef __Impala__
-    fd = open("/dev/ttyv0", 0, 0);
+    fd = open("/dev/ttyv1", 0 /* | O_NOCTTY*/, 0);
 #endif
     tid_t t = thr_create(tmain, 0, 0, 0);
+    printV("Utw. w±tek:", t);
+    char buf[32];
+    while(1) {
+        int s = read(0, buf, 32);
+        write(0, buf, s);
+    }
+    
     return 0;
 }

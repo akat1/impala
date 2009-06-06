@@ -35,14 +35,16 @@ SRCS=\
         string/strtok.c\
         string/strxfrm.c\
 	string/strstr.c\
-	termios/tcgetattr.c\
 	signal/kill.c\
-    sys/sched_yield.c\
-    sysvipc/ftok.c\
+	sys/sched_yield.c\
+	sysvipc/ftok.c\
 	sysvipc/msgctl.c\
 	sysvipc/msgget.c\
 	sysvipc/msgrcv.c\
 	sysvipc/msgsnd.c\
+	termios/cfmakeraw.c\
+	termios/tcgetattr.c\
+	termios/tcsetattr.c\
 	thr/thr_cancel.c\
 	thr/thr_create.c\
 	thr/thr_destroy.c\
@@ -55,18 +57,27 @@ SRCS=\
 	unistd/execve.c\
 	unistd/getdents.c\
 	unistd/ioctl.c\
+	unistd/isatty.c\
 	unistd/lseek.c\
 	unistd/lstat.c\
 	unistd/fork.c\
+	unistd/getegid.c\
+	unistd/geteuid.c\
 	unistd/getgid.c\
+	unistd/getpgid.c\
+	unistd/getpgrp.c\
 	unistd/getpid.c\
 	unistd/getppid.c\
 	unistd/getuid.c\
 	unistd/setgid.c\
+	unistd/setpgid.c\
+	unistd/setpgrp.c\
 	unistd/setuid.c\
 	unistd/sleep.c\
 	unistd/stat.c\
 	unistd/read.c\
+	unistd/tcgetpgrp.c\
+	unistd/tcsetpgrp.c\
 	unistd/umask.c\
 	unistd/write.c\
 

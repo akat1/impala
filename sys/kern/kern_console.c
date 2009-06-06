@@ -31,8 +31,10 @@
  */
 
 #include <fs/devfs/devfs.h>
+#include <sys/ctty.h>
 #include <sys/types.h>
 #include <sys/console.h>
+#include <sys/termios.h>
 #include <sys/kmem.h>
 #include <sys/device.h>
 #include <sys/string.h>
@@ -58,12 +60,12 @@ enum {
 };
 
 enum {
-    VTTY_MAX = 3
+    VCONS_MAX = 3
 };
 
 
-typedef struct vt_parser vt_parser_t;
-struct vt_parser {
+typedef struct vc_parser vc_parser_t;
+struct vc_parser {
     int     state;
     int     value;
     int     attr[PARSER_MAX_ATTRS];
@@ -71,8 +73,15 @@ struct vt_parser {
 };
 
 
-typedef struct vtty vtty_t;
-struct vtty {
+typedef struct vconsole vconsole_t;
+
+/**
+ * Struktura reprezentuj±ca wirtualn± konsolê - wirtualny zestaw
+ * klawiatura - monitor. Prawdziwe urz±dzenia podpiête s± pod aktualn± wirtualn±
+ * konsolê - current_vcons
+ */
+
+struct vconsole {
     int             num;
     int             bold;
     int             sattr;
@@ -80,19 +89,22 @@ struct vtty {
     int             cx;
     int             cy;
     textscreen_t    screen;
-    vt_parser_t     parser;
+    vc_parser_t     parser;
     mutex_t         mtx;
-    devd_t         *dev;
+//    devd_t         *dev;
+    tty_t          *tty;    ///< urz±dzenie terminalowe tej konsoli wirtualnej
 };
 
+static void vcons_input_char(vconsole_t *vc, int ch);
+static void vcons_input_string(vconsole_t *vc, const char* str);
+static void vcons_put(vconsole_t *t, char c);
+static void vcons_putstr(vconsole_t *t, const char *c);
+void vcons_data_out(vconsole_t *vc, const char *c, int n);
 
-static void vtty_put(vtty_t *t, char c);
-static void vtty_putstr(vtty_t *t, const char *c);
-void vtty_data_out(vtty_t *vt, const char *c, int n);
+static int vc_parser_put(vc_parser_t *vcprs, char c);
+static void vc_parser_reset(vc_parser_t *vcprs);
+static void vcons_code(vconsole_t *vc, int c);
 
-static int vt_parser_put(vt_parser_t *vtprs, char c);
-static void vt_parser_reset(vt_parser_t *vtprs);
-static void vtty_code(vtty_t *vt, int c);
 
 
 
@@ -101,44 +113,11 @@ enum {
     PARSER_CONT     = -2,
 };
 
-static d_open_t ttyv_open;
-static d_close_t ttyv_close;
-static d_write_t ttyv_write;
-static d_read_t ttyv_read;
-static d_close_t ttyv_close;
-static d_ioctl_t ttyv_ioctl;
 
-static d_open_t cons_open;
-static d_close_t cons_close;
-static d_write_t cons_write;
-static d_read_t cons_read;
-static d_close_t cons_close;
-static d_ioctl_t cons_ioctl;
-
-static devsw_t ttyvsw = {
-    ttyv_open,
-    ttyv_close,
-    ttyv_ioctl,
-    ttyv_read,
-    ttyv_write,
-    nostrategy,
-    "ttyv"
-};
-
-static devsw_t conssw = {
-    cons_open,
-    cons_close,
-    cons_ioctl,
-    cons_read,
-    cons_write,
-    nostrategy,
-    "console"
-};
-
-
-static vtty_t vttys[VTTY_MAX];
-static vtty_t *current_vtty = NULL;
-static devd_t *consdev;
+static vconsole_t vcons[VCONS_MAX];
+static vconsole_t *current_vcons = NULL;
+static tty_t  *current_vcons_tty = NULL;
+//static devd_t *consttydev;
 
 // Odwzorowanie kolorów czcionki z sekwencji steruj±cych na kolory VGA
 static int tty_fgattr_map[10] = {
@@ -173,39 +152,58 @@ static int tty_bgattr_map[10] = {
  * Konsola
  */
 
+tty_write_t vcons_write;
+
+int vcons_write(void *t, char *b, size_t s)
+{
+    vcons_data_out((vconsole_t*)t, b, s);
+    return s;
+}
+
+
+tty_lowops_t vcons_lowop = {
+    .tty_write = vcons_write,
+};
+
+// tty_lowops_t cons_lowop = {
+//     .tty_write = cons_write,
+// };
+
 void
 cons_init()
 {
-    consdev = devd_create(&conssw, -1, NULL);
-    devfs_register(consdev->name, consdev, 0, 0, 0777);
-    for (int i = 0; i < VTTY_MAX; i++) {
-        mutex_init(&vttys[i].mtx, MUTEX_NORMAL);
-        vttys[i].dev = devd_create(&ttyvsw, i, &vttys[i]);
-        devfs_register(vttys[i].dev->name, vttys[i].dev, 0, 0, 0777);
-        vttys[i].sattr = COLOR_BRIGHTGRAY;
+    //tty_create("console", -1, &console_data, &cons_lowop);
+//    devfs_register(consdev->name, consdev, 0, 0, 0777);
+
+    ctty_create(); //tworzymy /dev/tty
+    for (int i = 0; i < VCONS_MAX; i++) {
+        mutex_init(&vcons[i].mtx, MUTEX_NORMAL);
+        vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
+        vcons[i].sattr = COLOR_BRIGHTGRAY;
         if (i > 0) {
-            textscreen_clone(&vttys[i].screen);
-            textscreen_clear(&vttys[i].screen);
+            textscreen_clone(&vcons[i].screen);
+            textscreen_clear(&vcons[i].screen);
         }
     }
-    textscreen_clone(&vttys[0].screen);
-    textscreen_switch(&vttys[0].screen);
-    current_vtty = &vttys[0];
+    textscreen_clone(&vcons[0].screen);
+    textscreen_switch(&vcons[0].screen);
+    current_vcons = &vcons[0];
+    current_vcons_tty = current_vcons->tty;
 }
 
 #define isprint(c) ( 31 < c && c < 127 )
 void
 cons_output(int t, const char *c)
 {
-    if (current_vtty) {
+    if (current_vcons) {
         if (t != CONS_TTY) {
             char buf[SPRINTF_BUFSIZE];
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
             str_cat(ptr, "\033[u");
-            vtty_putstr(current_vtty, buf);
+            vcons_putstr(current_vcons, buf);
         } else {
-            vtty_putstr(current_vtty, c);
+            vcons_putstr(current_vcons, c);
         }
     } else {
         // Je¿eli obs³uga terminali nie jest jeszcze zainicjalizowana
@@ -217,17 +215,32 @@ cons_output(int t, const char *c)
     }
 }
 
+//wywo³ywane póki co ze sterownika klawiatury
+void cons_input_char(int ch)
+{
+    if(current_vcons) {
+        vcons_input_char(current_vcons, ch);
+    }
+}
+
+void cons_input_string(const char *str)
+{
+    if(current_vcons) {
+        vcons_input_string(current_vcons, str);
+    }
+}
+
 
 /*========================================================================
  * Obs³uga wirtualnych terminali w emulacji VT100
  */
 
 /*
- * Sekwencje steruj±cy terminalu VT100.
+ * Sekwencje steruj±ce terminalu VT100.
  * Wszystkie zaczynaj± siê od znaku ESCAPE, klamrami {}
  * s± oznaczone zmienne. Zapis {X=y} oznacza, ¿e parametr
  * X mo¿e nie zostaæ podany, i wtedy przyjmuje domy¶ln± warto¶æ y.
- * Opis kodów dostêpny na stronie (kody poni¿ej s± w tej samej kolejno¶æi)
+ * Opis kodów dostêpny na stronie (kody poni¿ej s± w tej samej kolejno¶ci)
  *      http://www.termsys.demon.co.uk/vtansi.htm
  *
  * Dodatkowe oznaczenia:
@@ -273,127 +286,148 @@ enum {
 
 
 void
-vtty_putstr(vtty_t *vt, const char *c)
+vcons_input_char(vconsole_t *vc, int ch)
 {
-    vtty_data_out(vt, c, str_len(c));
+    tty_input(vc->tty, ch);
 }
 
 void
-vtty_data_out(vtty_t *vt, const char *c, int n)
+vcons_input_string(vconsole_t *vc, const char* str)
+{
+    tty_t *tty = vc->tty;
+    for(const char *c=str; *c; c++)
+        tty_input(tty, *c);
+}
+
+
+void
+vcons_putstr(vconsole_t *vc, const char *c)
+{
+    vcons_data_out(vc, c, str_len(c));
+}
+
+void
+vcons_data_out(vconsole_t *vc, const char *c, int n)
 {
     enum {
         CODE_ESC = 033
     };
     bool escape = FALSE;
     int X = spltty();
-    mutex_lock(&vt->mtx);
+    mutex_lock(&vc->mtx);
     for (; n; c++, n--) {
         if (escape) {
-            int code = vt_parser_put(&vt->parser, *c);
+            int code = vc_parser_put(&vc->parser, *c);
             if (code == PARSER_ERROR) {
                 escape = FALSE;
             } else
             if (code != PARSER_CONT) {
-                vtty_code(vt, code);
+                vcons_code(vc, code);
                 escape = FALSE;
             }
         } else {
             if (*c == CODE_ESC) {
                 escape = TRUE;
-                vt_parser_reset(&vt->parser);
+                vc_parser_reset(&vc->parser);
             } else {
-                vtty_put(vt, *c);
+                vcons_put(vc, *c);
             }
         }
     }
-    mutex_unlock(&vt->mtx);
+    mutex_unlock(&vc->mtx);
     splx(X);
 }
 
 
 void
-vtty_put(vtty_t *vt, char c)
+vcons_put(vconsole_t *vc, char c)
 {
     if (isprint(c)) {
-        textscreen_put(&vt->screen, c, vt->sattr);
+        textscreen_put(&vc->screen, c, vc->sattr);
     } else
     if (c == '\n') {
-        textscreen_next_line(&vt->screen);
+        textscreen_next_line(&vc->screen);
+    } else if (c == '\b') {
+        int cx, cy;
+        textscreen_get_cursor(&vc->screen, &cx, &cy);
+        textscreen_update_cursor(&vc->screen, cx-1, cy);
+        textscreen_put(&vc->screen, ' ', vc->sattr);
+        textscreen_update_cursor(&vc->screen, cx-1, cy);
     } else {
-        textscreen_put(&vt->screen, '?', vt->sattr);
+        textscreen_put(&vc->screen, '?', vc->sattr);
     }
 }
 
 void
-vtty_code(vtty_t *vt, int c)
+vcons_code(vconsole_t *vc, int c)
 {
     int cx,cy;
-    textscreen_get_cursor(&vt->screen, &cx, &cy);
+    textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
         case ESC_CURHOME:
-            cx = vt->parser.attr[0];
-            cy = vt->parser.attr[1];
-            textscreen_update_cursor(&vt->screen, cx, cy);
+            cx = vc->parser.attr[0];
+            cy = vc->parser.attr[1];
+            textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURSAVEA:
-            vt->cx = cx;
-            vt->cy = cy;
+            vc->cx = cx;
+            vc->cy = cy;
         case ESC_CURSAVE:
-            vt->sattr2 = vt->sattr;
+            vc->sattr2 = vc->sattr;
             break;
         case ESC_CURLOADA:
-            textscreen_update_cursor(&vt->screen, vt->cx, vt->cy);
+            textscreen_update_cursor(&vc->screen, vc->cx, vc->cy);
         case ESC_CURLOAD:
-            vt->sattr = vt->sattr2;
+            vc->sattr = vc->sattr2;
             break;
         case ESC_CURUP:
-            cy -= vt->parser.attr[0];
-            textscreen_update_cursor(&vt->screen, cx, cy);
+            cy -= vc->parser.attr[0];
+            textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURDOWN:
-            cy += vt->parser.attr[0];
-            textscreen_update_cursor(&vt->screen, cx, cy);
+            cy += vc->parser.attr[0];
+            textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURFORW:
-            cx += vt->parser.attr[0];
-            textscreen_update_cursor(&vt->screen, cx, cy);
+            cx += vc->parser.attr[0];
+            textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURBACK:
-            cx -= vt->parser.attr[0];
-            textscreen_update_cursor(&vt->screen, cx, cy);
+            cx -= vc->parser.attr[0];
+            textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_RESET:
-            textscreen_clear(&vt->screen);
-            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+            textscreen_clear(&vc->screen);
+            vc->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
             break;
         case ESC_ERASES:
-            textscreen_clear(&vt->screen);
+            textscreen_clear(&vc->screen);
             break;
         case ESC_ATTR:
-            for (int i = 0; i <= vt->parser.attr_i; i++) {
-                int a = vt->parser.attr[i];
+            for (int i = 0; i <= vc->parser.attr_i; i++) {
+                int a = vc->parser.attr[i];
                 if (a < 10) {
                     switch (a) {
                         case 0:
-                            vt->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
+                            vc->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
                             break;
                         case 1:
-                            vt->sattr = TS_BOLD(vt->sattr);
+                            vc->sattr = TS_BOLD(vc->sattr);
                             break;
                         case 5: // mruganie
                             break;
                         case 7:
-                            vt->sattr = TS_BG(_TS_FG(vt->sattr)) |
-                                TS_FG(_TS_BG(vt->sattr));
+                            vc->sattr = TS_BG(_TS_FG(vc->sattr)) |
+                                TS_FG(_TS_BG(vc->sattr));
                             break;
                     }
                 } else
                 if (30 <= a && a < 40) {
-                    vt->sattr = _TS_BG(vt->sattr) | _TS_BOLD(vt->sattr)
+                    vc->sattr = _TS_BG(vc->sattr) | _TS_BOLD(vc->sattr)
                         | tty_fgattr_map[a-30];
                 } else
                 if (40 <= a && a < 50) {
-                    vt->sattr = _TS_FG(vt->sattr) | _TS_BOLD(vt->sattr)
+                    vc->sattr = _TS_FG(vc->sattr) | _TS_BOLD(vc->sattr)
                         | tty_bgattr_map[a-40];
                 }
             }
@@ -401,87 +435,6 @@ vtty_code(vtty_t *vt, int c)
     }
 }
 
-
-
-/*========================================================================
- * Plik urz±dzenia: /dev/console
- */
-
-int
-cons_open(devd_t *d, int flags)
-{
-    return -ENOTSUP;
-}
-
-int
-cons_read(devd_t *d, uio_t *u)
-{
-    return -ENOTSUP;
-}
-
-int
-cons_write(devd_t *d, uio_t *u)
-{
-    return -ENOTSUP;
-}
-
-int
-cons_close(devd_t *d)
-{
-    return -ENOTSUP;
-}
-
-int
-cons_ioctl(devd_t *d, int cmd, uintptr_t param)
-{
-    return -ENOTSUP;
-}
-
-/*========================================================================
- * Plik urz±dzenia: /dev/ttyvXX
- */
-
-int
-ttyv_open(devd_t *d, int flags)
-{
-    return 0;
-}
-
-int
-ttyv_read(devd_t *d, uio_t *u)
-{
-//    vtty_t *vtty = d->priv;
-    //tymczasowo, chyba na potrzeby demka 
-    char c;
-    char BUF[512];
-    char *b = BUF;
-    while((c = pckbd_get_char())!=-1 && b<BUF+511)
-        *(b++) = c;
-    uio_move(BUF, b-BUF, u);
-    return b-BUF;
-}
-
-int
-ttyv_write(devd_t *d, uio_t *u)
-{
-    vtty_t *vtty = d->priv;
-    char BUF[512];
-    uio_move(BUF, MIN(512, u->size), u);
-    vtty_data_out(vtty, BUF, MIN(512, u->size));
-    return MIN(512, u->size);
-}
-
-int
-ttyv_ioctl(devd_t *d, int cmd, uintptr_t param)
-{
-    return -ENOTSUP;
-}
-
-int
-ttyv_close(devd_t *d)
-{
-    return -ENOTSUP;
-}
 
 
 /*========================================================================
@@ -498,21 +451,21 @@ enum {
 };
 
 void
-vt_parser_reset(vt_parser_t *vtprs)
+vc_parser_reset(vc_parser_t *vcprs)
 {
-    mem_zero(vtprs, sizeof(*vtprs));
-    vtprs->state = P_FIRST;
+    mem_zero(vcprs, sizeof(*vcprs));
+    vcprs->state = P_FIRST;
 }
 
 /*
  * Zastanawiam siê czy nie przepisaæ tego na jaki¶ DFA.
  */
 int
-vt_parser_put(vt_parser_t *vtprs, char c)
+vc_parser_put(vc_parser_t *vcprs, char c)
 {
     int ret = PARSER_CONT;
     int nexts = P_DUMMY;
-    if(vtprs->state == P_FIRST) {
+    if(vcprs->state == P_FIRST) {
         switch (c) {
             case 'c':
                 ret = ESC_RESET;
@@ -546,10 +499,10 @@ vt_parser_put(vt_parser_t *vtprs, char c)
                 break;
         }
     } else
-    if (vtprs->state == P_LONG) {
+    if (vcprs->state == P_LONG) {
         if ( '0' <= c && c <= '9') {
-            vtprs->attr[0] = c - '0';
-            vtprs->attr_i = 0;
+            vcprs->attr[0] = c - '0';
+            vcprs->attr_i = 0;
             nexts = P_LONG_ATTR;
         } else
         switch (c) {
@@ -580,36 +533,36 @@ vt_parser_put(vt_parser_t *vtprs, char c)
                 break;
             case 'A':
                 ret = ESC_CURUP;
-                vtprs->attr[0] = 1;
+                vcprs->attr[0] = 1;
                 break;
             case 'B':
                 ret = ESC_CURDOWN;
-                vtprs->attr[0] = 1;
+                vcprs->attr[0] = 1;
                 break;
             case 'C':
                 ret = ESC_CURFORW;
-                vtprs->attr[0] = 1;
+                vcprs->attr[0] = 1;
                 break;
             case 'D':
                 ret = ESC_CURBACK;
-                vtprs->attr[0] = 1;
+                vcprs->attr[0] = 1;
                 break;
             default:
                 ret = PARSER_ERROR;
                 break;
         }
     } else
-    if (vtprs->state == P_LONG_ATTR) {
+    if (vcprs->state == P_LONG_ATTR) {
         if ('0' <= c && c <= '9') {
-            vtprs->attr[vtprs->attr_i] *= 10;
-            vtprs->attr[vtprs->attr_i] += c - '0';
+            vcprs->attr[vcprs->attr_i] *= 10;
+            vcprs->attr[vcprs->attr_i] += c - '0';
             nexts = P_LONG_ATTR;
         } else
         switch (c) {
             case ';':
                 nexts = P_LONG_ATTR;
-                vtprs->attr_i++;
-                vtprs->attr[vtprs->attr_i] = 0;
+                vcprs->attr_i++;
+                vcprs->attr[vcprs->attr_i] = 0;
                 break;
             case 'm':
                 ret = ESC_ATTR;
@@ -634,7 +587,7 @@ vt_parser_put(vt_parser_t *vtprs, char c)
                 ret = ESC_SCROLL;
                 break;
             case 'J':
-                switch (vtprs->attr[0]) {
+                switch (vcprs->attr[0]) {
                     case 1:
                         ret = ESC_ERASEU;
                         break;
@@ -647,7 +600,7 @@ vt_parser_put(vt_parser_t *vtprs, char c)
                 }
                 break;
             case 'i':
-                switch (vtprs->attr[0]) {
+                switch (vcprs->attr[0]) {
                     case 1:
                         ret = ESC_PRINTL;
                         break;
@@ -664,10 +617,10 @@ vt_parser_put(vt_parser_t *vtprs, char c)
                 break;
         }
     }
-    if (vtprs->attr_i == PARSER_MAX_ATTRS) {
-        vtprs->attr_i = 0;
+    if (vcprs->attr_i == PARSER_MAX_ATTRS) {
+        vcprs->attr_i = 0;
         ret = PARSER_ERROR;
     }
-    vtprs->state = nexts;
+    vcprs->state = nexts;
     return ret;
 }

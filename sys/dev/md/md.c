@@ -79,14 +79,14 @@ mdclose(devd_t *d)
 }
 
 int
-mdread(devd_t *d, uio_t *uio)
+mdread(devd_t *d, uio_t *uio, int flags)
 {
 //    TRACE_IN("dev=%p uio=%p", d,uio);
     return physio(d, uio, 0);
 }
 
 int
-mdwrite(devd_t *d, uio_t *uio)
+mdwrite(devd_t *d, uio_t *uio, int flags)
 {
 //    TRACE_IN("dev=%p uio=%p", d, uio);
     return physio(d, uio, 0);

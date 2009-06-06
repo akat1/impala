@@ -33,6 +33,13 @@
 #ifndef __MACHINE_PCKBD_TABLES_H
 #define __MACHINE_PCKBD_TABLES_H
 
+//ASCII control characters
+enum {
+    NUL = 0,
+    SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE,
+    DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EM, SUB, ESC, FS, GS, RS, US,
+    DEL = 127
+};
 
 /// kody klawiszy
 enum {
@@ -94,6 +101,15 @@ uint8_t keymap_shift[] =
 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',  0, 'A', 'S', // 0x10 - 0x1f  //0x1d - brak
 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0 , '|', 'Z', 'X', 'C', 'V', // 0x20 - 0x2f  //0x2a - lshift
 'B', 'N', 'M', '<', '>', '?', 0  , '*', 0  , ' ', 0 ,  0 ,    0,   0,   0,   0, // 0x30 - 0x3f  //0x36 - rshift
+  0,   0,   0,   0,   0,   0,   0, '7', '8', '9', '-', '4', '5', '6', '+', '1', // 0x40 - 0x4f
+'2', '3', '0', '.',   0,   0,   0,   0                                          // 0x50 - 0x58
+};
+
+uint8_t keymap_ctrl[] =
+{ 0,'\e', '1', '2', '3', '4', '5', RS, '7', '8', '9', '0', US, '=','\b', '\t',// 0x00 - 0x0f
+DC1, ETB, ENQ, DC2, DC4, EM, NAK, HT, SI, DLE, ESC, GS, '\n',  0, SOH, DC3,    // 0x10 - 0x1f  //0x1d - brak
+EOT, ACK, BEL, BS, LF, VT, FF, ';','\'', '`', 0 , FS, SUB, CAN, ETX, SYN,     // 0x20 - 0x2f  //0x2a - lshift
+STX, SO, CR, ',', '.', DEL, 0  , '*', 0  , ' ', 0 ,  0 ,    0,   0,   0,   0, // 0x30 - 0x3f  //0x36 - rshift
   0,   0,   0,   0,   0,   0,   0, '7', '8', '9', '-', '4', '5', '6', '+', '1', // 0x40 - 0x4f
 '2', '3', '0', '.',   0,   0,   0,   0                                          // 0x50 - 0x58
 };

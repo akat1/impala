@@ -34,6 +34,7 @@
 #define __SYS_PROC_H
 
 #include <sys/thread.h>
+#include <sys/termios.h>
 #include <sys/vfs/vfs_node.h>
 #include <sys/vfs/vfs_types.h>
 
@@ -48,6 +49,9 @@ struct pcred {
 struct proc {
     pid_t           p_pid;       ///< identyfikator procesu
     pid_t           p_ppid;      ///< identyfikator rodzica
+    pid_t           p_session;   ///< identyfikator sesji procesu
+    pid_t           p_group;     ///< identyfikator grupy procesów
+    tty_t          *p_ctty;      ///< terminal kontroluj±cy procesu
     pcred_t        *p_cred;      ///< przywileje
     filetable_t    *p_fd;        ///< pliki przypisane do procesu
     list_t          p_threads;   ///< lista w±tków wchodz±cych w sk³ad procesu

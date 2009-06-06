@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,29 +26,39 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: setregid.c 249 2009-05-24 15:14:24Z shm $
  */
 
-#ifndef __SYS_CONSOLE_H
-#define __SYS_CONSOLE_H
-#ifdef __KERNEL
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/sched.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
 
-enum {
-    CONS_TTY,
-    CONS_ERROR,
-    CONS_MSG
+typedef struct setregid_args setregid_args;
+
+struct setregid_args {
+    gid_t rgid;
+    gid_t egid;
 };
 
-void cons_init(void);
-void cons_output(int msgt, const char *str);
-void cons_input_char(int ch);
-void cons_input_string(const char *str);
+errno_t sc_setregid(thread_t *t, syscall_result_t *r, setregid_args *args);
 
-#define cons_tty(msg) cons_output(CONS_TTY, msg)
-#define cons_msg(msg) cons_output(CONS_MSG, msg)
-#define cons_err(msg) cons_output(CONS_ERROR, msg)
-
-
-#endif
-#endif
+errno_t
+sc_setregid(thread_t *t, syscall_result_t *r, setregid_args *args)
+{
+    if ( t->thr_proc->p_cred->p_gid == 0 ) {
+        if(args->rgid!=-1)
+            t->thr_proc->p_cred->p_gid = args->rgid;
+        if(args->egid!=-1)
+            t->thr_proc->p_cred->p_egid = args->egid;
+        r->result = 0;
+        return EOK;
+    } else {
+        r->result = -1;
+        return EPERM;
+    }
+}
 

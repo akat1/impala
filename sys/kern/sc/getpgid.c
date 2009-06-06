@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,29 +26,36 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 350 2009-06-03 23:16:05Z wieczyk $
  */
 
-#ifndef __SYS_CONSOLE_H
-#define __SYS_CONSOLE_H
-#ifdef __KERNEL
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/syscall.h>
 
-enum {
-    CONS_TTY,
-    CONS_ERROR,
-    CONS_MSG
+typedef struct getpgid_args getpgid_args_t;
+struct getpgid_args {
+    pid_t pid;
 };
 
-void cons_init(void);
-void cons_output(int msgt, const char *str);
-void cons_input_char(int ch);
-void cons_input_string(const char *str);
+int sc_getpgid(thread_t *p, syscall_result_t *r, getpgid_args_t *args);
 
-#define cons_tty(msg) cons_output(CONS_TTY, msg)
-#define cons_msg(msg) cons_output(CONS_MSG, msg)
-#define cons_err(msg) cons_output(CONS_ERROR, msg)
+/// Przeniesienie procesu potomnego do innej grupy, w ramach tej samej sesji
 
+int
+sc_getpgid(thread_t *t, syscall_result_t *r, getpgid_args_t *args)
+{
+    proc_t *p = t->thr_proc;
+    r->result = -1;
+    int pid = args->pid;
+    if(!pid)
+        pid = p->p_pid;
+    if(pid < 0)
+        return -EINVAL;
+    proc_t *target = proc_find(pid);
+    if(!target)
+        return -ESRCH;
+    r->result = target->p_group;
 
-#endif
-#endif
-
+    return EOK;
+}

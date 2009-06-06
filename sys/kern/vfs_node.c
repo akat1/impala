@@ -90,6 +90,16 @@ vnode_opendev(const char *devname, int mode, vnode_t **vn)
     return 0;
 }
 
+bool
+vnode_isatty(vnode_t *vn)
+{
+    if(!vn || vn->v_type != VNODE_TYPE_DEV)
+        return FALSE;
+    if(vn->v_dev->type == DEV_TTY)
+        return TRUE;
+    return FALSE;
+}
+
 int
 vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr, int f)
 {
@@ -291,9 +301,9 @@ _rdwr(int space, int rw, vnode_t *vn, void *addr, int len, off_t offset)
     u.oper = rw;
     u.space = space;
     if(u.oper == UIO_WRITE)
-        return VOP_WRITE(vn, &u);
+        return VOP_WRITE(vn, &u, O_RDWR);
     else if(u.oper == UIO_READ)
-        return VOP_READ(vn, &u);
+        return VOP_READ(vn, &u, O_RDWR);
     else return -EINVAL;
 }
 

@@ -12,6 +12,7 @@ SRCS=\
 	kern_clock.c\
 	kern_bio.c\
 	kern_console.c\
+	kern_ctty.c\
 	kern_dev.c\
 	kern_exec.c\
 	kern_file.c\
@@ -23,6 +24,7 @@ SRCS=\
 	kern_syscall.c\
 	kern_sysvipc.c\
 	kern_thread.c\
+	kern_tty.c\
 	kern_uio.c\
 	kern_utils.c\
 	vfs.c\

@@ -78,6 +78,7 @@ proc_init(void)
         proc_dtor);
 
     proc0.p_pid = last_pid++;
+    proc0.p_group = proc0.p_pid;
     proc0.p_ppid = 0;
     proc0.p_cred = NULL;
     LIST_CREATE(&proc0.p_threads, thread_t, L_pthreads, FALSE);
@@ -125,7 +126,8 @@ proc_fork(proc_t *p, proc_t **child)
     // CWD
     cp->p_rootdir = p->p_rootdir;
     vref(cp->p_rootdir);
-
+    cp->p_session = p->p_session;
+    cp->p_group = p->p_group;
     // Kopia IPC SystemV MSG
     // Reset clock
 
@@ -148,6 +150,9 @@ proc_create(void)
     new_p->p_pid = last_pid++;
     new_p->p_ppid = 0; // XXX: fork
     new_p->p_cred->p_uid = 0;  // XXX: fork
+    new_p->p_ctty = NULL; //zaczynamy bez terminala kontroluj±cego
+    new_p->p_group = -1;
+    new_p->p_session = -1;
     new_p->p_rootdir = rootvnode;
     new_p->p_curdir = rootvnode;
     KASSERT(rootvnode!=NULL);

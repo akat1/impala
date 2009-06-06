@@ -62,14 +62,18 @@ sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
         return EINVAL;
     }
 
-    p->thr_flags |= THREAD_SLEEP;
+    p->thr_flags |= THREAD_SLEEP; ///@todo ¿e jak?? ;)
 
     if ( args->req->tv_sec > 0 )
         ssleep(args->req->tv_sec);
     if ( args->req->tv_nsec > 0 )
         msleep(args->req->tv_nsec); // XXX: mili
 
-    p->thr_flags ^= THREAD_SLEEP;
+    p->thr_flags ^= THREAD_SLEEP; ///@todo ¿e jak?? ;)
+                    //po wyj¶ciu z msleep mamy thread_sleep = 0
+                    //jak ju¿ ma byæ to wcze¶niejsze ustawianie flagi "¶pi"
+                    //to niech chocia¿ kasowana bêdzie porz±dnie ;)
+                    //a i tak ta flaga jest ustawiana w Xsleep
 
     return EOK;
 }

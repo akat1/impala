@@ -166,7 +166,7 @@ ssize_t
 f_write(file_t *f, uio_t *u)
 {
     u->offset = f->f_offset;
-    int res = VOP_WRITE(f->f_vnode, u);
+    int res = VOP_WRITE(f->f_vnode, u, f->f_flags);
     if(res < 0) 
         return res;
     f->f_offset += res;
@@ -177,7 +177,7 @@ ssize_t
 f_read(file_t *f, uio_t *u)
 {
     u->offset = f->f_offset;
-    int res = VOP_READ(f->f_vnode, u);
+    int res = VOP_READ(f->f_vnode, u, f->f_flags);
     if(res < 0)
         return res;
     f->f_offset += res;
@@ -217,6 +217,7 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
         case F_GETFL:
             return f->f_flags;
         case F_SETFL:
+            ///@todo O_APPEND, O_NONBLOCK
             return 0; /// XXX: co chcemy mieæ?
     }
     return 0;

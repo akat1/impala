@@ -31,6 +31,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/console.h>
 #include <sys/utils.h>
 #include <machine/interrupt.h>
 #include <machine/pckbd.h>
@@ -57,38 +58,7 @@ char key_modifiers;     /// wykaz naci¶niêtych klawiszy-modyfikatorów
 static bool i8042_irq1(void);
 static void __enqueue_keycode(int sc);
 static void set_modifiers(void);
-static void kq_insert(char c);
 
-char key_queue[PCKBD_BUFSIZE];
-#define IDX(i) ((i)%PCKBD_BUFSIZE)
-int key_b, key_s;
-
-
-void
-kq_insert(char c)
-{
-    if (key_s == PCKBD_BUFSIZE) return;
-    key_queue[IDX(key_b + key_s)] = c;
-    key_s++;
-}
-
-
-char
-pckbd_get_char()
-{
-
-    char c;
-    int s = spltty ();
-    if (key_s == 0) {
-        c = -1;
-    } else {
-        c = key_queue[key_b];
-        key_b=IDX(key_b+1);
-        key_s--;
-    }
-    splx(s);
-    return c;
-}
 
 void
 __enqueue_keycode(int kc)
@@ -96,15 +66,21 @@ __enqueue_keycode(int kc)
     char c = '?';
     // sprawdzamy czy mamy miejsce w kolejce.
     bool shift=(key_modifiers & (KM_LSHIFT | KM_RSHIFT))>0;
+    bool ctrl =(key_modifiers & (KM_LCONTROL | KM_RCONTROL))>0;
     if(kc<MAX_SC_LINEAR) {
-        c = keymap_normal[kc];
-        if('a' <= c && c <= 'z')
-            shift ^= (key_modifiers & KM_CAPSLOCK)>0;
+        if(ctrl) {
+            c = keymap_ctrl[kc];
+        } else {
+            c = keymap_normal[kc];
+            if('a' <= c && c <= 'z')
+                shift ^= (key_modifiers & KM_CAPSLOCK)>0;
 
-        if(shift)
-            c = keymap_shift[kc];
+            if(shift)
+                c = keymap_shift[kc];
+        }
     }
-    kq_insert(c);
+    if(c)
+        cons_input_char(c);
 }
 
 void
@@ -121,8 +97,6 @@ void
 pckbd_init()
 {
     irq_install_handler(IRQ1, i8042_irq1, IPL_TTY);
-    key_b = 0;
-    key_s = 0;
 }
 
 bool

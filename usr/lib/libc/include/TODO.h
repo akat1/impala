@@ -2,7 +2,6 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
 // `_abort'
-// `_cfmakeraw'   //tty
 // `_closedir'
 // `_eaccess'
 // `_environ'
@@ -14,18 +13,13 @@
 // `_fwopen'
 // `_fwrite'
 // `_getcwd'
-// `_getegid'
 // `_getenv'
-// `_geteuid'
 // `_gethostname'
 // `_getmode'
 // `_getopt'
-// `_getpgid'
-// `_getpgrp'
 // `_getpwnam'
 // `_getrlimit'
 // `_getrusage'
-// `_isatty'
 // `_killpg'
 // `__longjmp'
 // `_malloc'
@@ -42,7 +36,6 @@
 // `__setjmp'
 // `_setlocale' // STUB
 // `_setmode'
-// `_setpgid' 
 // `_setrlimit' // STUB
 // `_sigaction' // SIG
 // `_sigemptyset' // SIG
@@ -54,9 +47,6 @@
 // `_strerror'
 // `_strtoimax'
 // `_sys_siglist' // SIG
-// `_tcgetpgrp'   //tty
-// `_tcsetattr'   //tty
-// `_tcsetpgrp'   //tty
 // `_unsetenv'
 // `_vfprintf'
 // `_wait3'
