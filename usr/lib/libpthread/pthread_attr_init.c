@@ -34,4 +34,12 @@
 #include <sys/syscall.h>
 #include <pthread.h>
 
+int
+pthread_attr_init(pthread_attr_t *a)
+{
+    a->stackaddr = NULL;
+    a->stacksize = 0;
+    return 0;
+}
+
 

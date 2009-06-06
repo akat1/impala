@@ -34,4 +34,8 @@
 #include <sys/syscall.h>
 #include <pthread.h>
 
-
+int
+pthread_cancel(pthread_t p)
+{
+    return 0;
+}

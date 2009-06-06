@@ -31,7 +31,11 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
 #include <pthread.h>
 
+int
+pthread_attr_destroy(pthread_attr_t *a)
+{
+    return 0;
+}
 

@@ -15,29 +15,30 @@ SRCS=\
 	string/index.c\
 	string/rindex.c\
 	string/memchr.c\
-        string/memcmp.c\
-        string/memcpy.c\
-        string/memmove.c\
-        string/memset.c\
-        string/strcat.c\
-        string/strchr.c\
-        string/strcmp.c\
-        string/strcoll.c\
-        string/strcpy.c\
-        string/strcspn.c\
-        string/strlen.c\
-        string/strncat.c\
-        string/strncmp.c\
-        string/strncpy.c\
-        string/strpbrk.c\
-        string/strrchr.c\
-        string/strspn.c\
-        string/strtok.c\
-        string/strxfrm.c\
+    string/memcmp.c\
+    string/memcpy.c\
+    string/memmove.c\
+    string/memset.c\
+    string/strcat.c\
+    string/strchr.c\
+    string/strcmp.c\
+    string/strcoll.c\
+    string/strcpy.c\
+    string/strcspn.c\
+    string/strlen.c\
+    string/strncat.c\
+    string/strncmp.c\
+    string/strncpy.c\
+    string/strpbrk.c\
+    string/strrchr.c\
+    string/strspn.c\
+    string/strtok.c\
+    string/strxfrm.c\
 	string/strstr.c\
+	termios/tcgetattr.c\
 	signal/kill.c\
-	sys/sched_yield.c\
-	sysvipc/ftok.c\
+    sys/sched_yield.c\
+    sysvipc/ftok.c\
 	sysvipc/msgctl.c\
 	sysvipc/msgget.c\
 	sysvipc/msgrcv.c\

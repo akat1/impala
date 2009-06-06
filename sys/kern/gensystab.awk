@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f 
+#!/usr/bin/awk -f
 # $Id$
 
 function printHc(file) {

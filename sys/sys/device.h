@@ -39,6 +39,7 @@ enum {
     DEVD_MAXDESCR = 128
 };
 
+typedef void d_init_t(void);
 typedef int d_open_t(devd_t *d, int flags);
 typedef int d_read_t(devd_t *d, uio_t *u, int flags);
 typedef int d_write_t(devd_t *d, uio_t *u, int flags);
@@ -81,6 +82,7 @@ enum {
     DEV_BDEV,
     DEV_TTY
 };
+
 
 devd_t *devd_create(devsw_t *dsw, int unit, void *pr);
 void devd_destroy(devd_t *dev);

@@ -51,6 +51,11 @@
 
 #include <machine/cdefs.h>
 
+#define ISSET(a,f)  ((a) & (f))
+#define ISUNSET(a,f) (!ISSET(a,f))
+#define SET(a,f) ((a) |= (f))
+#define UNSET(a,f) ((a) &= ~(f))
+
 #endif
 
 

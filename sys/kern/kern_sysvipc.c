@@ -65,6 +65,9 @@ find_key_eq(const ipckey_t *key, key_t k)
     return (key->key == k);
 }
 
+
+///@todo sprawdzaæ prawa dostêpu.
+
 /*========================================================================
  * Kolejki wiadomo¶ci
  */
@@ -235,6 +238,7 @@ ipc_msg_ctl(ipcmsq_t *msq, int cmd, struct msqid_ds *uds)
         copyout(uds, &msq->msq_ds, sizeof(msq->msq_ds));
     } else
     if (cmd == IPC_SET) {
+        err = -ENOTSUP;
     } else
     if (cmd == IPC_RMID) {
         ipc_msg_flush(msq);
@@ -321,10 +325,4 @@ find_msq_le_type(const msqmsg_t *msg, uintptr_t type)
 {
     return (msg->type <= type);
 }
-
-
-/*========================================================================
- * Kolejki wiadomo¶ci
- */
-
 

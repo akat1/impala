@@ -44,10 +44,17 @@ typedef struct pthread_cond pthread_cond_t;
 
 typedef void *(*pthread_entry)(void *);
 
+struct pthread_attr {
+    size_t      stacksize;
+    void        *stackaddr;
+};
+
 struct pthread {
     tid_t           pth_tid;
     pthread_entry   pth_entry;
-    void            *pth_entry_arg;
+    void           *pth_entry_arg;
+    pthread_attr_t  pth_attr;
+    void           *pth_exit;
 };
 
 struct pthread_mutex {
@@ -59,7 +66,15 @@ struct pthread_cond {
     pthread_mutex_t     *pcn_mtx;
 };
 
+int pthread_attr_init(pthread_attr_t *);
+int pthread_attr_destroy(pthread_attr_t *);
+int pthread_attr_setstacksize(pthread_attr_t *, size_t);
+int pthread_attr_getstacksize(const pthread_attr_t *, size_t *);
+int pthread_attr_setstackaddr(pthread_attr_t *, void *);
+int pthread_attr_getstackaddr(const pthread_attr_t *, void **);
+
 int pthread_create(pthread_t *, const pthread_attr_t *, pthread_entry, void *);
+int pthread_detach(pthread_t);
 int pthread_cancel(pthread_t);
 int pthread_join(pthread_t, void **);
 pthread_t pthread_self(void);

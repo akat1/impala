@@ -16,8 +16,12 @@ SRCS=\
 	pthread_setcanceltype.c\
 	pthread_testcancel.c\
 	pthread_yield.c\
+	pthread_attr_getstackaddr.c\
+	pthread_attr_getstacksize.c\
 	pthread_attr_destroy.c\
 	pthread_attr_init.c\
+	pthread_attr_setstackaddr.c\
+	pthread_attr_setstacksize.c\
 	pthread_mutex_destroy.c\
 	pthread_mutex_init.c\
 	pthread_mutex_lock.c\

@@ -42,6 +42,14 @@ static void __entry(void)
 }
 
 
+/**
+ * Tworzy nowy w±tek u¿ytkownika.
+ * @param pres wska¼nik na deskryptor w±tku (do wype³nienia).
+ * @param attr atrybuty w±tku (NULL dla domy¶lnych).
+ * @param entry adres procedury wej¶ciowej.
+ * @param arg argument procedury wej¶ciowej.
+ *
+ */
 int
 pthread_create(pthread_t *pres, const pthread_attr_t *attr,
             pthread_entry entry, void *arg)
@@ -49,9 +57,19 @@ pthread_create(pthread_t *pres, const pthread_attr_t *attr,
     ///@todo to trzeba alokowaæ!
     static struct pthread _pth;
     pthread_t p = &_pth;
+    if (attr == NULL) {
+        pthread_attr_init(&p->pth_attr);
+    } else {
+        p->pth_attr = *attr;
+    }
     p->pth_entry = entry;
     p->pth_entry_arg = arg;
-    p->pth_tid = thr_create(__entry, 0, 0, 0);   
+
+    void *stack_addr;
+    size_t stack_size;
+    pthread_attr_getstackaddr(&p->pth_attr, &stack_addr);
+    pthread_attr_getstacksize(&p->pth_attr, &stack_size);
+    p->pth_tid = thr_create(__entry, stack_addr, stack_size, p);
     if (p->pth_tid == -1) {
         // zwolniæ pamiêæ
         return -1;

@@ -397,8 +397,10 @@ int
 mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)
 {
     mfs_header_t *header = (mfs_header_t*)image;
-    if(header->magic0 != MFS_MAGIC0 || header->magic1 != MFS_MAGIC1)
+    if(header->magic0 != MFS_MAGIC0 || header->magic1 != MFS_MAGIC1) {
+        DEBUGF("bad MFS image magic");
         return -1;
+    }
     int ncount = header->items;
     mfs_node_t *nptr[ncount];
     for(int i=0; i<ncount; i++)
@@ -435,7 +437,7 @@ mfs_mount(vfs_t *fs)
         return -1;
     }
     kprintf("Dev: %s\n", dv->v_dev->name);
-    bp = bio_read(dv, 0);
+    bp = bio_read(fs->vfs_mdev, 0);
     if (!bp) {
         DEBUGF("cannot start I/O operation");
         return -1;

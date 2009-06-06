@@ -49,4 +49,4 @@ SYS thr_cancel
 SYS thr_getid
 SYS thr_getarg
 SYS sched_yield
-
+SYS sbrk

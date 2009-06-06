@@ -211,7 +211,7 @@ spinlock_destroy(spinlock_t *sp)
 }
 
 #else
-tid_t thr_create(void *entry, uintptr_t stackaddr, size_t stacksize, uintptr_t arg);
+tid_t thr_create(void *entry, void *stackaddr, size_t stacksize,  void *arg);
 int thr_destroy(tid_t tid);
 int thr_cancel(tid_t tid);
 tid_t thr_getid(void);
