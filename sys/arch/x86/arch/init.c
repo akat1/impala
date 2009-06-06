@@ -44,6 +44,7 @@
 #include <machine/cpu.h>
 #include <machine/pckbd.h>
 #include <machine/video.h>
+#include <machine/bus/isa.h>
 
 void kmain(void);
 void init_x86(void);
@@ -168,6 +169,7 @@ init_x86()
     pckbd_init();
     vm_low_init();
     video_init();
+    bus_isa_init();
     irq_enable();
     _cpu_info();
 }
