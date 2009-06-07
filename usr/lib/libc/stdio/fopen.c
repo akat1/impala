@@ -4,8 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-FILE _stdF[3] = {{.fd=0, .status=_FST_OPEN}, {.fd=1, .status=_FST_OPEN},
-                {.fd=2, .status=_FST_OPEN}};
+FILE _stdF[3] = {{.fd=0, .status=_FST_OPEN|_FST_NOBUF},
+                 {.fd=1, .status=_FST_OPEN|_FST_NOBUF},
+                 {.fd=2, .status=_FST_OPEN|_FST_NOBUF}};
 
 FILE *
 fopen(const char *path, const char *mode)

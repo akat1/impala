@@ -82,6 +82,7 @@ main(int argc, char **v)
 #endif
     tid_t t = thr_create(tmain, 0, 0, 0);
     printV("Utw. w±tek:", t);
+
     char buf[512];
     char *const argv[]={NULL};
     char *const env[]={NULL};

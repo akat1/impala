@@ -331,10 +331,8 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
         } else {
             if (*c == CODE_ESC) {
                 vc->escape = TRUE;
-                //vc_parser_resetE(&vc->parser);
                 vc_parser_reset(&vc->parser);
             } else if(*c == 0x9b) {
-                //while(1);
                 vc->escape = TRUE;
                 vc_parser_resetE(&vc->parser);
             } else {
