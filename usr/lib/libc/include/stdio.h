@@ -12,10 +12,15 @@
 
 struct FILE {
     int fd;
+    int status;
     int err;
     char buf[BUFSIZ];
 };
 typedef struct FILE FILE;
+
+#define _FST_OPEN    1
+#define _FST_LINEBUF 2
+#define _FST_NOBUF   4
 
 extern FILE _stdF[3];
 
@@ -35,16 +40,16 @@ int      fclose(FILE *);
 // FILE    *fdopen(int, const char *);
 // int      feof(FILE *);
 // int      ferror(FILE *);
-// int      fflush(FILE *);
-// int      fgetc(FILE *);
+int      fflush(FILE *);
+int      fgetc(FILE *);
 // int      fgetpos(FILE *, fpos_t *);
 // char    *fgets(char *, int, FILE *);
 int      fileno(FILE *);
 // void     flockfile(FILE *);
 FILE    *fopen(const char *, const char *);
 int      fprintf(FILE *, const char *, ...);
-// int      fputc(int, FILE *);
-// int      fputs(const char *, FILE *);
+int      fputc(int, FILE *);
+int      fputs(const char *, FILE *);
 // size_t   fread(void *, size_t, size_t, FILE *);
 // FILE    *freopen(const char *, const char *,
 //             FILE *);
@@ -58,19 +63,19 @@ int      fprintf(FILE *, const char *, ...);
 // void     funlockfile(FILE *);
 size_t   fwrite(const void *, size_t, size_t, FILE *);
 // int      getc(FILE *);
-// int      getchar(void);
+int      getchar(void);
 // int      getc_unlocked(FILE *);
 // int      getchar_unlocked(void);
 // char    *gets(char *);
 // int      pclose(FILE *);
-// void     perror(const char *);
+void     perror(const char *);
 // FILE    *popen(const char *, const char *);
 int      printf(const char *, ...);
-// int      putc(int, FILE *);
+int      putc(int, FILE *);
 int      putchar(int);
 // int      putc_unlocked(int, FILE *);
 // int      putchar_unlocked(int);
-// int      puts(const char *);
+int      puts(const char *);
 // int      remove(const char *);
 // int      rename(const char *, const char *);
 // void     rewind(FILE *);
@@ -90,7 +95,7 @@ int      vfprintf(FILE *, const char *, va_list);
 // int      vscanf(const char *, va_list);
 int      vsnprintf(char *, size_t, const char *, va_list);
 // int      vsprintf(char *, const char *, va_list);
-// int      vsscanf(const char *, const char *, va_list arg);
+int      vsscanf(const char *, const char *, va_list arg);
 
 
 

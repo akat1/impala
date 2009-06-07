@@ -288,8 +288,6 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
             mutex_wait(&msq->msq_mtx);
         }
         msg = list_extract_first(&msq->msq_data);
-        copyout(uaddr, msg->data, MIN(size, msg->size));
-        kmem_cache_free(msg_cache, msg);
     } else
     if (type > 0) {
        msqmsg_t *msg = NULL;

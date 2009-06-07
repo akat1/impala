@@ -5,5 +5,8 @@ void*
 malloc(size_t size)
 {
     ///@todo impl
-    return sbrk(size)-size;
+    int ns = size+sizeof(size_t);
+    void* addr = sbrk(ns)-size;
+    ((int*)addr)[-1] = size;
+    return addr;
 }

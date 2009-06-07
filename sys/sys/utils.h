@@ -64,7 +64,7 @@ ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
     } while (0);
 
 #define DEBUGF(fmt, a...) do {\
-    kprintf("%s: " fmt "\n", __FILE__, ## a );\
+    kprintf("%s:%i: " fmt "\n", __FILE__, __LINE__, ## a );\
     } while (0)
 
 #define TRACE_IN0() TRACE_IN("");

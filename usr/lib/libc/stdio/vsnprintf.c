@@ -81,6 +81,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         arg_u32 = VA_ARG(ap, uint32_t);
                         pbuf = convert_uint32(buf, arg_u32);
                         break;
+                    case 'd':
                     case 'i':
                         arg_u32 = VA_ARG(ap, int32_t);
                         pbuf = convert_int32(buf, (int32_t)arg_u32);

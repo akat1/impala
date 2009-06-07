@@ -88,6 +88,7 @@ struct vconsole {
     int             sattr2;
     int             cx;
     int             cy;
+    bool            escape;
     textscreen_t    screen;
     vc_parser_t     parser;
     mutex_t         mtx;
@@ -103,6 +104,7 @@ void vcons_data_out(vconsole_t *vc, const char *c, int n);
 
 static int vc_parser_put(vc_parser_t *vcprs, char c);
 static void vc_parser_reset(vc_parser_t *vcprs);
+static void vc_parser_resetE(vc_parser_t *vcprs);
 static void vcons_code(vconsole_t *vc, int c);
 
 
@@ -180,6 +182,7 @@ cons_init()
         mutex_init(&vcons[i].mtx, MUTEX_NORMAL);
         vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
         vcons[i].sattr = COLOR_BRIGHTGRAY;
+        vcons[i].escape = FALSE;
         if (i > 0) {
             textscreen_clone(&vcons[i].screen);
             textscreen_clear(&vcons[i].screen);
@@ -307,28 +310,33 @@ vcons_putstr(vconsole_t *vc, const char *c)
 }
 
 void
-vcons_data_out(vconsole_t *vc, const char *c, int n)
+vcons_data_out(vconsole_t *vc, const char *cc, int n)
 {
     enum {
         CODE_ESC = 033
     };
-    bool escape = FALSE;
     int X = spltty();
     mutex_lock(&vc->mtx);
+    unsigned char *c = (unsigned char *)cc;
     for (; n; c++, n--) {
-        if (escape) {
+        if (vc->escape) {
             int code = vc_parser_put(&vc->parser, *c);
             if (code == PARSER_ERROR) {
-                escape = FALSE;
+                vc->escape = FALSE;
             } else
             if (code != PARSER_CONT) {
                 vcons_code(vc, code);
-                escape = FALSE;
+                vc->escape = FALSE;
             }
         } else {
             if (*c == CODE_ESC) {
-                escape = TRUE;
+                vc->escape = TRUE;
+                //vc_parser_resetE(&vc->parser);
                 vc_parser_reset(&vc->parser);
+            } else if(*c == 0x9b) {
+                //while(1);
+                vc->escape = TRUE;
+                vc_parser_resetE(&vc->parser);
             } else {
                 vcons_put(vc, *c);
             }
@@ -347,6 +355,8 @@ vcons_put(vconsole_t *vc, char c)
     } else
     if (c == '\n') {
         textscreen_next_line(&vc->screen);
+    } else if (c == '\r') {
+        //nic nie robimy? czy rozdzielamy \n od \r?
     } else if (c == '\b') {
         int cx, cy;
         textscreen_get_cursor(&vc->screen, &cx, &cy);
@@ -354,7 +364,11 @@ vcons_put(vconsole_t *vc, char c)
         textscreen_put(&vc->screen, ' ', vc->sattr);
         textscreen_update_cursor(&vc->screen, cx-1, cy);
     } else {
-        textscreen_put(&vc->screen, '?', vc->sattr);
+        char hex[16]="0123456789abcdef";
+        textscreen_put(&vc->screen, '0', vc->sattr);
+        textscreen_put(&vc->screen, 'x', vc->sattr);
+        textscreen_put(&vc->screen, hex[((c&0xf0)>>4)], vc->sattr);
+        textscreen_put(&vc->screen, hex[(c&0x0f)], vc->sattr);
     }
 }
 
@@ -453,8 +467,15 @@ enum {
 void
 vc_parser_reset(vc_parser_t *vcprs)
 {
-    mem_zero(vcprs, sizeof(*vcprs));
+    mem_zero(vcprs, sizeof(vc_parser_t));
     vcprs->state = P_FIRST;
+}
+
+void
+vc_parser_resetE(vc_parser_t *vcprs)
+{
+    mem_zero(vcprs, sizeof(vc_parser_t));
+    vcprs->state = P_LONG;
 }
 
 /*

@@ -194,6 +194,7 @@ kmem_alloc(size_t s, int flags)
  * Zwalnia pamiêæ.
  * @param ptr wska¼nik na pamiêæ przydzielon± przez kmem_alloc
  */
+//#undef kmem_free
 void
 kmem_free(void *ptr)
 {
@@ -492,6 +493,7 @@ get_bufctl_from_ptr(void *ptr)
      * W przysz³o¶ci ten schemat mo¿e siê zmieniæ dla alokacji
      * du¿ych porcji danych, st±d oddzielna procedura.
      */
+    KASSERT(ptr!=NULL);
     kmem_bufctl_t *bctl = ((kmem_bufctl_t*) ptr) - 1;
     KASSERT(bctl->magic == KMEM_BUFCTL_MAGIC );
     return bctl;

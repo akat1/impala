@@ -8,11 +8,22 @@ SRCS=\
     stdio/fileno.c\
     stdio/fopen.c\
     stdio/fclose.c\
+    stdio/fflush.c\
+    stdio/fgetc.c\
+    stdio/fprintf.c\
+    stdio/fputs.c\
+    stdio/fputc.c\
     stdio/fwrite.c\
+    stdio/getchar.c\
+    stdio/perror.c\
     stdio/printf.c\
+    stdio/putchar.c\
+    stdio/puts.c\
     stdio/snprintf.c\
     stdio/sprintf.c\
+    stdio/sscanf.c\
     stdio/vsnprintf.c\
+    stdio/vsscanf.c\
     stdlib/atexit.c\
     stdlib/atoi.c\
     stdlib/exit.c\
@@ -20,6 +31,7 @@ SRCS=\
     stdlib/free.c\
     stdlib/malloc.c\
     stdlib/qsort.c\
+    stdlib/realloc.c\
     stdlib/strtol.c\
     string/index.c\
     string/rindex.c\
@@ -46,6 +58,7 @@ SRCS=\
     string/strstr.c\
     termios/tcgetattr.c\
     signal/kill.c\
+    signal/signal.c\
     sys/sched_yield.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
@@ -69,6 +82,7 @@ SRCS=\
     unistd/getdents.c\
     unistd/ioctl.c\
     unistd/isatty.c\
+    unistd/longjmp.c\
     unistd/lseek.c\
     unistd/lstat.c\
     unistd/fork.c\
@@ -82,6 +96,7 @@ SRCS=\
     unistd/getuid.c\
     unistd/sbrk.c\
     unistd/setgid.c\
+    unistd/setjmp.c\
     unistd/setpgid.c\
     unistd/setpgrp.c\
     unistd/setuid.c\

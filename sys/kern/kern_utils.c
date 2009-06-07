@@ -104,7 +104,7 @@ copyinstr(void *kaddr, const void *uaddr, size_t limit)
     int err=0;
     if ((err=vm_validate_string(uaddr, limit))) return err;
     str_cpy(kaddr, uaddr);
-    return -1;
+    return 0;
 }
 
 ssize_t

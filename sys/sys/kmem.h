@@ -43,6 +43,7 @@ typedef void kmem_dtor_t(void *);
 addr_t kmem_zalloc(size_t s, int flags);
 addr_t kmem_alloc(size_t s, int flags);
 void kmem_free(addr_t );
+//#define kmem_free(x) do {DEBUGF(); kmem_free(x);}while(0)
 
 kmem_cache_t *kmem_cache_create(const char *name, size_t esize, 
         kmem_ctor_t *ctor, kmem_dtor_t *dtor);

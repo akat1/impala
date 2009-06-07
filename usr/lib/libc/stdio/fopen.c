@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-FILE _stdF[3] = {{.fd=0}, {.fd=1}, {.fd=2}};
+FILE _stdF[3] = {{.fd=0, .status=_FST_OPEN}, {.fd=1, .status=_FST_OPEN},
+                {.fd=2, .status=_FST_OPEN}};
 
 FILE *
 fopen(const char *path, const char *mode)
@@ -32,5 +33,6 @@ fopen(const char *path, const char *mode)
         free(f);
         return NULL;
     }
+    f->status = _FST_OPEN | _FST_NOBUF;
     return f;
 }

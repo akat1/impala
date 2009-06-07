@@ -33,7 +33,6 @@
 #ifndef __SYS_CDEFS_H
 #define __SYS_CDEFS_H
 
-
 #define __packed __attribute__((packed))
 
 #ifndef NULL

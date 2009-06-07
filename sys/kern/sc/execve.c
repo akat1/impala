@@ -51,7 +51,9 @@ errno_t
 sc_execve(thread_t *t, syscall_result_t *r, execve_args_t *ap)
 {
     char path[256];
-    copyinstr(path, ap->path, 256);
+    int err=0;
+    if((err=copyinstr(path, ap->path, 256)))
+        return err;
     TRACE_IN("t=%p path=%s", t, path);
 
     r->result = -execve(t->thr_proc, path, ap->argv, ap->envp);

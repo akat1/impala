@@ -31,14 +31,14 @@ void
 printV(const char *msg, int v)
 {
     char val[10];
-    print(0, msg);
+    print(1, msg);
     print32(val, v);
-    print(0, val);
-    print(0, "\n");
+    print(1, val);
+    print(1, "\n");
 }
 
 #define _E(ret, msg) if (ret == -1) {\
-    print(0, msg);\
+    print(1, msg);\
     return -1;\
     }
 
@@ -48,7 +48,8 @@ main(int argc, char **v)
     char msg[100];
     int fd = 0;
 #ifdef __Impala__
-    fd = open("/dev/ttyv0", 0, 0);
+    open("/dev/ttyv1", O_RDWR);
+    open("/dev/ttyv1", O_RDWR);
 #endif
     key_t k = ftok("/sbin/init", 1);
 
@@ -57,9 +58,9 @@ main(int argc, char **v)
     _E(msgrcv(msg_id, msg, sizeof(msg), 0,  0), "msgsnd error\n");
     printV("key: ", k);
     printV("msg id: ", msg_id);
-    print(0, "msg: ");
-    print(0, msg);
-    print(0, "\n");
+    print(1, "msg: ");
+    print(1, msg);
+    print(1, "\n");
 #ifdef __Impala__
     while(1);
 #endif

@@ -282,7 +282,10 @@ void
 tty_output(tty_t *tty, char c)
 {
     //na razie olewamy buforowanie... "may provide a buffering mechanism;"
-    tty->t_lowops->tty_write(tty->t_private, &c, 1);
+    if(c == '\t')
+        tty->t_lowops->tty_write(tty->t_private, "      ", 6);
+    else
+        tty->t_lowops->tty_write(tty->t_private, &c, 1);
 }
 
 /// Canonical processing of ERASE character

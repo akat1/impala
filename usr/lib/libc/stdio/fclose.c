@@ -9,7 +9,11 @@ int
 fclose(FILE *stream)
 {
     int ret;
-    // fflush
+    ret = fflush(stream);
+    if(ret) {
+        UNSET(stream->status, _FST_OPEN);
+        return ret;
+    }
     ret = close(stream->fd);
     free(stream);
     return ret;
