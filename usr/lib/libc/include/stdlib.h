@@ -35,6 +35,8 @@
 #include <sys/types.h>
 #include <stdio.h>
 
+void    _exit(int status);
+void    _Exit(int status);
 void    abort(void); //
 int     atoi(const char *nptr); //
 //void *calloc(size_t nmemb, size_t size);

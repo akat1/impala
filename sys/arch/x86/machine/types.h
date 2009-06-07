@@ -50,7 +50,17 @@ typedef int32_t  intptr_t;
 typedef void* addr_t;
 typedef const void* caddr_t;
 
+#ifndef __SIZE_T
+#define __SIZE_T
 typedef uint32_t size_t;
+#endif
+
+#ifndef __PTRDIFF_T
+#define __PTRDIFF_T
+typedef uint32_t ptrdiff_t;
+#endif
+
+
 typedef int32_t  ssize_t;
 
 

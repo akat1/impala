@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+FILE _stdF[3] = {{.fd=0}, {.fd=1}, {.fd=2}};
+
 FILE *
 fopen(const char *path, const char *mode)
 {

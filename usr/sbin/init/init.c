@@ -52,6 +52,7 @@ tmain()
     printV("errno: ", err);
     print(fd,"elo320\n\n");
     print(fd,"\tSiemanizator ;D... 1234567890\n\n");
+    printf("Test oto jest %i\n", 12);
     while(1);
 }
 

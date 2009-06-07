@@ -68,6 +68,7 @@ int          isatty(int);
 //int          pause(void);
 int          pipe(int [2]);
 //ssize_t      readlink(const char *, char *, size_t);
+void        *sbrk(ptrdiff_t increment);
 //int          setegid(gid_t);
 //int          seteuid(uid_t);
 int          setpgid(pid_t, pid_t);

@@ -5,13 +5,8 @@
 // `_closedir'
 // `_eaccess'
 // `_environ'
-// `__exit'
-// `_exit'
 // `_fcntl'
-// `_fprintf'
-// `_free'
 // `_fwopen'
-// `_fwrite'
 // `_getcwd'
 // `_getenv'
 // `_gethostname'
@@ -22,7 +17,6 @@
 // `_getrusage'
 // `_killpg'
 // `__longjmp'
-// `_malloc'
 // `_opendir'
 // `_opterr'
 // `_optind'
@@ -42,8 +36,6 @@
 // `_siginterrupt' // SIG
 // `_signal' // SIG
 // `_sigprocmask' // SIG
-// `_snprintf'
-// `_sprintf'
 // `_strerror'
 // `_strtoimax'
 // `_sys_siglist' // SIG

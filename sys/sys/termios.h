@@ -7,9 +7,10 @@ typedef unsigned int cc_t;
 typedef unsigned int speed_t;
 typedef unsigned int tcflag_t;
 
+//argumenty tcsetattr
 #define TCSANOW 1
-//#define TCSADRAIN 2
-//#define TCSAFLUSH 3
+#define TCSADRAIN 2
+#define TCSAFLUSH 3
 
 #define CTRL(x) ((x)&037)
 #define EOF    (-1)
@@ -124,6 +125,8 @@ typedef unsigned int tcflag_t;
 #define B9600   9600
 #define B19200  19200
 #define B38400  38400
+
+#define _POSIX_VDISABLE '\0'
 
 struct termios {
     tcflag_t c_iflag;

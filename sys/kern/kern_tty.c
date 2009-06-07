@@ -185,12 +185,6 @@ tty_write(devd_t *d, uio_t *u, int flags)
 
 /////////////////////////////////////////////////////
 
-struct setattr_args {
-    int optact;
-    termios_t *t;
-};
-typedef struct setattr_args setattr_args_t;
-
 
 int
 tty_ioctl(devd_t *d, int cmd, uintptr_t param)
@@ -205,13 +199,7 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
             break;
         }
         case TCSETS: {
-            setattr_args_t *args = (setattr_args_t*)param;
-            setattr_args_t largs;
-            if((err=copyin(&largs, args, sizeof(setattr_args_t))))
-                return err;
-            if(largs.optact != TCSANOW)
-                return -ENOTSUP;
-            termios_t *tconf = largs.t;
+            termios_t *tconf = (termios_t*)param;
             if((err=copyin(&tty->t_conf, tconf, sizeof(termios_t))))
                 return err;
             break;

@@ -17,9 +17,11 @@ struct FILE {
 };
 typedef struct FILE FILE;
 
-FILE *stdin;
-FILE *stderr;
-FILE *stdout;
+extern FILE _stdF[3];
+
+#define stdin (&_stdF[0])
+#define stdout (&_stdF[1])
+#define stderr (&_stdF[2])
 
 #include <sys/types.h>
 //typedef fpos_t 
@@ -77,7 +79,7 @@ int      putchar(int);
 // int      setvbuf(FILE *, char *, int, size_t);
 int      snprintf(char *, size_t, const char *, ...);
 int      sprintf(char *, const char *, ...);
-// int      sscanf(const char *, const char *, int ...);
+int      sscanf(const char *, const char *, ...);
 // char    *tempnam(const char *, const char *);
 // FILE    *tmpfile(void);
 // char    *tmpnam(char *);
@@ -86,7 +88,7 @@ int      vfprintf(FILE *, const char *, va_list);
 // int      vfscanf(FILE *, const char *, va_list);
 // int      vprintf(const char *, va_list);
 // int      vscanf(const char *, va_list);
-// int      vsnprintf(char *, size_t, const char *, va_list;
+int      vsnprintf(char *, size_t, const char *, va_list);
 // int      vsprintf(char *, const char *, va_list);
 // int      vsscanf(const char *, const char *, va_list arg);
 
