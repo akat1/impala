@@ -377,8 +377,8 @@ vcons_code(vconsole_t *vc, int c)
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
         case ESC_CURHOME:
-            cx = vc->parser.attr[0];
-            cy = vc->parser.attr[1];
+            cx = vc->parser.attr[1];
+            cy = vc->parser.attr[0];
             textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURSAVEA:
@@ -414,6 +414,9 @@ vcons_code(vconsole_t *vc, int c)
             break;
         case ESC_ERASES:
             textscreen_clear(&vc->screen);
+            break;
+        case ESC_ERASEU:
+            
             break;
         case ESC_ATTR:
             for (int i = 0; i <= vc->parser.attr_i; i++) {
