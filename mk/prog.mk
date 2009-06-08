@@ -21,7 +21,7 @@ ${_PROG_CLEAN}:
 .depend ${_PROG_DEPEND}: ${SRCS}
 	@rm -f .depend
 	@for i in ${SRCS}; do	\
-		${CC} ${_CFLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
+		${CC} ${_CFLAGS} ${CFLAGS} -M $$i -MT `echo $$i | sed -e "s|\.c$$|\.o|g"`  >> .depend; \
 	done;
 
 ${_PROG_CLEANDEPEND}:

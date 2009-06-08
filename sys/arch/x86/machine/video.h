@@ -68,12 +68,23 @@ void textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute);
 void textscreen_put(struct hw_textscreen *screen, char c,
         int8_t attr);
-void textscreen_scroll(struct hw_textscreen *screen);
+void textscreen_scroll_up(struct hw_textscreen *screen);
+void textscreen_scroll_down(struct hw_textscreen *screen);
+void textscreen_move_up(struct hw_textscreen *screen);
+void textscreen_move_down(struct hw_textscreen *screen);
+void textscreen_move_cursor(struct hw_textscreen *screen, int8_t dcol,
+        int8_t drow);
 void textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
         int8_t row);
 void textscreen_next_line(struct hw_textscreen *screen);
 void textscreen_reset(struct hw_textscreen *screen);
+void textscreen_fill(struct hw_textscreen *screen, char c);
 void textscreen_clear(struct hw_textscreen *screen);
+void textscreen_clear_line(struct hw_textscreen *screen, int line);
+void textscreen_clear_right(struct hw_textscreen *screen);
+void textscreen_clear_left(struct hw_textscreen *screen);
+void textscreen_clear_up(struct hw_textscreen *screen);
+void textscreen_clear_down(struct hw_textscreen *screen);
 void textscreen_draw(struct hw_textscreen *screen);
 void textscreen_switch(struct hw_textscreen *screen);
 void textscreen_clone(struct hw_textscreen *screen);

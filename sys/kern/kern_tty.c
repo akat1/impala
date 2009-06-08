@@ -283,7 +283,7 @@ tty_output(tty_t *tty, char c)
 {
     //na razie olewamy buforowanie... "may provide a buffering mechanism;"
     if(c == '\t')
-        tty->t_lowops->tty_write(tty->t_private, "      ", 6);
+        tty->t_lowops->tty_write(tty->t_private, "     ", 5);
     else
         tty->t_lowops->tty_write(tty->t_private, &c, 1);
 }

@@ -53,7 +53,7 @@ enum {
     CONSOLE_ATTR= COLOR_WHITE
 };
 
-#define CONSOLE_ATTR_CODE "\033[s\033[1;30;40m"
+#define CONSOLE_ATTR_CODE "\0337\033[1;30;40m"
 
 enum {
     PARSER_MAX_ATTRS = 10
@@ -88,6 +88,7 @@ struct vconsole {
     int             sattr2;
     int             cx;
     int             cy;
+    int             mode;
     bool            escape;
     textscreen_t    screen;
     vc_parser_t     parser;
@@ -100,6 +101,8 @@ static void vcons_input_char(vconsole_t *vc, int ch);
 static void vcons_input_string(vconsole_t *vc, const char* str);
 static void vcons_put(vconsole_t *t, char c);
 static void vcons_putstr(vconsole_t *t, const char *c);
+static void reset_mode(vconsole_t *vc, int m);
+static void set_mode(vconsole_t *vc, int m);
 void vcons_data_out(vconsole_t *vc, const char *c, int n);
 
 static int vc_parser_put(vc_parser_t *vcprs, char c);
@@ -203,7 +206,7 @@ cons_output(int t, const char *c)
             char buf[SPRINTF_BUFSIZE];
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
-            str_cat(ptr, "\033[u");
+            str_cat(ptr, "\0338");
             vcons_putstr(current_vcons, buf);
         } else {
             vcons_putstr(current_vcons, c);
@@ -268,21 +271,25 @@ enum {
     ESC_CURLOADA,   // 8 (@)
     ESC_SCROLLE,    // [r (#)
     ESC_SCROLL,     // [{start};{end}r (#)
-    ESC_SCROLLD,    // D (#)
-    ESC_SCROLLU,    // M (#)
+    ESC_MOVED,      // D (#)
+    ESC_MOVEU,      // M (#)
     ESC_TABSET,     // H (#)
     ESC_TABCLR,     // [g (#)
     ESC_TABCLRA,    // [3g
-    ESC_ERASEE,     // [K (#)
-    ESC_ERASEB,     // [1K
-    ESC_ERASEL,     // [2K
-    ESC_ERASED,     // [J (#)
-    ESC_ERASEU,     // [1J (#)
+    ESC_DECALN,     // #8 (@)
+    ESC_ERASEE,     // [K (@)
+    ESC_ERASEB,     // [1K (@)
+    ESC_ERASEL,     // [2K (@)
+    ESC_ERASED,     // [J (@)
+    ESC_ERASEU,     // [1J (@)
     ESC_ERASES,     // [2J (@)
     ESC_PRINTS,     // [i (#)
     ESC_PRINTL,     // [1i (#)
     ESC_LOGS,       // [4i (#)
     ESC_LOGE,       // [7i (#)
+    ESC_SETMODE,    // [{};{}h
+    ESC_RESMODE,    // [{};{}l
+    ESC_NEXTL,      // E        (@)
     ESC_DEFKEY,     // [{key};"{string}"p
     ESC_ATTR,       // [{attr1};...;{attrn}m (@)
 };
@@ -319,7 +326,9 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
     mutex_lock(&vc->mtx);
     unsigned char *c = (unsigned char *)cc;
     for (; n; c++, n--) {
-        if (vc->escape) {
+        if (*c <= 032)
+            vcons_put(vc, *c);  //te znaki mog± byæ nawet w ¶rodku escape
+        else if (vc->escape) {
             int code = vc_parser_put(&vc->parser, *c);
             if (code == PARSER_ERROR) {
                 vc->escape = FALSE;
@@ -355,6 +364,8 @@ vcons_put(vconsole_t *vc, char c)
         textscreen_next_line(&vc->screen);
     } else if (c == '\r') {
         //nic nie robimy? czy rozdzielamy \n od \r?
+    } else if (c == '\v') {
+        //a co tutaj?
     } else if (c == '\b') {
         int cx, cy;
         textscreen_get_cursor(&vc->screen, &cx, &cy);
@@ -371,52 +382,117 @@ vcons_put(vconsole_t *vc, char c)
 }
 
 void
+set_mode(vconsole_t *vc, int m)
+{
+    switch(m) {
+        case 3:
+            textscreen_clear(&vc->screen);
+            break;
+        case 7: //autowrap
+            break;
+        default:
+            break;
+    }
+}
+
+void
+reset_mode(vconsole_t *vc, int m)
+{
+    switch(m) {
+        case 3:
+            textscreen_clear(&vc->screen);
+            break;
+        case 7: //no autowrap
+            break;
+        default:
+            break;
+    }
+}
+
+void
 vcons_code(vconsole_t *vc, int c)
 {
     int cx,cy;
+    int attr0 =  vc->parser.attr[0];
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
         case ESC_CURHOME:
-            cx = vc->parser.attr[1];
-            cy = vc->parser.attr[0];
+            cx = vc->parser.attr[1]-1;
+            cy = vc->parser.attr[0]-1;
             textscreen_update_cursor(&vc->screen, cx, cy);
             break;
         case ESC_CURSAVEA:
+            vc->sattr2 = vc->sattr;
+        case ESC_CURSAVE:
             vc->cx = cx;
             vc->cy = cy;
-        case ESC_CURSAVE:
-            vc->sattr2 = vc->sattr;
             break;
         case ESC_CURLOADA:
-            textscreen_update_cursor(&vc->screen, vc->cx, vc->cy);
-        case ESC_CURLOAD:
             vc->sattr = vc->sattr2;
+        case ESC_CURLOAD:
+            textscreen_update_cursor(&vc->screen, vc->cx, vc->cy);
+            break;
+        case ESC_NEXTL:
+            textscreen_next_line(&vc->screen);
+            break;
+        case ESC_MOVEU:
+            textscreen_move_up(&vc->screen);
+            break;
+        case ESC_MOVED:
+            textscreen_move_down(&vc->screen);
+            break;
+        case ESC_SETMODE:
+            for(int i=0; i<=vc->parser.attr_i; i++)
+                set_mode(vc, vc->parser.attr[i]);
+            break;
+        case ESC_RESMODE:
+            for(int i=0; i<=vc->parser.attr_i; i++)
+                reset_mode(vc, vc->parser.attr[i]);
             break;
         case ESC_CURUP:
-            cy -= vc->parser.attr[0];
-            textscreen_update_cursor(&vc->screen, cx, cy);
+            if(attr0==0)
+                attr0++;
+            textscreen_move_cursor(&vc->screen, 0, -attr0);
             break;
         case ESC_CURDOWN:
-            cy += vc->parser.attr[0];
-            textscreen_update_cursor(&vc->screen, cx, cy);
+            if(attr0==0)
+                attr0++;
+            textscreen_move_cursor(&vc->screen, 0, attr0);
             break;
         case ESC_CURFORW:
-            cx += vc->parser.attr[0];
-            textscreen_update_cursor(&vc->screen, cx, cy);
+            if(attr0==0)
+                attr0++;
+            textscreen_move_cursor(&vc->screen, attr0, 0);
             break;
         case ESC_CURBACK:
-            cx -= vc->parser.attr[0];
-            textscreen_update_cursor(&vc->screen, cx, cy);
+            if(attr0==0)
+                attr0++;
+            textscreen_move_cursor(&vc->screen, -attr0, 0);
             break;
         case ESC_RESET:
             textscreen_clear(&vc->screen);
             vc->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
             break;
+        case ESC_DECALN:
+            textscreen_fill(&vc->screen, 'E');
+            break;
+        case ESC_ERASEB:
+            textscreen_clear_left(&vc->screen);
+            break;
+        case ESC_ERASEE:
+            textscreen_clear_right(&vc->screen);
+            break;
+        case ESC_ERASEL:
+            textscreen_clear_line(&vc->screen, cy);
+            break;
         case ESC_ERASES:
             textscreen_clear(&vc->screen);
             break;
         case ESC_ERASEU:
-            
+            textscreen_clear_up(&vc->screen);
+            break;
+        case ESC_ERASED:
+            textscreen_clear_down(&vc->screen);
             break;
         case ESC_ATTR:
             for (int i = 0; i <= vc->parser.attr_i; i++) {
@@ -460,6 +536,7 @@ vcons_code(vconsole_t *vc, int c)
 enum {
     P_DUMMY,
     P_FIRST,         // czekamy na pierwszy znak
+    P_AFTER_HASH,    // jeste¶my po #    
     P_LONG,          // czekamy na znaczki po '['
     P_LONG_ATTR      // czekamy na atrybut po '['
 
@@ -505,10 +582,13 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = ESC_CURLOADA;
                 break;
             case 'D':
-                ret = ESC_SCROLLD;
+                ret = ESC_MOVED;
                 break;
+            case 'E':
+                ret = ESC_NEXTL;
+                break;    
             case 'M':
-                ret = ESC_SCROLLU;
+                ret = ESC_MOVEU;
                 break;
             case 'H':
                 ret = ESC_TABSET;
@@ -516,13 +596,28 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             case '[':
                 nexts = P_LONG;
                 break;
+            case '#':
+                nexts = P_AFTER_HASH;
+                break;
+            default:
+                ret = PARSER_ERROR;
+                break;
+        }
+    } else
+    if (vcprs->state == P_AFTER_HASH) {
+        switch (c) {
+            case '8':
+                ret = ESC_DECALN;
+                break;
             default:
                 ret = PARSER_ERROR;
                 break;
         }
     } else
     if (vcprs->state == P_LONG) {
-        if ( '0' <= c && c <= '9') {
+        if (c == '?') {
+            nexts = P_LONG_ATTR;
+        } else if ( '0' <= c && c <= '9') {
             vcprs->attr[0] = c - '0';
             vcprs->attr_i = 0;
             nexts = P_LONG_ATTR;
@@ -555,19 +650,15 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 break;
             case 'A':
                 ret = ESC_CURUP;
-                vcprs->attr[0] = 1;
                 break;
             case 'B':
                 ret = ESC_CURDOWN;
-                vcprs->attr[0] = 1;
                 break;
             case 'C':
                 ret = ESC_CURFORW;
-                vcprs->attr[0] = 1;
                 break;
             case 'D':
                 ret = ESC_CURBACK;
-                vcprs->attr[0] = 1;
                 break;
             default:
                 ret = PARSER_ERROR;
@@ -589,6 +680,12 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             case 'm':
                 ret = ESC_ATTR;
                 break;
+            case 'h':
+                ret = ESC_SETMODE;
+                break;
+            case 'l':
+                ret = ESC_RESMODE;
+                break;
             case 'f':
             case 'H':
                 ret = ESC_CURHOME;
@@ -608,8 +705,27 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             case 'r':
                 ret = ESC_SCROLL;
                 break;
+            case 'K':
+                switch (vcprs->attr[0]) {
+                    case 0:
+                        ret = ESC_ERASEE;
+                        break;
+                    case 1:
+                        ret = ESC_ERASEB;
+                        break;
+                    case 2:
+                        ret = ESC_ERASEL;
+                        break;
+                    default:
+                        ret = PARSER_ERROR;
+                        break;
+                }
+                break;
             case 'J':
                 switch (vcprs->attr[0]) {
+                    case 0:
+                        ret = ESC_ERASED;
+                        break;
                     case 1:
                         ret = ESC_ERASEU;
                         break;
