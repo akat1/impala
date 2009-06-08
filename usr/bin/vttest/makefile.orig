@@ -6,29 +6,29 @@ RELEASE = 2
 
 #### Start of system configuration section. ####
 
-srcdir = @srcdir@
-VPATH  = @srcdir@
+srcdir = .
 
-x		= @EXEEXT@
-o		= .@OBJEXT@
 
-CC		= @CC@
-CPP		= @CPP@
+x		= 
+o		= .o
+
+CC		= i386-aout-gcc
+CPP		= i386-aout-gcc -E
 LINK		= $(CC)
-LINT		= @LINT@
-INSTALL 	= @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA	= @INSTALL_DATA@
+LINT		= 
+INSTALL 	= /usr/bin/install -c
+INSTALL_PROGRAM = ${INSTALL}
+INSTALL_DATA	= ${INSTALL} -m 644
 
-LIBS		= @LIBS@
-CFLAGS		= @CFLAGS@ @EXTRA_CFLAGS@
-LDFLAGS 	= @LDFLAGS@
+LIBS		= 
+CFLAGS		= -Wl,-e,__start 
+LDFLAGS 	= -static
 
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
+prefix		= /usr/local/i386-aout
+exec_prefix	= /usr/local/i386-aout
 
-bindir		= $(DESTDIR)@bindir@
-mandir		= $(DESTDIR)@mandir@/man$(manext)
+bindir		= $(DESTDIR)${exec_prefix}/bin
+mandir		= $(DESTDIR)${prefix}/share/man/man$(manext)
 manext		= 1
 
 #### End of system configuration section. ####
@@ -37,16 +37,16 @@ SHELL		= /bin/sh
 
 DEFINES 	= -DHAVE_CONFIG_H -DRELEASE=$(RELEASE)
 INCLUDES	= -I. -I$(srcdir)
-CPPFLAGS	= $(DEFINES) $(INCLUDES) @CPPFLAGS@
+CPPFLAGS	= $(DEFINES) $(INCLUDES)  -U_XOPEN_SOURCE -D_XOPEN_SOURCE=500 -U_POSIX_C_SOURCE -D_POSIX_C_SOURCE=199506L
 
 .SUFFIXES: .c .i $o
 
 .c.i:
-@RULE_CC@
-	@ECHO_CC@$(CPP) -E -C $(CPPFLAGS) $< >$@
+# compiling
+	$(CPP) -E -C $(CPPFLAGS) $< >$@
 .c$o:
-@RULE_CC@
-	@ECHO_CC@$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+# compiling
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 C_SRC = \
 	charsets.c \
@@ -114,7 +114,7 @@ DISTFILES = MANIFEST configure $(SRC)
 all:	$(PROG)
 
 $(PROG): $(OBJS)
-	@ECHO_LD@$(LINK) $(CFLAGS) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS)
 
 $(OBJS): config.h $(THIS).h patchlev.h
 
@@ -141,11 +141,11 @@ distclean: clean
 realclean: distclean
 	rm -f tags TAGS # don't remove configure!
 
-@MAKE_LOWER_TAGS@tags:	$(C_SRC) $(HDRS)
-@MAKE_LOWER_TAGS@	ctags $(C_SRC) $(HDRS)
+tags:	$(C_SRC) $(HDRS)
+	ctags $(C_SRC) $(HDRS)
 
-@MAKE_UPPER_TAGS@TAGS:	$(C_SRC) $(HDRS)
-@MAKE_UPPER_TAGS@	etags $(C_SRC) $(HDRS)
+#TAGS:	$(C_SRC) $(HDRS)
+#	etags $(C_SRC) $(HDRS)
 
 # I keep my sources in RCS, and assign a symbolic release to the current patch
 # level.  The 'manifest' script knows how to build a list of files for a given

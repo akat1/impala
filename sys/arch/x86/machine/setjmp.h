@@ -35,10 +35,10 @@
 
 // piêkny triczek aby typ jmp_buf by³ przekazyway przez referencjê
 // a nie przez warto¶æ.
-typedef struct _jmp_buf jmp_buf[1];
 struct _jmp_buf {
     uint32_t    env[10]; 
 };
+typedef struct _jmp_buf jmp_buf[1];
 
 #endif
 

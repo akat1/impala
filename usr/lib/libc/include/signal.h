@@ -1,6 +1,7 @@
 #ifndef __SIGNAL_H
 #define __SIGNAL_H
 
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/signum.h>
 #include <sys/wait.h> //tak na razie...

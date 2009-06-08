@@ -36,6 +36,7 @@
 #include <sys/cdefs.h>
 
 #define va_start(ap, last) VA_START(ap, last)
+#define va_arg(ap,expr) VA_ARG(ap,expr)
 #define va_end(ap)
 //#define va_copy(dest, src);
 

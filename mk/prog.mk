@@ -4,7 +4,7 @@ _PROG_DEPEND?= depend
 _PROG_CLEANDEPEND?= cleandepend
 _PROG_INSTALL?= install
 PREFIX=${AOUT_PREFIX}
-CFLAGS=${_U_FLAGS}
+_CFLAGS=${_U_FLAGS}
 PROG?= noname
 
 include ${IMPALA_SRCROOT}/mk/build.mk

@@ -1,6 +1,0 @@
-main.o:main.o:(.text+0x292): undefined reference to `_signal'
-main.o:main.o:(.text+0x2a4): undefined reference to `_signal'
-main.o:main.o:(.text+0x49c0): undefined reference to `_signal'
-main.o:main.o:(.text+0x49fc): undefined reference to `_signal'
-collect2: ld returned 1 exit status
-make: *** [vttest] B³±d 1
