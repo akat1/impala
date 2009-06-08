@@ -45,6 +45,7 @@
 #include <machine/video.h>
 #include <machine/interrupt.h>
 #include <machine/pckbd.h>
+#include <sys/ascii.h>
 
 enum {
     DEFAULT_FG = COLOR_BRIGHTGRAY,
@@ -96,6 +97,11 @@ struct vconsole {
 //    devd_t         *dev;
     tty_t          *tty;    ///< urz±dzenie terminalowe tej konsoli wirtualnej
 };
+
+#define CONS_MODE_AWRAP   1
+#define CONS_MODE_ORIGIN  2
+#define CONS_MODE_SCREEN  4
+#define CONS_MODE_NEWLINE 8
 
 static void vcons_input_char(vconsole_t *vc, int ch);
 static void vcons_input_string(vconsole_t *vc, const char* str);
@@ -186,6 +192,7 @@ cons_init()
         vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
         vcons[i].sattr = COLOR_BRIGHTGRAY;
         vcons[i].escape = FALSE;
+        textscreen_init_tab(&vcons[i].screen);
         if (i > 0) {
             textscreen_clone(&vcons[i].screen);
             textscreen_clear(&vcons[i].screen);
@@ -274,8 +281,7 @@ enum {
     ESC_MOVED,      // D (#)
     ESC_MOVEU,      // M (#)
     ESC_TABSET,     // H (#)
-    ESC_TABCLR,     // [g (#)
-    ESC_TABCLRA,    // [3g
+    ESC_TABCLR,     // [{attr}g (#)
     ESC_DECALN,     // #8 (@)
     ESC_ERASEE,     // [K (@)
     ESC_ERASEB,     // [1K (@)
@@ -357,21 +363,20 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
 void
 vcons_put(vconsole_t *vc, char c)
 {
+    int cx, cy;
+    textscreen_get_cursor(&vc->screen, &cx, &cy);
+    
     if (isprint(c)) {
         textscreen_put(&vc->screen, c, vc->sattr);
     } else
-    if (c == '\n') {
+    if (c == '\n' || c == '\v' || c == 0x0c) { //0x0c = FF
         textscreen_next_line(&vc->screen);
     } else if (c == '\r') {
-        //nic nie robimy? czy rozdzielamy \n od \r?
-    } else if (c == '\v') {
-        //a co tutaj?
+        textscreen_update_cursor(&vc->screen, 0, cy);
+    } else if (c == '\t') {
+        textscreen_tab(&vc->screen);
     } else if (c == '\b') {
-        int cx, cy;
-        textscreen_get_cursor(&vc->screen, &cx, &cy);
-        textscreen_update_cursor(&vc->screen, cx-1, cy);
-        textscreen_put(&vc->screen, ' ', vc->sattr);
-        textscreen_update_cursor(&vc->screen, cx-1, cy);
+        textscreen_move_cursor(&vc->screen, -1, 0);
     } else {
         char hex[16]="0123456789abcdef";
         textscreen_put(&vc->screen, '0', vc->sattr);
@@ -389,6 +394,7 @@ set_mode(vconsole_t *vc, int m)
             textscreen_clear(&vc->screen);
             break;
         case 7: //autowrap
+            SET(vc->mode, CONS_MODE_AWRAP);
             break;
         default:
             break;
@@ -403,6 +409,7 @@ reset_mode(vconsole_t *vc, int m)
             textscreen_clear(&vc->screen);
             break;
         case 7: //no autowrap
+            UNSET(vc->mode, CONS_MODE_AWRAP);
             break;
         default:
             break;
@@ -431,6 +438,15 @@ vcons_code(vconsole_t *vc, int c)
             vc->sattr = vc->sattr2;
         case ESC_CURLOAD:
             textscreen_update_cursor(&vc->screen, vc->cx, vc->cy);
+            break;
+        case ESC_TABCLR:
+            if(attr0 == 0)
+                textscreen_del_tab(&vc->screen);
+            else if(attr0 == 3)
+                textscreen_del_all_tab(&vc->screen);
+            break;
+        case ESC_TABSET:
+            textscreen_set_tab(&vc->screen);
             break;
         case ESC_NEXTL:
             textscreen_next_line(&vc->screen);
@@ -689,6 +705,9 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             case 'f':
             case 'H':
                 ret = ESC_CURHOME;
+                break;
+            case 'g':
+                ret = ESC_TABCLR;
                 break;
             case 'A':
                 ret = ESC_CURUP;

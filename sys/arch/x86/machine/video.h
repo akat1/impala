@@ -51,11 +51,12 @@ enum {
 
 typedef struct hw_textscreen textscreen_t;
 struct hw_textscreen {
-    uint16_t screen_map[TS_SIZE];
+    uint16_t  screen_map[TS_SIZE];
+    uint8_t   tab_stop[TS_SIZE];
     uint16_t *screen_buf;
-    int8_t cursor_y;
-    int8_t cursor_x;
-    uint16_t cursor_hack;
+    int8_t    cursor_y;
+    int8_t    cursor_x;
+    uint16_t  cursor_hack;
 };
 
 void textscreen_enable_forced_attr(int8_t f);
@@ -63,11 +64,16 @@ void textscreen_disable_forced_attr(void);
 
 void video_init(void);
 void textscreen_init(struct hw_textscreen *ts);
-
+void textscreen_init_tab(struct hw_textscreen *screen);
 void textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute);
 void textscreen_put(struct hw_textscreen *screen, char c,
         int8_t attr);
+
+void textscreen_tab(struct hw_textscreen *screen);
+void textscreen_set_tab(struct hw_textscreen *screen);
+void textscreen_del_tab(struct hw_textscreen *screen);
+void textscreen_del_all_tab(struct hw_textscreen *screen);
 void textscreen_scroll_up(struct hw_textscreen *screen);
 void textscreen_scroll_down(struct hw_textscreen *screen);
 void textscreen_move_up(struct hw_textscreen *screen);

@@ -97,8 +97,17 @@ textscreen_init(struct hw_textscreen *ts)
 {
     ts->screen_buf = NULL;
     textscreen_clear(ts);
+    textscreen_init_tab(ts);
 }
 
+void
+textscreen_init_tab(struct hw_textscreen *ts)
+{
+    mem_set(ts->tab_stop, 0, TS_SIZE);
+    for(int y=0; y<TS_HEIGHT; y++)
+        for(int x=0; x<TS_WIDTH; x+=6)
+            ts->tab_stop[y*TS_WIDTH+x] = 1;
+}
 
 void
 textscreen_enable_forced_attr(int8_t f)
@@ -120,7 +129,7 @@ textscreen_next_line(struct hw_textscreen *screen)
    //     uint16_t *map = screen->screen_buf;
      //   int cur_pos = screen->cursor_y*TS_WIDTH + screen->cursor_x;
 //        map[cur_pos] = screen->cursor_hack;
-    //}
+    //x}
 
     if ( screen->cursor_y < TS_HEIGHT-1 )
         textscreen_update_cursor(screen, 0, screen->cursor_y+1);
@@ -129,6 +138,43 @@ textscreen_next_line(struct hw_textscreen *screen)
 
 }
 
+void textscreen_tab(struct hw_textscreen *screen)
+{
+    screen = SELECT_SCREEN(screen);
+//    uint16_t *map = SELECT_MAP(screen);
+    int sx = screen->cursor_x;
+    if(sx == TS_WIDTH-1)
+        return;
+    int cur_pos = (screen->cursor_y) * TS_WIDTH + sx;
+    for(int x = screen->cursor_x+1; x<TS_WIDTH; x++)
+        if(screen->tab_stop[++cur_pos]) {
+            textscreen_update_cursor(screen, x, screen->cursor_y);
+            return;
+        }
+    textscreen_update_cursor(screen, TS_WIDTH-1, screen->cursor_y);
+}
+
+void textscreen_set_tab(struct hw_textscreen *screen)
+{
+    screen = SELECT_SCREEN(screen);
+    int sx = screen->cursor_x;
+    int cur_pos = (screen->cursor_y) * TS_WIDTH + sx;
+    screen->tab_stop[cur_pos] = TRUE;
+}
+
+void textscreen_del_tab(struct hw_textscreen *screen)
+{
+    screen = SELECT_SCREEN(screen);
+    int sx = screen->cursor_x;
+    int cur_pos = (screen->cursor_y) * TS_WIDTH + sx;
+    screen->tab_stop[cur_pos] = FALSE;
+}
+
+void textscreen_del_all_tab(struct hw_textscreen *screen)
+{
+    screen = SELECT_SCREEN(screen);
+    mem_set(screen->tab_stop, 0, TS_SIZE);
+}
 
 void
 textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,

@@ -8,4 +8,5 @@ sscanf(const char *src, const char *fmt, ...)
     VA_START(ap, fmt);
     int res = vsscanf(src, fmt, ap);
     VA_END(ap);
+    return res;
 }

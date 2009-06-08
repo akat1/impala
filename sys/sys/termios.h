@@ -14,8 +14,6 @@ typedef unsigned int tcflag_t;
 
 #define CTRL(x) ((x)&037)
 #define EOF    (-1)
-#define NL     '\n'
-#define CR     '\r'
 
 //c_cc index:
 
@@ -139,6 +137,8 @@ typedef struct termios termios_t;
 
 
 #ifdef __KERNEL
+
+#include <sys/ascii.h>
 
 // XXX:tymczasowo tutaj
 
