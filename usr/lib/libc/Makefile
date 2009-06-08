@@ -82,7 +82,6 @@ SRCS=\
     unistd/getdents.c\
     unistd/ioctl.c\
     unistd/isatty.c\
-    unistd/longjmp.c\
     unistd/lseek.c\
     unistd/lstat.c\
     unistd/fork.c\
@@ -96,7 +95,6 @@ SRCS=\
     unistd/getuid.c\
     unistd/sbrk.c\
     unistd/setgid.c\
-    unistd/setjmp.c\
     unistd/setpgid.c\
     unistd/setpgrp.c\
     unistd/setuid.c\
@@ -107,5 +105,6 @@ SRCS=\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
     unistd/write.c\
+    ${IMPALA_ARCH}/setjmp.s\
 
 include ${IMPALA_MK}/lib.mk

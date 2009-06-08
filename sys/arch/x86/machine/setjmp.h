@@ -1,4 +1,4 @@
-/* Impala C Library
+/* Impala Operating System
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
@@ -27,26 +27,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: cdefs.h 272 2009-05-26 17:36:35Z takeshi $
  */
-#ifndef __SETJMP_H
-#define __SETJMP_H
 
-#include <machine/setjmp.h>
+#ifndef __MACHINE_SETJMP_H
+#define __MACHINE_SETJMP_H
 
-typedef int jmp_buf[6];
-struct sigjmp_buf{
-    jmp_buf env;
-    int sth;
+// piêkny triczek aby typ jmp_buf by³ przekazyway przez referencjê
+// a nie przez warto¶æ.
+typedef struct _jmp_buf jmp_buf[1];
+struct _jmp_buf {
+    uint32_t    env[10]; 
 };
-typedef struct sigjmp_buf sigjmp_buf;
-
-void   longjmp(jmp_buf, int);
-void   siglongjmp(sigjmp_buf, int);
-void  _longjmp(jmp_buf, int);
-
-int    setjmp(jmp_buf);
-int    sigsetjmp(sigjmp_buf, int);
-int   _setjmp(jmp_buf);
 
 #endif
+
