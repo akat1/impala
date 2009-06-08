@@ -56,7 +56,15 @@ struct hw_textscreen {
     uint16_t *screen_buf;
     int8_t    cursor_y;
     int8_t    cursor_x;
+    int8_t    margin_up;
+    int8_t    margin_down;
+    int8_t    index_mode;
     uint16_t  cursor_hack;
+};
+
+enum {
+    VIDEO_INDEX_ABSOLUTE,
+    VIDEO_INDEX_RELATIVE
 };
 
 void textscreen_enable_forced_attr(int8_t f);
@@ -74,6 +82,8 @@ void textscreen_tab(struct hw_textscreen *screen);
 void textscreen_set_tab(struct hw_textscreen *screen);
 void textscreen_del_tab(struct hw_textscreen *screen);
 void textscreen_del_all_tab(struct hw_textscreen *screen);
+void textscreen_set_margins(struct hw_textscreen *screen, int up, int down);
+void textscreen_set_index_mode(struct hw_textscreen *screen, int8_t mode);
 void textscreen_scroll_up(struct hw_textscreen *screen);
 void textscreen_scroll_down(struct hw_textscreen *screen);
 void textscreen_move_up(struct hw_textscreen *screen);

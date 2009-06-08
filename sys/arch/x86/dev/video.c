@@ -85,6 +85,9 @@ video_init()
     defscreen.cursor_y = cur_pos / TS_WIDTH;
     defscreen.screen_buf = (uint16_t*) vidmem;
     defscreen.cursor_hack = 0;
+    textscreen_init_tab(&defscreen);
+    defscreen.margin_up = 0;
+    defscreen.margin_down = TS_HEIGHT-1;
     current = &defscreen;
 //    defscreen.cursor_hack = defscreen.screen_buf[cur_pos];
     SYSTEM_DEBUG = 1;
@@ -96,6 +99,9 @@ void
 textscreen_init(struct hw_textscreen *ts)
 {
     ts->screen_buf = NULL;
+    ts->index_mode = VIDEO_INDEX_ABSOLUTE;
+    ts->margin_up = 0;
+    ts->margin_down = TS_HEIGHT-1;
     textscreen_clear(ts);
     textscreen_init_tab(ts);
 }
@@ -176,6 +182,23 @@ void textscreen_del_all_tab(struct hw_textscreen *screen)
     mem_set(screen->tab_stop, 0, TS_SIZE);
 }
 
+void textscreen_set_margins(struct hw_textscreen *screen, int up, int down)
+{
+    screen = SELECT_SCREEN(screen);
+    if(up>=down)
+        return;
+    if(up<0) up=0;
+    if(down>TS_HEIGHT-1) down = TS_HEIGHT-1;
+    screen->margin_up = up;
+    screen->margin_down = down;
+}
+
+void textscreen_set_index_mode(struct hw_textscreen *screen, int8_t mode)
+{
+    screen = SELECT_SCREEN(screen);
+    screen->index_mode = mode;
+}
+
 void
 textscreen_putat(struct hw_textscreen *screen, int8_t col, int8_t row,
         char c, int8_t attribute)
@@ -245,19 +268,19 @@ textscreen_move_up(struct hw_textscreen *screen)
 }
 
 void
-textscreen_move_cursor(struct hw_textscreen *screen, int8_t dcol,
+textscreen_move_cursor(struct hw_textscreen *ts, int8_t dcol,
         int8_t drow)
 {
-    screen = SELECT_SCREEN(screen);
-    int curx=clamp(screen->cursor_x+dcol, 0, TS_WIDTH-1);
-    int cury=clamp(screen->cursor_y+drow, 0, TS_HEIGHT-1);
-    int cur_pos = (screen->cursor_y) * TS_WIDTH + screen->cursor_x;
-    screen->cursor_y = cury;
-    screen->cursor_x = curx;
+    ts = SELECT_SCREEN(ts);
+    int curx=clamp(ts->cursor_x+dcol, 0, TS_WIDTH-1);
+    int cury=clamp(ts->cursor_y+drow, 0, TS_HEIGHT-1);//ts->margin_up, ts->margin_down);
+    int cur_pos = (ts->cursor_y) * TS_WIDTH + ts->cursor_x;
+    ts->cursor_y = cury;
+    ts->cursor_x = curx;
 
-    if (screen->screen_buf) {
+    if (ts->screen_buf) {
 //        screen->screen_buf[cur_pos] = screen->cursor_hack;
-        cur_pos = (screen->cursor_y) * TS_WIDTH + screen->cursor_x;
+        cur_pos = (ts->cursor_y) * TS_WIDTH + ts->cursor_x;
 #if 1
         io_out8(VGA_PORT, REG_CUR_POS_HI);
         io_out8(VGA_PORT+1, cur_pos>>8 );
@@ -275,7 +298,6 @@ textscreen_update_cursor(struct hw_textscreen *screen, int8_t col,
         int8_t row)
 {
     screen = SELECT_SCREEN(screen);
-
     if (col < 0) col = 0;
     if (row < 0) row = 0;
     if (col > TS_WIDTH-1) col = TS_WIDTH-1;

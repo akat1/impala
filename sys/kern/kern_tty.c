@@ -282,9 +282,13 @@ void
 tty_output(tty_t *tty, char c)
 {
     //na razie olewamy buforowanie... "may provide a buffering mechanism;"
-    if(ISSET(tty->t_conf.c_oflag, OPOST)) {
-        if(c == '\t' && ISSET(tty->t_conf.c_oflag, TAB3))
+    int oflag = tty->t_conf.c_oflag;
+    if(ISSET(oflag, OPOST)) {
+        if(c == '\t' && ISSET(oflag, TAB3))
             tty->t_lowops->tty_write(tty->t_private, "      ", 6);
+        else if(c == '\n' && ISSET(oflag, ONLCR)) {
+            tty->t_lowops->tty_write(tty->t_private, "\r\n", 2);
+        }
         else
             tty->t_lowops->tty_write(tty->t_private, &c, 1);
     }

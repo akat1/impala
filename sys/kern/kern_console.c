@@ -192,6 +192,7 @@ cons_init()
         vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
         vcons[i].sattr = COLOR_BRIGHTGRAY;
         vcons[i].escape = FALSE;
+        vcons[i].mode = CONS_MODE_AWRAP | CONS_MODE_NEWLINE;
         textscreen_init_tab(&vcons[i].screen);
         if (i > 0) {
             textscreen_clone(&vcons[i].screen);
@@ -276,7 +277,6 @@ enum {
     ESC_CURLOAD,    // [u (@)
     ESC_CURSAVEA,   // 7 (@)
     ESC_CURLOADA,   // 8 (@)
-    ESC_SCROLLE,    // [r (#)
     ESC_SCROLL,     // [{start};{end}r (#)
     ESC_MOVED,      // D (#)
     ESC_MOVEU,      // M (#)
@@ -367,16 +367,26 @@ vcons_put(vconsole_t *vc, char c)
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     
     if (isprint(c)) {
-        textscreen_put(&vc->screen, c, vc->sattr);
-    } else
-    if (c == '\n' || c == '\v' || c == 0x0c) { //0x0c = FF
-        textscreen_next_line(&vc->screen);
-    } else if (c == '\r') {
+        if(cx == TS_WIDTH-1 && ISUNSET(vc->mode, CONS_MODE_AWRAP))
+            textscreen_putat(&vc->screen, cx, cy, c, vc->sattr);
+        else
+            textscreen_put(&vc->screen, c, vc->sattr);
+    } else if(c == NUL); //nie jestem pewien, czy dostawaæ tu taki znak
+    else if (c == NL || c == VT || c == FF) {
+        if(ISSET(vc->mode, CONS_MODE_NEWLINE))
+            textscreen_next_line(&vc->screen);
+        else
+            textscreen_move_down(&vc->screen);
+    } else if (c == CR) {
         textscreen_update_cursor(&vc->screen, 0, cy);
-    } else if (c == '\t') {
+    } else if (c == HT) {
         textscreen_tab(&vc->screen);
-    } else if (c == '\b') {
+    } else if (c == BS) {
         textscreen_move_cursor(&vc->screen, -1, 0);
+    } else if (c == ENQ) {
+        //todo
+    } else if (c == SO || c == SI) {
+        //sth...
     } else {
         char hex[16]="0123456789abcdef";
         textscreen_put(&vc->screen, '0', vc->sattr);
@@ -390,11 +400,19 @@ void
 set_mode(vconsole_t *vc, int m)
 {
     switch(m) {
-        case 3:
+        case 3: //column mode
             textscreen_clear(&vc->screen);
+            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+            break;
+        case 6: //origin avs
+            SET(vc->mode, CONS_MODE_ORIGIN);
+            textscreen_set_index_mode(&vc->screen, VIDEO_INDEX_ABSOLUTE);
             break;
         case 7: //autowrap
             SET(vc->mode, CONS_MODE_AWRAP);
+            break;
+        case 20: //line
+            SET(vc->mode, CONS_MODE_NEWLINE);
             break;
         default:
             break;
@@ -407,9 +425,17 @@ reset_mode(vconsole_t *vc, int m)
     switch(m) {
         case 3:
             textscreen_clear(&vc->screen);
+            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+            break;
+        case 6: //origin rel
+            UNSET(vc->mode, CONS_MODE_ORIGIN);
+            textscreen_set_index_mode(&vc->screen, VIDEO_INDEX_RELATIVE);
             break;
         case 7: //no autowrap
             UNSET(vc->mode, CONS_MODE_AWRAP);
+            break;
+        case 20: //line only vertical
+            UNSET(vc->mode, CONS_MODE_NEWLINE);
             break;
         default:
             break;
@@ -423,6 +449,16 @@ vcons_code(vconsole_t *vc, int c)
     int attr0 =  vc->parser.attr[0];
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
+        case ESC_SCROLL: {
+            int attr1 = vc->parser.attr[1];
+            if(attr0 == 0 && attr1 == 0)
+                ;//...
+            else {
+                textscreen_set_margins(&vc->screen, attr0, attr1);
+                textscreen_update_cursor(&vc->screen, 0, 0);
+            }
+            break;
+        }
         case ESC_CURHOME:
             cx = vc->parser.attr[1]-1;
             cy = vc->parser.attr[0]-1;
@@ -554,7 +590,9 @@ enum {
     P_FIRST,         // czekamy na pierwszy znak
     P_AFTER_HASH,    // jeste¶my po #    
     P_LONG,          // czekamy na znaczki po '['
-    P_LONG_ATTR      // czekamy na atrybut po '['
+    P_LONG_ATTR,     // czekamy na atrybut po '['
+    P_SET_G0,        // znaczki po '('
+    P_SET_G1         // znaczki po ')'
 
 };
 
@@ -586,10 +624,10 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = ESC_RESET;
                 break;
             case '(':
-                ret = ESC_G0;
+                nexts = P_SET_G0;
                 break;
             case ')':
-                ret = ESC_G1;
+                nexts = P_SET_G1;
                 break;
             case '7':
                 ret = ESC_CURSAVEA;
@@ -619,8 +657,7 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = PARSER_ERROR;
                 break;
         }
-    } else
-    if (vcprs->state == P_AFTER_HASH) {
+    } else if (vcprs->state == P_AFTER_HASH) {
         switch (c) {
             case '8':
                 ret = ESC_DECALN;
@@ -629,8 +666,19 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = PARSER_ERROR;
                 break;
         }
-    } else
-    if (vcprs->state == P_LONG) {
+    } else if(vcprs->state == P_SET_G0) {
+        switch (c) {
+            default:
+                ret = PARSER_ERROR;
+                break;
+        }
+    } else if(vcprs->state == P_SET_G1) {
+                switch (c) {
+            default:
+                ret = PARSER_ERROR;
+                break;
+        }
+    } else if (vcprs->state == P_LONG) {
         if (c == '?') {
             nexts = P_LONG_ATTR;
         } else if ( '0' <= c && c <= '9') {
@@ -639,6 +687,12 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             nexts = P_LONG_ATTR;
         } else
         switch (c) {
+            case ';':
+                nexts = P_LONG_ATTR;
+                vcprs->attr[0] = 0;
+                vcprs->attr_i++;
+                vcprs->attr[vcprs->attr_i] = 0;
+                break;
             case 's':
                 ret = ESC_CURSAVE;
                 break;
@@ -646,7 +700,7 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = ESC_CURLOAD;
                 break;
             case 'r':
-                ret = ESC_SCROLLE;
+                ret = ESC_SCROLL;
                 break;
             case 'g':
                 ret = ESC_TABCLR;
@@ -680,8 +734,7 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = PARSER_ERROR;
                 break;
         }
-    } else
-    if (vcprs->state == P_LONG_ATTR) {
+    } else if (vcprs->state == P_LONG_ATTR) {
         if ('0' <= c && c <= '9') {
             vcprs->attr[vcprs->attr_i] *= 10;
             vcprs->attr[vcprs->attr_i] += c - '0';
