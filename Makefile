@@ -16,6 +16,7 @@ run: build-image
 	cd image && qemu -m 32 -fda floppy.img
 
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
+	cp COPYRIGHT output
 	cp usr/sbin/init/init output/sbin/init
 	cp usr/bin/test/test output/bin/test
 	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
