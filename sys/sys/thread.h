@@ -171,6 +171,7 @@ void semaph_destroy(semaph_t *s);
 void sleepq_init(sleepq_t *q);
 void sleepq_destroy(sleepq_t *q);
 void sleepq_wait(sleepq_t *q);
+void sleepq_wait_ms(sleepq_t *q, uint ms);
 int sleepq_wait_i(sleepq_t *q);
 void sleepq_wakeup(sleepq_t *q);
 void sleepq_intrpt(thread_t *td);

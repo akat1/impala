@@ -5,6 +5,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <termios.h>
 #include <sys/syscall.h>
 
 #define print(fd, str) write(fd, str, strlen(str))
@@ -46,10 +47,9 @@ printV(const char *msg, int v)
 void
 tmain()
 {
-    int fd = open("/dev/tty", O_RDWR);
-    int err = errno;
-    printV("fd w w±tku: ", fd);
-    printV("errno: ", err);
+//    int fd = open("/dev/tty", O_RDWR);
+    int fd = 1;
+
     print(fd,"elo320\n\n");
     print(fd,"\tSiemanizator ;D... 1234567890\n\n");
     printf("Test oto jest %i\n", 12);
@@ -81,7 +81,6 @@ main(int argc, char **v)
     open("/dev/ttyv1", O_WRONLY);   //stderr
 #endif
     tid_t t = thr_create(tmain, 0, 0, 0);
-    printV("Utw. w±tek:", t);
 
     char buf[512];
     char *const argv[]={NULL};

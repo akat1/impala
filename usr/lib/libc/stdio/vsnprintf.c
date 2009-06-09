@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 
 static char *convert_int32(char *b, int32_t arg_u32);
@@ -78,33 +79,33 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                             *(dst++)='%';
                         break;
                     case 'u':
-                        arg_u32 = VA_ARG(ap, uint32_t);
+                        arg_u32 = va_arg(ap, uint32_t);
                         pbuf = convert_uint32(buf, arg_u32);
                         break;
                     case 'd':
                     case 'i':
-                        arg_u32 = VA_ARG(ap, int32_t);
+                        arg_u32 = va_arg(ap, int32_t);
                         pbuf = convert_int32(buf, (int32_t)arg_u32);
                         break;
                     case 'x':
-                        arg_u32 = VA_ARG(ap, uint32_t);
+                        arg_u32 = va_arg(ap, uint32_t);
                         pbuf = convert_hexuint32(buf, arg_u32);
                         break;
                     case 'b':
-                        arg_u32 = VA_ARG(ap, uint32_t);
+                        arg_u32 = va_arg(ap, uint32_t);
                         pbuf = convert_binuint32(buf, arg_u32);
                         break;
                     case 'p':
-                        arg_u32 = VA_ARG(ap, uintptr_t);
+                        arg_u32 = va_arg(ap, uintptr_t);
                         pbuf = convert_hexuint32(buf, arg_u32);
                         *(--pbuf) = 'x';
                         *(--pbuf) = '0';
                         break;
                     case 's':
-                        pbuf = VA_ARG(ap, char *);
+                        pbuf = va_arg(ap, char *);
                         break;
                     case 'c':
-                        cbuf[0] = VA_ARG(ap, uint32_t);
+                        cbuf[0] = va_arg(ap, uint32_t);
                         cbuf[1] = 0;
                         pbuf = cbuf;
                         break;

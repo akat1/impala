@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 static int _parse_int(const char **src);
 static void _parse_str(const char **src, char *res);
@@ -41,19 +42,19 @@ vsscanf(const char *src, const char *fmt, va_list ap)
             f++;
             switch(*f) {
                 case 's': {
-                    char *sptr = VA_ARG(ap, char*);
+                    char *sptr = va_arg(ap, char*);
                     _parse_str(&s, sptr);
                     res++;
                     break;
                 }
                 case 'd': {
-                    int *iptr = VA_ARG(ap, int*);
+                    int *iptr = va_arg(ap, int*);
                     *iptr = _parse_int(&s);
                     res++;
                     break;
                 }
                 case 'c': {
-                    char *cptr = VA_ARG(ap, char*);
+                    char *cptr = va_arg(ap, char*);
                     *cptr = *s;
                     res++;
                     f++;

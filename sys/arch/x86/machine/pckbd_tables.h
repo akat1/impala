@@ -66,6 +66,13 @@ enum {
     KC_PAUSE
 };
 
+char *keymap_string[] =
+{
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "D",
+     "A", "B", "C", NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+     NULL, NULL, NULL, NULL 
+};
+    
 
 /// tablica do translacji scancode -> keycode dla klawiszy z grupy 'e0'
 uint8_t e0_kcodes[] = 
@@ -104,7 +111,7 @@ uint8_t keymap_ctrl[] =
 { 0,'\e', '1', '2', '3', '4', '5', RS, '7', '8', '9', '0', US, '=','\b', '\t',// 0x00 - 0x0f
 DC1, ETB, ENQ, DC2, DC4, EM, NAK, HT, SI, DLE, ESC, GS, '\n',  0, SOH, DC3,    // 0x10 - 0x1f  //0x1d - brak
 EOT, ACK, BEL, BS, LF, VT, FF, ';','\'', '`', 0 , FS, SUB, CAN, ETX, SYN,     // 0x20 - 0x2f  //0x2a - lshift
-STX, SO, CR, ',', '.', DEL, 0  , '*', 0  , ' ', 0 ,  0 ,    0,   0,   0,   0, // 0x30 - 0x3f  //0x36 - rshift
+STX, SO, CR, ',', '.', DEL, 0  , '*', 0  , NUL, 0 ,  0 ,    0,   0,   0,   0, // 0x30 - 0x3f  //0x36 - rshift
   0,   0,   0,   0,   0,   0,   0, '7', '8', '9', '-', '4', '5', '6', '+', '1', // 0x40 - 0x4f
 '2', '3', '0', '.',   0,   0,   0,   0                                          // 0x50 - 0x58
 };

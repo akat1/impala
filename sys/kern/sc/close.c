@@ -59,6 +59,7 @@ sc_close(thread_t *t, syscall_result_t *r, close_args *args)
 
     r->result = 0;
     f_close(f);
+    f_set(t->thr_proc->p_fd, NULL, args->fd);
     return EOK;
 }
 

@@ -63,7 +63,7 @@ static void set_modifiers(void);
 void
 __enqueue_keycode(int kc)
 {
-    char c = '?';
+    char c = 0;
     // sprawdzamy czy mamy miejsce w kolejce.
     bool shift=(key_modifiers & (KM_LSHIFT | KM_RSHIFT))>0;
     bool ctrl =(key_modifiers & (KM_LCONTROL | KM_RCONTROL))>0;
@@ -78,8 +78,17 @@ __enqueue_keycode(int kc)
             if(shift)
                 c = keymap_shift[kc];
         }
+    } else if(kc == DEL)
+        c = DEL;
+    else {
+        char *x = keymap_string[kc-128];
+        if(x) {
+            cons_input_char(0233);
+            cons_input_string(x);
+        }
+        return;
     }
-    if(c)
+    if(c || (ctrl && kc==' '))
         cons_input_char(c);
 }
 

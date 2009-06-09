@@ -141,20 +141,22 @@ typedef struct termios termios_t;
 #include <sys/ascii.h>
 
 // XXX:tymczasowo tutaj
-
+///< bufor znaków w postaci kolejki
 struct clist {
-    int     *buf;       ///< bufor na dane
-    int      beg;       ///< miejsce gdzie zaczyna siê kolejka
-    int      end;       ///< koniec kolejki (najstarsze dane)
-    int      size;      ///< aktualnie wykorzystana przestrzeñ
-    int      buf_size;  ///< wielko¶æ ca³ego bufora
-    mutex_t *mtx;
+    int      *buf;       ///< bufor na dane
+    int       beg;       ///< miejsce gdzie zaczyna siê kolejka
+    int       end;       ///< koniec kolejki (najstarsze dane)
+    int       size;      ///< aktualnie wykorzystana przestrzeñ
+    int       buf_size;  ///< wielko¶æ ca³ego bufora
+    sleepq_t *slpq;      
 };
 typedef struct clist clist_t;
 
 clist_t *clist_create(size_t size);
+void clist_wakeup(clist_t *l);
+void clist_wait(clist_t *l);
 void clist_push(clist_t *l, int ch);
-void clist_unpush(clist_t *l);
+char clist_unpush(clist_t *l);//mo¿e siê jako¶ zdecydowaæ? char / int
 int  clist_pop(clist_t *l);
 void clist_unpop(clist_t *l, int ch);
 void clist_move(clist_t *dst, clist_t *src);

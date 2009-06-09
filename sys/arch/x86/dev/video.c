@@ -99,7 +99,7 @@ void
 textscreen_init(struct hw_textscreen *ts)
 {
     ts->screen_buf = NULL;
-    ts->index_mode = VIDEO_INDEX_ABSOLUTE;
+    ts->origin_mode = VIDEO_ORIGIN_ABSOLUTE;
     ts->margin_up = 0;
     ts->margin_down = TS_HEIGHT-1;
     textscreen_clear(ts);
@@ -193,10 +193,10 @@ void textscreen_set_margins(struct hw_textscreen *screen, int up, int down)
     screen->margin_down = down;
 }
 
-void textscreen_set_index_mode(struct hw_textscreen *screen, int8_t mode)
+void textscreen_set_origin_mode(struct hw_textscreen *screen, int8_t mode)
 {
     screen = SELECT_SCREEN(screen);
-    screen->index_mode = mode;
+    screen->origin_mode = mode;
 }
 
 void

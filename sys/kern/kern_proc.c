@@ -128,6 +128,7 @@ proc_fork(proc_t *p, proc_t **child)
     vref(cp->p_rootdir);
     cp->p_session = p->p_session;
     cp->p_group = p->p_group;
+    cp->p_ctty = p->p_ctty;
     // Kopia IPC SystemV MSG
     // Reset clock
 

@@ -1,4 +1,5 @@
 PROG=sh
+PREFIX=${AOUT_PREFIX}
 SRCS=\
 	alias.c\
 	builtins.c\

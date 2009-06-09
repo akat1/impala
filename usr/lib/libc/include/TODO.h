@@ -24,7 +24,6 @@
 // `_optreset'
 // `_pipe'
 // `_readdir'
-// `_realloc'
 // `_select'
 // `_setenv'
 // `__setjmp'

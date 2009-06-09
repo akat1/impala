@@ -1,14 +1,15 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 int
 printf(const char *format, ...)
 {
     va_list ap;
-    VA_START(ap, format);
+    va_start(ap, format);
     char buf[1024];
     vsnprintf(buf, 1024, format, ap);
-    VA_END(ap);
+    va_end(ap);
     return fwrite(buf, strlen(buf), 1, stdout);
 }

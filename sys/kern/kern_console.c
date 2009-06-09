@@ -326,7 +326,9 @@ void
 vcons_data_out(vconsole_t *vc, const char *cc, int n)
 {
     enum {
-        CODE_ESC = 033
+        CODE_ESC = 0033,
+        CODE_CSI = 0233,
+        CODE_SS3 = 0217
     };
     int X = spltty();
     mutex_lock(&vc->mtx);
@@ -347,7 +349,7 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
             if (*c == CODE_ESC) {
                 vc->escape = TRUE;
                 vc_parser_reset(&vc->parser);
-            } else if(*c == 0x9b) {
+            } else if(*c == CODE_CSI) {
                 vc->escape = TRUE;
                 vc_parser_resetE(&vc->parser);
             } else {
@@ -371,7 +373,7 @@ vcons_put(vconsole_t *vc, char c)
             textscreen_putat(&vc->screen, cx, cy, c, vc->sattr);
         else
             textscreen_put(&vc->screen, c, vc->sattr);
-    } else if(c == NUL); //nie jestem pewien, czy dostawaæ tu taki znak
+    } else if(c == NUL || c == DEL); //nie jestem pewien, czy dostawaæ tu taki znak
     else if (c == NL || c == VT || c == FF) {
         if(ISSET(vc->mode, CONS_MODE_NEWLINE))
             textscreen_next_line(&vc->screen);
@@ -406,7 +408,8 @@ set_mode(vconsole_t *vc, int m)
             break;
         case 6: //origin avs
             SET(vc->mode, CONS_MODE_ORIGIN);
-            textscreen_set_index_mode(&vc->screen, VIDEO_INDEX_ABSOLUTE);
+            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_ABSOLUTE);
+            textscreen_update_cursor(&vc->screen, 0, 0);
             break;
         case 7: //autowrap
             SET(vc->mode, CONS_MODE_AWRAP);
@@ -429,7 +432,8 @@ reset_mode(vconsole_t *vc, int m)
             break;
         case 6: //origin rel
             UNSET(vc->mode, CONS_MODE_ORIGIN);
-            textscreen_set_index_mode(&vc->screen, VIDEO_INDEX_RELATIVE);
+            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_RELATIVE);
+            textscreen_update_cursor(&vc->screen, 0, 0);
             break;
         case 7: //no autowrap
             UNSET(vc->mode, CONS_MODE_AWRAP);
@@ -523,6 +527,8 @@ vcons_code(vconsole_t *vc, int c)
             break;
         case ESC_RESET:
             textscreen_clear(&vc->screen);
+            textscreen_set_margins(&vc->screen, 0, TS_HEIGHT-1);
+            vc->mode = CONS_MODE_AWRAP | CONS_MODE_NEWLINE;
             vc->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
             break;
         case ESC_DECALN:
@@ -678,7 +684,7 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = PARSER_ERROR;
                 break;
         }
-    } else if (vcprs->state == P_LONG) {
+    } else if (vcprs->state == P_LONG) {//warto pomy¶leæ nad mergem z P_LONG_ATTR
         if (c == '?') {
             nexts = P_LONG_ATTR;
         } else if ( '0' <= c && c <= '9') {
@@ -701,6 +707,9 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 break;
             case 'r':
                 ret = ESC_SCROLL;
+                break;
+            case 'm':
+                ret = ESC_ATTR;
                 break;
             case 'g':
                 ret = ESC_TABCLR;

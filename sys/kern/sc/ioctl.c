@@ -60,9 +60,7 @@ sc_ioctl(thread_t *t, syscall_result_t *r, sc_ioctl_args *args)
     if (file == NULL) {
         return EBADF;
     }
-    int x = spltty();
     int res = f_ioctl(file, args->cmd, args->arg);
-    splx(x);
     if(res < 0)
         return res;
     r->result = res;

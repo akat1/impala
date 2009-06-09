@@ -8,5 +8,5 @@ tcsetattr(int fd, int optact, const struct termios *termios_p)
     if(optact == TCSANOW)
         return ioctl(fd, TCSETS, termios_p);
     else
-        return -1;
+        return ioctl(fd, TCSETS, termios_p);///@todo zrobiæ normalnie
 }

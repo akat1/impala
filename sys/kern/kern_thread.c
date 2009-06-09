@@ -399,6 +399,7 @@ semaph_destroy(semaph_t *sem)
  */
 
 static void sleepq_waiting(sleepq_t *q, thread_t *t);
+static void sleepq_waiting_ms(sleepq_t *q, thread_t *t, uint ms);
 static void sleepq_insert(sleepq_t *q, thread_t *t);
 static void sleepq_remove(sleepq_t *q, thread_t *T);
 
@@ -416,6 +417,17 @@ sleepq_wait(sleepq_t *q)
     mutex_lock(&t->thr_mtx);
     sleepq_insert(q, t);
     sleepq_waiting(q, t);
+    sleepq_remove(q,t);
+    mutex_unlock(&t->thr_mtx);
+}
+
+void
+sleepq_wait_ms(sleepq_t *q, uint ms)
+{
+    thread_t *t = curthread;
+    mutex_lock(&t->thr_mtx);
+    sleepq_insert(q, t);
+    sleepq_waiting_ms(q, t, ms);
     sleepq_remove(q,t);
     mutex_unlock(&t->thr_mtx);
 }
@@ -442,7 +454,7 @@ sleepq_wakeup(sleepq_t *q)
     mutex_lock(&q->sq_mtx);
     thread_t *t = NULL;
     while ( (t = list_next(&q->sq_waiting, t)) ) {
-        TRACE_IN("q=%p t=%p [waking up]", q, t);
+//        TRACE_IN("q=%p t=%p [waking up]", q, t);
         KASSERT(t->thr_sleepq == q);
         t->thr_flags &= ~THREAD_SLEEPQ;
         sched_wakeup(t);
@@ -468,11 +480,23 @@ sleepq_waiting(sleepq_t *q, thread_t *t)
 {
     t->thr_flags |= THREAD_SLEEPQ;
     while (t->thr_flags & THREAD_SLEEPQ && !(t->thr_flags & THREAD_INTRPT)) {
-        TRACE_IN("q=%p t=%p [sleep]", q, t);
+        //TRACE_IN("q=%p t=%p [sleep]", q, t);
         sched_wait();
     }
-    TRACE_IN("q=%p t=%p [%s]", q, t,
-            (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
+    //TRACE_IN("q=%p t=%p [%s]", q, t,
+      //      (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
+}
+
+void
+sleepq_waiting_ms(sleepq_t *q, thread_t *t, uint ms)
+{
+    t->thr_flags |= THREAD_SLEEPQ;
+    while (t->thr_flags & THREAD_SLEEPQ && !(t->thr_flags & THREAD_INTRPT)) {
+        TRACE_IN("q=%p t=%p [sleep]", q, t);
+        msleep(ms); return;//todo;)
+    }
+    //TRACE_IN("q=%p t=%p [%s]", q, t,
+      //      (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
 }
 
 void

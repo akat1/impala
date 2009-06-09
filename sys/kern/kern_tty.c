@@ -135,12 +135,13 @@ tty_read(devd_t *d, uio_t *u, int flags)
     tty_t *tty = d->priv;
     size_t need = u->size;
     cc_t *cc = tty->t_conf.c_cc;
+    int lflag = tty->t_conf.c_lflag;
     
-    if(tty->t_conf.c_lflag & ICANON) {
+    if(ISSET(lflag, ICANON)) {
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)
                 return -EAGAIN;
-            //sleepq();
+            clist_wait(tty->t_inq);
         }
         size_t to_go = MIN(need, clist_size(tty->t_inq));
         int i=0;
@@ -153,15 +154,30 @@ tty_read(devd_t *d, uio_t *u, int flags)
         }
         uio_move(BUF, i, u);
         return i;
-    } else {
+    } else {    //not canonical
         int TIME = cc[VTIME], MIN = cc[VMIN];
+//        kprintf("MIN: %i\n", MIN);
         if (TIME == 0 && MIN == 0) {
         } else if(TIME > 0 && MIN == 0) {
         } else if(TIME > 0 && MIN > 0) {
         } else if(TIME == 0 && MIN > 0) {
-            
+            while(clist_size(tty->t_inq) < MIN) {
+                if(flags & O_NONBLOCK)
+                    return -EAGAIN;
+                clist_wait(tty->t_inq);
+            }
+            size_t to_go = MIN(need, clist_size(tty->t_inq));
+            int i=0;
+            char BUF[MAX_INPUT];
+            while(clist_size(tty->t_inq) > 0 && to_go-->0) {
+                int c = clist_pop(tty->t_inq);
+                BUF[i++] = c;
+            }
+            uio_move(BUF, i, u);
+            return i;
         }
     }
+    kprintf("AAA\n");
     return 0;
 }
 
@@ -194,14 +210,22 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
     switch(cmd) {
         case TCGETS: {
             termios_t *tconf = (termios_t*)param;
-            if((err = copyout(tconf, &tty->t_conf, sizeof(termios_t))))
+            int x = spltty();
+            if((err = copyout(tconf, &tty->t_conf, sizeof(termios_t)))) {
+                splx(x);
                 return err;
-            break;
+            }
+            splx(x);break;
         }
         case TCSETS: {
+            //kprintf("SET!\n\n");
+            int x = spltty();
             termios_t *tconf = (termios_t*)param;
-            if((err=copyin(&tty->t_conf, tconf, sizeof(termios_t))))
+            if((err=copyin(&tty->t_conf, tconf, sizeof(termios_t)))) {
+                splx(x);
                 return err;
+            }
+            splx(x);
             break;
         }
         case TIOCSPGRP:
@@ -253,6 +277,7 @@ tty_input(tty_t *tty, int ch)
             return;
         } else if(ch == cc[VEOF]) {
             clist_move(tty->t_inq, tty->t_clq);
+            clist_wakeup(tty->t_inq);
             return;
         }
         tcflag_t iflag = tty->t_conf.c_iflag;
@@ -271,10 +296,12 @@ tty_input(tty_t *tty, int ch)
         }
         if(ch == NL || ch == cc[VEOL]) {
             clist_move(tty->t_inq, tty->t_clq);
+            clist_wakeup(tty->t_inq);
         }
         
     } else { //bez ICANON
-        clist_push(tty->t_clq, ch);
+        clist_push(tty->t_inq, ch);
+        clist_wakeup(tty->t_inq);
     }
 }
 
@@ -300,11 +327,19 @@ tty_output(tty_t *tty, char c)
 void
 tty_erase(tty_t *tty)
 {
-    clist_unpush(tty->t_clq);
+    if(clist_size(tty->t_clq)==0)
+        return;
+    char c = clist_unpush(tty->t_clq);    
     if(tty->t_conf.c_lflag & ECHOE) {
-        tty_output(tty, '\b');
-        tty_output(tty, ' ');
-        tty_output(tty, '\b');
+        if(c == '\t') {
+            ///@todo poprawiæ to; powinno czasem usuwaæ mniej znaków...;)
+            for(int i=0; i<6; i++)
+                tty_output(tty, '\b');
+        } else {
+            tty_output(tty, '\b');
+            tty_output(tty, ' ');
+            tty_output(tty, '\b');
+        }
     }
 }
 
@@ -322,6 +357,18 @@ tty_kill(tty_t *tty)
 
 //=========== temp place for clist
 
+void
+clist_wait(clist_t *l)
+{
+    sleepq_wait(l->slpq);
+}
+
+void
+clist_wakeup(clist_t *l)
+{
+    sleepq_wakeup(l->slpq);
+}
+
 clist_t *
 clist_create(size_t size)
 {
@@ -337,21 +384,23 @@ clist_create(size_t size)
     l->buf_size = size;
     l->beg = l->size = 0;
     l->end = size - 1;
-    l->mtx = kmem_alloc(sizeof(mutex_t), KM_SLEEP);
-    if(!l->mtx) panic("Jeszcze nie zaimpl..");
-    mutex_init(l->mtx, MUTEX_NORMAL);
+    l->slpq = kmem_alloc(sizeof(sleepq_t), KM_SLEEP);
+    if(!l->slpq)
+        goto nomem;
+    sleepq_init(l->slpq);
     return l;
+
+nomem:
+    kmem_free(l->buf);
+    kmem_free(l);
+    return NULL;
 }
 
 void
 clist_flush(clist_t *l)
 {
-    int x = spltty();
-    mutex_lock(l->mtx);
     l->beg = l->size = 0;
     l->end = l->buf_size - 1;
-    mutex_unlock(l->mtx);
-    splx(x);
 }
 
 int
@@ -363,10 +412,7 @@ clist_size(clist_t *l)
 void
 clist_push(clist_t *l, int ch)
 {
-    int x = spltty();
-    mutex_lock(l->mtx);
     if(l->size == l->buf_size) {
-        mutex_unlock(l->mtx);
         return; ///@todo porz±dna obs³uga
     }
     if(l->beg == 0)
@@ -374,51 +420,38 @@ clist_push(clist_t *l, int ch)
     l->beg--;
     l->size++;
     l->buf[l->beg] = ch;
-    mutex_unlock(l->mtx);
-    splx(x);
 }
 
-void
+char
 clist_unpush(clist_t *l)
 {
-    int x = spltty();
-    mutex_lock(l->mtx);
     if(l->size == 0) {
-        mutex_unlock(l->mtx);
-        return;
+        return '\0';
     }
+    char ret = l->buf[l->beg];
     l->beg++;
     if(l->beg == l->buf_size)
         l->beg = 0;
     l->size--;
-    mutex_unlock(l->mtx);
-    splx(x);
+    return ret;
 }
 
 int clist_pop(clist_t *l)
 {
-    int x = spltty();
-    mutex_lock(l->mtx);
     if(l->size == 0) {
-        mutex_unlock(l->mtx);
-        return 0;
+        return -1;
     }
     l->size--;
     int res = l->buf[l->end];
     if(l->end == 0)
         l->end = l->buf_size;
     l->end--;
-    mutex_unlock(l->mtx);
-    splx(x);
     return res;
 }
 
 void
 clist_move(clist_t *dst, clist_t *src)
 {
-    int x = spltty();
-    mutex_lock(dst->mtx);
-    mutex_lock(src->mtx);
     while(src->size>0) {
         if(dst->size == dst->buf_size)
             break;
@@ -432,9 +465,5 @@ clist_move(clist_t *dst, clist_t *src)
             src->end = src->buf_size;
         src->end--;
     }
-
-    mutex_unlock(src->mtx);
-    mutex_unlock(dst->mtx);
-    splx(x);
 }
 
