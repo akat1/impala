@@ -42,23 +42,26 @@ enum {
 };
 
 #define _TS_BG(attr) (((attr) >> 4) & 0x7)
-#define _TS_FG(attr) ((attr) & 0xf)
+#define _TS_FG(attr) ((attr) & 0x7)
 #define _TS_BOLD(attr) (attr & 0x8)
+#define _TS_BLINK(attr) (attr & 0x80)
+#define _TS_NOT_COLOR(attr) (attr & 0x88)
 
-#define TS_BG(attr) (((attr) & 0xf) << 4)
+#define TS_BG(attr) (((attr) & 0x7) << 4)
 #define TS_FG(attr) ((attr) & 0x7)
 #define TS_BOLD(attr) (attr | 0x8)
+#define TS_BLINK(attr) (attr | 0x80)
 
 typedef struct hw_textscreen textscreen_t;
 struct hw_textscreen {
     uint16_t  screen_map[TS_SIZE];
     uint8_t   tab_stop[TS_SIZE];
     uint16_t *screen_buf;
-    int8_t    cursor_y;
-    int8_t    cursor_x;
-    int8_t    margin_up;
-    int8_t    margin_down;
-    int8_t    origin_mode;
+    int8_t    cursor_y;     ///< pozycja kursora, zawsze licz±c od pocz±tku ekr.
+    int8_t    cursor_x;     ///< pozycja kursora, zawsze licz±c od pocz±tku ekr.
+    int8_t    margin_up;    ///< górny margines ekranu
+    int8_t    margin_down;  ///< dolny margines ekranu (mo¿na po nim pisaæ)
+    int8_t    origin_mode;  ///< sposób traktowania przekazywanych wsp.
     uint16_t  cursor_hack;
 };
 

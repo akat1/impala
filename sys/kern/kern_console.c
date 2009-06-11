@@ -408,7 +408,7 @@ set_mode(vconsole_t *vc, int m)
             break;
         case 6: //origin avs
             SET(vc->mode, CONS_MODE_ORIGIN);
-            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_ABSOLUTE);
+            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_RELATIVE);
             textscreen_update_cursor(&vc->screen, 0, 0);
             break;
         case 7: //autowrap
@@ -432,7 +432,7 @@ reset_mode(vconsole_t *vc, int m)
             break;
         case 6: //origin rel
             UNSET(vc->mode, CONS_MODE_ORIGIN);
-            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_RELATIVE);
+            textscreen_set_origin_mode(&vc->screen, VIDEO_ORIGIN_ABSOLUTE);
             textscreen_update_cursor(&vc->screen, 0, 0);
             break;
         case 7: //no autowrap
@@ -454,13 +454,11 @@ vcons_code(vconsole_t *vc, int c)
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
         case ESC_SCROLL: {
-            int attr1 = vc->parser.attr[1];
-            if(attr0 == 0 && attr1 == 0)
-                ;//...
-            else {
-                textscreen_set_margins(&vc->screen, attr0, attr1);
-                textscreen_update_cursor(&vc->screen, 0, 0);
-            }
+            int attr1 = vc->parser.attr[1] - 1;
+            attr0--;
+            textscreen_set_margins(&vc->screen, attr0, attr1);
+            textscreen_update_cursor(&vc->screen, 0, 0);
+
             break;
         }
         case ESC_CURHOME:
@@ -564,10 +562,12 @@ vcons_code(vconsole_t *vc, int c)
                             vc->sattr = TS_BOLD(vc->sattr);
                             break;
                         case 5: // mruganie
+                            vc->sattr = TS_BLINK(vc->sattr);
                             break;
                         case 7:
                             vc->sattr = TS_BG(_TS_FG(vc->sattr)) |
-                                TS_FG(_TS_BG(vc->sattr));
+                                TS_FG(_TS_BG(vc->sattr)) |
+                                _TS_NOT_COLOR(vc->sattr);
                             break;
                     }
                 } else
