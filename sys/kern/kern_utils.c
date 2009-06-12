@@ -47,7 +47,7 @@ bool SYSTEM_DEBUG = FALSE;
 void
 panic(const char *msg, ...)
 {
-    irq_disable();
+    splhigh();
     va_list ap;
     VA_START(ap, msg);
     kprintf("\npanic: ");

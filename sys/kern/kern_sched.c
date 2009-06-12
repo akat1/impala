@@ -95,6 +95,7 @@ sched_action()
 void
 __sched_yield()
 {
+    KASSERT(CIPL == IPL_SOFTCLOCK);
     thread_t *n = select_next_thread(); // wymaganie: przerwanie zegarowe = ON
 //     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
     spinlock_unlock(&sprq); //nikt nam nie zablokuje, CIPL == IPL_SOFTCLOCK
@@ -347,7 +348,6 @@ sleepq_wait(sleepq_t *q)
     s = splbio();
     UNSET(curthread->thr_flags,THREAD_RUN);
     SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
-    spl0();
     __sched_yield();
     splx(s);
 }
