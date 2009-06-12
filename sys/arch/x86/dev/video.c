@@ -325,7 +325,7 @@ _set_cursor(struct hw_textscreen *screen, int8_t col,
 #endif
         screen->cursor_hack = screen->screen_buf[cur_pos];
         screen->screen_buf[cur_pos] = ((screen->cursor_hack)&0xff) |
-            (TS_FG(COLOR_WHITE) | TS_BG(COLOR_BRIGHTGRAY)) << 8;
+            (TS_BG(COLOR_BRIGHTGRAY) << 8);
     }
 }
 
@@ -356,6 +356,7 @@ textscreen_get_cursor(struct hw_textscreen *ts, int *cx, int *cy)
     *cy = ts->cursor_y - rely;
 }
 
+// W terminologii z VT100 UG. to jest scroll up.. mo¿na by i zmieniæ..
 void
 textscreen_scroll_down(struct hw_textscreen *ts)
 {
@@ -408,8 +409,8 @@ textscreen_clear(struct hw_textscreen *screen)
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
     for ( int i = 0 ; i < TS_SIZE ; i++ )
-        map[i] = COLOR_WHITE<<8;
-    screen->cursor_hack = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
     textscreen_update_cursor(screen, 0, 0);
 }
 
@@ -420,10 +421,10 @@ textscreen_clear_up(struct hw_textscreen *screen)
     uint16_t *map = SELECT_MAP(screen);
     int cur_pos = (screen->cursor_y) * TS_WIDTH +
         screen->cursor_x;
-    screen->cursor_hack = COLOR_WHITE<<8;
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
         
     for(int i = 0; i<=cur_pos; i++)
-        map[i] = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
 }
 
 void
@@ -433,10 +434,10 @@ textscreen_clear_down(struct hw_textscreen *screen)
     uint16_t *map = SELECT_MAP(screen);
     int cur_pos = (screen->cursor_y) * TS_WIDTH +
         screen->cursor_x;
-    screen->cursor_hack = COLOR_WHITE<<8;
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
         
     for(int i = cur_pos; i<TS_SIZE; i++)
-        map[i] = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
 }
 
 void
@@ -446,10 +447,10 @@ textscreen_clear_left(struct hw_textscreen *screen)
     uint16_t *map = SELECT_MAP(screen);
     int x = screen->cursor_x;
     int cur_beg = (screen->cursor_y) * TS_WIDTH;
-    screen->cursor_hack = COLOR_WHITE<<8;
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
         
     for(int i = cur_beg; i<=cur_beg+x; i++)
-        map[i] = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
 }
 
 void
@@ -460,10 +461,10 @@ textscreen_clear_right(struct hw_textscreen *screen)
     int x = screen->cursor_x;
     int cur_pos = (screen->cursor_y) * TS_WIDTH + x;
     int cur_end = (screen->cursor_y+1) * TS_WIDTH;
-    screen->cursor_hack = COLOR_WHITE<<8;
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
     
     for(int i = cur_pos; i< cur_end; i++)
-        map[i] = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
 }
 
 void
@@ -471,9 +472,9 @@ textscreen_clear_line(struct hw_textscreen *screen, int line)
 {
     screen = SELECT_SCREEN(screen);
     uint16_t *map = SELECT_MAP(screen);
-    screen->cursor_hack = COLOR_WHITE<<8;
+    screen->cursor_hack = COLOR_WHITE<<8 | ' ';
     for(int i = TS_WIDTH*line; i<TS_WIDTH*(line+1); i++)
-        map[i] = COLOR_WHITE<<8;
+        map[i] = COLOR_WHITE<<8 | ' ';
 }
 
 void

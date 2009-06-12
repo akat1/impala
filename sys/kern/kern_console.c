@@ -263,8 +263,6 @@ void cons_input_string(const char *str)
  */
 enum {
     ESC_RESET,      // c (@)
-    ESC_LWRAPON,    // [7h
-    ESC_LWRAPOFF,   // [71
     ESC_G0,         // ( (#)
     ESC_G1,         // ) (#)
     ESC_CURHOME,    // [{ROW=0};{COL=0}H (@)
@@ -277,11 +275,11 @@ enum {
     ESC_CURLOAD,    // [u (@)
     ESC_CURSAVEA,   // 7 (@)
     ESC_CURLOADA,   // 8 (@)
-    ESC_SCROLL,     // [{start};{end}r (#)
-    ESC_MOVED,      // D (#)
-    ESC_MOVEU,      // M (#)
-    ESC_TABSET,     // H (#)
-    ESC_TABCLR,     // [{attr}g (#)
+    ESC_SCROLL,     // [{start};{end}r (@)
+    ESC_MOVED,      // D (@)
+    ESC_MOVEU,      // M (@)
+    ESC_TABSET,     // H (@)
+    ESC_TABCLR,     // [{attr}g (@)
     ESC_DECALN,     // #8 (@)
     ESC_ERASEE,     // [K (@)
     ESC_ERASEB,     // [1K (@)
@@ -293,8 +291,11 @@ enum {
     ESC_PRINTL,     // [1i (#)
     ESC_LOGS,       // [4i (#)
     ESC_LOGE,       // [7i (#)
-    ESC_SETMODE,    // [{};{}h
-    ESC_RESMODE,    // [{};{}l
+    ESC_QUERY_DA,   // [{0}c (@)
+    ESC_QUERY_PARAM,// [{0-1}x (@)
+    ESC_QUERY_DSTAT,// [{}n    (@)
+    ESC_SETMODE,    // [{};{}h (@)
+    ESC_RESMODE,    // [{};{}l (@)
     ESC_NEXTL,      // E        (@)
     ESC_DEFKEY,     // [{key};"{string}"p
     ESC_ATTR,       // [{attr1};...;{attrn}m (@)
@@ -305,6 +306,8 @@ void
 vcons_input_char(vconsole_t *vc, int ch)
 {
     tty_input(vc->tty, ch);
+    if(ch == CR && ISSET(vc->mode, CONS_MODE_NEWLINE))
+        tty_input(vc->tty, NL);
 }
 
 void
@@ -334,7 +337,7 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
     mutex_lock(&vc->mtx);
     unsigned char *c = (unsigned char *)cc;
     for (; n; c++, n--) {
-        if (*c <= 032)
+        if (*c <= 032 || *c == DEL)
             vcons_put(vc, *c);  //te znaki mog± byæ nawet w ¶rodku escape
         else if (vc->escape) {
             int code = vc_parser_put(&vc->parser, *c);
@@ -373,7 +376,7 @@ vcons_put(vconsole_t *vc, char c)
             textscreen_putat(&vc->screen, cx, cy, c, vc->sattr);
         else
             textscreen_put(&vc->screen, c, vc->sattr);
-    } else if(c == NUL || c == DEL); //nie jestem pewien, czy dostawaæ tu taki znak
+    } else if(c == NUL || c == DEL);
     else if (c == NL || c == VT || c == FF) {
         if(ISSET(vc->mode, CONS_MODE_NEWLINE))
             textscreen_next_line(&vc->screen);
@@ -458,7 +461,6 @@ vcons_code(vconsole_t *vc, int c)
             attr0--;
             textscreen_set_margins(&vc->screen, attr0, attr1);
             textscreen_update_cursor(&vc->screen, 0, 0);
-
             break;
         }
         case ESC_CURHOME:
@@ -581,6 +583,24 @@ vcons_code(vconsole_t *vc, int c)
                 }
             }
             break;
+        case ESC_QUERY_DA:
+            vcons_input_string(vc, "\033[?1;0c"); //a mo¿e co¶ wiêkszego?
+            break;
+        case ESC_QUERY_PARAM: {
+            char buf[32];
+            snprintf(buf, 32, "\033[%i;1;1;112;112;1;0x", 2+attr0);
+            vcons_input_string(vc, buf); //a mo¿e co¶ wiêkszego?
+            break;
+        }
+        case ESC_QUERY_DSTAT:
+            if(attr0 == 5)
+                vcons_input_string(vc, "\033[3n"); //terminal OK
+            else if(attr0 == 6) {
+                char buf[16];
+                snprintf(buf, 16, "\033[%i;%iR", cy+1, cx+1);
+                vcons_input_string(vc, buf);
+            }
+            break;
     }
 }
 
@@ -653,6 +673,9 @@ vc_parser_put(vc_parser_t *vcprs, char c)
             case 'H':
                 ret = ESC_TABSET;
                 break;
+            case 'Z':
+                ret = ESC_QUERY_DA;
+                break;
             case '[':
                 nexts = P_LONG;
                 break;
@@ -701,6 +724,12 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 break;
             case 's':
                 ret = ESC_CURSAVE;
+                break;
+            case 'c':
+                ret = ESC_QUERY_DA;
+                break;
+            case 'x':
+                ret = ESC_QUERY_PARAM;
                 break;
             case 'u':
                 ret = ESC_CURLOAD;
@@ -760,6 +789,15 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 break;
             case 'h':
                 ret = ESC_SETMODE;
+                break;
+            case 'c':
+                ret = ESC_QUERY_DA;
+                break;
+            case 'x':
+                ret = ESC_QUERY_PARAM;
+                break;
+            case 'n':
+                ret = ESC_QUERY_DSTAT;
                 break;
             case 'l':
                 ret = ESC_RESMODE;
