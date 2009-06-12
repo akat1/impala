@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/vfs.h>
+#include <sys/kargs.h>
 #include <sys/kmem.h>
 #include <sys/string.h>
 #include <sys/utils.h>
@@ -59,20 +60,16 @@ vfs_init()
     list_create(&filesystems, offsetof(vfs_conf_t, L_confs), FALSE);
     list_create(&mounted_fs, offsetof(vfs_t, L_mountlist), FALSE);
     register_fss();
-    vfs_mountroot();
-    vnode_t *devdir;
-    if(!vfs_lookup(NULL, &devdir, "/dev", NULL, LKP_NORMAL))
-    {
-        vfs_mount("devfs", devdir, NULL);
-    } else kprintf("No /dev dir on root filesystem -> devfs not mounted\n");
-    
 }
 
 void
 register_fss()
 {
-    fs_mfs_init();
-    fs_devfs_init();
+
+    extern vfs_init_t *fstab[];
+    for (int i = 0; fstab[i] != NULL; i++) {
+        (fstab[i])();
+    }
 }
 
 void
@@ -83,7 +80,7 @@ vfs_register(const char *name, vfs_ops_t *ops)
     vfs_conf_t *vc = kmem_alloc( sizeof(*vc), KM_SLEEP);
     vc->name = name;
     vc->ops = ops;
-    list_insert_tail(&filesystems, vc); 
+    list_insert_tail(&filesystems, vc);
     mutex_unlock(&global_lock);
 }
 
@@ -126,12 +123,16 @@ vfs_create(vfs_t **fs, const char *fstype)
 void
 vfs_mountroot()
 {
+    const char *_rootdev = "fd0";
     // Na sztywno wpisane mfs:/dev/md0
-    DEBUGF("Trying to mount from mfs:/dev/md0");
     vnode_t *devn = NULL;
-    if (vnode_opendev("md0", 0/*O_RDWR*/, &devn) != 0) {
-        panic("cannot find root device");
+
+    karg_get_s("rootdev", &_rootdev);
+    DEBUGF("trying to mount from fatfs:/dev/%s", _rootdev);
+    if (vnode_opendev(_rootdev, 0/*O_RDWR*/, &devn) != 0) {
+        panic("cannot open root device %s", _rootdev);
     }
+
     vfs_t *fs;
     vfs_create(&fs, "mfs");
     if (!fs) {
@@ -157,7 +158,7 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     if(mpoint->v_type != VNODE_TYPE_DIR)
         return -ENOTDIR;
     vfs_create(&fs, name);
-    if (!fs) 
+    if (!fs)
         return -1;
     fs->vfs_mdev = dev;
     fs->vfs_mpoint = mpoint;

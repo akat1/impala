@@ -149,7 +149,7 @@ md_is_this(const memdisk_t *md, uintptr_t unit)
 
 /**
  * Tworzy "pamiêciowy" dysk twardy.
- * @param unit jednostka dysku (/dev/mdXX) 
+ * @param unit jednostka dysku (/dev/mdXX)
  * @param data obraz, gdy NULL to sam alokuje dane
  * @param size wielko¶c w bajtach.
  */
@@ -184,7 +184,7 @@ md_create(int unit, void *data, size_t size)
     list_insert_in_order(&memdisks, md, (list_less_f*) md_less);
     md->devd = devd_create(&md_devsw, md->unit, md);
     devfs_register(md->devd->name, md->devd, 0, 0, 0777);
-    md->owner = NULL;       
+    md->owner = NULL;
     return 0;
 }
 

@@ -8,12 +8,11 @@ all: build
 
 
 build-image: ${IMAGE_FILE} build
-	touch image/root/boot/impala
-	cp sys/kern/impala image/root/boot/
+	cp -f sys/kern/impala.gz image/root/boot/
 	cd image && ./mtools.sh
 
 run: build-image
-	cd image && qemu -m 32 -fda floppy.img
+	cd image && qemu -s -m 32 -fda floppy.img # bochs -f impala-usr-local.bochs && qemu -s -m 32 -fda floppy.img 
 
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp COPYRIGHT output
@@ -30,6 +29,9 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 
 commit:
 	svn commit
+
+debug: build
+	gdb -x tools/gdbscript sys/kern/impala
 
 burn: build-image
 	sudo dd if=image/floppy.img of=${FLOPPY_DEV}

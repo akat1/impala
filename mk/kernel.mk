@@ -24,11 +24,13 @@ tmp_rootimage.c:
 	cp _tmp_rootimage.c tmp_rootimage.c
 
 ${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS} ${LD_SCRIPT}
-	@echo " LD ${KERNEL}"
+	@echo " LD ${KERNEL} (compressed)"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
+	@${GZIP} -f -9 -k ${KERNEL}"
 
 
 ${_LIB_CLEAN}:
+	@echo " CLEAN"
 	@rm -f ${OBJS} ${KERNEL}
 
 .depend ${_KERNEL_DEPEND}: ${SRCS}

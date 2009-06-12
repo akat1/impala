@@ -54,7 +54,7 @@ enum {
     CONSOLE_ATTR= COLOR_WHITE
 };
 
-#define CONSOLE_ATTR_CODE "\0337\033[1;30;40m"
+#define CONSOLE_ATTR_CODE "\033[1;30;40m"
 
 enum {
     PARSER_MAX_ATTRS = 10
@@ -223,7 +223,7 @@ cons_output(int t, const char *c)
             char buf[SPRINTF_BUFSIZE];
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
-            str_cat(ptr, "\0338");
+            str_cat(ptr, "\033[0m");
             vcons_putstr(current_vcons, buf);
         } else {
             vcons_putstr(current_vcons, c);

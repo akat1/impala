@@ -152,6 +152,7 @@ tty_read(devd_t *d, uio_t *u, int flags)
             if(c == NL || c == cc[VEOF] || c == cc[VEOL]) //max 1 linia
                 break;
         }
+        u->resid = u->size;
         uio_move(BUF, i, u);
         return i;
     } else {    //not canonical
@@ -184,14 +185,16 @@ tty_read(devd_t *d, uio_t *u, int flags)
 int
 tty_write(devd_t *d, uio_t *u, int flags)
 {
+    size_t size = u->size;
     tty_t *tty = d->priv;
     if(u->size == 0)
         return 0;
     char *buf = kmem_alloc(u->size, KM_SLEEP);
     if(!buf)
         return -ENOMEM;
+    u->resid = u->size;
     uio_move(buf, u->size, u);
-    for(int i=0; i<u->size; i++)
+    for(int i=0; i<size; i++)
         tty_output(tty, buf[i]);
 
     kmem_free(buf);

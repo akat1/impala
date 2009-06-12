@@ -278,7 +278,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
 {
     int err = -ENOMSG;
     msqmsg_t *msg = NULL;
-    bool wait = flags & IPC_NOWAIT;
+    bool wait = ISUNSET(flags,IPC_NOWAIT);
     if (size < sizeof(long)) {
         return -EINVAL;
     }

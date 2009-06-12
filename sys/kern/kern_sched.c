@@ -35,6 +35,7 @@
 #include <sys/sched.h>
 #include <sys/clock.h>
 #include <sys/utils.h>
+#include <sys/kargs.h>
 #include <machine/interrupt.h>
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
@@ -52,11 +53,14 @@ static inline thread_t * select_next_thread(void);
 static void __sched_yield(void);
 static inline void _sched_wakeup(thread_t *n);
 
+
+
 /// Procedura inicjuj±ca program planisty.
 void
 sched_init()
 {
     sched_quantum = 5;
+    karg_get_i("sched_quantum", &sched_quantum);
     end_ticks = clock_ticks + sched_quantum;
     list_create(&run_queue, offsetof(thread_t, L_run_queue), TRUE);
     spinlock_init(&sprq);
@@ -126,6 +130,7 @@ do_switch()
 void
 sched_yield()
 {
+    if (CIPL > 0) return;
     do_switch();
 //    spinlock_lock(&sprq);
 //    __sched_yield();
@@ -195,9 +200,8 @@ sched_unlock_and_wait(mutex_t *m)
     __mutex_unlock(m);
 
     int old=splbio();
-    KASSERT(old==0);
     __sched_yield();
-    spl0();
+    splx(old);
 }
 
 /// Usypia dzia³aj±cy w±tek.
@@ -208,10 +212,9 @@ sched_wait()
 //    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
-    int old=splbio();
-    KASSERT(old==0);
+    int s = splbio();
     __sched_yield();
-    spl0();
+    splx(s);
 }
 
 static inline void
@@ -316,5 +319,59 @@ select_next_thread()
     panic("Impossible to get here! runq=%u, curthr: %p, p: %p",
         list_length(&run_queue), curthread, p);
     return 0;
+}
+
+
+
+/*============================================================================
+ * ¦pi±ce królewny... tzn kolejki.
+ */
+
+void
+sleepq_init(sleepq_t *q)
+{
+    LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
+}
+
+void
+sleepq_wait(sleepq_t *q)
+{
+    int s = splhigh();
+    list_insert_tail(&q->sq_waiting, curthread);
+    curthread->thr_sleepq = q;
+    UNSET(curthread->thr_flags,THREAD_INTRPT);
+    SET(curthread->thr_flags, THREAD_SLEEPQ);
+    spinlock_lock(&sprq);
+    splx(s);
+    s = splbio();
+    UNSET(curthread->thr_flags,THREAD_RUN);
+    SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
+    spl0();
+    __sched_yield();
+    splx(s);
+}
+
+void
+sleepq_wakeup(sleepq_t *q)
+{
+    int s = splhigh();
+    thread_t *t = NULL;
+    while ( (t = list_extract_first(&q->sq_waiting)) ) {
+        UNSET(t->thr_flags,THREAD_SLEEPQ);
+        _sched_wakeup(t);
+    }
+    splx(s);
+}
+
+void
+sleepq_intrpt(thread_t *t)
+{
+}
+
+void
+sleepq_destroy(sleepq_t *q)
+{
+    sleepq_wakeup(q);
+    mutex_destroy(&q->sq_mtx);
 }
 

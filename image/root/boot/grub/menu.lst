@@ -1,10 +1,12 @@
 default 0
-color yellow/blue black/light-gray
-
-title ImpalaOS (/boot/impala)
+color yellow/green black/light-gray
+timeout 5
+title Impala (with debug messages) (/boot/impala.gz)
 	root (fd0)
-	kernel /boot/impala
+	kernel /boot/impala.gz debug 
 
-title ImpalaOS (/boot/impala.old)
+title Impala (/boot/impala.gz)
     root (fd0)
-    kernel /boot/impala.old
+    kernel /boot/impala.gz 
+
+

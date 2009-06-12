@@ -42,6 +42,7 @@
 struct iobuf {
     void        *addr;
     int          oper;
+    int          errno;
     blkno_t      blkno;
     size_t       bcount;
     size_t       size;
@@ -68,8 +69,13 @@ enum BUF_FLAGS {
     BIO_VALID     = 0x00400
 };
 
-void bio_init(void);
+typedef struct bio_queue bio_queue_t;
+struct bio_queue {
+    mutex_t     bq_mtx;
+    list_t      bq_queue;
+};
 
+void bio_init(void);
 iobuf_t *bio_getblk(devd_t *d, blkno_t n);
 iobuf_t *bio_read(devd_t *d, blkno_t n);
 void bio_write(iobuf_t *bp);
@@ -78,8 +84,18 @@ void bio_release(iobuf_t *bp);
 void bio_wait(iobuf_t *bp);
 void bio_wakeup(iobuf_t *bp);
 void bio_done(iobuf_t *bp);
+void bio_error(iobuf_t *bp, int errno);
+
+void bioq_init(bio_queue_t *q);
+void bioq_enqueue(bio_queue_t *q, iobuf_t *bp);
+iobuf_t *bioq_dequeue(bio_queue_t *q);
+void bioq_lock(bio_queue_t *q);
+void bioq_unlock(bio_queue_t *q);
+
 
 ssize_t physio(devd_t *dev, uio_t *uio, int bioflags);
+
+
 #endif
 #endif
 

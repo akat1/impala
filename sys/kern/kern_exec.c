@@ -116,7 +116,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     einfo.envp = envp;
     einfo.header = header;
     einfo.header_size = len;
-    image_exec(p, &einfo);
+    if ( (err = image_exec(p, &einfo)) ) goto fail;
     vrele(vp);
     return 0;
 fail:
@@ -152,7 +152,7 @@ image_exec(proc_t *p, exec_info_t *einfo)
 int
 aout_exec(proc_t *p, exec_info_t *einfo)
 {
-    TRACE_IN("p=%p einfo=%p", p, einfo);
+//     TRACE_IN("p=%p einfo=%p", p, einfo);
     if (einfo->image_size < PAGE_SIZE) return -EINVAL;
     exec_t *exec = einfo->header;
     if (N_BADMAG(*exec)) return -EINVAL;
@@ -179,13 +179,13 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     vm_segmap(vm_space->seg_text, _TEXT, exec->a_text, &TEXT);
     vm_segmap(vm_space->seg_data, _DATA, exec->a_data + exec->a_bss, &DATA);
     mem_zero(DATA, exec->a_data + exec->a_bss);
-
+    DEBUGF("reading data");
     vnode_rdwr(UIO_READ, einfo->vp, TEXT, exec->a_text, N_TXTOFF(*exec));
     vnode_rdwr(UIO_READ, einfo->vp, DATA, exec->a_data, N_DATAOFF(*exec));
 
     thread_t *t = proc_create_thread(p, exec->a_entry);
-    vm_space_create_stack(vm_space, &t->thr_stack, THREAD_STACK_SIZE);
-    t->thr_stack_size = THREAD_STACK_SIZE;
+    vm_space_create_stack(vm_space, &t->thr_stack, thread_stack_size);
+    t->thr_stack_size = thread_stack_size;
     thread_prepare(t);
 
     sched_insert(t);

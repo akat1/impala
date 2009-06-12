@@ -10,7 +10,7 @@ _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\
 	-Wmissing-prototypes ${_INCDIR} -nostdlib -D__Impala__
 _K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
-    -D__KERNEL -Werror -nostdinc
+    -D__KERNEL -Werror -nostdinc -g
 _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_SRCROOT}/usr/lib/libc/include 
 _U_LDFLAGS=-Wl,-e,__start -L${IMPALA_USR}/lib/libc ${IMPALA_USR}/lib/crt/crt0.o -lgcc -lc
 _CFLAGS?= ${_K_FLAGS_} ${CFLAGS}
@@ -19,6 +19,7 @@ CC= ${PREFIX}gcc
 AS= ${PREFIX}as
 AS_FLAGS= -32
 AR=${PREFIX}ar
+GZIP=gzip -k -9
 STRIP=${PREFIX}strip
 AR=${PREFIX}ar
 RANLIB=${PREFIX}ranlib

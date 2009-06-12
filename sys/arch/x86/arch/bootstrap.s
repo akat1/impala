@@ -54,8 +54,9 @@
 
 .equ ALIGN,    1<<0
 .equ MEMINFO,  1<<1
+.equ CMDLINE,  1<<2
 .equ ADDRESS,  1<<16
-.equ FLAGS,    ALIGN
+.equ FLAGS,    ALIGN|CMDLINE
 .equ MAGIC,    0x1BADB002
 .equ CHECKSUM, -(MAGIC + FLAGS)
 
@@ -78,6 +79,8 @@ multiboot_header:
 .long CHECKSUM
 
 
+cmdline:    .long 0
+
 .align 4096
 boot_pdir: .space 4096,0
 boot_ptable0: .space 4096,0
@@ -88,7 +91,10 @@ boot_ptable1: .space 4096,0
 
 kernel_entrypoint:
     movl $(stack + STACKSIZE-4), %esp
+    movl 16(%ebx), %eax
+    movl %eax, cmdline
     call set_vmspace
+    pushl cmdline
     call kernel_startup
 .L1:
     movl $0xb8004, %edx

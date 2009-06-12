@@ -1,9 +1,13 @@
 LIBRARY= libfs
-CFLAGS=-D__KERNEL ${_K_FLAGS}
+CFLAGS=${_K_FLAGS}
 
 SRCS=\
-	devfs/devfs.c\
-	mfs/mfs.c\
+    fstable.c\
+    devfs/devfs.c\
+    mfs/mfs.c\
+    fatfs/fat_node.c\
+    fatfs/fat_main.c\
+    fatfs/fat_dirent.c
 
 
 include ${IMPALA_MK}/lib.mk

@@ -29,7 +29,7 @@ vt100-color-org|vt100-co-org|vt100 emulator with ANSI colors (Original termcap e
 
 # Ca³kowita definicja vt100-co, mo¿na wkleiæ w ¶rodowisko.
 
-vt100-color|vt100-co|vt100 emulator with ANSI colors:\
+vt100-8025|vt100 emulator with ANSI colors 80x25:\
         :pa#64:Co#8:AF=\E[3%dm:AB=\E[4%dm:op=\E[39;49m\E[m:\
         :do=2\E[B:co#80:li#24:cl=50\E[H\E[J:sf=2*\ED:\
         :le=^H:bs:am:cm=5\E[%i%d;%dH:nd=2\E[C:up=2\E[A:\

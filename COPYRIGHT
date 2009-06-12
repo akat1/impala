@@ -28,7 +28,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
- * Program /bin/sh (ASH) jest udostêpniony na licencji:
+ * Program Almquist Shell (usr/bin/sh) zosta³ skopiowany z FreeBSD 7.1
+ * Jest udostêpniony na licencji:
 
 Copyright (c) 1992-2009
     The FreeBSD Project. All rights reserved.

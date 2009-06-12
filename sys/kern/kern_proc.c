@@ -90,8 +90,6 @@ proc_init(void)
     proc0.vm_space = &vm_kspace;
     curthread->vm_space = proc0.vm_space;
     mutex_init(&proc0.p_mtx, MUTEX_NORMAL);
-    initproc = proc_create();
-    initproc->p_rootdir = rootvnode;
 }
 
 void

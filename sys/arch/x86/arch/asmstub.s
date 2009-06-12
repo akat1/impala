@@ -64,17 +64,21 @@
 .equ \name, \num*4
 .endm
 
-.equ KSTACKSIZE, 0x16000
+.equ KSTACKSIZE, 0x30000
 .comm kstack, KSTACKSIZE, 32
+
 
 offset32    CTX_ESP,    0
 offset32    CTX_EBP,    1
 offset32    CTX_EFLAGS, 2
 offset32    CTX_CR3,    3
 
+cmdline: .long 0
 
 kernel_startup:
+    movl 4(%esp), %eax
     movl $(kstack + KSTACKSIZE-4), %esp
+    pushl %eax
     call init_x86
     call kmain
     jmp .

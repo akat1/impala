@@ -40,6 +40,7 @@
 /// Wej¶ciowa procedura dla obs³ugi w±tku.
 static void __kthr(void);
 static void setup_vmspace(thread_t *arg);
+
 /**
  * Tworzy nowy w±tek po stronie j±dra.
  * @param kthr referencja do deskryptora w±tku.

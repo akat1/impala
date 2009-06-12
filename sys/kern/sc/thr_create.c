@@ -52,7 +52,7 @@ sc_thr_create(thread_t *t, syscall_result_t *r, thr_create_args_t *args)
     if (ct == NULL) return -EINVAL;
     if (args->stack_size == 0 && args->stack_addr != 0) return -EINVAL;
 //    if (args->stack_addr == 0) {
-        if (args->stack_size == 0) args->stack_size = THREAD_STACK_SIZE;
+        if (args->stack_size == 0) args->stack_size = thread_stack_size;
         vm_space_create_stack(ct->vm_space, &ct->thr_stack, args->stack_size);
 //    } else {
 //        ct->thr_stack = (void*)args->stack_addr;

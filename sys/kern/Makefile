@@ -9,6 +9,7 @@ LIBDEPS=\
 	../fs/libfs.a\
 
 SRCS=\
+	kern_args.c\
 	kern_clock.c\
 	kern_bio.c\
 	kern_console.c\
@@ -34,7 +35,7 @@ SRCS=\
 	vm_segment.c\
 	vm_space.c\
 	vm_trap.c\
-	tmp_rootimage.c\
+    tmp_rootimage.c\
 	${SC_SRCS}
 
 include Makefile.sc

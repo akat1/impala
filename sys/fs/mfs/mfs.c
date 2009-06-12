@@ -44,7 +44,7 @@
 #include <sys/uio.h>
 #include <fs/mfs/mfs_internal.h>
 
-
+vfs_init_t           mfs_init;
 static vfs_mount_t   mfs_mount;
 static vfs_unmount_t mfs_unmount;
 static vfs_sync_t    mfs_sync;
@@ -54,7 +54,7 @@ static vfs_ops_t mfs_ops = {
     .vfs_mount = mfs_mount,
     .vfs_unmount = mfs_unmount,
     .vfs_getroot = mfs_getroot,
-    .vfs_sync = mfs_sync    
+    .vfs_sync = mfs_sync
 };
 
 static vnode_open_t mfs_open;
@@ -168,6 +168,7 @@ mfs_read(vnode_t *vn, uio_t *u, int flags)
     if(node->size < start)
         return -1;
     size_t size = MIN(node->size-start, u->size);
+    u->resid = u->size;
     uio_move(node->data+start, size, u);
     return size;
 }
@@ -341,7 +342,7 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
         en = en->parent;
         _get_vnode(en, vpp, vn->v_vfs);
         return 0;
-    }        
+    }
     en = en->child;
     while(en) {
         if(!pc_cmp(path, en->name))
@@ -387,7 +388,7 @@ struct mfs_data {
 };
 
 void
-fs_mfs_init()
+mfs_init()
 {
     vfs_register("mfs", &mfs_ops);
 }
@@ -405,9 +406,9 @@ mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)
     mfs_node_t *nptr[ncount];
     for(int i=0; i<ncount; i++)
         nptr[i] = _alloc_node();
-    
+
     mfs_data_entry_t *data = (mfs_data_entry_t*)(image + sizeof(mfs_header_t));
-    for(int i=0; i<ncount; i++) {    
+    for(int i=0; i<ncount; i++) {
         nptr[i]->name = str_dup(data->name);
         nptr[i]->size = data->size;
         nptr[i]->type = data->type;
@@ -436,14 +437,11 @@ mfs_mount(vfs_t *fs)
         DEBUGF("cannot open dev");
         return -1;
     }
-    kprintf("Dev: %s\n", dv->v_dev->name);
-    bp = bio_read(fs->vfs_mdev, 0);
+    bp = bio_read(fs->vfs_mdev, 2240);
     if (!bp) {
-        DEBUGF("cannot start I/O operation");
+        DEBUGF("I/O error");
         return -1;
     }
-//    char *p = bp->addr;
-//    DEBUGF("readed %s", p);
     mfs_data_t *mfs = kmem_zalloc(sizeof(mfs_data_t), KM_SLEEP);
     mfs->rootvnode = NULL;
     mfs->rootinode = NULL;

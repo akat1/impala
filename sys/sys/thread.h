@@ -113,7 +113,7 @@ enum THREAD_FLAGS {
     THREAD_SYSCALL   = 1 << 3, //< jest w obs³udze wywo³ania
     THREAD_SLEEP     = 1 << 4, //< u¶piony
     THREAD_INTRPT    = 1 << 5, //< przerwano spanie
-    THREAD_INRUNQ    = 1 << 6, //< 
+    THREAD_INRUNQ    = 1 << 6, //<
     THREAD_USER      = 1 << 7, //< w±tek u¿ytkownika
     THREAD_SLEEPQ    = 1 << 8  //< u¶piony przez sleepq
 };
@@ -210,6 +210,9 @@ static inline void
 spinlock_destroy(spinlock_t *sp)
 {
 }
+
+extern size_t thread_stack_size;
+extern size_t thread_kstack_size;
 
 #else
 tid_t thr_create(void *entry, void *stackaddr, size_t stacksize,  void *arg);

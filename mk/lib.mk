@@ -15,6 +15,7 @@ ${LIBRARY}.a: ${OBJS}
 	@${RANLIB} ${LIBRARY}.a
 
 ${_LIB_CLEAN}:
+	@echo " CLEAN"
 	@rm -f ${OBJS} ${LIBRARY}.a
 
 .depend ${_LIB_DEPEND}: ${SRCS}

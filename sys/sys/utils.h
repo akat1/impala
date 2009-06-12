@@ -44,6 +44,12 @@ extern bool SYSTEM_DEBUG;
 
 #define MIN(a,b) ( (a) < (b) )? (a) : (b)
 #define MAX(a,b) ( (a) < (b) )? (b) : (a)
+#define _INRNG(x,a,b,R1,R2) ((a) R1 (x)) && ((x) R2 (b))
+#define _INRNG_L(x,a,l,R1,R2) _INRNG(x,a,a+l,R1,R2)
+#define INRNG_OOL(x,a,l) _INRNG_L(x,a,l,<,<)
+#define INRNG_OCL(x,a,l) _INRNG_L(x,a,l,<,<=)
+#define INRNG_COL(x,a,l) _INRNG_L(x,a,l,<=,<)
+#define INRNG_CCL(x,a,l) _INRNG_L(x,a,l,<=,<=)
 
 void kprintf(const char *fmt, ...);
 void vkprintf(const char *fmt, va_list ap);
@@ -57,18 +63,28 @@ ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
 #define TRACE_IN(fmt, args...)\
     do { \
         if (!SYSTEM_DEBUG) break;\
-        kprintf("@ %s: ", __func__);\
+        kprintf("%s(", __func__);\
         kprintf(fmt, ## args);\
-        kprintf("\n");\
+        kprintf(")\n");\
         for (unsigned int xxx = 0; xxx < 0xfffff; xxx++);\
     } while (0);
 
 #define DEBUGF(fmt, a...) do {\
-    kprintf("%s:%i: " fmt "\n", __FILE__, __LINE__, ## a );\
+    if (!SYSTEM_DEBUG) break;\
+    kprintf("%s: " fmt "\n", __LS(__FILE__), ## a );\
     } while (0)
 
 #define TRACE_IN0() TRACE_IN("");
 
+static inline const char *
+__LS(const char *file)
+{
+    const char *last;
+    for (last = file; *file; file++) {
+        if (*file == '/') last = file+1;
+    }
+    return last;
+}
 
 #endif
 #endif

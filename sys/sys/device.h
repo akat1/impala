@@ -87,6 +87,7 @@ enum {
 devd_t *devd_create(devsw_t *dsw, int unit, void *pr);
 void devd_destroy(devd_t *dev);
 void dev_init(void);
+void dev_initdevs(void);
 devd_t *devd_find(const char *name);
 
 int devd_open(devd_t *d, int flags);

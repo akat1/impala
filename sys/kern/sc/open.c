@@ -78,8 +78,8 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     if((error = vm_validate_string(arg->fname, 256)))
         return error;
     KASSERT(proc->p_rootdir!=NULL);
-//    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, arg->flags,
-//             arg->mode);
+    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, arg->flags,
+             arg->mode);
     error = vfs_lookup(proc->p_curdir, &node, arg->fname, p, LKP_NORMAL);
     if(error) {
         if(!(flags & O_CREAT))

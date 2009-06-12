@@ -30,46 +30,35 @@
  * $Id$
  */
 
-#ifndef __MACHINE_BUS_ISA_H
-#define __MACHINE_BUS_ISA_H
+#ifndef __MACHINE_CMOS_H
+#define __MACHINE_CMOS_H
+
+enum {
+    CMOS_IO = 0x70
+};
+
+enum {
+    CMOS_REG_FDC    = 0x10
+};
+
 #ifdef __KERNEL
 
-typedef struct bus_isa_dma bus_isa_dma_t;
-typedef struct bus_isa_pnp bus_isa_pnp_t;
+inline static uint8_t
+cmos_rdreg(int re)
+{
+    io_out8(CMOS_IO, re);
+    return io_in8(CMOS_IO+1);
+}
 
-enum {
-    ISA_DMA_8,
-    ISA_DMA_16
-};
-
-enum {
-    ISA_DMA_FDC = 0x2
-};
-
-enum {
-    ISA_DMA_SINGLE = 1 << 6,
-    ISA_DMA_AUTO = 1 << 4,
-    ISA_DMA_READ = 1 << 2,
-    ISA_DMA_WRITE = 2 << 2,
-    ISA_DMA_INVLD = 3 << 2,
-};
-
-void bus_isa_init(void);
-
-bus_isa_dma_t *bus_isa_dma_alloc(int chan);
-void bus_isa_dma_free(bus_isa_dma_t *ch);
-int bus_isa_dma_prepare(bus_isa_dma_t *d, int cmd, void *buf, size_t size);
-void bus_isa_dma_finish(bus_isa_dma_t *d);
-
-struct bus_isa_pnp {
-    uint32_t    name;
-    uint32_t    rev;
-    uint32_t    serial;
-    int irq;
-    int io;
-};
-
-int bus_isa_probe(bus_isa_pnp_t *);
+inline static void
+cmos_wrreg(int re, uint8_t v)
+{
+    io_out8(CMOS_IO, re);
+    io_out8(CMOS_IO+1, v);
+}
 
 #endif
+
 #endif
+
+

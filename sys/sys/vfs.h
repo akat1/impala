@@ -63,6 +63,7 @@ extern vnode_t *rootvnode;
 #define VFS_SYNC(fs) (fs)->vfs_ops->vfs_sync((fs))
 #define VFS_GETROOT(fs) (fs)->vfs_ops->vfs_getroot((fs))
 
+typedef void vfs_init_t(void);
 typedef int vfs_mount_t(vfs_t *fs);
 typedef int vfs_unmount_t(vfs_t *fs);
 typedef vnode_t * vfs_getroot_t(vfs_t *fs);

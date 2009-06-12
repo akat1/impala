@@ -41,6 +41,7 @@
 #include <sys/string.h>
 #include <sys/uio.h>
 
+vfs_init_t           devfs_init;
 static vfs_mount_t   devfs_mount;
 static vfs_unmount_t devfs_unmount;
 static vfs_sync_t    devfs_sync;
@@ -110,13 +111,13 @@ _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
             res->v_type = VNODE_TYPE_DIR;
             res->v_dev = NULL;
             res->v_private = node;
-            node->i_dirvnode = res;            
+            node->i_dirvnode = res;
         } else vref(node->i_dirvnode);
         *vpp = node->i_dirvnode;
         return 0;
     }
     //ka¿dy dev w³asny vnode.. my¶lê, ¿e to siê przyda, jak nie to zmiana
-    
+
     vnode_t *res = vnode_alloc();
     if(!res)
         return -ENOMEM;
@@ -127,7 +128,7 @@ _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
     res->v_dev = node->i_dev;
     res->v_private = node;
     *vpp = res;
-    return 0;    
+    return 0;
 }
 
 int
@@ -362,17 +363,10 @@ devfs_node_t *devfs_rootinode = NULL;
 
 //powiadomienie vfs o istnieniu tego fs
 void
-fs_devfs_init()
-{
-    vfs_register("devfs", &devfs_ops);
-}
-
-//devfs przyda siê ju¿ w trakcie inicjalizacji vfs, wiêc wypada³o by
-//zainicjalizowaæ go wcze¶niej
-
-void
 devfs_init()
 {
+    vfs_register("devfs", &devfs_ops);
+
     devfs_node_t *n = kmem_zalloc(sizeof(devfs_node_t), KM_SLEEP);
     str_cpy(n->i_name, "<devfs root>"); // ciekawe, czy da radê jako¶ to zobaczyæ...
     n->i_type = _INODE_TYPE_DIR;

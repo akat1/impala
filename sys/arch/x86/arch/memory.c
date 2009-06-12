@@ -475,6 +475,7 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
         }
     }
     pt->table[pte] = 0;
+    tlb_flush(va);
     return TRUE;
 }
 

@@ -36,7 +36,6 @@
 #include <sys/errno.h>
 #include <sys/utils.h>
 #include <sys/string.h>
-#include <dev/md/md.h>
 
 static list_t devs;
 static kmem_cache_t *devd_cache;
@@ -53,13 +52,22 @@ dev_init()
 {
     list_create(&devs, offsetof(devd_t, L_devs), FALSE);
     devd_cache = kmem_cache_create("devs", sizeof(devd_t), NULL, NULL);
-    md_init();
-    extern unsigned char image[];
-    extern unsigned int image_size;
-    md_create(0, &image, image_size);
 }
 
+
+void
+dev_initdevs()
+{
+    extern d_init_t *devtab[];
+    for (int i = 0; devtab[i] != NULL; i++) {
+        (devtab[i])();
+    }
+}
+
+
 static bool find_this_dev(const devd_t *d, const char *name);
+
+#include <fs/devfs/devfs.h>
 
 devd_t *
 devd_create(devsw_t *dsw, int unit, void *priv)
@@ -73,6 +81,7 @@ devd_create(devsw_t *dsw, int unit, void *priv)
     dev->devsw = dsw;
     dev->priv = priv;
     list_insert_tail(&devs, dev);
+    devfs_register(dev->name, dev, 0, 0, 0777);
     return dev;
 }
 
@@ -84,7 +93,6 @@ devd_printf(devd_t *d, const char *fmt, ...)
     VA_START(ap, fmt);
     vsnprintf(buf, SPRINTF_BUFSIZE, fmt, ap);
     VA_END(ap);
-    kprintf("%s: %s\n", d->name, buf);
 }
 
 
@@ -99,7 +107,7 @@ devd_find(const char *name)
 int
 devd_open(devd_t *d, int flags)
 {
-    return d->devsw->d_open(d, flags); 
+    return d->devsw->d_open(d, flags);
 }
 
 int

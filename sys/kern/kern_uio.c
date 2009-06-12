@@ -35,6 +35,10 @@
 #include <sys/string.h>
 #include <sys/utils.h>
 
+// #define USE_OLD_UIOMOVE
+
+#ifdef USE_OLD_UIOMOVE
+
 static int kernel_copy(char *buf, uio_t *uio, size_t len);
 
 int
@@ -61,6 +65,8 @@ kernel_copy(char *buf, uio_t *uio, size_t len)
         } else {
             clen = len;
         }
+        DEBUGF("xfer: %p+%u %u", uio->iovs[i].iov_base, clen,
+            uio->oper);
         if (uio->oper == UIO_WRITE) {
             mem_cpy(buf, uio->iovs[i].iov_base, clen);
         } else {
@@ -71,3 +77,44 @@ kernel_copy(char *buf, uio_t *uio, size_t len)
     return 0;
 }
 
+#else
+
+int
+uio_move(void *_buf, size_t len, uio_t *uio)
+{
+    int e;
+    char *buf = _buf;
+    KASSERT(len <= uio->size);
+    while (uio->resid && len) {
+        if (uio->iovs->iov_len == 0) {
+            uio->iovs++;
+            uio->iovcnt--;
+        }
+        iovec_t *iov = uio->iovs;
+//         DEBUGF("xfer: iov(%p+%p)", iov->iov_base, iov->iov_len);
+        size_t xfer = MIN(iov->iov_len, len);
+//         DEBUGF("xfer: base=%p xfer=%u len=%u resid=%u", iov->iov_base, xfer,len,uio->resid);
+        if (uio->space == UIO_SYSSPACE || 1) {
+            if (uio->oper == UIO_WRITE) {
+                mem_cpy(buf, iov->iov_base, xfer);
+            } else {
+                mem_cpy(iov->iov_base, buf, xfer);
+            }
+        } else {
+            panic("e");
+            if (uio->oper == UIO_READ) {
+                e = copyout(iov->iov_base, buf, xfer);
+            } else {
+                e = copyin(buf, iov->iov_base, xfer);
+            }
+            if (e) return -1;
+        }
+        iov->iov_base += xfer;
+        iov->iov_len -= xfer;
+        uio->resid -= xfer;
+        uio->offset += xfer;
+        len -= xfer;
+    }
+    return 0;
+}
+#endif

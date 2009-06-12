@@ -35,8 +35,11 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/kmem.h>
+#include <sys/kargs.h>
 #include <sys/string.h>
 #include <sys/vm.h>
+#include <machine/interrupt.h>
+
 thread_t * volatile curthread;
 thread_t *thread_idle;
 
@@ -46,7 +49,8 @@ static kmem_cache_t *thread_cache;
 
 static void thread_ctor(void *_thr);
 static void thread_dtor(void *_thr);
-
+size_t thread_stack_size = THREAD_STACK_SIZE;
+size_t thread_kstack_size = THREAD_KSTACK_SIZE;
 
 /*=============================================================================
  * Obsluga watkow.
@@ -77,6 +81,8 @@ thread_init()
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN;
     curthread->vm_space = &vm_kspace;
+    karg_get_i("stacksize", (int*)&thread_stack_size);
+    karg_get_i("kstacksize", (int*)&thread_kstack_size);
 }
 
 /**
@@ -102,9 +108,8 @@ thread_create(int type, addr_t entry, addr_t arg)
         t->thr_sleepq = NULL;
         list_insert_tail(&threads_list, t);
 
-        vm_space_create_stack(&vm_kspace, &t->thr_kstack,
-                    THREAD_KSTACK_SIZE);
-        t->thr_kstack_size = THREAD_KSTACK_SIZE;
+        vm_space_create_stack(&vm_kspace, &t->thr_kstack, thread_kstack_size);
+        t->thr_kstack_size = thread_kstack_size;
         thread_context_init(t, &t->thr_context);
         return t;
     } else {
@@ -392,135 +397,4 @@ void
 semaph_destroy(semaph_t *sem)
 {
     mutex_destroy(&sem->mtx);
-}
-
-/*============================================================================
- * ¦pi±ce królew.. tzn kolejki.
- */
-
-static void sleepq_waiting(sleepq_t *q, thread_t *t);
-static void sleepq_waiting_ms(sleepq_t *q, thread_t *t, uint ms);
-static void sleepq_insert(sleepq_t *q, thread_t *t);
-static void sleepq_remove(sleepq_t *q, thread_t *T);
-
-void
-sleepq_init(sleepq_t *q)
-{
-    mutex_init(&q->sq_mtx, MUTEX_NORMAL);
-    LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
-}
-
-void
-sleepq_wait(sleepq_t *q)
-{
-    thread_t *t = curthread;
-    mutex_lock(&t->thr_mtx);
-    sleepq_insert(q, t);
-    sleepq_waiting(q, t);
-    sleepq_remove(q,t);
-    mutex_unlock(&t->thr_mtx);
-}
-
-void
-sleepq_wait_ms(sleepq_t *q, uint ms)
-{
-    thread_t *t = curthread;
-    mutex_lock(&t->thr_mtx);
-    sleepq_insert(q, t);
-    sleepq_waiting_ms(q, t, ms);
-    sleepq_remove(q,t);
-    mutex_unlock(&t->thr_mtx);
-}
-
-int
-sleepq_wait_i(sleepq_t *q)
-{
-    int r;
-    thread_t *t = curthread;
-    mutex_lock(&t->thr_mtx);
-    sleepq_insert(q, t);
-    mutex_unlock(&t->thr_mtx);
-    sleepq_waiting(q, t);
-    mutex_lock(&t->thr_mtx);
-    r = t->thr_flags & THREAD_INTRPT;
-    sleepq_remove(q, t);
-    mutex_unlock(&t->thr_mtx);
-    return r;
-}
-
-void
-sleepq_wakeup(sleepq_t *q)
-{
-    mutex_lock(&q->sq_mtx);
-    thread_t *t = NULL;
-    while ( (t = list_next(&q->sq_waiting, t)) ) {
-//        TRACE_IN("q=%p t=%p [waking up]", q, t);
-        KASSERT(t->thr_sleepq == q);
-        t->thr_flags &= ~THREAD_SLEEPQ;
-        sched_wakeup(t);
-    }
-    mutex_unlock(&q->sq_mtx);
-}
-
-void
-sleepq_intrpt(thread_t *t)
-{
-    sleepq_t *sq = NULL;
-    mutex_lock(&t->thr_mtx);
-    sq = t->thr_sleepq;
-    mutex_unlock(&t->thr_mtx);
-    if (sq == NULL) return;
-    t->thr_flags |= THREAD_INTRPT;
-    t->thr_flags &= ~THREAD_SLEEPQ;
-    sched_wakeup(t);
-}
-
-void
-sleepq_waiting(sleepq_t *q, thread_t *t)
-{
-    t->thr_flags |= THREAD_SLEEPQ;
-    while (t->thr_flags & THREAD_SLEEPQ && !(t->thr_flags & THREAD_INTRPT)) {
-        //TRACE_IN("q=%p t=%p [sleep]", q, t);
-        sched_wait();
-    }
-    //TRACE_IN("q=%p t=%p [%s]", q, t,
-      //      (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
-}
-
-void
-sleepq_waiting_ms(sleepq_t *q, thread_t *t, uint ms)
-{
-    t->thr_flags |= THREAD_SLEEPQ;
-    while (t->thr_flags & THREAD_SLEEPQ && !(t->thr_flags & THREAD_INTRPT)) {
-        TRACE_IN("q=%p t=%p [sleep]", q, t);
-        msleep(ms); return;//todo;)
-    }
-    //TRACE_IN("q=%p t=%p [%s]", q, t,
-      //      (t->thr_flags & THREAD_INTRPT)? "intrpt" : "waked up");
-}
-
-void
-sleepq_insert(sleepq_t *q, thread_t *t)
-{
-    mutex_lock(&q->sq_mtx);
-    list_insert_tail(&q->sq_waiting, t);
-    t->thr_sleepq = q;
-    mutex_unlock(&q->sq_mtx);
-}
-
-void
-sleepq_remove(sleepq_t *q, thread_t *t)
-{
-    mutex_lock(&q->sq_mtx);
-    t->thr_sleepq = NULL;
-    list_remove(&q->sq_waiting, t);
-    t->thr_flags &= ~(THREAD_INTRPT|THREAD_SLEEPQ);
-    mutex_unlock(&q->sq_mtx);
-}
-
-void
-sleepq_destroy(sleepq_t *q)
-{
-    sleepq_wakeup(q);
-    mutex_destroy(&q->sq_mtx);
 }

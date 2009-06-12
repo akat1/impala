@@ -164,7 +164,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
     if(*(path->now) == '/') {
         (path->now)++;
         if(thr)
-            _change_vptr(&cur, thr->thr_proc->p_rootdir);            
+            _change_vptr(&cur, thr->thr_proc->p_rootdir);
         else
             _change_vptr(&cur, rootvnode);
     }
@@ -177,7 +177,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             vrele(cur);
             cur = tmp;
     }
-    
+
     while(*(path->now)) {
         if(*(path->now) == '/') {
             (path->now)++;
@@ -219,7 +219,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
         vrele(last);
         last = cur;
         cur = tmp;
-        
+
         if(!(path->flags & LKP_NO_FOLLOW) || *(path->now))
             while(cur->v_type == VNODE_TYPE_LNK) {
                 char lpath[PATH_MAX];
@@ -243,7 +243,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
                 }
                 vrele(cur);
                 cur = tmp;  //last nie aktualizujemy, zgadza siê? ;)
-                
+
             }
         if(*(path->now) && (cur->v_type != VNODE_TYPE_DIR))
             return -ENOTDIR;
@@ -263,7 +263,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
         *vpp = cur;
     }
     return 0;
-    
+
 end_error:
     if(cur)
         vrele(cur);
@@ -300,6 +300,7 @@ _rdwr(int space, int rw, vnode_t *vn, void *addr, int len, off_t offset)
     u.offset = offset;
     u.oper = rw;
     u.space = space;
+    u.resid = u.size;
     if(u.oper == UIO_WRITE)
         return VOP_WRITE(vn, &u, O_RDWR);
     else if(u.oper == UIO_READ)

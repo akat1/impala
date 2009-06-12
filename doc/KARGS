@@ -1,0 +1,36 @@
+# $Id$
+
+Program ³aduj±cy GRUB wspiera przekazywanie linii polecenia do ³adowanego
+j±dra. Za liniê polecenia uwa¿a siê napis w konfiguracji GRUB'a znajduj±cy siê
+po ¶cie¿ce do obrazu j±dra. Na przyk³ad:
+
+    kernel /boot/impala.gz <linia polecenia>
+
+Impala odczytuje parametry z tej linii. Parametry s± oddzielone znakiem
+spacji, i s± w formacie 'nazwa=warto¶æ'. Je¿eli warto¶æ nie jest istotna
+to mo¿na podaæ tylko nazwê parametru.  Warto¶ci w j±drze mog± byæ
+interpretowane jako napisy lub liczby (lub warto¶ci logiczne, gdy istotna
+jest jedynie wyst±pienie parametru). Liczby mog± byæ zapisane dziesiêtnie
+lub szesnastkowo (musi je poprzedzaæ prefiks '0x').
+
+1. Ogólne parametry j±dra.
+
+debug - w³±czenie komunikatów z DEBUGF i TRACE_IN. 
+init_path - ¶cie¿ka do programu init. 
+
+2. Parametry dotycz±ce buforowanego wej¶cia-wyj¶cia urz±dzen (BIO).
+
+bio_nbufs - ilo¶c buforów w pamiêci podrêcznej BIO. (4096)
+
+3. Parametry dotycz±ce wielow±tkowo¶ci.
+
+thr_stacksize - domy¶lny rozmiar stosu dla w±tków u¿ytkownika. 
+thr_kstacksize - domy¶lny rozmiar stosu alternatywnego i w±tków j±dra.
+sched_quantum - kwant czasu przyznawany programom.
+
+4. Parametry dotycz±ce pamiêci wirtualnej.
+
+vm_knptbl - ilo¶æ tablic stron przeznaczonych dla j±dra (max 256).
+
+5. Parametry dotycz±ce sterowników.
+

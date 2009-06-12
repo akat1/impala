@@ -27,49 +27,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: fdc.h 155 2009-04-28 12:50:35Z wieczyk $
  */
 
-#ifndef __MACHINE_BUS_ISA_H
-#define __MACHINE_BUS_ISA_H
+#ifndef __DEV_FDC_FDC_H
+#define __DEV_FDC_FDC_H
 #ifdef __KERNEL
 
-typedef struct bus_isa_dma bus_isa_dma_t;
-typedef struct bus_isa_pnp bus_isa_pnp_t;
 
-enum {
-    ISA_DMA_8,
-    ISA_DMA_16
-};
-
-enum {
-    ISA_DMA_FDC = 0x2
-};
-
-enum {
-    ISA_DMA_SINGLE = 1 << 6,
-    ISA_DMA_AUTO = 1 << 4,
-    ISA_DMA_READ = 1 << 2,
-    ISA_DMA_WRITE = 2 << 2,
-    ISA_DMA_INVLD = 3 << 2,
-};
-
-void bus_isa_init(void);
-
-bus_isa_dma_t *bus_isa_dma_alloc(int chan);
-void bus_isa_dma_free(bus_isa_dma_t *ch);
-int bus_isa_dma_prepare(bus_isa_dma_t *d, int cmd, void *buf, size_t size);
-void bus_isa_dma_finish(bus_isa_dma_t *d);
-
-struct bus_isa_pnp {
-    uint32_t    name;
-    uint32_t    rev;
-    uint32_t    serial;
-    int irq;
-    int io;
-};
-
-int bus_isa_probe(bus_isa_pnp_t *);
+void fdc_init(void);
 
 #endif
 #endif

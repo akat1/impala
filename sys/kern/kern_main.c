@@ -29,6 +29,10 @@
  * $Id$
  */
 
+/** @mainpage
+ * Dokumentacja systemu operacyjnego Impala
+ *
+ */
 
 #include <sys/types.h>
 #include <sys/kernel.h>
@@ -39,6 +43,7 @@
 #include <sys/console.h>
 #include <sys/vm.h>
 #include <sys/ipc.h>
+#include <sys/kargs.h>
 #include <sys/vfs.h>
 #include <sys/exec.h>
 #include <dev/md/md.h>
@@ -46,6 +51,7 @@
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
 #include <machine/pckbd.h>
+#include <machine/bus/isa.h>
 
 void kmain(void);
 static void print_welcome(void);
@@ -53,10 +59,11 @@ static void init_kernel(void);
 static void prepare_root(void);
 static void start_init_process(void);
 
+
+
 void
 kmain()
 {
-    SYSTEM_DEBUG = 0;
     print_welcome();
     init_kernel();
     prepare_root();
@@ -66,23 +73,36 @@ kmain()
 void
 prepare_root()
 {
+    extern unsigned char image[];
+    extern unsigned int image_size;
+    md_create(0, &image, image_size);
+    vfs_mountroot();
+    vnode_t *devdir;
+    if(!vfs_lookup(NULL, &devdir, "/dev", NULL, LKP_NORMAL))
+    {
+        vfs_mount("devfs", devdir, NULL);
+    } else kprintf("No /dev dir on root filesystem -> devfs not mounted\n");
 }
 
 void
 start_init_process()
 {
+    const char *init_path = "/sbin/init";
+    initproc = proc_create();
+    karg_get_s("init", &init_path);
+    kprintf("calling %s\n", init_path);
     int err;
-    switch ( (err = execve(initproc, "/sbin/init", NULL, NULL)) ) {
+    switch ( (err = execve(initproc, init_path, NULL, NULL)) ) {
         case 0:
             break;
         case -ENOENT:
-            panic("Cannot found init image at /sbin/init");
+            panic("Cannot found init image at %s", init_path);
             break;
         default:
             panic("Cannot execute init process");
             break;
     }
-    while(1);
+    while (1);
 
 }
 
@@ -107,19 +127,19 @@ print_welcome()
 void
 init_kernel()
 {
-    SYSTEM_DEBUG = 1;
     vm_init();
     kmem_init();
     thread_init();
     sched_init();
     clock_init();
-    devfs_init();
+    SYSTEM_DEBUG = karg_is_set("debug");
     dev_init();
     bio_init();
     vfs_init();
     proc_init();
     cons_init();
     sysvipc_init();
+    dev_initdevs();
     ssleep(1);
     kprintf("kernel initialized\n");
     kprintf("current time: %i\n", curtime.tv_sec);

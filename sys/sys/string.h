@@ -54,7 +54,7 @@ enum {
 
 
 #define mem_zero(s, l) mem_set(s, 0, l)
-
+#define str_eq(a,b) (str_cmp(a,b) == 0)
 #endif
 
 #endif

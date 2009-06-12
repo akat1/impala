@@ -16,6 +16,7 @@ ${PROG}: ${OBJS} ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${IMPALA_SRCROOT}/usr/lib
 	@${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS}
 
 ${_PROG_CLEAN}:
+	@echo " CLEAN"
 	@rm -f ${OBJS} ${PROGRARY}.a
 
 .depend ${_PROG_DEPEND}: ${SRCS}

@@ -35,6 +35,7 @@
 #include <sys/thread.h>
 #include <sys/vm.h>
 #include <sys/string.h>
+#include <sys/kargs.h>
 
 #include <machine/descriptor.h>
 #include <machine/tss.h>
@@ -47,7 +48,7 @@
 #include <machine/bus/isa.h>
 
 void kmain(void);
-void init_x86(void);
+void init_x86(const char *);
 void _cpuid(int option, struct cpuid_result *r);
 void _unhnd_intrpt(void);
 void _intrpt_syscall(void);
@@ -64,6 +65,9 @@ static descriptor_t p_idt[0x100];
 static task_state_segment p_tss0;
 static descriptor_register_t p_gdtr;
 static descriptor_register_t p_idtr;
+
+char kernarg[256];
+const char *__kernarg;
 
 void
 _cpuid(int option, struct cpuid_result *r) {
@@ -107,7 +111,7 @@ _cpu_info(void)
 void setesp0(void *a);
 
 void
-init_x86()
+init_x86(const char *karg)
 {
     enum {
         code = GATE_PRESENT | GATE_TYPE_RX,
@@ -120,7 +124,15 @@ init_x86()
         trap_attr = GATE_PRESENT | GATE_TYPE_TRAP
     };
 
-    int i;
+    int i = 0;
+
+    __kernarg = karg;
+    if (1)
+    for (i = 0; i < 255 && *karg; karg++, i++) {
+        kernarg[i] = *karg;
+    }
+    kernarg[i] = 0;
+    kargs_init();
 
     // Ustawienie GDT
     mem_zero(&p_gdt, sizeof(p_gdt));
@@ -172,6 +184,7 @@ init_x86()
     bus_isa_init();
     irq_enable();
     _cpu_info();
+
 }
 
 void
