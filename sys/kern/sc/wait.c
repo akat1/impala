@@ -78,13 +78,13 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
                 // niszczymy dziecko
                 proc_destroy(p_iter);
                 
-                return EOK;
+                return -EOK;
             }
         } while ((p_iter = NEXTPROC()));
         #undef NEXTPROC
     }
 
     // Nieosiagalny
-    return EOK;
+    return -EOK;
 }
 

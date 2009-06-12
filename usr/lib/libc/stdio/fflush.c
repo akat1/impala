@@ -9,7 +9,7 @@ int
 fflush(FILE *stream)
 {
     if(ISUNSET(stream->status,_FST_OPEN)) {
-        //errno = -EBADF;
+        errno = EBADF;
         return -1;
     }
     if(ISSET(stream->status, _FST_NOBUF))

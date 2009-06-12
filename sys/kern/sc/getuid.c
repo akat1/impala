@@ -44,6 +44,6 @@ errno_t
 sc_getuid(thread_t *t, syscall_result_t *r)
 {
     r->result = t->thr_proc->p_cred->p_uid;
-    return EOK;
+    return -EOK;
 }
 

@@ -58,10 +58,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
     proc_t *p = t->thr_proc;
 
     if ( to_trace == NULL || (!proc_is_parent(t->thr_proc, to_trace)))
-    {
-        r->result = -1;
-        return ECHILD;
-    }
+        return -ECHILD;
 
     while(1)
     {
@@ -79,10 +76,10 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                 // niszczymy dziecko
                 proc_destroy(to_trace);
                 
-                return EOK;
+                return -EOK;
         }
     }
 
-    return EOK;
+    return -EOK;
 }
 

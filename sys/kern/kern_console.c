@@ -224,7 +224,10 @@ cons_output(int t, const char *c)
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
             str_cat(ptr, "\033[0m");
+            int old_mode = current_vcons->mode; //zabezpieczyæ gdzie¶ mutexem?
+            current_vcons->mode |= CONS_MODE_NEWLINE;
             vcons_putstr(current_vcons, buf);
+            current_vcons->mode = old_mode;
         } else {
             vcons_putstr(current_vcons, c);
         }

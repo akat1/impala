@@ -46,23 +46,14 @@ int
 main(int argc, char **v)
 {
     char msg[100];
-    int fd = 0;
-#ifdef __Impala__
-    open("/dev/ttyv1", O_RDWR);
-    open("/dev/ttyv1", O_RDWR);
-#endif
     key_t k = ftok("/sbin/init", 1);
-
     int msg_id = msgget(k, IPC_CREAT|S_IRWXU|S_IRWXG|S_IRWXO);
     _E(msg_id, "msgget error\n");
-    _E(msgrcv(msg_id, msg, sizeof(msg), 0,  0), "msgsnd error\n");
+    _E(msgrcv(msg_id, msg, sizeof(msg), 0,  IPC_NOWAIT), "msgsnd error\n");
     printV("key: ", k);
     printV("msg id: ", msg_id);
     print(1, "msg: ");
     print(1, msg);
     print(1, "\n");
-#ifdef __Impala__
-    while(1);
-#endif
     return 0;
 }

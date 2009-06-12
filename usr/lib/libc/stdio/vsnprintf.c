@@ -27,8 +27,10 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
     char *pbuf;
     char cbuf[2];
     uint32_t arg_u32;
-    if(!dst || !fmt)
-        return -EINVAL;  // -EBLEBLE ?
+    if(!dst || !fmt) {
+        errno = EINVAL;
+        return -1;
+    }
 
     for (; *fmt; fmt++) {
         pbuf = 0;

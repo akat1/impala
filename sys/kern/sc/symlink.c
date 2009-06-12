@@ -51,6 +51,6 @@ errno_t
 sc_symlink(thread_t *p, syscall_result_t *r, symlink_args *args)
 {
     r->result = 0;
-    return ENOSTR;
+    return -ENOSTR;
 }
 

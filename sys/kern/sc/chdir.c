@@ -52,7 +52,6 @@ errno_t
 sc_chdir(thread_t *t, syscall_result_t *r, chdir_args *args)
 {
     int res=0;
-    r->result = -1;
     proc_t *p = t->thr_proc;
     vnode_t *node;
     if((res = vm_validate_string(args->pathname, PATH_MAX)))
@@ -68,6 +67,6 @@ sc_chdir(thread_t *t, syscall_result_t *r, chdir_args *args)
     p->p_curdir = node;
     vrele(old);
     r->result = 0;
-    return EOK;
+    return -EOK;
 }
 

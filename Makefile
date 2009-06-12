@@ -37,3 +37,4 @@ burn: build-image
 	sudo dd if=image/floppy.img of=${FLOPPY_DEV}
 
 include mk/subdir.mk
+

@@ -62,7 +62,7 @@ sc_thr_create(thread_t *t, syscall_result_t *r, thr_create_args_t *args)
     thread_prepare(ct);
     sched_insert(ct);
     r->result = (uintptr_t)ct;
-    return EOK;
+    return -EOK;
 }
 
 

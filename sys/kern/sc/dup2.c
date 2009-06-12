@@ -54,7 +54,7 @@ sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
     file_t *f;
     
     if ( args->newfd > t->thr_proc->p_fd->max_ds ) {
-        return EINVAL;
+        return -EINVAL;
     }
     
     f = f_get(t->thr_proc->p_fd, args->newfd);
@@ -64,6 +64,6 @@ sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
     }
 
     r->result = f_fcntl(t->thr_proc->p_fd, f, F_DUPFD, args->newfd);
-    return EOK;
+    return -EOK;
 }
 

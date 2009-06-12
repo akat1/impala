@@ -71,7 +71,6 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     int fd;
     int flags = arg->flags;
     int error = 0;
-    r->result = -1;
     vnode_t *node;
     file_t  *file;
     proc_t *proc = p->thr_proc;

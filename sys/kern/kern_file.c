@@ -83,7 +83,7 @@ f_seek(file_t *f, off_t o, int whence)
     vattr_t attr;
 
     if ( f == NULL ) {
-        return EBADF;
+        return -EBADF;
     }
 
     switch(whence) {
@@ -102,7 +102,7 @@ f_seek(file_t *f, off_t o, int whence)
                 f->f_offset = attr.va_size - o;
             break;
         default:
-            return EINVAL;
+            return -EINVAL;
     }
 
     return f->f_offset;
@@ -112,7 +112,7 @@ int
 f_ioctl(file_t *f, int cmd, uintptr_t param)
 {
     if ( f == NULL )
-        return EBADF;
+        return -EBADF;
 
     return VOP_IOCTL(f->f_vnode, cmd, param);
 }
@@ -151,7 +151,7 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
     switch(cmd) {
         case F_DUPFD:
             if ( param > ft->max_ds )    
-                return EINVAL;
+                return -EINVAL;
             fc = _get_chunk_by_index(ft, (int)param);
             if ( fc == NULL ) {
                 _filetable_expand(ft, param - list_length(&(ft->chunks))

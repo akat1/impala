@@ -24,8 +24,10 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
     char *pbuf;
     char cbuf[2];
     uint32_t arg_u32;
-    if(!stream || !fmt)
-        return -EINVAL;
+    if(!stream || !fmt) {
+        errno = EINVAL;
+        return -1;
+    }
 
     for (; *fmt; fmt++) {
         pbuf = 0;

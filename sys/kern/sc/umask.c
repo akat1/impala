@@ -53,6 +53,6 @@ sc_umask(thread_t *p, syscall_result_t *r, umask_args *args)
     
     p->thr_proc->p_umask = args->mask & 0777;
 
-    return EOK;
+    return -EOK;
 }
 

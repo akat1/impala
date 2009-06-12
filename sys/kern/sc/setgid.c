@@ -51,10 +51,9 @@ sc_setgid(thread_t *t, syscall_result_t *r, setgid_args *args)
     if ( t->thr_proc->p_cred->p_gid == 0 ) {
         t->thr_proc->p_cred->p_gid = args->gid;
         r->result = 0;
-        return EOK;
+        return -EOK;
     } else {
-        r->result = -1;
-        return EPERM;
+        return -EPERM;
     }
 }
 

@@ -55,10 +55,8 @@ sc_setregid(thread_t *t, syscall_result_t *r, setregid_args *args)
         if(args->egid!=-1)
             t->thr_proc->p_cred->p_egid = args->egid;
         r->result = 0;
-        return EOK;
-    } else {
-        r->result = -1;
-        return EPERM;
-    }
+        return -EOK;
+    } else
+        return -EPERM;
 }
 

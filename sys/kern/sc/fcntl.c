@@ -50,12 +50,11 @@ sc_fcntl(thread_t *t, syscall_result_t *r, fcntl_args_t *args)
         return -EBADF;
     }
     int res = f_fcntl(t->thr_proc->p_fd, file, args->cmd, args->arg);
-    if(res < 0) {
-        r->result = -1;
+    if(res < 0)
         return res;
-    }
+
     r->result = res;
-    return EOK; 
+    return -EOK; 
 }
 
 

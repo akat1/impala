@@ -125,7 +125,7 @@ clock_softtick()
 {
     if ( spinlock_trylock(&soft_guard) ) {
         spinlock_unlock(&soft_guard);
-        sched_action();
+        sched_action(); //nie dokonuje faktycznej zmiany w±tku
     }
 }
 

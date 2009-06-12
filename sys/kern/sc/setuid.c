@@ -51,11 +51,9 @@ sc_setuid(thread_t *t, syscall_result_t *r, setuid_args *args)
     if ( t->thr_proc->p_cred->p_uid == 0 ) {
         t->thr_proc->p_cred->p_uid = args->uid;
         r->result = 0;
-        return EOK;
-    } else {
-        r->result = -1;
-        return EPERM;
-    }
+        return -EOK;
+    } else
+        return -EPERM;
     
     /* NOT REACHED */
 }

@@ -46,7 +46,6 @@ int
 sc_getpgid(thread_t *t, syscall_result_t *r, getpgid_args_t *args)
 {
     proc_t *p = t->thr_proc;
-    r->result = -1;
     int pid = args->pid;
     if(!pid)
         pid = p->p_pid;
@@ -57,5 +56,5 @@ sc_getpgid(thread_t *t, syscall_result_t *r, getpgid_args_t *args)
         return -ESRCH;
     r->result = target->p_group;
 
-    return EOK;
+    return -EOK;
 }

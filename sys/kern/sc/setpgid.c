@@ -49,7 +49,6 @@ int
 sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
 {
     proc_t *p = t->thr_proc;
-    r->result = -1;
     int pid = args->pid;
     int pgid = args->pgid;
     if(!pid)
@@ -78,7 +77,7 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
         return -EPERM;
     target->p_group = pgid;
     r->result = 0;
-    return EOK;
+    return -EOK;
 }
 
 

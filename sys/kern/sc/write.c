@@ -57,7 +57,7 @@ sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
 {
     file_t *file = f_get(t->thr_proc->p_fd, args->fd);
     if (file == NULL) {
-        return EBADF;
+        return -EBADF;
     }
     uio_t u;
     iovec_t iov;
@@ -69,5 +69,5 @@ sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
     u.oper = UIO_WRITE;
     u.space = UIO_SYSSPACE; //znowu ¶ciema
     r->result = f_write(file, &u);
-    return EOK;
+    return -EOK;
 }

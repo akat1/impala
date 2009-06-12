@@ -55,14 +55,13 @@ errno_t sc_ioctl(thread_t *t, syscall_result_t *r, sc_ioctl_args *args);
 errno_t
 sc_ioctl(thread_t *t, syscall_result_t *r, sc_ioctl_args *args)
 {
-    r->result = -1;
     file_t *file = f_get(t->thr_proc->p_fd, args->fd);
     if (file == NULL) {
-        return EBADF;
+        return -EBADF;
     }
     int res = f_ioctl(file, args->cmd, args->arg);
     if(res < 0)
         return res;
     r->result = res;
-    return EOK;
+    return -EOK;
 }

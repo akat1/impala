@@ -61,7 +61,7 @@ sc_isatty(thread_t *t, syscall_result_t *r, sc_isatty_args *args)
     if(!vnode_isatty(file->f_vnode))
         return -ENOTTY;
     r->result = 1;    
-    return EOK;
+    return -EOK;
 }
 
 

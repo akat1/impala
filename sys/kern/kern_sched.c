@@ -71,7 +71,8 @@ sched_init()
  * Podprogram planisty.
  *
  * Procedura jest uruchamiana przez program obs³ugi przerwania
- * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
+ * zegara. Odlicza odpowiedni kwant czasu i informuje resztê j±dra, o potrzebie
+ * zmiany konktekstu.
  */
 
 void

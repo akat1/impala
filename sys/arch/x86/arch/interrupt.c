@@ -91,7 +91,7 @@ irq_done()
 void
 ISR_irq(interrupt_frame frame)
 {
-   int opl=CIPL;
+    int opl=CIPL;
     if (frame.f_n < MAX_IRQ) {
         if(irq_handlers[frame.f_n] != NULL)
         {
@@ -112,14 +112,16 @@ ISR_syscall(interrupt_frame frame)
     UPDATE(&frame);
     va_list ap;
     syscall_result_t result;
-
+    thread_t *thisthr = curthread;
+    irq_enable();
+    
     mem_zero(&result, sizeof(result));
-
     ap = (va_list) (frame.f_esp + 16);
-    curthread->thr_flags |= THREAD_SYSCALL;
+    thisthr->thr_flags |= THREAD_SYSCALL;
+    
 
-    syscall(curthread, frame.f_eax, &result, ap);
-    curthread->thr_flags &= ~THREAD_SYSCALL;
+    syscall(thisthr, frame.f_eax, &result, ap);
+    thisthr->thr_flags &= ~THREAD_SYSCALL;
 
     // result
     frame.f_eax = result.result;

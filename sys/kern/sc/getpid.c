@@ -44,6 +44,6 @@ errno_t
 sc_getpid(thread_t *t, syscall_result_t *r)
 {
     r->result = t->thr_proc->p_pid;
-    return EOK;
+    return -EOK;
 }
 

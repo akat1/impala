@@ -44,6 +44,6 @@ errno_t
 sc_getgid(thread_t *t, syscall_result_t *r)
 {
     r->result = t->thr_proc->p_cred->p_gid;
-    return EOK;
+    return -EOK;
 }
 

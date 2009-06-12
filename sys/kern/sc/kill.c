@@ -43,6 +43,6 @@ errno_t
 sc_kill(thread_t *p, syscall_result_t *r, va_list ap)
 {
     r->result = 0;
-    return ENOSTR;
+    return -ENOSTR;
 }
 

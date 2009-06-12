@@ -58,8 +58,7 @@ sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
     if ( (args->req->tv_sec < 0) || 
          !(args->req->tv_nsec >= 0 && args->req->tv_nsec <= 999999999) )
     {
-        r->result = -1;
-        return EINVAL;
+        return -EINVAL;
     }
 
     p->thr_flags |= THREAD_SLEEP; ///@todo ¿e jak?? ;)
@@ -75,6 +74,6 @@ sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
                     //to niech chocia¿ kasowana bêdzie porz±dnie ;)
                     //a i tak ta flaga jest ustawiana w Xsleep
 
-    return EOK;
+    return -EOK;
 }
 

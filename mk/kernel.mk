@@ -26,7 +26,7 @@ tmp_rootimage.c:
 ${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS} ${LD_SCRIPT}
 	@echo " LD ${KERNEL} (compressed)"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
-	@${GZIP} -f -9 -k ${KERNEL}"
+	@${GZIP} -f ${KERNEL}
 
 
 ${_LIB_CLEAN}:

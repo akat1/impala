@@ -54,7 +54,7 @@ sc_sbrk(thread_t *t, syscall_result_t *r, sbrk_args_t *args)
         proc_exit(p, 0);
         return -ENOTSUP;
     }
-    return EOK;
+    return -EOK;
 }
 
 

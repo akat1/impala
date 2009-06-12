@@ -50,6 +50,6 @@ errno_t
 sc_unlink(thread_t *p, syscall_result_t *r, unlink_args *args)
 {
     r->result = 0;
-    return ENOSTR;
+    return -ENOSTR;
 }
 

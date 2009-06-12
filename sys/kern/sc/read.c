@@ -69,12 +69,10 @@ sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
     u.oper = UIO_READ;
     u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
     int res = f_read(file, &u);
-    if(res < 0) {
-        r->result = -1;
+    if(res < 0)
         return res;
-    }
     r->result = res;
-    return EOK;
+    return -EOK;
 }
 
 

@@ -55,7 +55,6 @@ errno_t
 sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
 {
     int res=0;
-    r->result = -1;
     proc_t *p = t->thr_proc;
     vnode_t *node;
     if((res = vm_validate_string(args->pathname, PATH_MAX)))
@@ -88,6 +87,6 @@ sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
     buf->st_ctimespec = va.va_ctime;
     
     r->result = 0;
-    return EOK;
+    return -EOK;
 }
 

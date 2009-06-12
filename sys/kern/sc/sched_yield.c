@@ -40,7 +40,7 @@ int
 sc_sched_yield(thread_t *t, syscall_result_t *r)
 {
     sched_yield();
-    return EOK;
+    return -EOK;
 }
 
 

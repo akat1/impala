@@ -21,7 +21,7 @@ realloc(void *ptr, size_t size)
     }
     void* naddr = malloc(size);
     if(!naddr) {
-        errno = -ENOMEM;
+        errno = ENOMEM;
         return NULL;
     }
     memcpy(naddr, ptr, oldsize);

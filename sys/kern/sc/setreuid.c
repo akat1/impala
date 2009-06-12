@@ -55,10 +55,9 @@ sc_setreuid(thread_t *t, syscall_result_t *r, setreuid_args *args)
         if(args->euid!=-1)
             t->thr_proc->p_cred->p_euid = args->euid;
         r->result = 0;
-        return EOK;
+        return -EOK;
     } else {
-        r->result = -1;
-        return EPERM;
+        return -EPERM;
     }
     
     /* NOT REACHED */

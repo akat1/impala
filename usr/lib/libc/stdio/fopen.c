@@ -12,7 +12,7 @@ FILE *
 fopen(const char *path, const char *mode)
 {
     if(!mode || !path) {
-        errno = -EINVAL;
+        errno = EINVAL;
         return NULL;
     }
     FILE *f = malloc(sizeof(FILE));

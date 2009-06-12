@@ -48,7 +48,7 @@ sc_thr_cancel(thread_t *t, syscall_result_t *r, thr_cancel_args_t *args)
     if (ut == t)
         sched_exit(t);
     ut->thr_cancel = TRUE;
-    return EOK;
+    return -EOK;
 }
 
 

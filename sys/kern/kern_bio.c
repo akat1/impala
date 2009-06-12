@@ -265,6 +265,7 @@ bio_getblk(devd_t *d, blkno_t n)
             } else {
 //                 DEBUGF("getblk blk %u on %s found buffer in cache",
 //                     n, d->name);
+                return bp;
             }
         } else {
 //             DEBUGF("getblk blk %u on %s not found buffer in cache",

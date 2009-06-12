@@ -43,7 +43,7 @@ int sc_XXX(thread_t *p, syscall_result_t *r, XXX_args_t *args);
 int
 sc_XXX(thread_t *t, syscall_result_t *r, XXX_args_t *args)
 {
-    return EOK;
+    return -EOK;
 }
 
 

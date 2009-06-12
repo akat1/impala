@@ -59,8 +59,9 @@ sc_fork(thread_t *t, syscall_result_t *r)
     proc_t *p = t->thr_proc;
     proc_t *child;
     int err = proc_fork(p, &child);
-    if (err) return err;
+    if (err)
+        return err;
     r->result = child->p_pid;
-    return 0;
+    return -EOK;
 }
 

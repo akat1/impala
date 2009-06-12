@@ -52,14 +52,12 @@ sc_close(thread_t *t, syscall_result_t *r, close_args *args)
 {
     file_t *f = f_get(t->thr_proc->p_fd, args->fd);
     
-    if ( f == NULL ) {
-        r->result = -1;
-        return EBADF;
-    }
+    if ( f == NULL )
+        return -EBADF;
 
     r->result = 0;
     f_close(f);
     f_set(t->thr_proc->p_fd, NULL, args->fd);
-    return EOK;
+    return -EOK;
 }
 
