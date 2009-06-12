@@ -3,6 +3,7 @@
 
 SYS execve
 SYS exit
+SYS fcntl
 SYS fork
 SYS getegid
 SYS geteuid

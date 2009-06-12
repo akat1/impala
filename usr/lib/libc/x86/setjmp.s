@@ -1,8 +1,11 @@
 #
 # $Id$
 
+# jak bêdziemy zapisywaæ sygna³y, to _setjmp i _longjmp pójd± do c
 .global _setjmp
 .global _longjmp
+.global __setjmp
+.global __longjmp
 
 
 .macro offset32 name, num
@@ -20,6 +23,7 @@ offset32    JMP_EBP,    7
 offset32    JMP_EIP,    8
 
 
+__setjmp:
 _setjmp:
     movl 4(%esp), %eax
     movl %ebx, JMP_EBX(%eax)
@@ -34,6 +38,7 @@ _setjmp:
     movl $0, %eax
     ret
 
+__longjmp:
 _longjmp:
     movl 8(%esp), %eax
     movl 4(%esp), %ebx

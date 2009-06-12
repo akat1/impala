@@ -5,6 +5,7 @@ INCDIR=-Iinclude -Iprivate
 SRCS=\
     fcntl/open.c\
     fcntl/creat.c\
+    fcntl/fcntl.c\
     stdio/fileno.c\
     stdio/fopen.c\
     stdio/fclose.c\
@@ -22,6 +23,7 @@ SRCS=\
     stdio/snprintf.c\
     stdio/sprintf.c\
     stdio/sscanf.c\
+    stdio/vfprintf.c\
     stdio/vsnprintf.c\
     stdio/vsscanf.c\
     stdlib/atexit.c\
@@ -105,6 +107,7 @@ SRCS=\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
     unistd/write.c\
+    other/strtoimax.c\
     ${IMPALA_ARCH}/setjmp.s\
 
 include ${IMPALA_MK}/lib.mk
