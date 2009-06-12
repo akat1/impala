@@ -504,8 +504,8 @@ textscreen_switch(struct hw_textscreen *screen)
 void
 textscreen_clone(struct hw_textscreen *screen)
 {
-    mem_cpy(screen, current, sizeof(*screen));
-    mem_cpy(screen->screen_map, current->screen_buf, TS_SIZE*2);
+    mem_move(screen, current, sizeof(*screen));
+    mem_move(screen->screen_map, current->screen_buf, TS_SIZE*2);
     screen->screen_buf = NULL;
 }
 

@@ -63,7 +63,19 @@ enum {
     KC_SLEEP,
     KC_POWER,
     KC_WAKE,
-    KC_PAUSE
+    KC_PAUSE,
+    KC_F1 = 0x3b,
+    KC_F2,
+    KC_F3,
+    KC_F4,
+    KC_F5,
+    KC_F6,
+    KC_F7,
+    KC_F8,
+    KC_F9,
+    KC_F10,
+    KC_F11 = 0x57,
+    KC_F12,
 };
 
 char *keymap_string[] =
@@ -85,6 +97,21 @@ KC_UP, KC_PGUP, 0, KC_LEFT, 0, KC_RIGHT, 0, KC_END,
 KC_DOWN, KC_PGDOWN, KC_INSERT, KC_DELETE, 0, 0, 0, 0,
 0, 0, 0, KC_LWIN, KC_RWIN, KC_MENU, KC_POWER, KC_SLEEP,
 0, 0, 0, KC_WAKE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+enum KEYCODE_TYPE {
+    KT_NORMAL = 0,
+    KT_SPECIAL = 1
+};
+
+uint8_t keycode_type[] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0x00 - 0x0f
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0x10 - 0x1f
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0x20 - 0x2f
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, //0x30 - 0x3f
+    1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0x40 - 0x4f
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, //0x50 - 0x5f
 };
 
 /// tablica do translacji keycode -> ascii w przypadku braku wci¶niêtych

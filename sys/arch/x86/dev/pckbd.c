@@ -68,7 +68,31 @@ __enqueue_keycode(int kc)
     bool shift=(key_modifiers & (KM_LSHIFT | KM_RSHIFT))>0;
     bool ctrl =(key_modifiers & (KM_LCONTROL | KM_RCONTROL))>0;
     if(kc<MAX_SC_LINEAR) {
-        if(ctrl) {
+        if(keycode_type[kc] == KT_SPECIAL) {
+            //tymczasowo: przerobiæ na tablicê wsk. na funkcje lub co¶...
+            int id=0;
+            switch(kc) {
+                case KC_F1:
+                    id = 1;
+                    break;
+                case KC_F2:
+                    id = 2;
+                    break;
+                case KC_F3:
+                    id = 3;
+                    break;
+                case KC_F4:
+                    id = 4;
+                    break;
+                case KC_F5:
+                    id = 5;
+                    break;
+                default:
+                    id=0;
+            }
+            cons_switch(id);  //prze³±cza na /dev/ttyID
+                
+        } else if(ctrl) {
             c = keymap_ctrl[kc];
         } else {
             c = keymap_normal[kc];

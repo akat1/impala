@@ -80,8 +80,8 @@ void
 tty_conf_set_default(termios_t *tconf)
 {
     tconf->c_lflag = ICANON | ECHO | ISIG | ECHOE | ECHOKE;
-    tconf->c_iflag = IXON | ICRNL | BRKINT;
-    tconf->c_cflag = CREAD | CS7 | PARENB;
+    tconf->c_iflag = IXON  | BRKINT | ICRNL | ISTRIP;
+    tconf->c_cflag = CREAD | CS7 | PARENB | HUPCL;
     tconf->c_oflag = OPOST | ONLCR;
     for(int i = 0; i<NCCS; i++)
         tconf->c_cc[i] = default_cc[i];
@@ -218,7 +218,6 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
             splx(x);break;
         }
         case TCSETS: {
-            //kprintf("SET!\n\n");
             int x = spltty();
             termios_t *tconf = (termios_t*)param;
             if((err=copyin(&tty->t_conf, tconf, sizeof(termios_t)))) {

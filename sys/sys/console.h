@@ -40,6 +40,7 @@ enum {
     CONS_MSG
 };
 
+void cons_switch(int id);
 void cons_init(void);
 void cons_output(int msgt, const char *str);
 void cons_input_char(int ch);

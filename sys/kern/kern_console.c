@@ -103,6 +103,7 @@ struct vconsole {
 #define CONS_MODE_SCREEN  4
 #define CONS_MODE_NEWLINE 8
 
+static void vcons_switch(vconsole_t *vc);
 static void vcons_input_char(vconsole_t *vc, int ch);
 static void vcons_input_string(vconsole_t *vc, const char* str);
 static void vcons_put(vconsole_t *t, char c);
@@ -192,7 +193,7 @@ cons_init()
         vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
         vcons[i].sattr = COLOR_BRIGHTGRAY;
         vcons[i].escape = FALSE;
-        vcons[i].mode = CONS_MODE_AWRAP | CONS_MODE_NEWLINE;
+        vcons[i].mode = CONS_MODE_AWRAP;
         textscreen_init_tab(&vcons[i].screen);
         if (i > 0) {
             textscreen_clone(&vcons[i].screen);
@@ -203,6 +204,14 @@ cons_init()
     textscreen_switch(&vcons[0].screen);
     current_vcons = &vcons[0];
     current_vcons_tty = current_vcons->tty;
+}
+
+void
+cons_switch(int id)
+{
+    id--;
+    if(id < VCONS_MAX && 0<=id)
+        vcons_switch(&vcons[id]);
 }
 
 #define isprint(c) ( 31 < c && c < 127 )
@@ -301,6 +310,16 @@ enum {
     ESC_ATTR,       // [{attr1};...;{attrn}m (@)
 };
 
+void
+vcons_switch(vconsole_t *vc)
+{
+    int x = spltty();   //póki co wywo³ywane tylko z przerwania, ale i tak...
+    textscreen_clone(&current_vcons->screen);
+    current_vcons = vc;
+    current_vcons_tty = vc->tty;
+    textscreen_switch(&vc->screen);
+    splx(x);
+}
 
 void
 vcons_input_char(vconsole_t *vc, int ch)
@@ -314,8 +333,11 @@ void
 vcons_input_string(vconsole_t *vc, const char* str)
 {
     tty_t *tty = vc->tty;
-    for(const char *c=str; *c; c++)
+    for(const char *c=str; *c; c++) {
         tty_input(tty, *c);
+        if(*c == CR && ISSET(vc->mode, CONS_MODE_NEWLINE))
+            tty_input(vc->tty, NL);
+    }
 }
 
 
@@ -407,7 +429,7 @@ set_mode(vconsole_t *vc, int m)
     switch(m) {
         case 3: //column mode
             textscreen_clear(&vc->screen);
-            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+//            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
             break;
         case 6: //origin avs
             SET(vc->mode, CONS_MODE_ORIGIN);
@@ -431,7 +453,7 @@ reset_mode(vconsole_t *vc, int m)
     switch(m) {
         case 3:
             textscreen_clear(&vc->screen);
-            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+//            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
             break;
         case 6: //origin rel
             UNSET(vc->mode, CONS_MODE_ORIGIN);
