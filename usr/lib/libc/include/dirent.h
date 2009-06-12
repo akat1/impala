@@ -3,7 +3,12 @@
 
 #include <sys/types.h>
 
-typedef int DIR;
+struct DIR {
+    int flags;
+    int fd;
+};
+
+typedef struct DIR DIR;
 
 // jako¶ inaczej to trzeba zrobiæ
 #define MAX_NAME 128

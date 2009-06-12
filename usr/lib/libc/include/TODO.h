@@ -2,7 +2,6 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
 // `_abort'
-// `_closedir'
 // `_eaccess'
 // `_environ'
 // `_fwopen'
@@ -15,7 +14,6 @@
 // `_getrlimit'
 // `_getrusage'
 // `_killpg'
-// `_opendir'
 // `_opterr'
 // `_optind'
 // `_optopt'

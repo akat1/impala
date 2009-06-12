@@ -107,6 +107,8 @@ SRCS=\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
     unistd/write.c\
+    other/closedir.c\
+    other/opendir.c\
     other/strtoimax.c\
     ${IMPALA_ARCH}/setjmp.s\
 
