@@ -30,6 +30,53 @@
 % $Id$
 
 
-\section{Zarz±dzanie pamiêci±}
+\section{Pamiêæ wirtualna.}
+
+% To mo¿e siê zmieniæ, mo¿emy z GRUB'a skorzystaæ.
+Informacja o~ilo¶ci zainstalowanej pamiêci RAM na komputerze jest pobierana z~pamiêci CMOS.
+Poniewa¿ CMOS jest star± technologi± to przechowuje tê~informacjê w~16bitowym polu, co~znaczy
+¿e~ilo¶c wykrywanej pamiêci jest ograniczona do~64MB.
+
+Pamiêæ wirtulna (VM) jest jednym z~najwa¿niejszych elementów w systemie. Jest odpowiedzilna za tworzenie
+wielu przestrzeni adresowych, zarz±dzaniem obszarami pamiêci w segmentach, tworzenie stosów oraz
+odwzorowywaniu pamiêci pomiêdzy segmentami i przestrzeniami.
+
+Przestrzenie adresowe s± odwzorowaniem adresów u¿ywanych w instrukcjach procesora na~adresy pamiêci fizycznej.
+Jest to~istotny element dla~wielozadaniowo¶ci poniewa¿ zwykle programy nie wspóldziel± pamiêci, a~korzystaj± z tych
+samych adresów\footnote{£atwo siê o tym przekonaæ pisz±c prosty program w jêzyku C drukuj±cy na ekran adres
+jakiej¶ swojej zmiennej. Je¿eli uruchomimy jednocze¶nie wiele kopii naszego programu to~ka¿dy wydrukuje
+ten sam adres, mimo ¿e~ka¿dy ma~swoj± w³asn± pamiêæ.}.
+
+Zrealizowanie pamiêci wirtualnej w~systemie operacyjnym wymaga wsparcia ze~strony sprzêtu. Adresy u¿ywane
+w~instrukcjach (adresy wirtualne) procesora musz± zostaæ przez niego przet³umaczone na adresy fizyczne. W tym
+celu dzieli siê pamiêæ na ma³e ramki zwanymi stronami pamiêci. Procesor u¿ywa katalogów stron do t³umaczenia
+adresów wirtualnych na fizyczne. Pozycje w katalogu, oznaczaj±ce ramki w pamiêci wirtualnej, zawieraj± adresy
+stron w pamiêc fizycznej\footnote{Procesory z rodziny x86 pos³uguj± siê stronami wielko¶ci 4kB. Adresy pamiêci
+bêdziemy dla wygody zapisywaæ szesnastkowo, rozmiar strony zapisany szesnastkowo to \texttt{0x1000}.}. Przyk³adowo,
+je¿eli system operacyjny ramce strony pod adresem \texttt{0x1000} przypiszê stronê o adresie \texttt{0x4000}
+to spowoduje to t³umaczenie adresów \texttt{0x1000-0x1fff} z instrukcji na adresy fizyczne \texttt{0x4000-0x4fff}.
 
 
+
+% TODO: daæ referencje do tej ksi±¿ki Mateusza z której korzysta³em! wieczyk
+Modu³ VM powsta³ pod wp³ywem materia³ów 
+omawiaj±cych zarz±dzanie pamiêcia wirtualn± w systemach SVR4 i Mach. Nazewnictwo procedur by³o wzorowane
+na drugi z wymienionych modu³ów.
+
+
+\subsection{Mapa pamiêci.}
+
+Mapa pamiêci u¿ywana przez nasz system jest z góry ustalona.  
+
+\begin{figure}
+ \centering
+ 
+ \caption{Mapa pamiêci wirtualnej}
+ \label{vm:vmap}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \caption{Mapa pamiêci fizycznej}
+ \label{vm:pmap}
+\end{figure}
