@@ -91,8 +91,7 @@ fatfs_getvnode(fatfs_inode_t *inode)
             inode->vn->v_type = VNODE_TYPE_DIR;
             inode->vn->v_flags = VNODE_FLAG_ROOT;
         }
-        vref(inode->vn);
-    }
+    } else vref(inode->vn);
     return inode->vn;
 }
 

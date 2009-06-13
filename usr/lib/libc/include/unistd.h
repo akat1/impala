@@ -113,7 +113,7 @@ int dup2(int oldfd, int newfd);
 int getdents(int fd, dirent_t *data, size_t count);
 
 //getopt
-
+extern char **environ;
 extern char *optarg;
 extern int optind, opterr, optopt, optreset;
 

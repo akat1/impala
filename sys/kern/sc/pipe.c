@@ -26,47 +26,30 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 405 2009-06-12 20:32:13Z takeshi $
  */
 
-#include <sys/errno.h>
 #include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/sched.h>
-#include <sys/time.h>
-#include <sys/utils.h>
+#include <sys/kernel.h>
 #include <sys/syscall.h>
+#include <sys/vm.h>
 
-typedef struct sc_nanosleep_args sc_nanosleep_args;
-
-struct sc_nanosleep_args
-{
-    timespec_t *req;
-    timespec_t *rem;
+typedef struct pipe_args pipe_args_t;
+struct pipe_args {
+    int filedes[2];
 };
 
-errno_t sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args );
+int sc_pipe(thread_t *p, syscall_result_t *r, pipe_args_t *args);
 
-/**
- * XXX: ///@todo sygna³y i rem
- */
-
-errno_t
-sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
+int
+sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
 {
-    /* sprawdzamy parametry */
-    if ( (args->req->tv_sec < 0) || 
-         !(args->req->tv_nsec >= 0 && args->req->tv_nsec <= 999999999) )
-    {
-        return -EINVAL;
-    }
-
-    if ( args->req->tv_sec > 0 )
-        ssleep(args->req->tv_sec);
-    if ( args->req->tv_nsec > 0 )
-        msleep(args->req->tv_nsec); // XXX: mili
-
-
+    int err = 0;
+    if((err = vm_is_avail((vm_addr_t)args->filedes, sizeof(int[2]))))
+        return err;
+    // jak robimy pipe?
+    
     return -EOK;
 }
+
 

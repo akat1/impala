@@ -338,8 +338,8 @@ vcons_input_string(vconsole_t *vc, const char* str)
     tty_t *tty = vc->tty;
     for(const char *c=str; *c; c++) {
         tty_input(tty, *c);
-        if(*c == CR && ISSET(vc->mode, CONS_MODE_NEWLINE))
-            tty_input(vc->tty, NL);
+//        if(*c == CR && ISSET(vc->mode, CONS_MODE_NEWLINE))
+//            tty_input(tty, NL);
     }
 }
 
@@ -359,7 +359,7 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
         CODE_SS3 = 0217
     };
     int X = spltty();
-    mutex_lock(&vc->mtx);
+//    mutex_lock(&vc->mtx); //w spl nie powinno byæ potrzebne, a i jest niebezpieczne
     unsigned char *c = (unsigned char *)cc;
     for (; n; c++, n--) {
         if (*c <= 032 || *c == DEL)
@@ -385,7 +385,7 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
             }
         }
     }
-    mutex_unlock(&vc->mtx);
+//    mutex_unlock(&vc->mtx);
     splx(X);
 }
 

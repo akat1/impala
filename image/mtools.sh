@@ -7,6 +7,7 @@ MMD="mmd -i floppy.img -o"
 $MDEL -i floppy.img ::/BOOT/GRUB/MENU.LST
 $MDEL -i floppy.img ::/BOOT/IMPALA.GZ
 $MMD ::/sbin
+$MMD ::/dev
 $MCOPY ../output/sbin/init ::/sbin/init
 $MMD ::/bin
 $MCOPY ../output/bin/vttest ::/bin/vttest

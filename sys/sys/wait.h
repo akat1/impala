@@ -7,7 +7,6 @@
 #define   WUNTRACED       1<<1
 
 
-
 ///@todo wype³niæ
 #define WIFSTOPPED(st) 1
 #define WIFSIGNALED(st) 1

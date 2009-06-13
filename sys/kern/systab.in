@@ -20,6 +20,7 @@ SYS nanosleep
 SYS open
 SYS pause
 SYS read
+SYS select
 SYS setpgid
 SYS setuid
 SYS setreuid
@@ -30,6 +31,7 @@ SYS write
 SYS close
 SYS link
 SYS unlink
+SYS pipe
 SYS stat
 SYS symlink
 SYS rmdir

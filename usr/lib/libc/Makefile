@@ -48,6 +48,7 @@ SRCS=\
     string/strcoll.c\
     string/strcpy.c\
     string/strcspn.c\
+    string/strerror.c\
     string/strlen.c\
     string/strncat.c\
     string/strncmp.c\
@@ -80,6 +81,7 @@ SRCS=\
     unistd/close.c\
     unistd/dup.c\
     unistd/dup2.c\
+    unistd/eaccess.c\
     unistd/execve.c\
     unistd/getdents.c\
     unistd/ioctl.c\
@@ -90,12 +92,15 @@ SRCS=\
     unistd/getegid.c\
     unistd/geteuid.c\
     unistd/getgid.c\
+    unistd/gethostname.c\
     unistd/getpgid.c\
     unistd/getpgrp.c\
     unistd/getpid.c\
     unistd/getppid.c\
     unistd/getuid.c\
+    unistd/pipe.c\
     unistd/sbrk.c\
+    unistd/select.c\
     unistd/setgid.c\
     unistd/setpgid.c\
     unistd/setpgrp.c\
@@ -109,7 +114,9 @@ SRCS=\
     unistd/write.c\
     other/closedir.c\
     other/opendir.c\
+    other/readdir.c\
     other/strtoimax.c\
+    other/wait3.c\
     ${IMPALA_ARCH}/setjmp.s\
 
 include ${IMPALA_MK}/lib.mk

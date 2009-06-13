@@ -2,12 +2,10 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
 // `_abort'
-// `_eaccess'
 // `_environ'
 // `_fwopen'
 // `_getcwd'
 // `_getenv'
-// `_gethostname'
 // `_getmode'
 // `_getopt'
 // `_getpwnam'
@@ -18,9 +16,6 @@
 // `_optind'
 // `_optopt'
 // `_optreset'
-// `_pipe'
-// `_readdir'
-// `_select'
 // `_setenv'
 // `_setlocale' // STUB
 // `_setmode'
@@ -30,7 +25,5 @@
 // `_siginterrupt' // SIG
 // `_signal' // SIG
 // `_sigprocmask' // SIG
-// `_strerror'
 // `_sys_siglist' // SIG
 // `_unsetenv'
-// `_wait3'
