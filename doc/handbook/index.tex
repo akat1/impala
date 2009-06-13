@@ -29,19 +29,32 @@
 %
 % $Id$
 
-\section{Rozruch systemu}
 
-% ten dzia³ jest zama³y, trzeba go wrzuciæ gdzie¶ indziej :)
+\documentclass[a4paper,12pt]{report}
 
-J±dro systemu operacyjnego jest ³adowane przez program \emph{GRUB}. Plik j±dra
-zawiera w sobie informacje dla programu ³aduj±cego w jaki adres nale¿y je odczytaæ
-oraz gdzie znajduje siê procedura uruchamiaj±ca. 
+\usepackage{polski}
+\usepackage[latin2]{inputenc}
+\usepackage{a4wide}
+\usepackage{graphicx}
 
-Kod odpowiedzialny za rozruch jest umieszczony w sekcji \texttt{.bootstrap} w pliku
-jadra. Jego zadanie to uruchomiæ podstawow± obs³ugê sprzêtu (\texttt{init\_x86()}),
-a nastêpnie uruchamiæ g³ówn± procedurê (\texttt{kmain()}).
+\author{
+    Artur Koniñski \and
+    Mateusz Kocielski \and
+    Pawe³ Wieczorek
+}
 
-G³ówna procedura j±dra inicjalizuje pokolei podsystemy oraz uruchamia pierwszy program
-u¿ytkownika \texttt{/sbin/init}.
+\title{System operacyjny Impala.\\
+\small{Dokumentacja projektu.}\\
+}
 
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\input{chap1/chap1.tex}
+\input{chap2/chap2.tex}
+\input{chap3/chap3.tex}
+
+\end{document}
 
