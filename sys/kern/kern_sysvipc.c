@@ -120,7 +120,7 @@ ipc_msg_find(proc_t *p, int id)
 {
     ipcmsq_t *m = NULL;
     if (id < 0 && SYSVMSG_MAX < id) return NULL;
-    mutex_lock(&key_lock);
+    MUTEX_LOCK(&key_lock, "sysvmsg");
     if (id == SYSVMSG_MAX)
         m = p->p_ipc_msq;
         else m = &msqs[id];
@@ -142,7 +142,7 @@ ipc_msg_flush(ipcmsq_t *msq)
 void
 ipc_msg_destroy(ipcmsq_t *msq)
 {
-    mutex_lock(&msq->msq_mtx);
+    MUTEX_LOCK(&msq->msq_mtx, "msgdestr");
     KASSERT(msq->msq_refcnt > 0);
     msq->msq_refcnt--;
     mutex_unlock(&msq->msq_mtx);
@@ -202,7 +202,7 @@ ipc_msg_get(proc_t *p, key_t key, int flags, int *id, ipcmsq_t **r)
             p->p_ipc_msq->msq_key = key;
         } else err = -ENOENT;
     } else {
-        mutex_lock(&key_lock);
+        MUTEX_LOCK(&key_lock, "msgget");
         ipckey_t *ipck = list_find(&msq_keys, find_key_eq, key);
         TRACE_IN("ipck = %p", ipck);
         if (ipck && flags & IPC_EXCL) {
@@ -233,7 +233,7 @@ int
 ipc_msg_ctl(ipcmsq_t *msq, int cmd, struct msqid_ds *uds)
 {
     int err = 0;
-    mutex_lock(&msq->msq_mtx);
+    MUTEX_LOCK(&msq->msq_mtx, "msgctrl");
     if (cmd == IPC_STAT) {
         copyout(uds, &msq->msq_ds, sizeof(msq->msq_ds));
     } else
@@ -258,7 +258,7 @@ ipc_msg_snd(ipcmsq_t *msq, const void *uaddr, size_t size, int flags)
     if (size < sizeof(long)) {
         return -EINVAL;
     }
-    mutex_lock(&msq->msq_mtx);
+    MUTEX_LOCK(&msq->msq_mtx, "msgsnd");
     msqmsg_t *msg = kmem_cache_alloc(msg_cache, allocflags);
     if (msg == NULL) {
         mutex_unlock(&msq->msq_mtx);
@@ -282,7 +282,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
     if (size < sizeof(long)) {
         return -EINVAL;
     }
-    mutex_lock(&msq->msq_mtx);
+    MUTEX_LOCK(&msq->msq_mtx, "msgrcv");
     if (type == 0) {
         while (wait && list_length(&msq->msq_data) == 0) {
             mutex_wait(&msq->msq_mtx);

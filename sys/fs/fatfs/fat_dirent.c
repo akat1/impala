@@ -66,6 +66,7 @@ fatfs_dirent_lookup(fatfs_inode_t *inode, fatfs_inode_t **r, const char *name)
     fatfs_dirent_t *entry = NULL;
     while ( (entry = list_next(&inode->un.dir.dirents, entry)) ) {
         if ( str_eq(name,entry->name) ) {
+//             DEBUGF("=%s",entry->name);
             if (!entry->inode) {
                 fatfs_inode_create(inode->fatfs, entry);
             }
@@ -77,29 +78,50 @@ fatfs_dirent_lookup(fatfs_inode_t *inode, fatfs_inode_t **r, const char *name)
     return -1;
 }
 
+#define SDEBUGF(fmt, ap...) do { DEBUGF(fmt, ## ap); /*ssleep(1);*/ } while(0)
 int
 fatfs_dirent_read(fatfs_inode_t *inode)
 {
     if (inode->flags & FATFS_DIR_LOADED) return 0;
-    if (inode->type == FATFS_ROOT) return read_root(inode);
-    lfn_cache_t lfn;
+//     if (inode->type == FATFS_ROOT) return read_root(inode);
     fatfs_t *fatfs = inode->fatfs;
+    lfn_cache_t lfn;
+
+    bool isRoot = inode->type == FATFS_ROOT;
+    int N = (isRoot)? fatfs->secsize : fatfs->clubsize;
+    N /= sizeof(fatfs_dentry_t);
     int i = inode->clustart;
-    DEBUGF("need to load directory from device clu=%u", i);
+
+    lfn_cache_reset(&lfn);
+//     SDEBUGF("need to load directory from device clu=%u/%u %p", i,N, inode);
+//     SDEBUGF("inode=%p vnode=%p fatfs=%p clubuf=%p",
+//         inode, inode->vn, inode->fatfs, inode->clubuf);
     do {
-//         DEBUGF("clu=%u(%x)", i,i);
-        ssleep(1);
+//         SDEBUGF("current clu=%i", i);
+        if (isRoot) {
+//             SDEBUGF("reading sector");
+            iobuf_t *bp = bio_read(fatfs->dev, i);
+            if (ISSET(bp->flags, BIO_ERROR)) {
+                bio_release(bp);
+                goto error;
+            }
+            mem_cpy(inode->clubuf, bp->addr, fatfs->secsize);
+            bio_release(bp);
+            i++;
+        } else { //SDEBUGF("reading cluster");
         if (fatfs_clu_read(fatfs, i, inode)) {
-            return -1;
-        }
+            goto error;
+        }}
         fatfs_dentry_t *dents = inode->clubuf;
-        for (int j = 0; j < fatfs->secsize*fatfs->clusize/sizeof(fatfs_dentry_t); j++) {
+//         SDEBUGF("Interpreting content...");
+        for (int j = 0; j < N; j++) {
             if (dents[j].attr == FATFS_LONGNAME) {
                 lfn_cache_insert(&lfn, &dents[j]);
                 continue;
             }
             if (dents[j].attr == 0 || ISSET(dents[j].attr,FATFS_SKIP))
                 continue;
+//             SDEBUGF("entry");
             fatfs_dirent_t *entry = NEW_DIRENT();
             if (lfn_cache_parse(&lfn, entry->name)) {
                 char *ptr = entry->name;
@@ -118,12 +140,15 @@ fatfs_dirent_read(fatfs_inode_t *inode)
             entry->attr = dents[j].attr;
             entry->size = FAT_D_GET_SIZE(&dents[j]);
             entry->clustart = FAT_D_GET_INDEX(&dents[j]);
+//             DEBUGF("+%s %u %u",entry->name, entry->clustart, entry->size);
             list_insert_tail(&inode->un.dir.dirents, entry);
             lfn_cache_reset(&lfn);
         }
-    } while ( FATFS_UNTIL_EOF(fatfs,i) );
-
+    } while ( (isRoot)? i < fatfs->tablesize :  FATFS_UNTIL_EOF(fatfs,i) );
+    inode->flags |= FATFS_DIR_LOADED;
     return 0;
+error:
+    return -1;
 }
 
 /*============================================================================

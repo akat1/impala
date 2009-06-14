@@ -131,6 +131,7 @@ ISR_syscall(interrupt_frame frame)
 void
 TRAP_unhandled(interrupt_frame f)
 {
+    while(1) __asm__("hlt");
     print_frame("unhandled exception", &f);
     __asm__("hlt");
     while(1);

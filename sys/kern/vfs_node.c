@@ -59,12 +59,14 @@ vnode_alloc()
 void
 vref(vnode_t *vn)
 {
+//     DEBUGF("VREF vn=%p", vn);
     vn->v_refcnt++;
 }
 
 void
 vrele(vnode_t *vn)
 {
+//     DEBUGF("VRELE vn=%p", vn);
     KASSERT(vn->v_refcnt>0);
     vn->v_refcnt--;
     if(vn->v_refcnt == 0) {

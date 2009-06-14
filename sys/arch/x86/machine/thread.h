@@ -36,10 +36,17 @@
 
 typedef struct thread_context thread_context;
 struct thread_context {
+    uint32_t c_eax;
+    uint32_t c_ebx;
+    uint32_t c_ecx;
+    uint32_t c_edx;
+    uint32_t c_esi;
+    uint32_t c_edi;
     uint32_t c_esp;
     uint32_t c_ebp;
     uint32_t c_eflags;
     uint32_t c_cr3;
+    uint32_t c_eip;
     struct interrupt_frame *c_frame;
     ///@todo dodac koprocesor matematyczny
 };

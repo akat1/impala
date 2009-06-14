@@ -142,7 +142,6 @@ list_extract_last(list_t *ls)
     return x;
 }
 
-
 static inline void
 __list_insert_after(list_t *ls, void *xs, void *x)
 {
@@ -291,7 +290,7 @@ list_is_member(list_t *ls, const void *elem)
         if (x == elem) return TRUE;
     }
     return FALSE;
-    
+
 }
 
 #undef __elem_node

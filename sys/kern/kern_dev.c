@@ -35,6 +35,8 @@
 #include <sys/kmem.h>
 #include <sys/errno.h>
 #include <sys/utils.h>
+#include <sys/kernel.h>
+#include <sys/bio.h>
 #include <sys/string.h>
 
 static list_t devs;
@@ -143,6 +145,8 @@ find_this_dev(const devd_t *d, const char *name)
 int
 devd_strategy(devd_t *d, iobuf_t *b)
 {
+    KASSERT(b->dev == d);
+    KASSERT(b->dev && b->dev->priv);
     return d->devsw->d_strategy(d, b);
 }
 

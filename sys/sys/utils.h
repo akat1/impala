@@ -71,7 +71,7 @@ ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
 
 #define DEBUGF(fmt, a...) do {\
     if (!SYSTEM_DEBUG) break;\
-    kprintf("%s: " fmt "\n", __LS(__FILE__), ## a );\
+    kprintf("%s.%03u: " fmt "\n", __LS(__FILE__), __LINE__, ## a );\
     } while (0)
 
 #define TRACE_IN0() TRACE_IN("");
@@ -86,6 +86,8 @@ __LS(const char *file)
     return last;
 }
 
+#else
+#define KASSERT(x) 
 #endif
 #endif
 

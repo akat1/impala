@@ -103,7 +103,7 @@ vm_lpool_alloc(vm_lpool_t *vlp)
 {
     void *x;
     _pool_t *pl;
-    if ( list_length(&vlp->part_pools) > 1 ) {
+    if ( list_length(&vlp->part_pools) > 0 ) {
         pl = list_extract_first(&vlp->part_pools);
     } else {
         pl = list_extract_first(&vlp->empty_pools);
@@ -134,8 +134,12 @@ vm_lpool_free(vm_lpool_t *vlp, void *x)
     p = list_find(&vlp->full_pools, is_in_this_pool, (uintptr_t) x );
     if (p == NULL) {
         p = list_find(&vlp->part_pools, is_in_this_pool, (uintptr_t) x);
+        list_remove(&vlp->part_pools, p);
+    } else {
+        list_remove(&vlp->full_pools, p);
     }
     KASSERT(p != NULL);
+
     list_insert_head(&p->elems, x);
     if ( list_length(&p->elems) == vlp->elems_per_page ) {
         list_insert_head(&vlp->empty_pools, p);

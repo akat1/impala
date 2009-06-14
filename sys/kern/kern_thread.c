@@ -81,6 +81,7 @@ thread_init()
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN;
     curthread->vm_space = &vm_kspace;
+    mem_zero(&curthread->thr_wdescr, sizeof(wdescr_t));
     karg_get_i("stacksize", (int*)&thread_stack_size);
     karg_get_i("kstacksize", (int*)&thread_kstack_size);
 }
@@ -170,7 +171,8 @@ mutex_destroy(mutex_t *m)
  */
 
 void
-mutex_lock(mutex_t *m)
+mutex_lock(mutex_t *m, const char *file, const char *func, int line,
+    const char *descr)
 {
     if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
@@ -178,7 +180,7 @@ mutex_lock(mutex_t *m)
         spinlock_lock(&m->mtx_slock);
         list_insert_tail(&m->mtx_locking, curthread);
         spinlock_unlock(&m->mtx_slock);
-        sched_wait();
+        sched_wait(file,func,line,descr);
     }
 }
 
@@ -336,7 +338,7 @@ cqueue_shutdown(cqueue_t *q)
 void
 cqueue_insert(cqueue_t *q, void *d)
 {
-    mutex_lock(&q->q_mtx);
+    MUTEX_LOCK(&q->q_mtx, "cqueue");
     list_insert_tail(&q->q_data, d);
     mutex_wakeup(&q->q_mtx);
     mutex_unlock(&q->q_mtx);
@@ -354,7 +356,7 @@ void*
 cqueue_extract(cqueue_t *q)
 {
     void *p;
-    mutex_lock(&q->q_mtx);
+    MUTEX_LOCK(&q->q_mtx, "cqueue");
     while ( (p = list_extract_first(&q->q_data)) == NULL ) {
         mutex_wait(&q->q_mtx);
     }
@@ -376,7 +378,7 @@ semaph_init(semaph_t *sem)
 void
 semaph_post(semaph_t *sem)
 {
-    mutex_lock(&sem->mtx);
+    MUTEX_LOCK(&sem->mtx, "semaph");
     sem->count++;
     mutex_wakeup(&sem->mtx);
     mutex_unlock(&sem->mtx);
@@ -385,7 +387,7 @@ semaph_post(semaph_t *sem)
 void
 semaph_wait(semaph_t *sem)
 {
-    mutex_lock(&sem->mtx);
+    MUTEX_LOCK(&sem->mtx, "semaph");
     if (sem->count == 0) {
         mutex_wait(&sem->mtx);
     }

@@ -140,7 +140,7 @@ init_kernel()
     cons_init();
     sysvipc_init();
     dev_initdevs();
-    ssleep(1);
+    SSLEEP(1, "kinit");
     kprintf("kernel initialized\n");
     kprintf("current time: %i\n", curtime.tv_sec);
 }

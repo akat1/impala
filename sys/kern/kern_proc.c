@@ -192,7 +192,7 @@ proc_destroy(proc_t *proc)
 void
 proc_destroy_threads(proc_t *proc)
 {
-    mutex_lock(&proc->p_mtx);
+    MUTEX_LOCK(&proc->p_mtx, "proc");
     thread_t *t;
     while ( (t = list_extract_first(&(proc->p_threads))) )
         thread_destroy(t);
@@ -202,7 +202,7 @@ proc_destroy_threads(proc_t *proc)
 void
 proc_reset_vmspace(proc_t *p)
 {
-    mutex_lock(&p->p_mtx);
+    MUTEX_LOCK(&p->p_mtx, "proc");
     if (p->vm_space) {
         vm_space_destroy(p->vm_space);
     } else {
@@ -216,7 +216,7 @@ proc_reset_vmspace(proc_t *p)
 thread_t *
 proc_create_thread(proc_t *proc, uintptr_t entry)
 {
-    mutex_lock(&proc->p_mtx);
+    MUTEX_LOCK(&proc->p_mtx, "proc");
     thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
     t->thr_entry_point = (void*)entry;
@@ -231,7 +231,7 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
 bool
 proc_has_thread(proc_t *p, thread_t *t)
 {
-    mutex_lock(&p->p_mtx);
+    MUTEX_LOCK(&p->p_mtx, "proc");
     bool x = list_is_member(&p->p_threads, t);
     mutex_unlock(&p->p_mtx);
     return x;
@@ -256,7 +256,7 @@ proc_is_zombie(proc_t *p)
 void
 proc_insert_child(proc_t *proc, proc_t *child)
 {
-    mutex_lock(&proc->p_mtx);
+    MUTEX_LOCK(&proc->p_mtx, "proc");
     list_insert_tail(&(proc->p_children), child);
     child->p_ppid = proc->p_pid;
     mutex_unlock(&proc->p_mtx);

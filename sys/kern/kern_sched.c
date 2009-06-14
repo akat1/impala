@@ -71,8 +71,7 @@ sched_init()
  * Podprogram planisty.
  *
  * Procedura jest uruchamiana przez program obs³ugi przerwania
- * zegara. Odlicza odpowiedni kwant czasu i informuje resztê j±dra, o potrzebie
- * zmiany konktekstu.
+ * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
  */
 
 void
@@ -95,7 +94,6 @@ sched_action()
 void
 __sched_yield()
 {
-    KASSERT(CIPL == IPL_SOFTCLOCK);
     thread_t *n = select_next_thread(); // wymaganie: przerwanie zegarowe = ON
 //     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
     spinlock_unlock(&sprq); //nikt nam nie zablokuje, CIPL == IPL_SOFTCLOCK
@@ -208,15 +206,17 @@ sched_unlock_and_wait(mutex_t *m)
 
 /// Usypia dzia³aj±cy w±tek.
 void
-sched_wait()
+sched_wait(const char *fl, const char *fn, int l, const char *d)
 {
     spinlock_lock(&sprq);
 //    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
+    THREAD_SET_WDESCR(curthread, fl, fn, l, d);
     int s = splbio();
     __sched_yield();
     splx(s);
+    curthread->thr_wdescr.descr = "running";
 }
 
 static inline void
@@ -252,10 +252,10 @@ sched_wakeup(thread_t *n)
  */
 
 void
-ssleep(uint stime)
+ssleep(uint stime, const char *fl, const char *fn, int l, const char *d)
 {
     curthread->thr_wakeup_time = clock_ticks + stime * HZ;
-    sched_wait();
+    sched_wait(fl, fn, l, d);
 }
 
 /**
@@ -264,10 +264,10 @@ ssleep(uint stime)
  */
 
 void
-msleep(uint mtime)
+msleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
 {
     curthread->thr_wakeup_time = clock_ticks + (mtime * HZ)/1000;
-    sched_wait();
+    sched_wait(fl, fn, l, d);
 }
 
 /// Niszczy aktualny w±tek.
@@ -336,7 +336,7 @@ sleepq_init(sleepq_t *q)
 }
 
 void
-sleepq_wait(sleepq_t *q)
+sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d)
 {
     int s = splhigh();
     list_insert_tail(&q->sq_waiting, curthread);
@@ -346,10 +346,11 @@ sleepq_wait(sleepq_t *q)
     spinlock_lock(&sprq);
     splx(s);
     s = splbio();
+    spinlock_unlock(&sprq);
     UNSET(curthread->thr_flags,THREAD_RUN);
     SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
-    __sched_yield();
     splx(s);
+    sched_wait(fl, fn, l, d);
 }
 
 void

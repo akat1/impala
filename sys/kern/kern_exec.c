@@ -179,15 +179,15 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     vm_segmap(vm_space->seg_text, _TEXT, exec->a_text, &TEXT);
     vm_segmap(vm_space->seg_data, _DATA, exec->a_data + exec->a_bss, &DATA);
     mem_zero(DATA, exec->a_data + exec->a_bss);
-    DEBUGF("reading data");
+//     DEBUGF("reading .text");
     vnode_rdwr(UIO_READ, einfo->vp, TEXT, exec->a_text, N_TXTOFF(*exec));
+//     DEBUGF("reading .data");
     vnode_rdwr(UIO_READ, einfo->vp, DATA, exec->a_data, N_DATAOFF(*exec));
-
+//     DEBUGF("preparing proc");
     thread_t *t = proc_create_thread(p, exec->a_entry);
     vm_space_create_stack(vm_space, &t->thr_stack, thread_stack_size);
     t->thr_stack_size = thread_stack_size;
     thread_prepare(t);
-
     sched_insert(t);
 
     return 0;

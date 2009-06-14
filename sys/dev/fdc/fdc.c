@@ -583,8 +583,11 @@ fd_strategy(devd_t *d, iobuf_t *bp)
     bioq_lock(&fd->ctrl->bioq);
     bioq_enqueue(&fd->ctrl->bioq, bp);
     if (spinlock_trylock(&fd->ctrl->busy)) {
+        int s = splbio();
         fdc_work(fd->ctrl);
+        splx(s);
     }
     bioq_unlock(&fd->ctrl->bioq);
+//     msleep(50);
     return 0;
 }

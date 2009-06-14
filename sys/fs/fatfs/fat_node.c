@@ -169,10 +169,10 @@ fatfs_read(vnode_t *v, uio_t *u, int flags)
     size_t wsize = fatfs->clusize*fatfs->secsize;
     size_t xfer = 0;
     u->resid = u->size;
-    DEBUGF("!!!!!!!!transfer off=%p size=%x", u->offset, u->size);
+//     DEBUGF("!!!!!!!!transfer off=%p size=%x", u->offset, u->size);
     do {
-         DEBUGF("window(%x,%x) :- off=%x resid=%u", window, window+wsize,
-             u->offset, u->resid);
+//          DEBUGF("window(%x,%x) :- off=%x resid=%u", window, window+wsize,
+//              u->offset, u->resid);
         if ( INRNG_COL(u->offset,window,wsize) ) {
             off_t off = u->offset - window;
             int min = MIN(wsize-off, u->resid);
@@ -184,7 +184,7 @@ fatfs_read(vnode_t *v, uio_t *u, int flags)
 //         ssleep(2);
         window += wsize;
     } while ( FATFS_UNTIL_EOF(fatfs, clu) && u->resid );
-    DEBUGF("readed %u bytes", xfer);
+//     DEBUGF("readed %u bytes", xfer);
     return xfer;
 }
 
@@ -220,7 +220,6 @@ int
 fatfs_getattr(vnode_t *v, vattr_t *attr)
 {
     fatfs_inode_t *inode = v->v_private;
-    DEBUGF("getattr is fake :)");
     attr->va_uid = attr->va_gid = 0;
     attr->va_mode = S_IRWXU|S_IRWXG|S_IRWXO;
     attr->va_type = v->v_type;

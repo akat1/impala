@@ -62,9 +62,9 @@ sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args)
     }
 
     if ( args->req->tv_sec > 0 )
-        ssleep(args->req->tv_sec);
+        SSLEEP(args->req->tv_sec, "nanosleep");
     if ( args->req->tv_nsec > 0 )
-        msleep(args->req->tv_nsec); // XXX: mili
+        MSLEEP(args->req->tv_nsec, "nanosleep"); // XXX: mili
 
 
     return -EOK;

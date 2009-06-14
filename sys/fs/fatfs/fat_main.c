@@ -91,8 +91,8 @@ fat_mount(vfs_t *fs)
     fatfs->vfs = fs;
     fatfs->tables = sblock->tables;
     fatfs->tablesize = FAT_GET_TABLESIZE(sblock);
-    fatfs->clusize  = sblock->clusize;
     fatfs->secsize = 512;
+    fatfs->clusize  = sblock->clusize;
     fatfs->blkno_fat[0] = FAT_GET_RESERVED(sblock);
     fatfs->blkno_fat[1] = fatfs->tablesize + fatfs->blkno_fat[0];
     fatfs->blkno_root = FAT_GET_RESERVED(sblock)
@@ -100,10 +100,11 @@ fat_mount(vfs_t *fs)
     fatfs->blkno_data = fatfs->blkno_root + (FAT_GET_MAXROOT(sblock)*32)/512;
 
     bio_release(bp);
+    fatfs->clubsize = fatfs->secsize * fatfs->clusize;
 
-    DEBUGF("FAT12: diskmap FAT1=%u FAT2=%u ROOT=%u DATA=%u",
+    DEBUGF("FAT12: diskmap FAT1=%u FAT2=%u ROOT=%u DATA=%u CS=%u",
         fatfs->blkno_fat[0], fatfs->blkno_fat[1], fatfs->blkno_root,
-        fatfs->blkno_data);
+        fatfs->blkno_data, fatfs->clubsize);
 
     for (int i = 0; i < 2 && i < fatfs->tables; i++) {
         if ( (err = read_fat(fatfs, i)) ) {
@@ -121,6 +122,7 @@ fat_mount(vfs_t *fs)
     fatfs->clu_last = FAT12_CLU_LAST;
     fatfs->dev = fs->vfs_mdev;
     fatfs_inode_prepare(fatfs, &rootinode, FATFS_ROOT);
+    rootinode.clustart = fatfs->blkno_root;
     fatfs->root = fatfs_getvnode(&rootinode);
 
     return 0;
@@ -136,7 +138,9 @@ fat_unmount(vfs_t *fs)
 vnode_t *
 fat_getroot(vfs_t *fs)
 {
-    return ((fatfs_t*)(fs->vfs_private))->root;
+    fatfs_t *fatfs = fs->vfs_private;
+    vref(fatfs->root);
+    return fatfs->root;
 }
 
 void
@@ -163,10 +167,12 @@ read_fat(fatfs_t *fatfs, int x)
 }
 
 
+#define SDEBUG(fmt, ap...) do { DEBUGF(fmt, ## ap); ssleep(1); } while(0)
+
 void *
 fatfs_clu_alloc(fatfs_t *fatfs)
 {
-    return kmem_alloc(fatfs->clusize*512, KM_SLEEP);
+    return kmem_alloc(fatfs->clubsize, KM_SLEEP);
 }
 
 int
@@ -191,6 +197,7 @@ fatfs_clu_free(fatfs_t *fatfs, void *ptr)
     kmem_free(ptr);
 }
 
+
 // [AAABBB][CCCDDD]
 uint
 fatfs_fat_next(fatfs_t *fatfs, uint i)
@@ -201,8 +208,8 @@ fatfs_fat_next(fatfs_t *fatfs, uint i)
 
     a = (fat & 0xfff);
     b = (fat & 0xfff0) >>4;
-//     DEBUGF("trying to get %u entry, n=%u %x=(%u,%u)",
-//         i, n, fat, a, b);
+//      DEBUGF("trying to get %u entry, n=%u %x=(%u,%u)",
+//          i, n, fat, a, b);
     if ( (3*i) & 1) {
         return b;
     } else {

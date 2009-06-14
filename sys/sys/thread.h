@@ -62,6 +62,13 @@ struct mutex {
     list_node_t   L_user;
 };
 
+typedef struct wdescr wdescr_t;
+struct wdescr {
+    int              line;
+    const char      *file;
+    const char      *func;
+    const char      *descr;
+};
 
 /// w±tek procesora.
 struct thread {
@@ -77,6 +84,7 @@ struct thread {
     size_t          thr_kstack_size;///< rozmiar stosu dla jadra
     proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
     sleepq_t       *thr_sleepq;     ///< kolejka w której ¶pi w±tek
+    wdescr_t        thr_wdescr;
     mutex_t         thr_mtx;        ///< do synchronizacji
     bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
@@ -84,6 +92,14 @@ struct thread {
     list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
 };
+
+#define THREAD_SET_WDESCR(t,fl,fn,l,d)\
+    do {\
+        (t)->thr_wdescr.line = l;\
+        (t)->thr_wdescr.file = fl;\
+        (t)->thr_wdescr.func = fn;\
+        (t)->thr_wdescr.descr = d;\
+    } while (0)
 
 struct sleepq {
     mutex_t     sq_mtx;
@@ -150,7 +166,8 @@ void thread_fork(thread_t *t, thread_t *ct);
 void thread_join(thread_t *t);
 
 void mutex_init(mutex_t *m, int flags);
-void mutex_lock(mutex_t *m);
+void mutex_lock(mutex_t *m, const char *, const char *, int , const char *);
+#define MUTEX_LOCK(m,d) mutex_lock((m),__FILE__,__func__,__LINE__,(d))
 bool mutex_trylock(mutex_t *m);
 void mutex_unlock(mutex_t *m);
 void mutex_destroy(mutex_t *m);
@@ -170,7 +187,8 @@ void semaph_destroy(semaph_t *s);
 
 void sleepq_init(sleepq_t *q);
 void sleepq_destroy(sleepq_t *q);
-void sleepq_wait(sleepq_t *q);
+#define SLEEPQ_WAIT(q,d) sleepq_wait(q, __FILE__, __func__, __LINE__, d)
+void sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d);
 void sleepq_wait_ms(sleepq_t *q, uint ms);
 int sleepq_wait_i(sleepq_t *q);
 void sleepq_wakeup(sleepq_t *q);

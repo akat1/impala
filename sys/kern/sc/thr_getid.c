@@ -39,7 +39,8 @@ int sc_thr_getid(thread_t *p, syscall_result_t *r);
 int
 sc_thr_getid(thread_t *t, syscall_result_t *r)
 {
-    return (tid_t)t;
+    r->result = (tid_t)t;
+    return 0;
 }
 
 

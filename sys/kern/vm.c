@@ -39,8 +39,6 @@
 #include <sys/utils.h>
 #include <sys/errno.h>
 
-/// Globalny zamek pamiêci wirtualnej.
-static spinlock_t vm_sp;
 vm_lpool_t vm_unused_regions;
 list_t vm_spaces;
 vm_space_t vm_kspace;
@@ -49,15 +47,21 @@ vm_space_t vm_kspace;
 list_t vm_free_pages;
 vm_lpool_t vm_lpool_segments;
 
+static mutex_t vm_mtx;
+static bool sync = FALSE;
+#define VM_LOCK() if (sync) mutex_lock(&vm_mtx, __FILE__, __func__, __LINE__, "VM" )
+#define VM_UNLOCK() if (sync) mutex_unlock(&vm_mtx)
+
 /// Inicjalizuje system pamiêci wirtualnej.
 void
 vm_init()
 {
-    spinlock_init(&vm_sp);
+    mutex_init(&vm_mtx, MUTEX_NORMAL);
     list_create(&vm_spaces, offsetof(vm_space_t, L_spaces), FALSE);
     list_insert_head(&vm_spaces, &vm_kspace);
     vm_lpool_create(&vm_lpool_segments, offsetof(vm_seg_t, L_segments),
         sizeof(vm_seg_t), VM_LPOOL_NORMAL);
+    sync = TRUE;
 }
 
 
@@ -65,14 +69,14 @@ vm_init()
 void
 vm_lock()
 {
-    spinlock_lock(&vm_sp);
+    VM_LOCK();
 }
 
 /// Zwalnia zamek systemu pamiêci wirtualnej.
 void
 vm_unlock()
 {
-    spinlock_unlock(&vm_sp);
+    VM_UNLOCK();
 }
 
 /**
@@ -82,8 +86,10 @@ vm_unlock()
 vm_page_t *
 vm_alloc_page()
 {
+    VM_LOCK();
     vm_page_t *p = list_extract_first(&vm_free_pages);
     if (p) vm_physmem_free--;
+    VM_UNLOCK();
     return p;
 }
 
@@ -94,9 +100,11 @@ vm_alloc_page()
 void
 vm_free_page(vm_page_t *p)
 {
+    VM_LOCK();
     p->flags = 0;
     list_insert_head(&vm_free_pages, p);
     vm_physmem_free++;
+    VM_UNLOCK();
 }
 
 vm_paddr_t
@@ -129,30 +137,40 @@ vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res)
 int
 vm_remap(vm_addr_t vaddr, vm_size_t s, void *res)
 {
+    VM_LOCK();
     s = PAGE_ROUND(s);
     vm_addr_t *vres = res;
-    if (vm_seg_reserve(vm_kspace.seg_data, s, res))
+    if (vm_seg_reserve(vm_kspace.seg_data, s, res)) {
+        VM_UNLOCK();
         return -1;
+    }
     vm_pmap_map(&vm_kspace.pmap, *vres, &curthread->vm_space->pmap,
         vaddr, s);
+    VM_UNLOCK();
     return 0;
 }
 
 int
 vm_physmap(vm_paddr_t paddr, vm_size_t s, void *res)
 {
+    VM_LOCK();
     s = PAGE_ROUND(s);
     vm_addr_t *vres = res;
-    if (vm_seg_reserve(vm_kspace.seg_data, s, res))
+    if (vm_seg_reserve(vm_kspace.seg_data, s, res)) {
+        VM_UNLOCK();
         return -1;
+    }
     vm_pmap_physmap(&vm_kspace.pmap, *vres, paddr, s, vm_kspace.seg_data->prot);
+    VM_UNLOCK();
     return 0;
 }
 
 void
 vm_unmap(vm_addr_t addr, vm_size_t size)
 {
+    VM_LOCK();
     vm_seg_free(vm_kspace.seg_data, addr, size);
+    VM_UNLOCK();
 }
 
 int
@@ -160,7 +178,7 @@ vm_validate_string(const char *str, int maxlen)
 {
     vm_pmap_t *pmap = &curthread->vm_space->pmap;
     int old_page = PAGE_NUM(str);
-    
+
     for(int i=0; i<maxlen; i++) {
         if(old_page != PAGE_NUM(str+i)) {
             old_page = PAGE_NUM(str+i);

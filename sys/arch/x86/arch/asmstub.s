@@ -64,14 +64,22 @@
 .equ \name, \num*4
 .endm
 
-.equ KSTACKSIZE, 0x30000
+.equ KSTACKSIZE, 0x16000
 .comm kstack, KSTACKSIZE, 32
 
 
-offset32    CTX_ESP,    0
-offset32    CTX_EBP,    1
-offset32    CTX_EFLAGS, 2
-offset32    CTX_CR3,    3
+offset32    CTX_EAX,    0
+offset32    CTX_EBX,    1
+offset32    CTX_ECX,    2
+offset32    CTX_EDX,    3
+offset32    CTX_ESI,    4
+offset32    CTX_EDI,    5
+offset32    CTX_ESP,    6
+offset32    CTX_EBP,    7
+offset32    CTX_EFLAGS, 8
+offset32    CTX_CR3,    9
+offset32    CTX_EIP,    10
+
 
 cmdline: .long 0
 
@@ -120,7 +128,7 @@ cpu_resume:
     iret
 
 
-thread_context_load:
+OLDthread_context_load:
     enter $0, $0
     movl 8(%ebp), %edi
     pushl CTX_EFLAGS(%edi)
@@ -134,7 +142,7 @@ thread_context_load:
     ret
 
 
-thread_context_store:
+OLDthread_context_store:
     enter $0, $0
     movl 8(%ebp), %edi
     pushfl
@@ -145,6 +153,43 @@ thread_context_store:
     movl %eax, CTX_CR3(%edi)
     movl $0x1, %eax
     leave
+    ret
+
+thread_context_store:
+    movl 4(%esp), %eax
+    movl %ebx, CTX_EBX(%eax)
+    movl %ecx, CTX_ECX(%eax)
+    movl %edx, CTX_EDX(%eax)
+    movl %esi, CTX_ESI(%eax)
+    movl %edi, CTX_EDI(%eax)
+    movl %ebp, CTX_EBP(%eax)
+    movl %esp, CTX_ESP(%eax)
+    movl (%esp), %ebx
+    movl %ebx, CTX_EIP(%eax)
+    movl %cr3, %ebx
+    movl %ebx, CTX_CR3(%eax)
+    pushf
+    popl CTX_EFLAGS(%eax)
+    movl $1, %eax
+    ret
+
+thread_context_load:
+    movl 4(%esp), %ebx
+    movl CTX_EDX(%ebx), %edx
+    movl CTX_ESI(%ebx), %esi
+    movl CTX_EDI(%ebx), %edi
+    movl CTX_EBP(%ebx), %ebp
+    movl CTX_ESP(%ebx), %esp
+    movl CTX_EIP(%ebx), %ecx
+    movl %ecx, (%esp)
+    movl CTX_ECX(%ebx), %ecx
+    pushl CTX_EFLAGS(%ebx)
+    popfl
+    movl CTX_CR3(%ebx), %eax
+    movl %eax, %cr3
+    movl CTX_EBX(%ebx), %ebx
+    movl $0, %eax
+
     ret
 
 cpu_gdt_load:

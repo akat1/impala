@@ -46,6 +46,7 @@
 #include <machine/interrupt.h>
 // #define splbio() 1
 // #define splx(x) x = 1
+
 /** @file
  * Ten plik zawiera implementacjê procedur odpowiedzialnych za wej¶cie-wyj¶cie
  * na urz±dzeniach blokowych. Ten mechanizm (jak wiele innych) jest wzorowany
@@ -63,7 +64,7 @@
 enum {
     BUFHASH_P1      = 461,      ///< parametr 'a' funkcji haszuj±cej
     BUFHASH_P2      = 812,      ///< parametr 'b' funkcji haszuj±cej
-    BUFHASH_P_M     = 701,      ///< liczba pierwsza 'm'
+    BUFHASH_P_M     = 2, //701,      ///< liczba pierwsza 'm'
     BUFHASH_P_P     = 1117,     ///< liczba pierwsza 'p'
     NBUF            = 4096      ///< ilo¶æ buforów w pamiêci podrêcznej
 };
@@ -85,7 +86,11 @@ static iobuf_t *bufhash_find(devd_t *dev, blkno_t b);
 static iobuf_t *bufhash_getfree(void);
 static void bufhash_insert(iobuf_t *bp);
 static void bufhash_remove(iobuf_t *bp);
-static void bufhash_putfree_head(iobuf_t *bp);
+static void bufhash_remfree(iobuf_t *bp);
+static void bufhash_lock(void);
+static void bufhash_unlock(void);
+
+//static void bufhash_putfree_head(iobuf_t *bp);
 void bufhash_putfree_tail(iobuf_t *bp);
 
 static void buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize);
@@ -120,47 +125,57 @@ bio_init()
  * Procedury odpowiedzialne za zarz±dzanie tablic± haszuj±c±.
  */
 
+void
+bufhash_lock()
+{
+    MUTEX_LOCK(&bufhash.mtx, "bufhash");
+}
+
+void
+bufhash_unlock()
+{
+    mutex_unlock(&bufhash.mtx);
+}
+
+
 iobuf_t *
 bufhash_find(devd_t *dev, blkno_t b)
 {
-    mutex_lock(&bufhash.mtx);
     list_t *l = BUFHASH(dev, b);
-//     DEBUGF("BUFHASH FIND dev=/dev/%s blkno=%u hash=%u", dev->name,
-//         b, __(___( (uintptr_t)dev, b)));
+//     int h = __(___( (uintptr_t)dev, b));
+
+//      DEBUGF("BUFHASH FIND dev=/dev/%s blkno=%u hash=%u", dev->name, b, h);
     iobuf_t *bp = NULL;
+    int s = splbio();
     while ( (bp = list_next(l, bp)) ) {
+//         kprintf("%p\n", bp);
         if (bp->dev != dev || bp->blkno != b) continue;
-        mutex_unlock(&bufhash.mtx);
+        splx(s);
         return bp;
     }
-    mutex_unlock(&bufhash.mtx);
+    splx(s);
     return NULL;
 }
 
 iobuf_t *
 bufhash_getfree()
 {
-    mutex_lock(&bufhash.mtx);
     iobuf_t *bp = NULL;
     while ( list_length(&bufhash.free) == 0 ) {
         mutex_wait(&bufhash.mtx);
     }
-    int s = splbio();
     bp = list_extract_first(&bufhash.free);
     UNSET(bp->flags, BIO_VALID);
-    splx(s);
-    mutex_unlock(&bufhash.mtx);
     return bp;
 }
 
 void
 bufhash_insert(iobuf_t *bp)
 {
+    if ( ISSET(bp->flags, BIO_CACHE) ) return;
     list_t *l = BUFHASH(bp->dev, bp->blkno);
-    mutex_lock(&bufhash.mtx);
-    list_insert_tail(l, bp);
     SET(bp->flags, BIO_CACHE);
-    mutex_unlock(&bufhash.mtx);
+    list_insert_tail(l, bp);
 }
 
 void
@@ -168,30 +183,29 @@ bufhash_remove(iobuf_t *bp)
 {
     if ( ISUNSET(bp->flags, BIO_CACHE) ) return;
     list_t *l = BUFHASH(bp->dev, bp->blkno);
-    mutex_lock(&bufhash.mtx);
     list_remove(l, bp);
-    UNSET(bp->flags,BIO_CACHE);
+    UNSET(bp->flags, BIO_CACHE);
     mutex_unlock(&bufhash.mtx);
 }
 
+void
+bufhash_remfree(iobuf_t *bp)
+{
+    list_remove(&bufhash.free, bp);
+}
+/*
 void
 bufhash_putfree_head(iobuf_t *bp)
 {
-    mutex_lock(&bufhash.mtx);
-    int s = splbio();
     list_insert_head(&bufhash.free, bp);
-    splx(s);
-    mutex_unlock(&bufhash.mtx);
 }
-
+*/
 void
 bufhash_putfree_tail(iobuf_t *bp)
 {
-    mutex_lock(&bufhash.mtx);
-    int s = splbio();
     list_insert_tail(&bufhash.free, bp);
-    splx(s);
-    mutex_unlock(&bufhash.mtx);
+    mutex_wakeup_all(&bufhash.mtx);
+
 }
 
 /*============================================================================
@@ -248,7 +262,36 @@ buf_destroy(iobuf_t *bp)
  * Interfejs zewnêtrzny BIO
  */
 
+iobuf_t *
+bio_getblk(devd_t *d, blkno_t n)
+{
+    iobuf_t *bp;
+    bufhash_lock();
+    int s = splbio();
+    while ( (bp = bufhash_find(d,n)) ) {
+        if ( ISSET(bp->flags, BIO_BUSY) ) {
+            bufhash_unlock();
+            SLEEPQ_WAIT(&bp->sleepq, "getblk");
+            bufhash_lock();
+            continue;
+        }
+        SET(bp->flags, BIO_BUSY);
+        bufhash_remove(bp);
+        bufhash_remfree(bp);
+        break;
+    }
 
+    if (!bp) {
+        bp = bufhash_getfree();
+    }
+    buf_alloc(bp, d, n, 512);
+    bufhash_insert(bp);
+    bufhash_unlock();
+    splx(s);
+    return bp;
+}
+
+#if 0
 iobuf_t *
 bio_getblk(devd_t *d, blkno_t n)
 {
@@ -256,15 +299,20 @@ bio_getblk(devd_t *d, blkno_t n)
     do {
         bp = bufhash_find(d, n);
         if (bp) {
+            int s = splbio();
             if ( ISSET(bp->flags,BIO_BUSY) ) {
-//                 DEBUGF("getblk blk %u on %s found BUSY buffer in cache",
-//                     n, d->name);
+      //           DEBUGF("getblk blk %u on %s found BUSY buffer in cache",
+       //              n, d->name);
                 SET(bp->flags,BIO_WANTED);
+                splx(s);
                 sleepq_wait(&bp->sleepq);
                 bp = NULL;
             } else {
-//                 DEBUGF("getblk blk %u on %s found buffer in cache",
-//                     n, d->name);
+                SET(bp->flags, BIO_BUSY);
+                splx(s);
+                bufhash_remfree(bp);
+  //              DEBUGF("getblk blk %u on %s found buffer in cache",
+    //                n, d->name);
                 return bp;
             }
         } else {
@@ -282,6 +330,7 @@ bio_getblk(devd_t *d, blkno_t n)
     bufhash_insert(bp);
     return bp;
 }
+#endif
 
 iobuf_t *
 bio_read(devd_t *d, blkno_t n)
@@ -290,9 +339,12 @@ bio_read(devd_t *d, blkno_t n)
     if ( ISUNSET(bp->flags,BIO_VALID) ) {
 //         DEBUGF("read blk %u on %s buffer data is invalid, starting I/O",
 //             n, d->name);
+//        DEBUGF("bp=%p", bp);
         bp->oper = BIO_READ;
         UNSET(bp->flags, BIO_DONE);
+//        DEBUGF("strategy %p",d);
         devd_strategy(d, bp);
+//        DEBUGF("wait");
         bio_wait(bp);
     }
     return bp;
@@ -301,25 +353,18 @@ bio_read(devd_t *d, blkno_t n)
 void
 bio_write(iobuf_t *bp)
 {
-    bp->oper = BIO_WRITE;
-    devd_strategy(bp->dev, bp);
-    if ( ISSET(bp->flags,BIO_DELWRI) ) {
-        bufhash_putfree_head(bp);
-    } else {
-        bio_wait(bp);
-        bio_release(bp);
-    }
-
 }
 
 void
 bio_release(iobuf_t *bp)
 {
+    bufhash_lock();
     int s = splbio();
     UNSET(bp->flags,BIO_BUSY|BIO_DONE);
     bufhash_putfree_tail(bp);
     sleepq_wakeup(&bp->sleepq);
     splx(s);
+    bufhash_unlock();
 }
 
 void
@@ -347,7 +392,7 @@ bio_wait(iobuf_t *bp)
 {
     int s = splbio();
     if ( ISUNSET(bp->flags,BIO_DONE) ) {
-        sleepq_wait(&bp->sleepq);
+        SLEEPQ_WAIT(&bp->sleepq, "biowait");
     }
     splx(s);
 }
@@ -405,7 +450,7 @@ bioq_dequeue(bio_queue_t *q)
 void
 bioq_lock(bio_queue_t *q)
 {
-    mutex_lock(&q->bq_mtx);
+    MUTEX_LOCK(&q->bq_mtx, "bioqueue");
 }
 
 void

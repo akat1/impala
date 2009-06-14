@@ -1,4 +1,18 @@
 # $Id$
 
+define adder
+    if $argc == 2
+        print $arg0 + $arg1
+    end
+end
+
+# zakomentuj poni¿sz± linie je¿eli nie u¿ywasz Bochs
+# set can-use-hw-watchpoints 0
+
+#display /5i $pc
+#display curthread->thr_wdescr
+
 target remote 127.0.0.1:1234
+break panic
+
 

@@ -76,7 +76,7 @@ void
 vfs_register(const char *name, vfs_ops_t *ops)
 {
     // nie sprawdzamy czy istnieje ju¿ taki system plików.
-    mutex_lock(&global_lock);
+    MUTEX_LOCK(&global_lock, "vfs");
     vfs_conf_t *vc = kmem_alloc( sizeof(*vc), KM_SLEEP);
     vc->name = name;
     vc->ops = ops;
@@ -88,7 +88,7 @@ vfs_conf_t *
 vfs_byname(const char *name)
 {
     vfs_conf_t *c;
-    mutex_lock(&global_lock);
+    MUTEX_LOCK(&global_lock, "vfs");
     c = list_find(&filesystems, is_this_fsname, name);
     mutex_unlock(&global_lock);
     return c;
@@ -123,25 +123,25 @@ vfs_create(vfs_t **fs, const char *fstype)
 void
 vfs_mountroot()
 {
-    const char *_rootdev = "fd0";
-    // Na sztywno wpisane mfs:/dev/md0
-    vnode_t *devn = NULL;
-
-    karg_get_s("rootdev", &_rootdev);
-    DEBUGF("trying to mount from fatfs:/dev/%s", _rootdev);
-    if (vnode_opendev(_rootdev, 0/*O_RDWR*/, &devn) != 0) {
-        panic("cannot open root device %s", _rootdev);
-    }
+//     const char *_rootdev = "fd0";
+//     // Na sztywno wpisane mfs:/dev/md0
+//     vnode_t *devn = NULL;
+// 
+//     karg_get_s("rootdev", &_rootdev);
+//     DEBUGF("trying to mount from fatfs:/dev/%s", _rootdev);
+//     if (vnode_opendev(_rootdev, 0/*O_RDWR*/, &devn) != 0) {
+//         panic("cannot open root device %s", _rootdev);
+//     }
 
     vfs_t *fs;
     vfs_create(&fs, "mfs");
     if (!fs) {
         panic("cannot create root mount point");
     }
-    if(!devn) {
-        panic("Internal error - opendev succeded and devn NULL");
-    }
-    fs->vfs_mdev = devn->v_dev;
+//    if(!devn) {
+//        panic("Internal error - opendev succeded and devn NULL");
+//    }
+    fs->vfs_mdev = NULL;//devn->v_dev;
     fs->vfs_mpoint = NULL;  //montuj nigdzie -> twórz samodzielne drzewko
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");

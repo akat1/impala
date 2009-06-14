@@ -430,16 +430,10 @@ mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)
 int
 mfs_mount(vfs_t *fs)
 {
-    iobuf_t *bp;
     vnode_t *dv = NULL;
     tmp_vnode_dev(fs->vfs_mdev, &dv);
     if(!dv) {
         DEBUGF("cannot open dev");
-        return -1;
-    }
-    bp = bio_read(fs->vfs_mdev, 2240);
-    if (!bp) {
-        DEBUGF("I/O error");
         return -1;
     }
     mfs_data_t *mfs = kmem_zalloc(sizeof(mfs_data_t), KM_SLEEP);

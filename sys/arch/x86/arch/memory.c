@@ -140,6 +140,8 @@ vm_low_init()
     _collect_pages();
     create_kernel_space();
     initialize_internal();
+    // Ok, mo¿emy w³±czyæ globalne stronki PentiumPro(i686)
+    cpu_set_cr4(cpu_get_cr4() | CR4_PGE);
 }
 
 vm_page_t *page;

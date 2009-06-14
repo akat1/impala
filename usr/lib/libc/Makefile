@@ -78,6 +78,7 @@ SRCS=\
     thr/thr_create.c\
     thr/thr_destroy.c\
     thr/thr_getarg.c\
+    thr/thr_getid.c\
     time/nanosleep.c\
     unistd/chdir.c\
     unistd/close.c\

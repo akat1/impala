@@ -362,7 +362,7 @@ tty_kill(tty_t *tty)
 void
 clist_wait(clist_t *l)
 {
-    sleepq_wait(l->slpq);
+    SLEEPQ_WAIT(l->slpq, "ttyin");
 }
 
 void

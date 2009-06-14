@@ -178,10 +178,11 @@ void cpu_user_mode(void);
 uint32_t cpu_get_cr0(void);
 uint32_t cpu_get_cr2(void);
 uint32_t cpu_get_cr3(void);
+uint32_t cpu_get_cr4(void);
 void cpu_set_cr0(uint32_t r);
 void cpu_set_cr2(uint32_t r);
 void cpu_set_cr3(uint32_t r);
-
+void cpu_set_cr4(uint32_t r);
 uint32_t cpu_get_eflags(void);
 
 void cpu_resume(struct interrupt_frame *);

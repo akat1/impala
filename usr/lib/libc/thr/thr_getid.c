@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <sys/thread.h>
 #include <sys/syscall.h>
 
 tid_t

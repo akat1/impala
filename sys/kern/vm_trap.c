@@ -69,6 +69,7 @@ vm_user_pfault(vm_trap_frame_t *frame)
     // powinni¶my rzuciæ sygna³em tutaj!
     kprintf("Process PID=%u: access violation (killed)\n",
         curthread->thr_proc->p_pid);
+        panic("AAAA\n");
     proc_exit(curthread->thr_proc, 0);
     // zrobic proc_exit !
 }

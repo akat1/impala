@@ -35,6 +35,7 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/proc.h>
 #include <sys/errno.h>
 #include <sys/exec.h>
 
@@ -54,11 +55,13 @@ sc_execve(thread_t *t, syscall_result_t *r, execve_args_t *ap)
     int err=0;
     if((err=copyinstr(path, ap->path, 256)))
         return err;
-    TRACE_IN("t=%p path=%s", t, path);
+    TRACE_IN("from pid=%u t=%p path=%s", t->thr_proc->p_pid, t, path);
 
     r->result = -execve(t->thr_proc, path, ap->argv, ap->envp);
+    DEBUGF("execve result %i", r->result);
     if (r->result == 0) {
         sched_exit(t);
+        kprintf("still working\n");
     }
     return 0;
 }

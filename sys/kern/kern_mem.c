@@ -175,7 +175,7 @@ kmem_alloc(size_t s, int flags)
         s = PAGE_ROUND(s);
         kmem_bufctl_t *bctl;
         if (vm_seg_alloc(vm_kspace.seg_data, s, &bctl)) {
-            panic("no memory");
+            panic("no memory: needed %x\n", s);
         }
         bctl->magic = KMEM_BUFCTL_MAGIC;
         bctl->slab = NULL;
@@ -235,7 +235,7 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
     kmem_dtor_t *dtor)
 {
     if (esize == 0) return NULL;
-    mutex_lock(&global_lock);
+    MUTEX_LOCK(&global_lock, "kmem");
     kmem_cache_t *cache = vm_lpool_alloc(&lpool_caches);
     cache_init(cache);
     cache->elem_size = esize;
@@ -281,8 +281,8 @@ kmem_cache_destroy(kmem_cache_t *cache)
     // Nigdy nie zamykamy zamków w odwrotnej kolejno¶ci!
     // Gdyby najpierw zamkn±æ zamek globalny, to móg³oby powstaæ
     // zakleszczenie !
-    mutex_lock(&cache->mtx);
-    mutex_lock(&global_lock);
+    MUTEX_LOCK(&cache->mtx, "kmem");
+    MUTEX_LOCK(&global_lock, "kmem");
     KASSERT( list_length(&cache->full_slabs) == 0 );
     KASSERT( list_length(&cache->part_slabs) == 0 );
     while ( list_length(&cache->empty_slabs) > 0 ) {
@@ -304,7 +304,7 @@ kmem_cache_destroy(kmem_cache_t *cache)
 void *
 kmem_cache_alloc(kmem_cache_t *cache, int flags)
 {
-    mutex_lock(&cache->mtx);
+    MUTEX_LOCK(&cache->mtx, "kmem");
     kmem_slab_t *slab = get_slab_from_cache(cache);
     kmem_bufctl_t *bufctl = reserve_bufctl(cache, slab);
     mutex_unlock(&cache->mtx);
@@ -319,7 +319,7 @@ kmem_cache_alloc(kmem_cache_t *cache, int flags)
 void
 kmem_cache_free(kmem_cache_t *cache, void *m)
 {
-    mutex_lock(&cache->mtx);
+    MUTEX_LOCK(&cache->mtx, "kmem");
     kmem_bufctl_t *bctl = get_bufctl_from_ptr(m);
     // sprawdzamy czy dan± p³ytê nie trzeba przepi±æ.
     if (list_length(&bctl->slab->free_bufs) == 0) {
@@ -434,7 +434,7 @@ get_slab_from_cache(kmem_cache_t *cache)
     if (ls) {
         return list_extract_first(ls);
     }
-    mutex_lock(&global_lock);
+    MUTEX_LOCK(&global_lock, "kmem");
     kmem_slab_t *slab = vm_lpool_alloc(&lpool_slabs);
     mutex_unlock(&global_lock);
     prepare_slab_for_cache(cache, slab);
@@ -476,7 +476,7 @@ check_cache(kmem_cache_t *cache)
             cache->dtor(x);
         }
         vm_seg_free(vm_kspace.seg_data, (vm_addr_t)slab->addr, cache->slab_size);
-        mutex_lock(&global_lock);
+        MUTEX_LOCK(&global_lock, "kmem");
         vm_lpool_free(&lpool_slabs, slab);
         mutex_unlock(&global_lock);
     }

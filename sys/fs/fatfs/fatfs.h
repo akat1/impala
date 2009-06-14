@@ -161,6 +161,7 @@ struct fatfs {
     int             tables;         // obs³ugujemy najwy¿ej 2
     int             tablesize;
     int             clusize;
+    int             clubsize;
     int             secsize;
     vnode_t        *root;
     blkno_t         blkno_fat[2];
@@ -216,3 +217,4 @@ int fatfs_dirent_read(fatfs_inode_t *i);
 #endif
 
 #endif
+
