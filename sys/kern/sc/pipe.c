@@ -33,6 +33,7 @@
 #include <sys/kernel.h>
 #include <sys/syscall.h>
 #include <sys/vm.h>
+#include <fs/fifofs/fifofs.h>
 
 typedef struct pipe_args pipe_args_t;
 struct pipe_args {
@@ -45,11 +46,31 @@ int
 sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
 {
     int err = 0;
+    proc_t *proc = t->thr_proc;
     if((err = vm_is_avail((vm_addr_t)args->filedes, sizeof(int[2]))))
         return err;
-    // jak robimy pipe?
-    
-    return -EOK;
-}
 
+    vnode_t *p_read, *p_write;
+    file_t *f1, *f2;
+    int fd1, fd2;
+    if((err = fifo_create(&p_read, &p_write)))
+        return err;
+    if((err = f_alloc(proc, p_read, &f1, &fd1)))
+        goto end_err;
+    if((err = f_alloc(proc, p_write, &f2, &fd2)))
+        goto end_err2;
+    args->filedes[0] = fd1;
+    args->filedes[1] = fd2;
+    return -EOK;
+
+end_err2:
+    f_close(f1);
+    p_read = NULL;
+    f_set(proc->p_fd, NULL, fd1);
+end_err:
+    if(p_read)
+        vrele(p_read);
+    vrele(p_write);
+    return err;
+}
 

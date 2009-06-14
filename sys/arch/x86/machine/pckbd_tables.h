@@ -38,6 +38,7 @@
 
 /// kody klawiszy
 enum {
+    KC_SPACE = 0x39,
     KC_CAPSLOCK = 0x3a,
     KC_DELETE = 127,
     KC_LCTRL = 129,

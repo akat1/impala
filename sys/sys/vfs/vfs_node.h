@@ -58,7 +58,8 @@ enum {
     VNODE_TYPE_REG,
     VNODE_TYPE_DIR,
     VNODE_TYPE_DEV,
-    VNODE_TYPE_LNK
+    VNODE_TYPE_LNK,
+    VNODE_TYPE_FIFO
 };
 
 enum {

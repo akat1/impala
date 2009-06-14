@@ -139,30 +139,7 @@ typedef struct termios termios_t;
 #ifdef __KERNEL
 
 #include <sys/ascii.h>
-
-// XXX:tymczasowo tutaj
-///< bufor znaków w postaci kolejki
-struct clist {
-    int      *buf;       ///< bufor na dane
-    int       beg;       ///< miejsce gdzie zaczyna siê kolejka
-    int       end;       ///< koniec kolejki (najstarsze dane)
-    int       size;      ///< aktualnie wykorzystana przestrzeñ
-    int       buf_size;  ///< wielko¶æ ca³ego bufora
-    sleepq_t *slpq;      
-};
-typedef struct clist clist_t;
-
-clist_t *clist_create(size_t size);
-void clist_wakeup(clist_t *l);
-void clist_wait(clist_t *l);
-void clist_push(clist_t *l, int ch);
-char clist_unpush(clist_t *l);//mo¿e siê jako¶ zdecydowaæ? char / int
-int  clist_pop(clist_t *l);
-void clist_unpop(clist_t *l, int ch);
-void clist_move(clist_t *dst, clist_t *src);
-void clist_flush(clist_t *dst);
-int  clist_size(clist_t *l);
-// XXX:
+#include <sys/clist.h>
 
 typedef int tty_write_t(void* priv, char *ch, size_t size);
 

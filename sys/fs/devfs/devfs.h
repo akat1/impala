@@ -36,8 +36,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void fs_devfs_init(void);   /// rejestracja devfs w VFS
-void devfs_init(void);      /// inicjalizacja devfs ( przed VFS )
+void fs_devfs_init(void);   ///< rejestracja devfs w VFS
+void devfs_init(void);      ///< inicjalizacja devfs ( przed VFS )
 vnode_t *devfs_rootvnode(void);
 int devfs_register(const char *name, devd_t *device, uid_t def_uid,
                     gid_t def_gid, mode_t def_mode);

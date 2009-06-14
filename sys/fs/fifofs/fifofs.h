@@ -1,4 +1,5 @@
-/*
+/* Impala Operating System
+ *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -26,25 +27,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: $
  */
 
+#ifndef __FS_FIFOFS_H
+#define __FS_FIFOFS_H
+
 #include <sys/types.h>
-#include <sys/kernel.h>
-#include <sys/syscall.h>
-#include <sys/vm.h>
+#include <sys/stat.h>
 
-typedef struct XXX_args XXX_args_t;
-struct XXX_args {
-    int fd;
-};
+void fs_fifofs_init(void);   ///< rejestracja fifofs w VFS
+int fifo_create(vnode_t **re, vnode_t **we);
 
-int sc_XXX(thread_t *p, syscall_result_t *r, XXX_args_t *args);
 
-int
-sc_XXX(thread_t *t, syscall_result_t *r, XXX_args_t *args)
-{
-    return -EOK;
-}
+
+#endif
 
 

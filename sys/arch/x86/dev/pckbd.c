@@ -112,7 +112,7 @@ __enqueue_keycode(int kc)
         }
         return;
     }
-    if(c || (ctrl && kc==' '))
+    if(c || (ctrl && kc==KC_SPACE))
         cons_input_char(c);
 }
 

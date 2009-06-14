@@ -398,6 +398,20 @@ nomem:
     return NULL;
 }
 
+//inaczej jak przy sleepq_destroy, clist_destroy usuwa listê
+// -> bo create j± tworzy³
+
+void
+clist_destroy(clist_t *l)
+{
+    if(!l)
+        return;
+    sleepq_destroy(l->slpq);
+    kmem_free(l->slpq);
+    kmem_free(l->buf);
+    kmem_free(l);
+}
+
 void
 clist_flush(clist_t *l)
 {
@@ -468,4 +482,14 @@ clist_move(clist_t *dst, clist_t *src)
         src->end--;
     }
 }
+
+int
+clist_do_uio(clist_t *l, uio_t *u, int flags)
+{
+    //int size = (u->oper == UIO_WRITE)?l->buf_size - l->size : l->size;
+    panic("clist_do_uio: Not implemented");
+    while(1);
+    //if(size 
+}
+
 
