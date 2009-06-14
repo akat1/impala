@@ -56,7 +56,7 @@ main(int argc, char **v)
     default:  /* Parent - writes to pipe */
 //        close(fildes[0]);                       /* Read end is unused */
         nbytes = write(fildes[1], "Hello world\n", 12);  /* Write data on pipe */
-//        close(fildes[1]);                       /* Child will see EOF */
+        close(fildes[1]);                       /* Child will see EOF */
         printf("Father: after write, res = %i\n", nbytes);
         exit(EXIT_SUCCESS);
     }    
