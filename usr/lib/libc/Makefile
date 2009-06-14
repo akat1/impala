@@ -26,6 +26,7 @@ SRCS=\
     stdio/vfprintf.c\
     stdio/vsnprintf.c\
     stdio/vsscanf.c\
+    stdlib/abort.c\
     stdlib/atexit.c\
     stdlib/atoi.c\
     stdlib/exit.c\

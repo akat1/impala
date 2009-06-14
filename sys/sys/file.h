@@ -100,7 +100,8 @@ int     f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
 void    f_close(file_t *fd);
 off_t   f_seek(file_t *fd, off_t o, int whence);
 
-// nie ma sensu ich dostêpniaæ moim zdaniem.
+// nie ma sensu ich dostêpniaæ moim zdaniem. // s± wykorzystywane np. w close
+// chyba, ¿e f_close by usuwa³o file z filetable...
 file_t *f_get(filetable_t *ft, int index);
 void f_set(filetable_t *ft, file_t *fd, int index);
 

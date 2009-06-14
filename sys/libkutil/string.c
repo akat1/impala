@@ -139,6 +139,19 @@ str_cpy(char *str, const char *s)
     return str;
 }
 
+//inaczej ni¿ w standardzie, zawsze koñczy \0, nawet jak siê nie mie¶ci³o
+
+char *
+str_ncpy(char *str, const char *s, size_t len)
+{
+    while (*s && --len) {
+        *str = *s;
+        str++;
+        s++;
+    }
+    *str = 0;
+    return str;
+}
 
 char *
 str_cat(char *str, const char *s)

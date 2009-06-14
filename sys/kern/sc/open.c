@@ -74,17 +74,18 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     vnode_t *node;
     file_t  *file;
     proc_t *proc = p->thr_proc;
-    if((error = vm_validate_string(arg->fname, 256)))
+    char fname[PATH_MAX+1];
+    if((error = copyinstr(fname, arg->fname, PATH_MAX)))
         return error;
     KASSERT(proc->p_rootdir!=NULL);
-    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, arg->flags,
+    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, flags,
              arg->mode);
-    error = vfs_lookup(proc->p_curdir, &node, arg->fname, p, LKP_NORMAL);
+    error = vfs_lookup(proc->p_curdir, &node, fname, p, LKP_NORMAL);
     if(error) {
         if(!(flags & O_CREAT))
             return error;
         vnode_t *parent;
-        error = vfs_lookup_parent(proc->p_curdir, &parent, arg->fname, p);
+        error = vfs_lookup_parent(proc->p_curdir, &parent, fname, p);
         if(error)
             return error;
         vattr_t attr;
@@ -93,7 +94,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         attr.va_uid = proc->p_cred->p_uid;
         attr.va_gid = proc->p_cred->p_gid;
         attr.va_size = 0; attr.va_dev = NULL;
-        error = VOP_CREATE(parent, &node, _get_last_cmpt(arg->fname), &attr);
+        error = VOP_CREATE(parent, &node, _get_last_cmpt(fname), &attr);
         if(error)
             return error;
     } else {
@@ -106,7 +107,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
 
     if((error = f_alloc(proc, node, &file, &fd)))
         return error;
-    if((error = VOP_OPEN(node, arg->flags, arg->mode)))
+    if((error = VOP_OPEN(node, flags, arg->mode)))
         return error;
     file->f_flags = flags;
     r->result = fd;

@@ -103,7 +103,7 @@ copyinstr(void *kaddr, const void *uaddr, size_t limit)
 {
     int err=0;
     if ((err=vm_validate_string(uaddr, limit))) return err;
-    str_cpy(kaddr, uaddr);
+    str_ncpy(kaddr, uaddr, limit);
     return 0;
 }
 
