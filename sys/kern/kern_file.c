@@ -169,7 +169,7 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                     fd++;
                 }
                 if ( fd > ft->max_ds )
-                    return MAX_EXCEEDED; /// XXX
+                    return -EMFILE;
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
             break;
@@ -281,13 +281,13 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
                 fc->files[i] = fp;
                 *result = fdp;
                 *fpp = fp;
-                return OK;
+                return 0;
             }
             fdp++;
         }
 
         if ( fdp >= p->p_fd->max_ds )
-            return MAX_EXCEEDED;
+            return -EMFILE;
 
     } while ( (fc = (filetable_chunk_t *)list_next(&(p->p_fd->chunks), fc)) )
 
@@ -297,7 +297,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     *result = fdp;
     *fpp = fp;
     f_set(p->p_fd, fp, fdp);
-    return OK;
+    return 0;
 }
 
 void

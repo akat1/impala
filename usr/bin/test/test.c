@@ -1,59 +1,72 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <sys/syscall.h>
 
-#define print(fd, str) write(fd, str, strlen(str))
 
-char hex[] = "0123456789abcdefGH";
-
-void
-print32(char *str, uint32_t val)
-{
-    str[0] = '0';
-    str[1] = 'x';
-    int i = 10;
-    str[i--] = 0;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-    str[i--] = hex[val % 0x10]; val /= 0x10;
-}
 void
 printV(const char *msg, int v)
 {
-    char val[10];
-    print(1, msg);
-    print32(val, v);
-    print(1, val);
-    print(1, "\n");
+    printf("%s: %x\n", msg, v);
 }
 
 #define _E(ret, msg) if (ret == -1) {\
-    print(1, msg);\
+    printf("%s", msg);\
     return -1;\
     }
+
 
 int
 main(int argc, char **v)
 {
     char msg[100];
+    int fildes[2];
+    const int BSIZE = 100;
+    char buf[BSIZE];
+    ssize_t nbytes;
+    int status;
+
+    status = pipe(fildes);
+    if (status == -1 ) {
+        /* an error occurred */
+        printf("Error...\n");
+    }
+    printf("pipe: %i %i\n", fildes[0], fildes[1]);
+    switch (fork()) {
+    case -1: /* Handle error */
+        printf("Fork error...\n");
+        break;
+
+///@todo  SHM: uprzejmie proszê o fd_clone, aby nie musieæ hackowaæ close...
+        
+
+    case 0:  /* Child - reads from pipe */
+//        close(fildes[1]);                       /* Write end is unused */
+        nbytes = read(fildes[0], buf, BSIZE);   /* Get data from pipe */
+        /* At this point, a further read would see end of file ... */
+//        close(fildes[0]);                       /* Finished with pipe */
+        printf("Child: read res - %s, %i\n", buf, nbytes);
+        exit(EXIT_SUCCESS);
+
+
+    default:  /* Parent - writes to pipe */
+//        close(fildes[0]);                       /* Read end is unused */
+        nbytes = write(fildes[1], "Hello world\n", 12);  /* Write data on pipe */
+//        close(fildes[1]);                       /* Child will see EOF */
+        printf("Father: after write, res = %i\n", nbytes);
+        exit(EXIT_SUCCESS);
+    }    
+    
     key_t k = ftok("/sbin/init", 1);
     int msg_id = msgget(k, IPC_CREAT|S_IRWXU|S_IRWXG|S_IRWXO);
     _E(msg_id, "msgget error\n");
     _E(msgrcv(msg_id, msg, sizeof(msg), 0,  IPC_NOWAIT), "msgsnd error\n");
     printV("key: ", k);
     printV("msg id: ", msg_id);
-    print(1, "msg: ");
-    print(1, msg);
-    print(1, "\n");
+    printf("msg: %s\n", msg);
     return 0;
 }

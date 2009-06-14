@@ -88,11 +88,6 @@ struct file {
     //pcred_t   *f_pcred;
 };
 
-/* XXX */
-enum {
-    OK,
-    MAX_EXCEEDED
-};
 
 void filetable_free(filetable_t *fd);
 filetable_t *filetable_alloc(void);

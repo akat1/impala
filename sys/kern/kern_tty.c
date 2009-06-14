@@ -374,7 +374,7 @@ clist_wakeup(clist_t *l)
 clist_t *
 clist_create(size_t size)
 {
-    KASSERT(size>0);
+    KASSERT(size>1);
     clist_t *l = kmem_alloc(sizeof(clist_t), KM_SLEEP);
     if(!l)
         return NULL;
@@ -384,8 +384,7 @@ clist_create(size_t size)
         return NULL;
     }        
     l->buf_size = size;
-    l->beg = l->size = 0;
-    l->end = size - 1;
+    l->end = l->beg = l->size = 0;
     l->slpq = kmem_alloc(sizeof(sleepq_t), KM_SLEEP);
     if(!l->slpq)
         goto nomem;
@@ -415,8 +414,7 @@ clist_destroy(clist_t *l)
 void
 clist_flush(clist_t *l)
 {
-    l->beg = l->size = 0;
-    l->end = l->buf_size - 1;
+    l->end = l->beg = l->size = 0;
 }
 
 int
@@ -426,16 +424,16 @@ clist_size(clist_t *l)
 }
 
 void
-clist_push(clist_t *l, int ch)
+clist_push(clist_t *l, char ch)
 {
     if(l->size == l->buf_size) {
         return; ///@todo porz±dna obs³uga
     }
-    if(l->beg == 0)
-        l->beg = l->buf_size;
-    l->beg--;
-    l->size++;
     l->buf[l->beg] = ch;
+    l->beg++;
+    if(l->beg == l->buf_size)
+        l->beg = 0;
+    l->size++;
 }
 
 char
@@ -444,12 +442,11 @@ clist_unpush(clist_t *l)
     if(l->size == 0) {
         return '\0';
     }
-    char ret = l->buf[l->beg];
-    l->beg++;
-    if(l->beg == l->buf_size)
-        l->beg = 0;
+    if(l->beg == 0)
+        l->beg = l->buf_size;
+    l->beg--;
     l->size--;
-    return ret;
+    return l->buf[l->beg];
 }
 
 int clist_pop(clist_t *l)
@@ -459,37 +456,28 @@ int clist_pop(clist_t *l)
     }
     l->size--;
     int res = l->buf[l->end];
-    if(l->end == 0)
-        l->end = l->buf_size;
-    l->end--;
+    l->end++;
+    if(l->end == l->buf_size)
+        l->end = 0;
     return res;
 }
 
 void
 clist_move(clist_t *dst, clist_t *src)
 {
-    while(src->size>0) {
+    while(src->size > 0) {
         if(dst->size == dst->buf_size)
             break;
         src->size--;
         dst->size++;
-        if(dst->beg == 0)
-            dst->beg = dst->buf_size;
-        dst->beg--;
         dst->buf[dst->beg] = src->buf[src->end];
-        if(src->end == 0)
-            src->end = src->buf_size;
-        src->end--;
+        dst->beg++;
+        if(dst->beg == dst->buf_size)
+            dst->beg = 0;
+        src->end++;
+        if(src->end == src->buf_size)
+            src->end = 0;
     }
-}
-
-int
-clist_do_uio(clist_t *l, uio_t *u, int flags)
-{
-    //int size = (u->oper == UIO_WRITE)?l->buf_size - l->size : l->size;
-    panic("clist_do_uio: Not implemented");
-    while(1);
-    //if(size 
 }
 
 

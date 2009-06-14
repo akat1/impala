@@ -199,14 +199,54 @@ int
 fifofs_read(vnode_t *vn, uio_t *u, int flags)
 {
     fifofs_node_t *n = vn->v_private;
-    return clist_do_uio(n->i_buf, u, flags);
+    clist_t *l = n->i_buf;
+    int size = l->size;
+    int want = u->resid = ISSET(flags, O_NONBLOCK) ?
+                        MIN(u->size, size) : u->size;
+    while(u->resid > 0) {
+        char *read_beg = &l->buf[l->end];
+        size_t read_size= MIN(MIN(l->buf_size - l->end, u->resid), l->size);
+        if(read_size == 0) {
+            if(!n->i_writenode)
+                return want-u->resid;
+            continue;   //busy waiting... naprawiæ..
+        }
+        uio_move(read_beg, read_size, u);
+        l->end += read_size;
+        if(l->end == l->buf_size)
+            l->end = 0;
+        l->size -= read_size;
+    }
+    return want;
 }
 
 int
 fifofs_write(vnode_t *vn, uio_t *u, int flags)
 {
     fifofs_node_t *n = vn->v_private;
-    return clist_do_uio(n->i_buf, u, flags);
+    clist_t *l = n->i_buf;
+    int size = l->buf_size - l->size;
+    if(ISSET(flags, O_NONBLOCK) && u->size <= PIPE_BUF && size < u->size)
+        return -EAGAIN;
+    int want = u->resid = ISSET(flags, O_NONBLOCK) ?
+                        MIN(u->size, size) : u->size;
+    while(u->resid > 0) {
+        char *write_beg = &l->buf[l->beg];
+        size_t write_size =
+            MIN(MIN(l->buf_size - l->beg, u->resid), l->buf_size - l->size);
+        if(write_size == 0) {
+            if(!n->i_readnode) {
+                //signal(...., SIGPIPE);
+            }                    
+            continue;   //busy waiting... naprawiæ..
+        }
+        uio_move(write_beg, write_size, u);
+        l->beg += write_size;
+        if(l->beg == l->buf_size)
+            l->beg = 0;
+        l->size += write_size;
+    }
+    return want;
 }
 
 int
@@ -297,6 +337,7 @@ fifo_create(vnode_t **re, vnode_t **we)
     n->i_buf = clist_create(FIFO_SIZE);
     if(!n->i_buf)
         goto end_err0;
+    n->i_readnode = n->i_writenode = NULL;
     if((err = _get_read_vnode(n, &v1)))
         goto end_err1;
     if((err = _get_write_vnode(n, &v2)))

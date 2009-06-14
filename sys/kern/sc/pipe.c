@@ -37,7 +37,7 @@
 
 typedef struct pipe_args pipe_args_t;
 struct pipe_args {
-    int filedes[2];
+    int *filedes;
 };
 
 int sc_pipe(thread_t *p, syscall_result_t *r, pipe_args_t *args);
@@ -59,6 +59,8 @@ sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
         goto end_err;
     if((err = f_alloc(proc, p_write, &f2, &fd2)))
         goto end_err2;
+    f1->f_flags = O_RDONLY;
+    f2->f_flags = O_WRONLY;
     args->filedes[0] = fd1;
     args->filedes[1] = fd2;
     return -EOK;

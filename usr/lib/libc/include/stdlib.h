@@ -52,6 +52,8 @@ void    qsort(void *base, size_t nmemb, size_t size,
                 int(*compar)(const void *, const void *)); //
 long int strotl(const char *nptr, char **endptr, int base);
 
+#define EXIT_FAILURE 1
+#define EXIT_SUCCESS 0
 
 #define ALIGN(x) x //sam nie wiem co to ;)
 
