@@ -4,7 +4,7 @@ PDFLATEX?= pdflatex
 EPSTOPDF?= epstopdf
 
 all:
-#	cd work; for l in *.eps; do ${EPSTOPDF} $$l; done
+	cd work; for l in *.eps; do ${EPSTOPDF} $$l; done
 	${PDFLATEX} index.tex
 	${PDFLATEX} index.tex
 	${PDFLATEX} index.tex
