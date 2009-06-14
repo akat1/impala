@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0
-lastDocument=chap3/vm.tex
+lastDocument=chap3/chap3.tex
 masterDocument=
 name=Handbook
 pkg_extIsRegExp=false
@@ -33,21 +33,30 @@ line=0
 open=false
 order=-1
 
-[item:chap3/chap3.tex]
+[item:chap3/bio.tex]
 archive=true
 column=0
-encoding=
-highlight=
-line=0
-open=false
-order=-1
+encoding=ISO 8859-2
+highlight=LaTeX
+line=35
+open=true
+order=2
+
+[item:chap3/chap3.tex]
+archive=true
+column=32
+encoding=ISO 8859-2
+highlight=LaTeX
+line=17
+open=true
+order=3
 
 [item:chap3/vm.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=34
+line=128
 open=true
 order=0
 
@@ -62,12 +71,12 @@ order=-1
 
 [item:index.tex]
 archive=true
-column=0
-encoding=
-highlight=
-line=0
-open=false
-order=-1
+column=23
+encoding=ISO 8859-2
+highlight=LaTeX
+line=35
+open=true
+order=1
 
 [item:term.tex]
 archive=true

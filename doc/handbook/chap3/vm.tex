@@ -30,7 +30,7 @@
 % $Id$
 
 
-\section{Zarz±dzanie pamiêci±.}
+\section{Zarz±dzanie pamiêci± i pamiêæ wirtualna (VM).}
 
 % To mo¿e siê zmieniæ, mo¿emy z GRUB'a skorzystaæ.
 Informacja o~ilo¶ci zainstalowanej pamiêci RAM na komputerze jest pobierana z~pamiêci CMOS.
@@ -147,10 +147,21 @@ jest to, ¿e j±dro mo¿e nigdy podczas swojej pracy nie u¿yæ wszystkich tablic. Dl
 
 \subsection{Segmenty.}
 
-Warstwa zarz±dzaj±ca segmentami pamiêci ma g³ównie za zadanie zarz±dzaæ obszarami wewn±trz segmentu, ten mechanizm
-nie ma ¿adnego zwi±zku z~segmentacj± sprzêtow± wspomnian± z poprzednim punkcie.
+Warstwa obs³ugi segmantów nie ma dotyczy segmentacji sprzêtowej wspanianiej w~poprzednim pod punkcie. Segment
+pamiêci to ci±g³y obszar w przestrzeni adresowej, jest okre¶lany przez pocz±tek, koniec, ograniczenie górne
+na rozmiar, oraz informacjê o kierunku wzrostu.
+
+Zadaniem tej warstwy modu³u pamiêci wirtualnej jest zarz±dzanie podobszarami pamiêci w segmentów. Przyk³adowo,
+j±dro mo¿e tymczasowo odwzorowywaæ pamiêæ u¿ytkownika w swojej stercie. ...
 
 \subsection{Przestrzenie.}
+
+\begin{figure}
+\centering
+\includegraphics{work/vm_space}
+\caption{Techniczne ujêcie przestrzeni adresowej.}
+\label{vm:space}
+\end{figure}
 
 \subsection{Sterta j±dra.}
 
