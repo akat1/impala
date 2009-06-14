@@ -31,6 +31,7 @@ SRCS=\
     stdlib/exit.c\
     stdlib/_Exit.c\
     stdlib/free.c\
+    stdlib/getenv.c\
     stdlib/malloc.c\
     stdlib/qsort.c\
     stdlib/realloc.c\

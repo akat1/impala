@@ -376,7 +376,7 @@ bioq_init(bio_queue_t *q)
 
 /**
  * Wstawia bufor w kolejkê.
- * @bp bufor.
+ * @arg bp bufor.
  *
  * Procedura wy³±cza przerwania zwi±zane z obs³ug± urz±dzeñ blokowych
  * na czas wstawiania w kolejkê w celu ochrony struktury przed uszkodzeniem.
