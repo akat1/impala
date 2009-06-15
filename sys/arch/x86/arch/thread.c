@@ -110,7 +110,7 @@ thread_fork(thread_t *t, thread_t *ct)
  * @param t_from deskryptor obecnie dzia³aj±cego w±tku.
  */
 void
-thread_switch(thread_t * t_to, thread_t * volatile t_from)
+thread_switch(thread_t * volatile t_to, thread_t * volatile t_from)
 {
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
