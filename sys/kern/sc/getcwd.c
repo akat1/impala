@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,48 +26,42 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 418 2009-06-14 00:48:52Z takeshi $
  */
 
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/syscall.h>
+#include <sys/vm.h>
 
-#ifndef __SYS_VM_H
-#define __SYS_VM_H
-#ifdef __KERNEL
+typedef struct getcwd_args getcwd_args_t;
+struct getcwd_args {
+    char *buf;
+    size_t size;
+};
 
-#include <sys/vm/vm_types.h>
-#include <machine/memory.h>
-#include <sys/vm/vm_pmap.h>
-#include <sys/vm/vm_segment.h>
-#include <sys/vm/vm_space.h>
+int sc_getcwd(thread_t *p, syscall_result_t *r, getcwd_args_t *args);
 
-#define PAGE_MASK (PAGE_SIZE-1)
-#define YPAGE_ROUND(x) (((x) + PAGE_MASK)/PAGE_SIZE)
-#define PAGE_ROUND(x) (((x) + PAGE_MASK) & ~PAGE_MASK)
-
-extern list_t vm_free_pages;
-extern vm_space_t vm_kspace;
-
-void vm_init(void);
-void vm_lock(void);
-void vm_unlock(void);
-bool vm_trylock(void);
-
-vm_page_t *vm_alloc_page(void);
-void vm_free_page(vm_page_t *p);
-
-vm_paddr_t vm_space_phys(const vm_space_t *vms, vm_addr_t addr);
-void vm_space_switch(const vm_space_t *sp);
-vm_page_t *vm_kernel_alloc_page(void);
-vm_addr_t vm_ptov(vm_paddr_t v);
-vm_paddr_t vm_vtop(vm_addr_t p);
-
-int vm_segmap(vm_seg_t *seg, vm_addr_t addr, vm_size_t s, void *res);
-int vm_physmap(vm_addr_t paddr, vm_size_t s, void *res);
-int vm_remap(vm_addr_t vaddr, vm_size_t s, void *res);
-void vm_unmap(vm_addr_t addr, vm_size_t size);
-int vm_validate_string(const char *str, const size_t maxlen);
-int vm_is_avail(vm_addr_t addr, vm_size_t s);
+int
+sc_getcwd(thread_t *t, syscall_result_t *r, getcwd_args_t *args)
+{
+    int err = 0;
+    if((err = vm_is_avail((vm_addr_t)args->buf, args->size)))
+        return err;
+    vnode_t *cd = t->thr_proc->p_curdir;    //nie boimy siê trzymaæ ten wska¼nik
+    vnode_t *tmp = NULL;
+    
+    lkp_state_t pc;
+    pc.flags = LKP_GET_PARENT;
+    pc.max_link_cnt = 10;
+    pc.path = "..";
+    pc.now = pc.path;
+    
+    while(cd) {
+        VOP_LOOKUP(cd, &tmp, &pc);
+        pc.now = pc.path;
+    }
+    return -EOK;
+}
 
 
-#endif
-#endif

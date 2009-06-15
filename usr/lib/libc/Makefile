@@ -36,7 +36,9 @@ SRCS=\
     stdlib/malloc.c\
     stdlib/qsort.c\
     stdlib/realloc.c\
+    stdlib/setenv.c\
     stdlib/strtol.c\
+    stdlib/unsetenv.c\
     string/index.c\
     string/rindex.c\
     string/memchr.c\
@@ -45,6 +47,7 @@ SRCS=\
     string/memmove.c\
     string/memset.c\
     string/strcat.c\
+    string/strcasecmp.c\
     string/strchr.c\
     string/strcmp.c\
     string/strcoll.c\
@@ -52,6 +55,7 @@ SRCS=\
     string/strcspn.c\
     string/strerror.c\
     string/strlen.c\
+    string/strncasecmp.c\
     string/strncat.c\
     string/strncmp.c\
     string/strncpy.c\
@@ -92,10 +96,12 @@ SRCS=\
     unistd/lseek.c\
     unistd/lstat.c\
     unistd/fork.c\
+    unistd/getcwd.c\
     unistd/getegid.c\
     unistd/geteuid.c\
     unistd/getgid.c\
     unistd/gethostname.c\
+    unistd/getmode.c\
     unistd/getpgid.c\
     unistd/getpgrp.c\
     unistd/getpid.c\
@@ -105,6 +111,7 @@ SRCS=\
     unistd/sbrk.c\
     unistd/select.c\
     unistd/setgid.c\
+    unistd/setmode.c\
     unistd/setpgid.c\
     unistd/setpgrp.c\
     unistd/setuid.c\
@@ -116,8 +123,10 @@ SRCS=\
     unistd/umask.c\
     unistd/write.c\
     other/closedir.c\
+    other/getpwnam.c\
     other/opendir.c\
     other/readdir.c\
+    other/setlocale.c\
     other/strtoimax.c\
     other/wait3.c\
     ${IMPALA_ARCH}/setjmp.s\

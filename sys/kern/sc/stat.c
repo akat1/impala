@@ -57,7 +57,8 @@ sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
     int res=0;
     proc_t *p = t->thr_proc;
     vnode_t *node;
-    if((res = vm_validate_string(args->pathname, PATH_MAX)))
+    char pname[PATH_MAX+1];
+    if((res = copyinstr(pname, args->pathname, PATH_MAX)))
         return res;
     if((res = vm_is_avail((vm_addr_t)args->buf, sizeof(struct stat))))
         return res;

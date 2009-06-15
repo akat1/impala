@@ -48,7 +48,7 @@ main(int argc, char **v)
 //        close(fildes[1]);                       /* Write end is unused */
         nbytes = read(fildes[0], buf, BSIZE);   /* Get data from pipe */
         /* At this point, a further read would see end of file ... */
-//        close(fildes[0]);                       /* Finished with pipe */
+        close(fildes[0]);                       /* Finished with pipe */
         printf("Child: read res - %s, %i\n", buf, nbytes);
         exit(EXIT_SUCCESS);
 

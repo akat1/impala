@@ -102,8 +102,8 @@ ssize_t
 copyinstr(void *kaddr, const void *uaddr, size_t limit)
 {
     int err=0;
-    if ((err=vm_validate_string(uaddr, limit))) return err;
-    str_ncpy(kaddr, uaddr, limit);
+    if ((err=vm_validate_string(uaddr, limit))<0) return err;
+    str_ncpy(kaddr, uaddr, err+1);
     return 0;
 }
 

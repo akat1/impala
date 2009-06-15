@@ -1,8 +1,9 @@
 #include <string.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 int
-strncmp(const char *s1, const char *s2, size_t n)
+strncasecmp(const char *s1, const char *s2, size_t n)
 {
     while(n--) {
         if ( tolower(*s1) != tolower(*s2) ) {

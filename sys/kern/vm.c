@@ -173,19 +173,30 @@ vm_unmap(vm_addr_t addr, vm_size_t size)
     VM_UNLOCK();
 }
 
+/**
+ *  Weryfikuje, czy napis wskazywany przez str jest poprawnym napisem
+ *  mieszcz±cym siê razem z koñcz±cym zerem w maxlen bajtach.
+ *  Poprawno¶æ napisu oznacza, ¿e wykorzystywane przez niego strony pamiêci
+ *  s± zaalokowane i nale¿± do pamiêci u¿ytkownika.
+ *
+ *  UWAGA: maxlen nie mo¿e pochodziæ od u¿ytkownika. Nie mo¿e przekroczyæ 1GB.
+ */
+
 int
-vm_validate_string(const char *str, int maxlen)
+vm_validate_string(const char *str, const size_t maxlen)
 {
     vm_pmap_t *pmap = &curthread->vm_space->pmap;
     int old_page = PAGE_NUM(str);
-
-    for(int i=0; i<maxlen; i++) {
+    if( (vm_addr_t)str >= VM_SPACE_KERNEL)
+        return -EFAULT;
+    
+    for(size_t i=0; i<maxlen; i++) {
         if(old_page != PAGE_NUM(str+i)) {
             old_page = PAGE_NUM(str+i);
             if(!vm_pmap_is_avail(pmap, (vm_addr_t)&str[i])) return -EFAULT;
         }
         if(str[i] == 0)
-            return 0;
+            return ((vm_addr_t)&str[i] >= VM_SPACE_KERNEL)? -EFAULT : i;
     }
     return -ENAMETOOLONG;
 }
@@ -196,7 +207,8 @@ vm_is_avail(vm_addr_t addr, vm_size_t s)
     vm_pmap_t *pmap = &curthread->vm_space->pmap;
     s = PAGE_ROUND(s);
     for (s += addr; addr < s; addr += PAGE_SIZE) {
-        if (!vm_pmap_is_avail(pmap, addr)) return -EFAULT;
+        if (!vm_pmap_is_avail(pmap, addr) || addr >= VM_SPACE_KERNEL)
+            return -EFAULT;
     }
     return 0;
 }

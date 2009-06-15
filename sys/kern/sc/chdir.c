@@ -54,9 +54,10 @@ sc_chdir(thread_t *t, syscall_result_t *r, chdir_args *args)
     int res=0;
     proc_t *p = t->thr_proc;
     vnode_t *node;
-    if((res = vm_validate_string(args->pathname, PATH_MAX)))
+    char pname[PATH_MAX+1];
+    if((res = copyinstr(pname, args->pathname, PATH_MAX)))
         return res;
-    res = vfs_lookup(p->p_curdir, &node, args->pathname, t, LKP_NORMAL);
+    res = vfs_lookup(p->p_curdir, &node, pname, t, LKP_NORMAL);
     if(res)
         return res;
     if(node->v_type!=VNODE_TYPE_DIR) {

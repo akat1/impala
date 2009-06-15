@@ -5,6 +5,7 @@ SYS execve
 SYS exit
 SYS fcntl
 SYS fork
+SYS getcwd
 SYS getegid
 SYS geteuid
 SYS getdents

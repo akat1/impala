@@ -36,12 +36,12 @@
 
 struct vm_space {
     vm_pmap_t       pmap;
-    vm_seg_t    *seg_text;
-    vm_seg_t    *seg_data;
-    vm_seg_t    *seg_stack;
+    vm_seg_t       *seg_text;
+    vm_seg_t       *seg_data;
+    vm_seg_t       *seg_stack;
     list_node_t     L_spaces;
     int             space;
-    mutex_t         *mtx;
+    mutex_t        *mtx;
 };
 
 enum {
