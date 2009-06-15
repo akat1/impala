@@ -56,7 +56,16 @@ sc_getcwd(thread_t *t, syscall_result_t *r, getcwd_args_t *args)
     pc.max_link_cnt = 10;
     pc.path = "..";
     pc.now = pc.path;
-    
+    ///@todo Zaimplementowaæ getcwd
+    //Chwilowo wstrzymujê prace nad getcwd. Aby go zrealizowaæ, potrzebne jest
+    // jakie¶ rozszerzenie VFS... np. VOP_NAME() :)...
+    // z tym, ¿e vnode nie musi mieæ unikatowej nazwy.. a mo¿e nawet nie mieæ
+    // ¿adnej ;) (VOP_ANYNAME?) Mo¿na by u¿ywaæ ostatnio VOP_LOOKUPowanej nazwy
+    // wskazuj±cej na ten vnode.
+    //
+    // A tak na prawdê, to póki co u nas chyba wszystko ma dok³adnie jedn± nazwê
+    // Wiêc na razie nie by³o by wielkiego problemu z tak± funkcj±...
+    panic("Use of unimplemented syscall getcwd");
     while(cd) {
         VOP_LOOKUP(cd, &tmp, &pc);
         pc.now = pc.path;

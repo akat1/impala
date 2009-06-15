@@ -150,6 +150,7 @@ proc_create(void)
 
     new_p->p_pid = last_pid++;
     new_p->p_ppid = 0; // XXX: fork
+    new_p->p_flags = PROC_NEW;
     new_p->p_cred->p_uid = 0;  // XXX: fork
     new_p->p_ctty = NULL; //zaczynamy bez terminala kontroluj±cego
     new_p->p_group = -1;

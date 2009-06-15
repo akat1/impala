@@ -11,5 +11,7 @@ fprintf(FILE *f, const char *format, ...)
     char buf[1024];
     vsnprintf(buf, 1024, format, ap);
     va_end(ap);
+    if(f->writefn)
+        return f->writefn(f->cookie, buf, strlen(buf));
     return fwrite(buf, strlen(buf), 1, f);
 }

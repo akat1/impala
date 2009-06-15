@@ -1,8 +1,6 @@
 
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 
-// `_fwopen'
-// `_getcwd'
 // `_getopt'
 // `_getrlimit'
 // `_getrusage'

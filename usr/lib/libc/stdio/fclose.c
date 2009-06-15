@@ -14,7 +14,10 @@ fclose(FILE *stream)
         UNSET(stream->status, _FST_OPEN);
         return ret;
     }
-    ret = close(stream->fd);
+    if(stream->closefn)
+        ret = stream->closefn(stream->cookie);
+    else
+        ret = close(stream->fd);
     free(stream);
     return ret;
 }

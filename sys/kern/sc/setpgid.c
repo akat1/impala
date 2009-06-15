@@ -39,8 +39,6 @@ struct setpgid_args {
     pid_t pgid;
 };
 
-static bool is_xchild(proc_t *father, proc_t *child);
-
 int sc_setpgid(thread_t *p, syscall_result_t *r, setpgid_args_t *args);
 
 /// Przeniesienie procesu potomnego do innej grupy, w ramach tej samej sesji
@@ -64,11 +62,11 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
     proc_t *dstleader = proc_find(pgid);
     if(!dstleader)
         return -ESRCH;//nie jestem pewien
-    if(!is_xchild(p, target))
+    if(p!=target && !proc_is_parent(p, target))
         return -ESRCH;
     //jeste¶my tutaj -> target jest nami, lub naszym dzieckiem
     if(target->p_pid != p->p_pid) { //prawdziwy potomek
-        //if(target->p_flags & WAS_EXEC) return -EACCES;
+        if(ISSET(target->p_flags, PROC_AFTER_EXEC)) return -EACCES;
         if((target->p_session != p->p_session) || 
             (target->p_session == target->p_pid))
             return -EPERM;
@@ -78,18 +76,4 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
     target->p_group = pgid;
     r->result = 0;
     return -EOK;
-}
-
-
-bool
-is_xchild(proc_t *father, proc_t *child)
-{
-    //mo¿na szybciej? (bez spamiêtywania np. wska¼nika w proc_t...)
-    proc_t *p = child;
-    while(p->p_pid != father->p_pid) {
-        p = proc_find(p->p_ppid);
-        if(p->p_pid == 0)
-            return FALSE;
-    }
-    return TRUE;
 }

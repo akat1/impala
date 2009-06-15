@@ -130,6 +130,7 @@ prepare_process(proc_t *p)
 {
     proc_destroy_threads(p);
     proc_reset_vmspace(p);
+    p->p_flags |= PROC_AFTER_EXEC;
 }
 
 int

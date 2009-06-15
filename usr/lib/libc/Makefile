@@ -14,6 +14,7 @@ SRCS=\
     stdio/fprintf.c\
     stdio/fputs.c\
     stdio/fputc.c\
+    stdio/fwopen.c\
     stdio/fwrite.c\
     stdio/getchar.c\
     stdio/perror.c\

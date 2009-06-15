@@ -19,6 +19,11 @@ fopen(const char *path, const char *mode)
     if(!f)
         return NULL;
     f->fd = -1;
+    f->cookie = NULL;
+    f->writefn = NULL;
+    f->readfn = NULL;
+    f->seekfn = NULL;
+    f->closefn = NULL;
     int flags = 0;
     if(*mode == 'r')
         flags |= O_RDONLY;

@@ -1,6 +1,10 @@
 #ifndef __STDIO_H
 #define __STDIO_H
 
+#include <sys/types.h>
+
+typedef int fpos_t;
+
 #define FILENAME_MAX 4096
 #define BUFSIZ 8192
 
@@ -11,10 +15,15 @@
 #define EOF (-1)
 
 struct FILE {
-    int fd;
-    int status;
-    int err;
-    char buf[BUFSIZ];
+    int      fd;
+    void    *cookie;
+    int    (*readfn)(void *, char *, int);
+    int    (*writefn)(void*, const char *, int);
+    fpos_t (*seekfn)(void *, fpos_t, int);
+    int    (*closefn)(void *);
+    int      status;
+    int      err;
+    char     buf[BUFSIZ];
 };
 typedef struct FILE FILE;
 
@@ -28,8 +37,6 @@ extern FILE _stdF[3];
 #define stdout (&_stdF[1])
 #define stderr (&_stdF[2])
 
-#include <sys/types.h>
-//typedef fpos_t 
 //typedef uint32_t size_t;
 
 
@@ -61,6 +68,7 @@ int      fputs(const char *, FILE *);
 // off_t    ftello(FILE *);
 // int      ftrylockfile(FILE *);
 // void     funlockfile(FILE *);
+FILE *   fwopen(void *cookie, int (*writefn)(void *, const char *, int));
 size_t   fwrite(const void *, size_t, size_t, FILE *);
 // int      getc(FILE *);
 int      getchar(void);

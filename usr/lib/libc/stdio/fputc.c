@@ -10,9 +10,12 @@ fputc(int ch, FILE * f)
 {
     if(ISUNSET(f->status,_FST_OPEN))
         return EOF;
-    unsigned char c = (unsigned char)ch;
-    if(ISSET(f->status, _FST_NOBUF))
+    char c = (char)ch;
+    if(ISSET(f->status, _FST_NOBUF)) {
+        if(f->writefn)
+            return f->writefn(f->cookie, &c, 1);
         return write(f->fd, &c, 1);
+    }
     return 0;//todo..
 }
 

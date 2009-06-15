@@ -94,7 +94,8 @@ enum PROC_FLAGS
 {
     PROC_NEW    = 1<<0, // proces zosta³ utworzony
     PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
-    PROC_RUN    = 1<<2  // proces w kolejce uruchomieniowej
+    PROC_RUN    = 1<<2, // proces w kolejce uruchomieniowej
+    PROC_AFTER_EXEC = 1<<3 // proces wykona³ ju¿ exec
 };
 
 enum
