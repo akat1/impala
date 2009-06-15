@@ -80,6 +80,7 @@ struct filetable_chunk {
 };
 
 struct file {
+//    int     temp;
     vnode_t    *f_vnode;
     off_t       f_offset;
     int         f_refcnt;
@@ -90,6 +91,8 @@ struct file {
 
 
 void filetable_free(filetable_t *fd);
+void filetable_close(filetable_t *fd);
+void filetable_clone(filetable_t *dst, filetable_t *src);
 filetable_t *filetable_alloc(void);
 
 int     f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);

@@ -119,11 +119,13 @@ proc_fork(proc_t *p, proc_t **child)
     proc_reset_vmspace(cp);
     vm_space_clone(cp->vm_space, p->vm_space);
 
-    // tablica deskryptorów (czkemay na clone)
-    cp->p_fd = p->p_fd;
+    // tablica deskryptorów
+    filetable_clone(cp->p_fd, p->p_fd);
     // CWD
     cp->p_rootdir = p->p_rootdir;
     vref(cp->p_rootdir);
+    cp->p_curdir = p->p_curdir;
+    vref(cp->p_curdir);
     cp->p_session = p->p_session;
     cp->p_group = p->p_group;
     cp->p_ctty = p->p_ctty;
@@ -180,10 +182,10 @@ proc_destroy(proc_t *proc)
     }
     while ( (p = list_extract_first(&(proc->p_children))) )
     {
-            proc_insert_child(initproc, p);
+        proc_insert_child(initproc, p);
     }
-
-    kmem_free(proc->p_cred);
+    filetable_close(proc->p_fd);
+    ///proszê nie usuwaæ rzeczy utworzonych w ctor ;D
     kmem_cache_free(proc_cache, proc);
     return;
 }

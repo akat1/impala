@@ -67,8 +67,8 @@ sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
 
 end_err2:
     f_close(f1);
-    p_read = NULL;
     f_set(proc->p_fd, NULL, fd1);
+    p_read = NULL;
 end_err:
     if(p_read)
         vrele(p_read);

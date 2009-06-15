@@ -61,6 +61,7 @@ sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
 
     if ( f != NULL ) {
         f_close(f);
+        f_set(t->thr_proc->p_fd, NULL, args->newfd);
     }
 
     r->result = f_fcntl(t->thr_proc->p_fd, f, F_DUPFD, args->newfd);

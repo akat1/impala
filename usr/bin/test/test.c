@@ -40,12 +40,11 @@ main(int argc, char **v)
     case -1: /* Handle error */
         printf("Fork error...\n");
         break;
-
-///@todo  SHM: uprzejmie proszê o fd_clone, aby nie musieæ hackowaæ close...
-        
+       
 
     case 0:  /* Child - reads from pipe */
-//        close(fildes[1]);                       /* Write end is unused */
+        close(fildes[1]);                       /* Write end is unused */
+        printf("Próbujê czytaæ...\n");
         nbytes = read(fildes[0], buf, BSIZE);   /* Get data from pipe */
         /* At this point, a further read would see end of file ... */
         close(fildes[0]);                       /* Finished with pipe */
@@ -54,7 +53,7 @@ main(int argc, char **v)
 
 
     default:  /* Parent - writes to pipe */
-//        close(fildes[0]);                       /* Read end is unused */
+        close(fildes[0]);                       /* Read end is unused */
         nbytes = write(fildes[1], "Hello world\n", 12);  /* Write data on pipe */
         close(fildes[1]);                       /* Child will see EOF */
         printf("Father: after write, res = %i\n", nbytes);

@@ -51,7 +51,10 @@ static bool frele(file_t *);
 file_t*
 file_alloc(vnode_t *vn)
 {
+    KASSERT(vn);
     file_t *fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
+    if(!fp)
+        return NULL;
     fp->f_vnode = vn;
     fp->f_refcnt++;
     return fp;
@@ -60,12 +63,14 @@ file_alloc(vnode_t *vn)
 void 
 fref(file_t *f)
 {
+    KASSERT(f->f_refcnt>0);
     f->f_refcnt++;
 }
 
 bool
 frele(file_t *f)
 {
+    KASSERT(f->f_refcnt>0);
     f->f_refcnt--;
 
     if ( f->f_refcnt == 0 ) {
@@ -123,6 +128,7 @@ f_write(file_t *f, uio_t *u)
     if(!(f->f_flags & O_WRONLY || f->f_flags & O_RDWR))
         return -EBADF;
     u->offset = f->f_offset;
+//    KASSERT(f->f_vnode);
     int res = VOP_WRITE(f->f_vnode, u, f->f_flags);
     if(res < 0) 
         return res;
@@ -136,6 +142,7 @@ f_read(file_t *f, uio_t *u)
     if(!(f->f_flags & O_RDONLY || f->f_flags & O_RDWR))
         return -EBADF;
     u->offset = f->f_offset;
+//    KASSERT(f->f_vnode);
     int res = VOP_READ(f->f_vnode, u, f->f_flags);
     if(res < 0)
         return res;
@@ -199,13 +206,14 @@ void
 f_set(filetable_t *ft, file_t *fd, int index)
 {
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
+//    KASSERT(fd == NULL || fd->f_vnode);
 
     if ( fc == NULL ) {
         _filetable_expand(ft, 1 + index/FILES_PER_CHUNK 
                                 - list_length(&(ft->chunks)));
         fc = _get_chunk_by_index(ft, index);
     }
-
+//    KASSERT(fc!=NULL);
     fc->files[index % FILES_PER_CHUNK] = fd;
 
     return;
@@ -223,10 +231,8 @@ _get_chunk_by_index(filetable_t *ft, int index)
     while ( fc != NULL )
     {
         current += FILES_PER_CHUNK;
-
         if ( index < current )
             return fc;
-
         fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
     }
 
@@ -265,7 +271,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     int fdp = 0;
     file_t *fp;
     filetable_chunk_t *fc;
-
+    KASSERT(vn);
     /* sprawdzamy czy to pierwszy deskyptor */
     if ( list_is_empty(&(p->p_fd->chunks)) ) {
         _filetable_expand(p->p_fd, 1);
@@ -303,6 +309,8 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 void
 f_close(file_t *fp)
 {
+//    KASSERT(fp);
+//    KASSERT(fp->f_vnode);
     VOP_CLOSE(fp->f_vnode);
     frele(fp);
     return;
@@ -319,19 +327,46 @@ filetable_alloc(void)
 }
 
 void
-filetable_free(filetable_t *fd)
+filetable_clone(filetable_t *dst, filetable_t *src)
+{
+    filetable_chunk_t *t = NULL;
+
+    while((t = (filetable_chunk_t*)list_next(&(src->chunks), t))) {
+        filetable_chunk_t *nc= kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
+        for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
+            if ( t->files[i] != NULL ) {
+                fref(t->files[i]);  ///< a co z wy¶cigiem??
+//                KASSERT(t->files[i]->f_vnode);
+            }
+            nc->files[i] = t->files[i];
+        }
+        list_insert_tail(&(dst->chunks), nc);
+    }
+}
+
+
+void
+filetable_close(filetable_t *fd)
 {
     filetable_chunk_t *t;
 
     while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks)))) {
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
-            if ( t->files[i] != NULL )
+            if ( t->files[i] != NULL ) {
+//                kprintf("=FTC - closing: %p\n", t->files[i]);
                 f_close(t->files[i]);
+            }
         }
-
         kmem_free(t);
     }
+//    KASSERT(list_length(&(fd->chunks))==0);
+}
 
+
+void
+filetable_free(filetable_t *fd)
+{
+    filetable_close(fd);
     kmem_free(fd);
 
     return;
