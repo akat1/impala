@@ -46,3 +46,5 @@ ${_SUBDIR_CLEANDEPEND}:
 			cd $$d; DIRPRFX="${DIRPRFX}$$d/" MAKELEVEL="" ${MAKE} cleandepend; cd ..;\
 	done
 
+include ${IMPALA_MK}/config.mk
+

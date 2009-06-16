@@ -37,24 +37,52 @@
 \usepackage{a4wide}
 \usepackage{graphicx}
 
-
 \author{
-    Artur Koniñski \and
-    Mateusz Kocielski \and
-    Pawe³ Wieczorek
+    Artur Koniñski &
+    Mateusz Kocielski \\
+    \multicolumn{2}{c}{Pawe³ Wieczorek}
 }
 
 \title{System operacyjny Impala.\\
 \small{Dokumentacja projektu licencjackiego na Uniwersytecie Wroc³awskim.}
 }
 
+\makeatletter
+
+\renewcommand\maketitle{
+\begin{titlepage}
+\vspace{2cm} 
+{\LARGE \centering \scshape
+	\begin{tabular}{cc}
+		\@author
+	\end{tabular}
+\par}
+\vspace{1cm}
+{ \centering \Huge \scshape
+	System operacyjny Impala\par
+}
+\hrulefill
+\begin{flushright} { \large \scshape
+Licencjacji projekt programistyczny\\ \vspace{0.20cm}
+Uniwersytet Wroc³awski\\ \vspace{0.20cm}
+\par
+}
+\end{flushright}
+
+\end{titlepage}}
+
+\makeatother
+
 \begin{document}
+
+\maketitle
 
 \tableofcontents
 
 \input{chap1/chap1.tex}
 \input{chap2/chap2.tex}
 \input{chap3/chap3.tex}
+\input{biblio.tex}
 \appendix
 \input{term}
 \input{license}

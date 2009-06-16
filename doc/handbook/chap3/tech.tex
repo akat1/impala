@@ -30,7 +30,36 @@
 % $Id$
 
 \section{Szczegó³y techniczne.}
+
 \subsection{Obraz j±dra.}
+
+
 \subsection{Obrazy programów.}
+
+
 \subsection{Rozruch systemu.}
+
+Skompresowany obraz j±dra jest umieszczony w~pliku \texttt{/boot/impala.gz}.
+Zainstaloway program ³aduj±cy na~dyskietce to~GRUB, on przekazuje parametry
+do~j±dra oraz uruchamia jego kod rozruchowy.
+
+Z~dzia³ania j±dra w~wysokich adresach (\ref{vm:mmap}) wynika trudno¶æ
+techniczna przy ³adawaniu systemu. Program ³aduj±cy nie przygotowuje
+mechanizmu stronicowania (pamiêci wirtualnej). W zwi±zku z czym ogólny
+kod j±dra jest bezu¿yteczny. 
+Poniewa¿ format ELF umo¿liwia tworzenie wielu sekcji posiadaj±cych ró¿ne
+atrybuty to problem zosta³ rozwi±zany przez wprowadzenie
+specjalnej sekcji z kodem \texttt{.bootstrap}. Sekcja w~odró¿nieniu
+od standardowej sekcji z~kodem \texttt{.text} jest przystosowana
+do pracy w niskich adresach, w tych w jakie jest ³adowane j±dro.
+
+Kod rozruchowy z~tej sekcji konfiguruje mechanizm stronicowania aby
+odwzorowaæ kod j±dra w~wysokich adresach. Po tej czynno¶ci jest 
+uruchamiana niskopoziomowa inicjacja systemu, a w niej przygotowanie
+modu³u pamiêci wirtualnej, przerwañ, czasomierza i karty graficznej.
+
+...
+
+\subsection{System budowania.}
+
 

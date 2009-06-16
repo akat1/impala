@@ -1,6 +1,18 @@
 Proponujê robiæ listê referencji. Inaczej siê pogubimy w tym nazwach.
+    -- wieczyk.
 
+bio - rozdzia³ opisuj±cy buforowane wej-wyj.
 bio:bufhash - rysunek przedstawiaj±cy przyk³adow± tablicê haszuj±c± bufory
-vm:mmap - rysunek przedstawiaj±cy mapê pamiêci wirtualnej i fizycznej
-usenix:slab - dokument opisuj±cy alokator p³ytowy
+
+vm - rozdzia³ opisuj±cy pamiêæ wirtualn±.
+vm:mmap - rysunek przedstawiaj±cy mapê pamiêci wirtualnej (a) i fizycznej (b)
+
+vfs - rozdzia³ opisuj±cy wirtualny system plików
+
+tech - rozdzia³ opisuj±cy szczegó³y techniczne
+tech:boostrap - podrozdzia³ opisuj±cy rozruch systemu.
+
+Bibliografia:
+
+biblio:slab - dokument opisuj±cy alokator p³ytowy
 

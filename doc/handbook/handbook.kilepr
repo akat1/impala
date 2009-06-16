@@ -4,8 +4,8 @@ img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0
 lastDocument=chap3/chap3.tex
-masterDocument=
-name=Handbook
+masterDocument=index.tex
+name=Impala Handbook
 pkg_extIsRegExp=false
 pkg_extensions=.cls .sty
 src_extIsRegExp=false
@@ -14,6 +14,15 @@ src_extensions=.tex .ltx .latex .dtx .ins
 [Tools]
 MakeIndex=
 QuickBuild=
+
+[item:biblio.tex]
+archive=true
+column=18
+encoding=ISO 8859-2
+highlight=LaTeX
+line=1
+open=true
+order=7
 
 [item:chap1/chap1.tex]
 archive=true
@@ -44,19 +53,55 @@ order=2
 
 [item:chap3/chap3.tex]
 archive=true
-column=32
+column=58
 encoding=ISO 8859-2
 highlight=LaTeX
-line=17
+line=18
 open=true
-order=3
+order=9
 
-[item:chap3/vm.tex]
+[item:chap3/int.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=128
+line=0
+open=true
+order=3
+
+[item:chap3/multitask.tex]
+archive=true
+column=25
+encoding=ISO 8859-2
+highlight=LaTeX
+line=0
+open=true
+order=4
+
+[item:chap3/tech.tex]
+archive=true
+column=0
+encoding=ISO 8859-2
+highlight=LaTeX
+line=0
+open=true
+order=5
+
+[item:chap3/vfs.tex]
+archive=true
+column=0
+encoding=ISO 8859-2
+highlight=LaTeX
+line=34
+open=true
+order=6
+
+[item:chap3/vm.tex]
+archive=true
+column=5
+encoding=ISO 8859-2
+highlight=LaTeX
+line=168
 open=true
 order=0
 
@@ -71,18 +116,18 @@ order=-1
 
 [item:index.tex]
 archive=true
-column=23
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=35
+line=39
 open=true
 order=1
 
 [item:term.tex]
 archive=true
-column=2147483647
+column=25
 encoding=
-highlight=
+highlight=LaTeX
 line=0
-open=false
-order=-1
+open=true
+order=8

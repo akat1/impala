@@ -11,6 +11,7 @@ SRCS=\
 	pthread_join.c\
 	pthread_kill.c\
 	pthread_once.c\
+	pthread_rt.c\
 	pthread_self.c\
 	pthread_setcancelstate.c\
 	pthread_setcanceltype.c\

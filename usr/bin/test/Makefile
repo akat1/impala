@@ -1,4 +1,5 @@
 PROG=test
+LIBS=-lpthread
 SRCS=\
 	test.c
 

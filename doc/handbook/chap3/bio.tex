@@ -29,7 +29,31 @@
 %
 % $Id$
 
-\section{Buforowane wej¶cie-wyj¶cie.}
+\section{Buforowane wej¶cie-wyj¶cie (BIO).} \label{bio}
+
+Buforowane wej¶cie-wyj¶cie jest warstw± j±dra odpowiedzialn±
+za~operacje wej¶cia-wyj¶cia wykonywane na urz±dzeniach blokowych.
+
+J±dro przydziela z~góry ustalon± liczbê nag³ówków buforów (\texttt{iobuf\_t}),
+w~których przydzielane s± bufory dla~zleconych operacji wej¶cia-wyj¶cia.
+Przy ka¿dym zleceniu przeszukujê siê najpierw wyniki poprzednich zleconych
+operacji, je¿eli takie zlecenie by³o ju¿ wcze¶niej to~mo¿na pomin±æ jego
+faktyczn± realizacjê na~urz±dzeniu, które jest znacznie wolniejsze ni¿
+procesor.
+
+Poniewa¿ mechanizm pos³uguje siê z góry ustalonym zbiorem nag³ówków
+buforów to~mo¿e zda¿yæ siê sytuacja zleceñ na~dwie takie same operacje.
+W~zwi±zku z~tym bufor dla danej operacji wej¶cia-wyj¶cia mo¿e byæ u¿ywany
+jednocze¶nie przez tylko jednego zleceniodawcê. Ka¿dy inny zleceniodawca
+chc±cy wykonaæ operacjê, której bufor jest ju¿ zajêty zostanie u¶piony
+do czasu zwolnienia buforu.
+
+Operacje s± identyfikowanê przez deskryptor urz±dzenia(\texttt{devd\_t})
+oraz numer bloku(\texttt{blkno\_t}). 
+
+
+\subsection{Tablica haszuj±ca.}
+
 
 \begin{figure}
  \centering
