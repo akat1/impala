@@ -30,47 +30,71 @@
  * $Id$
  */
 
-#ifndef __MACHINE_THREAD_H
-#define __MACHINE_THREAD_H
+#ifndef __SYS_SIGNAL_H
+#define __SYS_SIGNAL_H
 
+#define sigmask(X)      (1<<((X)-1))
+#define sig_emptymask   0
 
-typedef struct thread_context thread_context;
-struct thread_context {
-    uint32_t c_eax;
-    uint32_t c_ebx;
-    uint32_t c_ecx;
-    uint32_t c_edx;
-    uint32_t c_esi;
-    uint32_t c_edi;
-    uint32_t c_esp;
-    uint32_t c_ebp;
-    uint32_t c_eflags;
-    uint32_t c_cr3;
-    uint32_t c_eip;
-    struct interrupt_frame *c_frame;
-    ///@todo dodac koprocesor matematyczny
+#define SIG_DFL ((void*)0)  /* Domy¶lna akcja */
+#define SIG_ERR ((void*)-1) /* Warto¶æ b³êdu */
+#define SIG_IGN ((void*)1)  /* Sygna³ bêdzie ignorowany */
+
+// SIGPROCMASK
+#define SIG_SETMASK     0
+#define SIG_BLOCK       1
+#define SIG_UNBLOCK     2
+
+struct sigaction {
+    sighandler_t sa_handler;
+    sigset_t     sa_mask;
+    int          sa_flags;
 };
 
-typedef struct signal_context signal_context;
-struct signal_context {
-    thread_context *context;
-    signal_context *prev;
-    sigset_t sigblock;
-};
+// Sygna³y
+#define SIGHUP          1
+#define SIGINT          2
+#define SIGQUIT         3
+#define SIGILL          4
+#define SIGTRAP         5
+#define SIGABRT         6
+#define SIGIOT          6
+#define SIGBUS          7
+#define SIGFPE          8
+#define SIGKILL         9
+#define SIGUSR1         10
+#define SIGSEGV         11
+#define SIGUSR2         12
+#define SIGPIPE         13
+#define SIGALRM         14
+#define SIGTERM         15
+#define SIGSTKFLT       16
+#define SIGCHLD         17
+#define SIGCONT         18
+#define SIGSTOP         19
+#define SIGTSTP         20
+#define SIGTTIN         21
+#define SIGTTOU         22
+#define SIGURG          23
+#define SIGXCPU         24
+#define SIGXFSZ         25
+#define SIGVTALRM       26
+#define SIGPROF         27
+#define SIGWINCH        28
+
+#define _NSIG    32   
+
+#define S_TERM      1<<0
+#define S_ABORT     1<<1
+#define S_IGNORE    1<<2
+#define S_STOP      1<<3
+#define S_CONT      1<<4
 
 #ifdef __KERNEL
-
-thread_context *thread_context_copy(thread_context *ctx);
-void thread_sigenter(thread_t *t, addr_t proc, int signum);
-void thread_sigreturn(thread_t *t);
-void thread_context_destroy(thread_context *ctx);
-void thread_context_load(thread_context *ctx);
-int thread_context_store(thread_context *ctx);
-void thread_context_init(thread_t *t, thread_context *ctx);
-void thread_prepare(thread_t *c);
-void thread_switch(thread_t *t_to, thread_t *t_from);
-void thread_resume(thread_t *t);
-
+bool signal_present(proc_t *p);
+int signal_proc(thread_t *t);
+bool signal_send(proc_t *p, int sig);
+void signal_handle(thread_t *t);
 #endif
 
 #endif

@@ -1090,14 +1090,14 @@ timescmd(int argc __unused, char **argv __unused)
 	long shumins, shsmins, chumins, chsmins;
 	double shusecs, shssecs, chusecs, chssecs;
 
-	if (getrusage(RUSAGE_SELF, &ru) < 0)
-		return 1;
+//	if (getrusage(RUSAGE_SELF, &ru) < 0)
+//		return 1;
 	shumins = ru.ru_utime.tv_sec / 60;
 	shusecs = ru.ru_utime.tv_sec % 60 + ru.ru_utime.tv_usec / 1000000.;
 	shsmins = ru.ru_stime.tv_sec / 60;
 	shssecs = ru.ru_stime.tv_sec % 60 + ru.ru_stime.tv_usec / 1000000.;
-	if (getrusage(RUSAGE_CHILDREN, &ru) < 0)
-		return 1;
+//	if (getrusage(RUSAGE_CHILDREN, &ru) < 0)
+//		return 1;
 	chumins = ru.ru_utime.tv_sec / 60;
 	chusecs = ru.ru_utime.tv_sec % 60 + ru.ru_utime.tv_usec / 1000000.;
 	chsmins = ru.ru_stime.tv_sec / 60;

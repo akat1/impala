@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
+#include <signal.h>
 #include <sys/thread.h>
 
 void tmain(void);
@@ -35,6 +36,11 @@ inputline(char *s)
   } while (!*s);
 }
 
+void handler(int sig)
+{
+    printf("HELLO WORLD!\n");
+    sigreturn();
+}
 
 int
 main(int argc, char **v)
@@ -46,6 +52,7 @@ main(int argc, char **v)
 #endif
     thr_create(tmain, 0, 0, 0);
 
+    int p;
     char buf[512];
     char *const argv[]={NULL};
     char *const env[]={NULL};
@@ -65,6 +72,16 @@ main(int argc, char **v)
                 while(1);
             }
         }
+        if(!strcmp(buf, "sh")) {
+            if(!fork()) {
+                execve("/bin/sh", argv, env);
+                printf("Nie uda³o siê uruchomiæ programu...");
+                exit(-1);
+            } else {
+                printf("Uruchamiam ma³e co nieco...\n");
+                while(1);
+            }
+        }
         if(!strcmp(buf, "test2")) {
             if(!fork()) {
                 execve("/bin/test", argv, env);
@@ -73,6 +90,21 @@ main(int argc, char **v)
             } else {
                 printf("Uruchamiam ma³e co nieco...\n");
             }
+        }
+        if(!strcmp(buf, "signal")) {
+            printf("SIGHUP:\n");
+            signal(SIGHUP, handler);
+            kill(getpid(), SIGHUP);
+            if ( ! (p=fork()) )
+            {
+                while(1);
+            }
+            kill(p, SIGSTOP);
+            printf("STOPPED!\n");
+            kill(p, SIGCONT);
+            printf("CONT!\n");
+            kill(p, SIGKILL);
+            printf("Bye: %i\n", p);
         }
         printf("%s", buf);
     }

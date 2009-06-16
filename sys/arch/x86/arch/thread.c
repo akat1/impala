@@ -35,6 +35,10 @@
 #include <sys/utils.h>
 #include <sys/string.h>
 #include <sys/vm.h>
+#include <sys/kmem.h>
+#include <sys/proc.h>
+#include <sys/thread.h>
+#include <sys/signal.h>
 #include <machine/cpu.h>
 #include <machine/descriptor.h>
 #include <machine/interrupt.h>
@@ -56,6 +60,71 @@ thread_context_init(thread_t *t, thread_context *ctx)
     mem_zero(ctx, sizeof(thread_context));
     ctx->c_eflags = EFLAGS_BITS;
     ctx->c_frame = (interrupt_frame*)frame;
+}
+
+thread_context *
+thread_context_copy(thread_context *ctx)
+{
+    thread_context *nctx = kmem_alloc(sizeof(thread_context), KM_SLEEP);
+    interrupt_frame *nif = kmem_alloc(sizeof(interrupt_frame), KM_SLEEP);
+
+    mem_cpy(nctx, ctx, sizeof(thread_context));
+    mem_cpy(nif, ctx->c_frame, sizeof(interrupt_frame));
+
+    nctx->c_frame = nif;
+
+    return nctx;
+}
+
+void
+thread_context_destroy(thread_context *ctx)
+{
+    kmem_free(ctx->c_frame);
+    kmem_free(ctx);
+    return;
+}
+
+void
+thread_sigenter(thread_t *t, addr_t proc, int signum)
+{
+    thread_context *ctx = thread_context_copy(&(t->thr_context));
+    signal_context *stx = kmem_alloc(sizeof(signal_context), KM_SLEEP);
+
+    stx->context = ctx;
+    stx->prev = t->thr_sigcontext;
+    stx->sigblock = t->thr_sigblock;
+    t->thr_sigblock = t->thr_proc->p_sigact[signum].sa_mask;
+    t->thr_sigcontext = stx;
+
+    mem_cpy((char *)t->thr_context.c_frame->f_esp-sizeof(int), &signum, sizeof(int));
+    mem_cpy((char *)t->thr_context.c_frame->f_esp-sizeof(int)*2, &(t->thr_context.c_frame->f_eip), sizeof(int));
+    t->thr_context.c_frame->f_esp -= 2*sizeof(int);
+    t->thr_context.c_frame->f_eip = (uint32_t)proc;
+    return;
+}
+
+void
+thread_sigreturn(thread_t *t)
+{
+    signal_context *stx = t->thr_sigcontext;
+    interrupt_frame *ifr;
+
+    if ( stx == NULL ) {
+        return;
+    }
+
+    t->thr_sigcontext = stx->prev;
+
+    ifr = t->thr_context.c_frame;
+    mem_cpy(&t->thr_context, stx->context, sizeof(thread_context));
+    mem_cpy(t->thr_context.c_frame, stx->context->c_frame, sizeof(interrupt_frame));
+    t->thr_context.c_frame = ifr;
+    t->thr_sigblock = stx->sigblock;
+
+    thread_context_destroy(stx->context);
+    kmem_free(stx);
+
+    return;
 }
 
 void
@@ -102,6 +171,7 @@ thread_fork(thread_t *t, thread_t *ct)
     ct->thr_stack_size = t->thr_stack_size;
     ct->thr_context.c_frame->f_eax = 0;
     ct->thr_context.c_frame->f_ecx = 0;
+    ct->thr_sigcontext = NULL;
 }
 
 /**

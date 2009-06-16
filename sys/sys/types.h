@@ -60,6 +60,8 @@ typedef uint mode_t;
 typedef uint nlink_t;
 typedef int pid_t;
 typedef uintptr_t tid_t;
+typedef void (*sighandler_t)(int);
+typedef uint32_t sigset_t;
 
 // Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS
@@ -86,6 +88,7 @@ typedef struct filetable_chunk filetable_chunk_t;
 typedef struct file file_t;
 typedef struct ipcmsq ipcmsq_t;
 typedef struct biohash biohash_t;
+typedef struct sigaction sigaction_t;
 
 #include <sys/vm/vm_types.h>
 #endif

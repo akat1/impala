@@ -34,6 +34,7 @@
 #include <sys/thread.h>
 #include <sys/syscall.h>
 #include <sys/string.h>
+#include <sys/signal.h>
 #include <sys/utils.h>
 #include <sys/vm.h>
 #include <sys/vm/vm_trap.h>
@@ -122,6 +123,8 @@ ISR_syscall(interrupt_frame frame)
 
     syscall(thisthr, frame.f_eax, &result, ap);
     thisthr->thr_flags &= ~THREAD_SYSCALL;
+
+    signal_handle(thisthr);
 
     // result
     frame.f_eax = result.result;

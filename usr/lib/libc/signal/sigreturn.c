@@ -3,8 +3,9 @@
 
 #include "libc_syscall.h"
 
-int
-kill(pid_t pid, int sig)
+void
+sigreturn(void)
 {
-	return syscall(SYS_kill, pid, sig);
+	syscall(SYS_sigreturn);
+    return;
 }

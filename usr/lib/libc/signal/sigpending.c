@@ -4,7 +4,7 @@
 #include "libc_syscall.h"
 
 int
-kill(pid_t pid, int sig)
+sigpending(sigset_t *set)
 {
-	return syscall(SYS_kill, pid, sig);
+    return syscall(SYS_sigpending, set);
 }

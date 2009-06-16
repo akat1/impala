@@ -2,8 +2,8 @@
 #define __SIGNAL_H
 
 #include <sys/types.h>
+#include <sys/signal.h>
 #include <sys/stat.h>
-#include <sys/signum.h>
 #include <sys/wait.h> //tak na razie...
 
 #define NSIG _NSIG
@@ -12,8 +12,6 @@ extern const char *const sys_siglist[NSIG]; //niby stare, ale ash chce
 const static int sys_nsig = NSIG; //co te¿ ten ash wymy¶la..
 
 typedef int sig_atomic_t;
-typedef long int sigset_t;
-typedef void (*sighandler_t)(int);
 
 typedef long long int clock_t;
 
@@ -37,13 +35,6 @@ struct siginfo {
 
 typedef struct siginfo siginfo_t;
 
-struct sigaction {
-    void   (*sa_handler)(int);
-    void   (*sa_sigaction)(int, siginfo_t *, void *);
-    sigset_t sa_mask;
-    int      sa_flags;
-};
-
 int kill(pid_t pid, int sig);
 int killpg(int pgrp, int sig);
 int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
@@ -53,7 +44,13 @@ int sigaction(int, const struct sigaction *,
                          struct sigaction *);
 
 
-
-#define SIG_SETMASK 0
-
+void sigreturn(void);
+int sigemptyset(sigset_t *set);
+int sigfillset(sigset_t *set);
+int sigaddset(sigset_t *set, int signum);
+int sigdelset(sigset_t *set, int signum);
+int sigismember(const sigset_t *set, int signum);
+int sigpending(sigset_t *set);
+int siginterrupt(int sig, int flag);
+int raise(int sig);
 #endif

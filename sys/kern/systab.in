@@ -54,3 +54,7 @@ SYS thr_getid
 SYS thr_getarg
 SYS sched_yield
 SYS sbrk
+SYS signal
+SYS sigpending
+SYS sigprocmask
+SYS sigreturn

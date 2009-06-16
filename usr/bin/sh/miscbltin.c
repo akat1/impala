@@ -348,6 +348,7 @@ static const struct limits limits[] = {
 int
 ulimitcmd(int argc __unused, char **argv __unused)
 {
+#if 0
 	int	c;
 	rlim_t val = 0;
 	enum { SOFT = 0x1, HARD = 0x2 }
@@ -452,4 +453,6 @@ ulimitcmd(int argc __unused, char **argv __unused)
 		}
 	}
 	return 0;
+#endif
+    return 0;
 }

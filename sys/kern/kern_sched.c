@@ -36,6 +36,7 @@
 #include <sys/clock.h>
 #include <sys/utils.h>
 #include <sys/kargs.h>
+#include <sys/signal.h>
 #include <machine/interrupt.h>
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
@@ -123,6 +124,7 @@ do_switch()
     //else spoko, przy opuszczaniu zamka bêdziemy uwa¿aæ..
     //else kprintf("Nie wysz³o..\n");
     spl0();
+    signal_handle(curthread);
 }
 
 

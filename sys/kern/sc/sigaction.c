@@ -35,13 +35,39 @@
 #include <sys/sched.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
+#include <sys/signal.h>
+#include <sys/proc.h>
 
-errno_t sc_sigaction(thread_t *p, syscall_result_t *r, va_list ap);
+typedef struct sigaction_args sigaction_args_t;
+
+struct sigaction_args {
+    int sig;
+    sigaction_t *act;
+    sigaction_t *oldact;
+};
+
+errno_t sc_sigaction(thread_t *p, syscall_result_t *r, sigaction_args_t *args);
 
 errno_t
-sc_sigaction(thread_t *p, syscall_result_t *r, va_list ap)
+sc_sigaction(thread_t *t, syscall_result_t *r, sigaction_args_t *args)
 {
-    r->result = 0;
-    return -ENOSTR;
-}
+    proc_t *p = t->thr_proc;
 
+    if ( args->sig < 1 || args->sig > _NSIG ||
+         args->sig == SIGSTOP || args->sig == SIGKILL ) {
+
+        r->result = -1;
+        return EINVAL;
+    }
+
+    if ( args->oldact ) {
+        copyout(args->oldact, &p->p_sigact[args->sig], sizeof(sigaction_t));
+    }
+
+    if ( args->act ) {
+        copyin(&p->p_sigact[args->sig], args->act, sizeof(sigaction_t));
+    }
+
+    r->result = 0;
+    return EOK;
+}

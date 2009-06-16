@@ -4,7 +4,8 @@
 #include "libc_syscall.h"
 
 int
-kill(pid_t pid, int sig)
+siginterrupt(int sig, int flag)
 {
-	return syscall(SYS_kill, pid, sig);
+    /* XXX */
+	return 0;
 }

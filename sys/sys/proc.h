@@ -33,6 +33,7 @@
 #ifndef __SYS_PROC_H
 #define __SYS_PROC_H
 
+#include <sys/signal.h>
 #include <sys/thread.h>
 #include <sys/termios.h>
 #include <sys/vfs/vfs_node.h>
@@ -58,6 +59,9 @@ struct proc {
     list_t          p_children;  ///< lista dzieci procesu
     int             p_flags;     ///< flagi procesu
     int             p_status;    ///< status
+    sigset_t        p_sig;       ///< maska sygna³ów dostarczonych do procesu
+    sigset_t        p_sigignore; ///< maska sygna³ów ignorowanych
+    sigaction_t     p_sigact[_NSIG]; ///< akcje sygna³ów
     vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
@@ -74,6 +78,7 @@ struct proc {
 /// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
 /// Aktualnie wykonywany proces.
+extern proc_t * volatile curproc;
 extern proc_t *initproc;
 extern proc_t proc0;
 
@@ -95,7 +100,8 @@ enum PROC_FLAGS
     PROC_NEW    = 1<<0, // proces zosta³ utworzony
     PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
     PROC_RUN    = 1<<2, // proces w kolejce uruchomieniowej
-    PROC_AFTER_EXEC = 1<<3 // proces wykona³ ju¿ exec
+    PROC_AFTER_EXEC = 1<<3, // proces wykona³ ju¿ exec
+    PROC_STOP   = 1<<4
 };
 
 enum

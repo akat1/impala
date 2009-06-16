@@ -176,6 +176,8 @@ proc_destroy(proc_t *proc)
 
     kprintf("%x - dlugosc\n", list_length(&proc->p_threads));
 
+    signal_send(proc_find(proc->p_ppid), SIGCHLD);
+
     proc_destroy_threads(proc);
     if (proc->vm_space) {
         vm_space_destroy(proc->vm_space);
@@ -188,6 +190,7 @@ proc_destroy(proc_t *proc)
     filetable_close(proc->p_fd);
     ///proszê nie usuwaæ rzeczy utworzonych w ctor ;D
     kmem_cache_free(proc_cache, proc);
+
     return;
 }
 

@@ -4,7 +4,7 @@
 #include "libc_syscall.h"
 
 int
-kill(pid_t pid, int sig)
+killpg(int pgrp, int sig)
 {
-	return syscall(SYS_kill, pid, sig);
+    return 0;
 }

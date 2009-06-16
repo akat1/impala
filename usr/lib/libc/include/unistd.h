@@ -119,6 +119,7 @@ int getdents(int fd, dirent_t *data, size_t count);
 extern char **environ;
 extern char *optarg;
 extern int optind, opterr, optopt, optreset;
+int getopt(int argc, char * const argv[], const char *optstring);
 
 #include <sys/select.h>
 

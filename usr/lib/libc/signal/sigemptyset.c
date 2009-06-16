@@ -4,7 +4,8 @@
 #include "libc_syscall.h"
 
 int
-kill(pid_t pid, int sig)
+sigemptyset(sigset_t *set)
 {
-	return syscall(SYS_kill, pid, sig);
+    *set ^= *set;
+    return 0;
 }

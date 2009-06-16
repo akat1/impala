@@ -33,61 +33,62 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/sched.h>
-#include <sys/errno.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
-#include <sys/proc.h>
 #include <sys/signal.h>
+#include <sys/proc.h>
+#include <sys/string.h>
 
-typedef struct kill_args kill_args_t;
+typedef struct sigprocmask_args sigprocmask_args_t;
 
-struct kill_args {
-    pid_t pid;
-    int sig;
+struct sigprocmask_args {
+    int how;
+    sigset_t *set;
+    sigset_t *oldset;
 };
 
-errno_t sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args);
+errno_t sc_sigprocmask(thread_t *t, syscall_result_t *r, sigprocmask_args_t *args);
 
 errno_t
-sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args)
+sc_sigprocmask(thread_t *t, syscall_result_t *r, sigprocmask_args_t *args)
 {
-    /* TODO:
-     * 1) grupy procesow == -pid
-     * 2) broadcast - pid == 0
-     * 3) broadcast poza initem - pid == -1
-     */
+    sigset_t sigblock;
 
-    proc_t *dest_proc = NULL;
+    *(args->set) &= ~(SIGKILL|SIGSTOP);
 
-    /* sprawdzamy sygna³ */
-    if ( args->sig < 0 || args->sig > _NSIG ) {
-        r->result = -1;
-        return EINVAL;
+    switch(args->how) {
+        case SIG_BLOCK:
+            if ( args->oldset != NULL ) {
+                copyout(args->oldset, &t->thr_sigblock, sizeof(sigset_t));
+            }
+            copyin(&sigblock, args->set, sizeof(sigset_t));
+            sigblock |= t->thr_sigblock;
+            mem_cpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
+            r->result = 0;
+            return EOK;
+        case SIG_UNBLOCK:
+            if ( args->oldset != NULL ) {
+                copyout(args->oldset, &t->thr_sigblock, sizeof(sigset_t));
+            }
+            copyin(&sigblock, args->set, sizeof(sigset_t));
+            sigblock &= ~t->thr_sigblock;
+            mem_cpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
+            r->result = 0;
+            return EOK;
+        case SIG_SETMASK:
+            if ( args->oldset != NULL ) {
+                copyout(args->oldset, &t->thr_sigblock, sizeof(sigset_t));
+            }
+            if ( args->set != NULL ) {
+                copyin(&t->thr_sigblock, args->set, sizeof(sigset_t));
+            }
+            r->result = 0;
+            return EOK;
+        default:
+            r->result = -1;
+            return EINVAL;
     }
 
-    /* szukamy procesu, któremu mamy dostarczyæ sygna³ */
-    dest_proc = proc_find(args->pid);
-
-    if ( dest_proc == NULL && args->pid != 0 ) {
-        r->result = -1;
-        return ESRCH;
-    }
-
-    /* sprawdzamy czy mo¿emy dostarczyæ sygna³ */
-    /* ... */
-
-    /* sprawdzamy komu dostarczamy sygna³ */
-
-    /* pojedynczy proces */
-    if ( args->pid > 0 )
-    {
-        signal_send(dest_proc, args->sig);
-        r->result = 0;
-        return EOK;
-    }
-
-    /* Uzupelnic wg. TODO */
-    r->result = -1;
-    return ENOSTR;
+    /* NOT REACHED */
 }
 

@@ -68,8 +68,21 @@ SRCS=\
     string/strstr.c\
     termios/tcgetattr.c\
     signal/kill.c\
+    signal/killpg.c\
     signal/signal.c\
+    signal/sigemptyset.c\
+    signal/sigfillset.c\
+    signal/sigaddset.c\
+    signal/sigdelset.c\
+    signal/sigismember.c\
+    signal/sigaction.c\
+    signal/sigpending.c\
+    signal/sigreturn.c\
+    signal/siginterrupt.c\
+    signal/sigprocmask.c\
+    signal/raise.c\
     sys/sched_yield.c\
+    sys/sys_siglist.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
     sysvipc/msgget.c\
@@ -123,6 +136,7 @@ SRCS=\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
     unistd/write.c\
+    unistd/getopt.c\
     other/closedir.c\
     other/getpwnam.c\
     other/opendir.c\

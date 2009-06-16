@@ -36,6 +36,7 @@
 #ifdef __KERNEL
 #include <sys/list.h>
 #include <sys/sched.h>
+#include <sys/signal.h>
 #include <machine/thread.h>
 #include <machine/atomic.h>
 
@@ -73,6 +74,7 @@ struct wdescr {
 /// w±tek procesora.
 struct thread {
     thread_context  thr_context;    ///< kontekst
+    signal_context *thr_sigcontext; ///< stos kontekstów dla sygna³ów
     addr_t          thr_entry_point;///< adres procedury wej¶ciowej
     addr_t          thr_entry_arg;  ///< adres argumenty procedury wej¶ciowej
     int             thr_flags;      ///< opcje
@@ -87,6 +89,7 @@ struct thread {
     wdescr_t        thr_wdescr;
     mutex_t         thr_mtx;        ///< do synchronizacji
     bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
+    sigset_t        thr_sigblock;   ///< blokowane sygna³y
     list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
     list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie

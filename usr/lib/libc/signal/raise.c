@@ -1,10 +1,11 @@
 #include <sys/syscall.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "libc_syscall.h"
 
 int
-kill(pid_t pid, int sig)
+raise(int sig)
 {
-	return syscall(SYS_kill, pid, sig);
+	return kill(getpid(), sig);
 }

@@ -33,61 +33,34 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/sched.h>
-#include <sys/errno.h>
 #include <sys/utils.h>
 #include <sys/syscall.h>
-#include <sys/proc.h>
 #include <sys/signal.h>
+#include <sys/proc.h>
 
-typedef struct kill_args kill_args_t;
+typedef struct signal_args signal_args_t;
 
-struct kill_args {
-    pid_t pid;
+struct signal_args {
     int sig;
+    sighandler_t handler;
 };
 
-errno_t sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args);
+errno_t sc_signal(thread_t *p, syscall_result_t *r, signal_args_t *args);
 
 errno_t
-sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args)
+sc_signal(thread_t *t, syscall_result_t *r, signal_args_t *args)
 {
-    /* TODO:
-     * 1) grupy procesow == -pid
-     * 2) broadcast - pid == 0
-     * 3) broadcast poza initem - pid == -1
-     */
+    proc_t *p = t->thr_proc;
 
-    proc_t *dest_proc = NULL;
+    if ( args->sig < 1 || args->sig > _NSIG ||
+         args->sig == SIGSTOP || args->sig == SIGKILL ) {
 
-    /* sprawdzamy sygna³ */
-    if ( args->sig < 0 || args->sig > _NSIG ) {
         r->result = -1;
         return EINVAL;
     }
 
-    /* szukamy procesu, któremu mamy dostarczyæ sygna³ */
-    dest_proc = proc_find(args->pid);
+    p->p_sigact[args->sig].sa_handler = args->handler;
 
-    if ( dest_proc == NULL && args->pid != 0 ) {
-        r->result = -1;
-        return ESRCH;
-    }
-
-    /* sprawdzamy czy mo¿emy dostarczyæ sygna³ */
-    /* ... */
-
-    /* sprawdzamy komu dostarczamy sygna³ */
-
-    /* pojedynczy proces */
-    if ( args->pid > 0 )
-    {
-        signal_send(dest_proc, args->sig);
-        r->result = 0;
-        return EOK;
-    }
-
-    /* Uzupelnic wg. TODO */
-    r->result = -1;
-    return ENOSTR;
+    r->result = 0;
+    return EOK;
 }
-
