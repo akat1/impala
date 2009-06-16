@@ -31,7 +31,7 @@
 
 
 \documentclass[a4paper,11pt]{report}
-
+\usepackage{fix-cm}
 \usepackage{polski}
 \usepackage[latin2]{inputenc}
 \usepackage{a4wide}
@@ -51,19 +51,20 @@
 
 \renewcommand\maketitle{
 \begin{titlepage}
-\vspace{2cm} 
+
+\vspace{4cm} 
 {\LARGE \centering \scshape
 	\begin{tabular}{cc}
 		\@author
 	\end{tabular}
 \par}
-\vspace{1cm}
-{ \centering \Huge \scshape
+\vspace{3cm}
+{ \centering \scshape \fontsize{44}{50}\selectfont
 	System operacyjny Impala\par
 }
 \hrulefill
 \begin{flushright} { \large \scshape
-Licencjacji projekt programistyczny\\ \vspace{0.20cm}
+Licencjacki projekt programistyczny\\ \vspace{0.20cm}
 Uniwersytet Wroc³awski\\ \vspace{0.20cm}
 \par
 }

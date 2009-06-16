@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0
-lastDocument=chap3/chap3.tex
+lastDocument=chap3/tech.tex
 masterDocument=index.tex
 name=Impala Handbook
 pkg_extIsRegExp=false
@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:biblio.tex]
 archive=true
-column=18
+column=8
 encoding=ISO 8859-2
 highlight=LaTeX
-line=1
+line=2
 open=true
 order=7
 
@@ -28,35 +28,35 @@ order=7
 archive=true
 column=0
 encoding=
-highlight=
+highlight=LaTeX
 line=0
-open=false
-order=-1
+open=true
+order=10
 
 [item:chap2/chap2.tex]
 archive=true
 column=0
 encoding=
-highlight=
+highlight=LaTeX
 line=0
-open=false
-order=-1
+open=true
+order=11
 
 [item:chap3/bio.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=35
+line=60
 open=true
 order=2
 
 [item:chap3/chap3.tex]
 archive=true
-column=58
+column=1
 encoding=ISO 8859-2
 highlight=LaTeX
-line=18
+line=7
 open=true
 order=9
 
@@ -80,10 +80,10 @@ order=4
 
 [item:chap3/tech.tex]
 archive=true
-column=0
+column=62
 encoding=ISO 8859-2
 highlight=LaTeX
-line=0
+line=42
 open=true
 order=5
 
@@ -98,10 +98,10 @@ order=6
 
 [item:chap3/vm.tex]
 archive=true
-column=5
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=168
+line=40
 open=true
 order=0
 
@@ -116,17 +116,17 @@ order=-1
 
 [item:index.tex]
 archive=true
-column=0
+column=10
 encoding=ISO 8859-2
 highlight=LaTeX
-line=39
+line=66
 open=true
 order=1
 
 [item:term.tex]
 archive=true
 column=25
-encoding=
+encoding=ISO 8859-2
 highlight=LaTeX
 line=0
 open=true

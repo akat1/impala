@@ -39,9 +39,9 @@
 
 \subsection{Rozruch systemu.}
 
-Skompresowany obraz j±dra jest umieszczony w~pliku \texttt{/boot/impala.gz}.
-Zainstaloway program ³aduj±cy na~dyskietce to~GRUB, on przekazuje parametry
-do~j±dra oraz uruchamia jego kod rozruchowy.
+Skompresowany obraz j±dra (\texttt{/boot/impala.gz}) jest ³adowany przez
+program GRUB, zainstalowany w~sektorze rozruchowym dyskietki. 
+
 
 Z~dzia³ania j±dra w~wysokich adresach (\ref{vm:mmap}) wynika trudno¶æ
 techniczna przy ³adawaniu systemu. Program ³aduj±cy nie przygotowuje
