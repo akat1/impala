@@ -50,7 +50,8 @@ sc_getcwd(thread_t *t, syscall_result_t *r, getcwd_args_t *args)
         return err;
     vnode_t *cd = t->thr_proc->p_curdir;    //nie boimy siê trzymaæ ten wska¼nik
     vnode_t *tmp = NULL;
-    
+    str_ncpy(args->buf, "/", args->size);
+    return -EOK;
     lkp_state_t pc;
     pc.flags = LKP_GET_PARENT;
     pc.max_link_cnt = 10;
