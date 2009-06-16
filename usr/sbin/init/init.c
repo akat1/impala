@@ -46,6 +46,7 @@ int
 main(int argc, char **v)
 {
 #ifdef __Impala__
+    setsid();
     open("/dev/ttyv1", O_RDONLY /* | O_NOCTTY*/);   //stdin
     open("/dev/ttyv1", O_WRONLY);   //stdout
     open("/dev/ttyv1", O_WRONLY);   //stderr

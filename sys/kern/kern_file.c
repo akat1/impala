@@ -193,6 +193,8 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
 file_t *
 f_get(filetable_t *ft, int index)
 {
+    if(index<0)
+        return NULL;
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
     if ( fc == NULL ) {
@@ -205,6 +207,7 @@ f_get(filetable_t *ft, int index)
 void 
 f_set(filetable_t *ft, file_t *fd, int index)
 {
+    KASSERT(index>=0);
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 //    KASSERT(fd == NULL || fd->f_vnode);
 
@@ -309,8 +312,8 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 void
 f_close(file_t *fp)
 {
-//    KASSERT(fp);
-//    KASSERT(fp->f_vnode);
+    KASSERT(fp);
+    KASSERT(fp->f_vnode);
     VOP_CLOSE(fp->f_vnode);
     frele(fp);
     return;
@@ -320,7 +323,7 @@ filetable_t *
 filetable_alloc(void)
 {
     filetable_t *t = kmem_zalloc(sizeof(filetable_t), KM_SLEEP);
-
+    t->max_ds = 100;
     LIST_CREATE(&(t->chunks), filetable_chunk_t, L_chunks, FALSE);
 
     return t;

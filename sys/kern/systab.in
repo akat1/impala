@@ -23,6 +23,7 @@ SYS pause
 SYS read
 SYS select
 SYS setpgid
+SYS setsid
 SYS setuid
 SYS setreuid
 SYS sigaction

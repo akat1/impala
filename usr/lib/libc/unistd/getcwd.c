@@ -6,7 +6,7 @@ getcwd(char *buf, size_t size)
 {
     if(!buf)
         return NULL;
-    if(syscall(SYS_getcwd, buf, size))
+    if(!syscall(SYS_getcwd, buf, size))
         return buf;
     return NULL;
 }

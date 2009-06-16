@@ -128,6 +128,7 @@ SRCS=\
     unistd/setmode.c\
     unistd/setpgid.c\
     unistd/setpgrp.c\
+    unistd/setsid.c\
     unistd/setuid.c\
     unistd/sleep.c\
     unistd/stat.c\

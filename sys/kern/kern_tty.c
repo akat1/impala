@@ -99,8 +99,8 @@ tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops)
     else
         snprintf(buf, 128, name, unit);
     tty->t_private = priv;
-    tty->t_session = 0; ///@todo zrobiæ to porz±dnie
-    tty->t_group = 0;
+    tty->t_session = -1; ///@todo zrobiæ to porz±dnie
+    tty->t_group = -1;
     tty->t_lowops = lops;
     tty->t_inq = clist_create(MAX_INPUT);
     tty->t_clq = clist_create(MAX_INPUT);
@@ -121,9 +121,13 @@ tty_open(devd_t *d, int flags)
 {
     proc_t *p = curthread->thr_proc;
     tty_t *tty = d->priv;
-    if(!(flags & O_NOCTTY) && (p->p_ctty == NULL)) {
+    if(!(flags & O_NOCTTY) && (p->p_ctty == NULL) 
+        && (p->p_session == p->p_pid)
+        && (tty->t_session == -1)) {
         //ustawiamy terminal steruj±cy procesu
         p->p_ctty = tty;
+        tty->t_session = p->p_session;
+        tty->t_group = p->p_group;
     }
 
     return 0;
@@ -136,7 +140,10 @@ tty_read(devd_t *d, uio_t *u, int flags)
     size_t need = u->size;
     cc_t *cc = tty->t_conf.c_cc;
     int lflag = tty->t_conf.c_lflag;
-    
+    /// czy to zawsze curthread?
+    proc_t *proc = curthread->thr_proc;
+    if(proc->p_group != tty->t_group)
+        return 0;   ///< zrobiæ prawid³ow± reakcje
     if(ISSET(lflag, ICANON)) {
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)

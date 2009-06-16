@@ -26,35 +26,32 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: TEMPLATE.c 350 2009-06-03 23:16:05Z wieczyk $
+ * $Id: TEMPLATE.c 418 2009-06-14 00:48:52Z takeshi $
  */
 
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/syscall.h>
+#include <sys/vm.h>
 
-typedef struct fcntl_args fcntl_args_t;
-struct fcntl_args {
-    int fd;
-    int cmd;
-    uintptr_t arg;
+typedef struct setsid_args setsid_args_t;
+struct setsid_args {
 };
 
-int sc_fcntl(thread_t *p, syscall_result_t *r, fcntl_args_t *args);
+int sc_setsid(thread_t *p, syscall_result_t *r, setsid_args_t *args);
 
 int
-sc_fcntl(thread_t *t, syscall_result_t *r, fcntl_args_t *args)
+sc_setsid(thread_t *t, syscall_result_t *r, setsid_args_t *args)
 {
-    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
-    if (file == NULL) {
-        return -EBADF;
-    }
-    int res = f_fcntl(t->thr_proc->p_fd, file, args->cmd, args->arg);
-    if(res < 0)
-        return res; //??? check this
-
-    r->result = res;
-    return -EOK; 
+    proc_t *p = t->thr_proc;
+    if(p->p_pid == p->p_group)
+        return -EPERM;
+    p->p_group = p->p_pid;
+    p->p_session = p->p_pid;
+    //jako¶ zamkn±æ lub co¶...
+    p->p_ctty = NULL;
+    r->result = p->p_pid;
+    return -EOK;
 }
 
 

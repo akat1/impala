@@ -73,7 +73,7 @@ void        *sbrk(ptrdiff_t increment);
 //int          seteuid(uid_t);
 int          setpgid(pid_t, pid_t);
 int          setpgrp(void);
-//pid_t        setsid(void);
+pid_t        setsid(void);
 unsigned int   sleep(unsigned int);
 //long         sysconf(int);
 pid_t        tcgetpgrp(int);

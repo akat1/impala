@@ -49,7 +49,7 @@
     pushl %fs
     pushl %gs
     pushal
-    push $0xdeadbabe
+    push $0xdeadbab2
 .endm
 
 .macro SET_KERNEL_REGS
