@@ -52,6 +52,8 @@
 #define O_APPEND      (1 << 7)
 #define O_NONBLOCK    (1 << 8)
 #define O_NOCTTY      (1 << 9)
+#define O_CLOEXEC    (1 << 10)
+#define FD_CLOEXEC    (1 << 10)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)
@@ -59,7 +61,7 @@
 #define F_GETFD       (1 << 3)
 #define F_SETFD       (1 << 4)
 
-#define FD_CLOEXEC     1
+
 
 #define PATH_MAX    4096
 
@@ -80,7 +82,6 @@ struct filetable_chunk {
 };
 
 struct file {
-//    int     temp;
     vnode_t    *f_vnode;
     off_t       f_offset;
     int         f_refcnt;
@@ -93,6 +94,7 @@ struct file {
 void filetable_free(filetable_t *fd);
 void filetable_close(filetable_t *fd);
 void filetable_clone(filetable_t *dst, filetable_t *src);
+void filetable_prepare_exec(filetable_t *fd);
 filetable_t *filetable_alloc(void);
 
 int     f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);

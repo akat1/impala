@@ -182,6 +182,21 @@ signal_send(proc_t *p, int sig)
     return TRUE;
 }
 
+bool
+signal_send_group(pid_t pgid, int sig)
+{
+    if ( sig < 1 || sig > _NSIG )
+        return FALSE;
+    ///@todo signal_send_group -> tak, bzdura, trzeba to zmieniæ
+    proc_t *p = NULL;
+    while((p = list_next(&procs_list, p))) {
+        if(p->p_group != pgid)
+            continue;
+        p->p_sig |= sigmask(sig) & (~p->p_sigignore);
+    }
+    return TRUE;
+}
+
 void
 signal_handle(thread_t *t)
 {

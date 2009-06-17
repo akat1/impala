@@ -142,8 +142,10 @@ tty_read(devd_t *d, uio_t *u, int flags)
     int lflag = tty->t_conf.c_lflag;
     /// czy to zawsze curthread?
     proc_t *proc = curthread->thr_proc;
-    if(proc->p_group != tty->t_group)
-        return 0;   ///< zrobiæ prawid³ow± reakcje
+    if(proc->p_group != tty->t_group) {
+        signal_send_group(proc->p_group, SIGTTIN);
+        return -1;   ///< zrobiæ prawid³ow± reakcje
+    }
     if(ISSET(lflag, ICANON)) {
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)
@@ -267,13 +269,13 @@ tty_input(tty_t *tty, int ch)
     tcflag_t lflag = tty->t_conf.c_lflag;
     if(lflag & ISIG) {
         if(ch == cc[VINTR]) {
-            //pgsignal(tty->t_group, SIGINT);
+            signal_send_group(tty->t_group, SIGINT);
             return;
         } else if(ch == cc[VQUIT]) {
-            //pgsignal(tty->t_group, SIGQUIT);
+            signal_send_group(tty->t_group, SIGQUIT);
             return;
         } else if(ch == cc[VSUSP]) {
-            //pgsignal(tty->t_group, SIGTSTP);
+            signal_send_group(tty->t_group, SIGTSTP);
             return;
         }
     }

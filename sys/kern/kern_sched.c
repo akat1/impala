@@ -279,12 +279,13 @@ sched_exit(thread_t *t)
     spinlock_lock(&sprq);
     list_remove(&run_queue, t);
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
-    if ( t == curthread )
+    if ( t == curthread ) {
         curthread = NULL;
-    int old = splbio();
-    KASSERT(old == 0);
-    __sched_yield();
-    spl0();
+        int old = splbio();
+        KASSERT(old <= IPL_SOFTCLOCK);
+        __sched_yield();
+        spl0();
+    }
 }
 
 void sched_dump(void);

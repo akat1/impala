@@ -97,13 +97,18 @@ proc_exit(proc_t *p, int exit)
 {
     TRACE_IN("p=%p",p);
     thread_t *t = NULL;
+    bool alive = FALSE;
     while ( (t = list_next(&p->p_threads, t)) ) {
-        if (t != curthread) sched_exit(t);
+        if (t != curthread)
+            sched_exit(t);
+        else
+            alive = TRUE;
     }
     p->p_flags = PROC_ZOMBIE;
     p->p_status = exit;
     proc_destroy(p);
-    sched_exit(curthread);
+    if(alive)
+        sched_exit(curthread);
 }
 
 #include <machine/thread.h>
@@ -174,7 +179,7 @@ proc_destroy(proc_t *proc)
 {
     proc_t *p;
 
-    kprintf("%x - dlugosc\n", list_length(&proc->p_threads));
+    kprintf("%i - dlugosc\n", list_length(&proc->p_threads));
 
     signal_send(proc_find(proc->p_ppid), SIGCHLD);
 
@@ -229,6 +234,7 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
     DEBUGF("Entry: 0x%08x", entry);
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
+    list_insert_tail(&proc->p_threads, t);
     mutex_unlock(&proc->p_mtx);
     return t;
 }

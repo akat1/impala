@@ -119,12 +119,32 @@ thread_create(int type, addr_t entry, addr_t arg)
     }
 }
 
+//na potrzeby zamkniêcia ostatniego w±tku procesu który robi exec
+void thread_exit_last(thread_t *t)
+{
+    int x = splbio();
+    kmem_cache_free(thread_cache, t);
+    sched_exit(t);
+    splx(x);
+    panic("Shouldnt be here ;) - thread exit last");
+}
+
 void
 thread_destroy(thread_t *t)
 {
-    KASSERT(t->thr_flags & THREAD_ZOMBIE);
-    kmem_cache_free(thread_cache, t);
-    if (t != curthread) sched_exit(t);
+    t->thr_flags |= THREAD_ZOMBIE;
+    kprintf("Thr destroy: %08x\n", t);
+    list_remove(&threads_list, t);
+    int x = splbio();
+
+    if (t != curthread) {
+        //bie¿±cego w±tku nie mo¿emy szybciej zwolniæ, bo jest w runq
+        // a ponowne przydzielenie tego samego adresu na nowy w±tek narobi³o by
+        // w takiej sytuacji k³opotów
+        kmem_cache_free(thread_cache, t);
+        sched_exit(t);
+    }
+    splx(x);
     return;
 }
 

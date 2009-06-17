@@ -179,14 +179,24 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                     return -EMFILE;
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
+            //shm: todo: a co je¶li nie by³o miejsca?
             break;
         case F_GETFL:
             return f->f_flags;
-        case F_SETFL:
+        case F_SETFL: {
             ///@todo O_APPEND, O_NONBLOCK
+            int possible = O_APPEND | O_NONBLOCK;
+            f->f_flags = (f->f_flags & ~possible) | (param & possible);
             return 0; /// XXX: co chcemy mieæ?
+        }
+        case F_SETFD:
+            f->f_flags = (f->f_flags&~FD_CLOEXEC) | (param & FD_CLOEXEC);
+            return 0;
+        case F_GETFD:
+            return (f->f_flags & FD_CLOEXEC)>0;
+            break;
     }
-    return 0;
+    return -1;
 }
 
 
@@ -365,6 +375,17 @@ filetable_close(filetable_t *fd)
 //    KASSERT(list_length(&(fd->chunks))==0);
 }
 
+void filetable_prepare_exec(filetable_t *fd)
+{
+    filetable_chunk_t *t = NULL;
+
+    while((t = (filetable_chunk_t *)list_next(&(fd->chunks), t))) {
+        for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
+            if(t->files[i] != NULL && ISSET(t->files[i]->f_flags, FD_CLOEXEC))
+                f_close(t->files[i]);
+        }
+    }
+}
 
 void
 filetable_free(filetable_t *fd)

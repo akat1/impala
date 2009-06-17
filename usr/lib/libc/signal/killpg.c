@@ -6,5 +6,5 @@
 int
 killpg(int pgrp, int sig)
 {
-    return 0;
+    return kill(-pgrp, sig); //tak tymczasowo
 }

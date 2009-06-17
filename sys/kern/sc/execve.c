@@ -57,12 +57,13 @@ sc_execve(thread_t *t, syscall_result_t *r, execve_args_t *ap)
         return err;
     TRACE_IN("from pid=%u t=%p path=%s", t->thr_proc->p_pid, t, path);
 
-    r->result = -execve(t->thr_proc, path, ap->argv, ap->envp);
+    int res = execve(t->thr_proc, path, ap->argv, ap->envp);
     DEBUGF("execve result %i", r->result);
-    if (r->result == 0) {
-        sched_exit(t);
-        kprintf("still working\n");
+    if (res == 0) {
+        //we did it ;)
+        thread_exit_last(t);
+        panic("still working\n");
     }
-    return 0;
+    return res;
 }
 

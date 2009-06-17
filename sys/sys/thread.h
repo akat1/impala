@@ -161,6 +161,7 @@ extern list_t threads_list;              // thread_t.L_threads
 void thread_init(void);
 thread_t *thread_create(int space, addr_t entry, addr_t arg);
 void thread_destroy(thread_t *t);
+void thread_exit_last(thread_t *t);
 void thread_clone(thread_t *dst, thread_t *src);
 // do wywalenia
 void thread_suspend(thread_t *t);

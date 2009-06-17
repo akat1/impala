@@ -94,6 +94,7 @@ struct sigaction {
 bool signal_present(proc_t *p);
 int signal_proc(thread_t *t);
 bool signal_send(proc_t *p, int sig);
+bool signal_send_group(pid_t pgid, int sig);
 void signal_handle(thread_t *t);
 #endif
 
