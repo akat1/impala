@@ -43,7 +43,10 @@ syscall(thread_t *thr, uint n, syscall_result_t *r, va_list ap)
     if (n < SYS_MAX) {
         r->result = 0;
         r->errno = -syscall_table[n](thr, r, ap);
-        if (r->errno) r->result = -1;
+        if (r->errno) {
+            r->result = -1;
+//            kprintf("Failing syscall %i, errno %i\n", n, r->errno);
+        }
     }
     return;
 }

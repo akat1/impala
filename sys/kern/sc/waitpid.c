@@ -35,6 +35,7 @@
 #include <sys/utils.h>
 #include <sys/string.h>
 #include <sys/syscall.h>
+#include <sys/wait.h>
 #include <sys/proc.h>
 
 typedef struct sc_waitpid_args sc_waitpid_args;
@@ -46,16 +47,45 @@ struct sc_waitpid_args {
 
 };
 
-
 errno_t sc_waitpid(thread_t *p, syscall_result_t *r, sc_waitpid_args *args);
-
 /** XXX: Narazie tylko per pid */
 
 errno_t
 sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
 {
-    proc_t *to_trace = proc_find(args->pid);
     proc_t *p = t->thr_proc;
+    if(args->pid == -1) {
+        proc_t *p_iter;
+        /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
+        while(1)
+        {
+            p_iter = (proc_t *)list_head(&(p->p_children));
+            /* proces nie ma dzieci - czekamy na sygnal */
+            if ( p_iter == NULL ) {
+                if(args->options & WNOHANG)
+                    return EOK;
+                for(;;);
+            }
+            #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
+            {
+                if ( proc_is_zombie(p_iter) )
+                {
+                    // odlaczamy dziecko
+                    list_remove(&(p->p_children), p_iter);
+                    // zwracamy jego pid jako wynik
+                    r->result = p_iter->p_pid;
+                    // zwracamy status procesu
+                    if ( args->status != NULL ) 
+                        *(args->status) = p_iter->p_status;
+                    // niszczymy dziecko
+                    proc_destroy(p_iter);
+                    return -EOK;
+                }
+            } while ((p_iter = NEXTPROC()));
+            #undef NEXTPROC
+        }
+    }
+    proc_t *to_trace = proc_find(args->pid);
 
     if ( to_trace == NULL || (!proc_is_parent(t->thr_proc, to_trace)))
         return -ECHILD;
@@ -78,6 +108,8 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                 
                 return -EOK;
         }
+        if(args->options & WNOHANG)
+            return EOK;
     }
 
     return -EOK;

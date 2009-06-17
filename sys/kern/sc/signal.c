@@ -55,8 +55,7 @@ sc_signal(thread_t *t, syscall_result_t *r, signal_args_t *args)
     if ( args->sig < 1 || args->sig > _NSIG ||
          args->sig == SIGSTOP || args->sig == SIGKILL ) {
 
-        r->result = -1;
-        return EINVAL;
+        return -EINVAL;
     }
 
     p->p_sigact[args->sig].sa_handler = args->handler;

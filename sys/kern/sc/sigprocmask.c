@@ -85,8 +85,7 @@ sc_sigprocmask(thread_t *t, syscall_result_t *r, sigprocmask_args_t *args)
             r->result = 0;
             return EOK;
         default:
-            r->result = -1;
-            return EINVAL;
+            return -EINVAL;
     }
 
     /* NOT REACHED */
