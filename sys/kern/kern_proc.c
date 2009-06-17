@@ -180,7 +180,7 @@ proc_destroy(proc_t *proc)
     proc_t *p;
 
     kprintf("%i - dlugosc\n", list_length(&proc->p_threads));
-
+    list_remove(&procs_list, proc);
     signal_send(proc_find(proc->p_ppid), SIGCHLD);
 
     proc_destroy_threads(proc);
@@ -194,9 +194,16 @@ proc_destroy(proc_t *proc)
     }
     filetable_close(proc->p_fd);
     ///proszê nie usuwaæ rzeczy utworzonych w ctor ;D
-    kmem_cache_free(proc_cache, proc);
-
+ 
     return;
+}
+
+/// Finalne wyrzucenie procesu z proc_cache
+
+void
+proc_delete(proc_t *proc)
+{
+    kmem_cache_free(proc_cache, proc);
 }
 
 

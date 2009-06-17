@@ -91,6 +91,7 @@ void proc_reset_vmspace(proc_t *proc);
 void proc_insert_child(proc_t *proc, proc_t *child);
 proc_t *proc_find(pid_t pid);
 void proc_destroy(proc_t *p);
+void proc_delete(proc_t *proc);
 bool proc_is_zombie(proc_t *p);
 bool proc_is_parent(proc_t *parent, proc_t *child);
 int proc_fork(proc_t *p, proc_t **child);

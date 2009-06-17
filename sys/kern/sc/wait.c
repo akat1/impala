@@ -76,7 +76,7 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
                     *(args->status) = p_iter->p_status;
 
                 // niszczymy dziecko
-                proc_destroy(p_iter);
+                proc_delete(p_iter);
                 
                 return -EOK;
             }

@@ -32,6 +32,8 @@
 #ifndef __SYS_LIST_H
 #define __SYS_LIST_H
 
+#include <sys/utils.h>
+
 // Proste listy, wzorowane na interfejsie z systemu Solaris
 
 typedef struct list list_t;
@@ -114,6 +116,7 @@ static inline void *
 list_remove(list_t *ls, void *x)
 {
     if (x == NULL) return NULL;
+    KASSERT(ls->ls_length!=0);
     list_node_t *x_node = __elem_node(ls, x);
     void *y = x_node->next;
     if (x_node->prev) __prev_node(ls, x)->next = x_node->next;

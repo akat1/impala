@@ -78,7 +78,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                     if ( args->status != NULL ) 
                         *(args->status) = p_iter->p_status;
                     // niszczymy dziecko
-                    proc_destroy(p_iter);
+                    proc_delete(p_iter);
                     return -EOK;
                 }
             } while ((p_iter = NEXTPROC()));
@@ -104,7 +104,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                     *(args->status) = to_trace->p_status;
 
                 // niszczymy dziecko
-                proc_destroy(to_trace);
+                proc_delete(to_trace);
                 
                 return -EOK;
         }
