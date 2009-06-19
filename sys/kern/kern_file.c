@@ -45,8 +45,6 @@ bool _chunk_is_empty(filetable_chunk_t *fd);
 void _filetable_expand(filetable_t *ft, int hm);
 filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
 static file_t *file_alloc(vnode_t *vn);
-static void fref(file_t *);
-static bool frele(file_t *);
 
 file_t*
 file_alloc(vnode_t *vn)
@@ -118,6 +116,7 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
 {
     if ( f == NULL )
         return -EBADF;
+    KASSERT(f->f_vnode);
 
     return VOP_IOCTL(f->f_vnode, cmd, param);
 }
@@ -168,11 +167,14 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
             fd = param;
             while ( fc != NULL ) {
                 for (int i = param % FILES_PER_CHUNK; i < FILES_PER_CHUNK; i++){
+                    MUTEX_LOCK(&ft->mtx, "f_fcntl");
                     if ( fc->files[i] == NULL ) {
                         fc->files[i] = f;
                         fref(f);
+                        mutex_unlock(&ft->mtx);
                         return fd;
                     }
+                    mutex_unlock(&ft->mtx);
                     fd++;
                 }
                 if ( fd > ft->max_ds )
@@ -205,19 +207,34 @@ f_get(filetable_t *ft, int index)
 {
     if(index<0)
         return NULL;
+    MUTEX_LOCK(&ft->mtx, "f_get");
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 
     if ( fc == NULL ) {
+        mutex_unlock(&ft->mtx);
         return NULL;
     }
-
-    return fc->files[index % FILES_PER_CHUNK];
+    file_t *res = fc->files[index % FILES_PER_CHUNK];
+    // zgodnie z filozofi±, zwracanie zliczanego obiektu z funkcji daje go
+    // ze zwiêkszonym licznikiem referencji
+    // w ten sposób ograniczamy mo¿liwe wy¶cigi do miejsc takich jak to ;)
+    if(res)
+        fref(res);
+    mutex_unlock(&ft->mtx);
+    return res;
 }
+
+/**
+ * f_set przejmuje prawo w³asno¶ci do fd od wywo³uj±cego i umieszcza wskazywany
+ * plik w tablicy otwartych plików procesu
+ *
+ */
 
 void 
 f_set(filetable_t *ft, file_t *fd, int index)
 {
     KASSERT(index>=0);
+    MUTEX_LOCK(&ft->mtx, "f_set");
     filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
 //    KASSERT(fd == NULL || fd->f_vnode);
 
@@ -227,8 +244,13 @@ f_set(filetable_t *ft, file_t *fd, int index)
         fc = _get_chunk_by_index(ft, index);
     }
 //    KASSERT(fc!=NULL);
+    // f_set przejmuje prawo w³asno¶ci do fd od wywo³uj±cego ->
+    // wywo³uj±cy przekaza³ nam prawo w³asno¶ci do tej referencji
+    file_t *old = fc->files[index % FILES_PER_CHUNK];
     fc->files[index % FILES_PER_CHUNK] = fd;
-
+    mutex_unlock(&ft->mtx);
+    if(old)
+        frele(old); //pozbywamy siê naszej w³asno¶ci
     return;
 }
 
@@ -285,6 +307,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     file_t *fp;
     filetable_chunk_t *fc;
     KASSERT(vn);
+    MUTEX_LOCK(&p->p_fd->mtx, "f_alloc");
     /* sprawdzamy czy to pierwszy deskyptor */
     if ( list_is_empty(&(p->p_fd->chunks)) ) {
         _filetable_expand(p->p_fd, 1);
@@ -300,13 +323,16 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
                 fc->files[i] = fp;
                 *result = fdp;
                 *fpp = fp;
+                mutex_unlock(&p->p_fd->mtx);
                 return 0;
             }
             fdp++;
         }
 
-        if ( fdp >= p->p_fd->max_ds )
+        if ( fdp >= p->p_fd->max_ds ) {
+            mutex_unlock(&p->p_fd->mtx);
             return -EMFILE;
+        }
 
     } while ( (fc = (filetable_chunk_t *)list_next(&(p->p_fd->chunks), fc)) )
 
@@ -316,6 +342,7 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     *result = fdp;
     *fpp = fp;
     f_set(p->p_fd, fp, fdp);
+    mutex_unlock(&p->p_fd->mtx);
     return 0;
 }
 
@@ -335,26 +362,30 @@ filetable_alloc(void)
     filetable_t *t = kmem_zalloc(sizeof(filetable_t), KM_SLEEP);
     t->max_ds = 100;
     LIST_CREATE(&(t->chunks), filetable_chunk_t, L_chunks, FALSE);
-
+    mutex_init(&t->mtx, MUTEX_NORMAL);
     return t;
 }
 
 void
 filetable_clone(filetable_t *dst, filetable_t *src)
 {
+    MUTEX_LOCK(&src->mtx, "filetable_clone");
+    MUTEX_LOCK(&dst->mtx, "filetable_clone");
     filetable_chunk_t *t = NULL;
 
     while((t = (filetable_chunk_t*)list_next(&(src->chunks), t))) {
         filetable_chunk_t *nc= kmem_zalloc(sizeof(filetable_chunk_t), KM_SLEEP);
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
             if ( t->files[i] != NULL ) {
-                fref(t->files[i]);  ///< a co z wy¶cigiem??
+                fref(t->files[i]);
 //                KASSERT(t->files[i]->f_vnode);
             }
             nc->files[i] = t->files[i];
         }
         list_insert_tail(&(dst->chunks), nc);
     }
+    mutex_unlock(&dst->mtx);
+    mutex_unlock(&src->mtx);
 }
 
 
@@ -362,7 +393,7 @@ void
 filetable_close(filetable_t *fd)
 {
     filetable_chunk_t *t;
-
+    MUTEX_LOCK(&fd->mtx, "filetable_close");
     while((t = (filetable_chunk_t *)list_extract_first(&(fd->chunks)))) {
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
             if ( t->files[i] != NULL ) {
@@ -372,19 +403,24 @@ filetable_close(filetable_t *fd)
         }
         kmem_free(t);
     }
+    mutex_unlock(&fd->mtx);
 //    KASSERT(list_length(&(fd->chunks))==0);
 }
 
 void filetable_prepare_exec(filetable_t *fd)
 {
     filetable_chunk_t *t = NULL;
-
+    MUTEX_LOCK(&fd->mtx, "filetable_prepare_exec");
     while((t = (filetable_chunk_t *)list_next(&(fd->chunks), t))) {
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
-            if(t->files[i] != NULL && ISSET(t->files[i]->f_flags, FD_CLOEXEC))
+            ///@todo CLOEXEC powinno chyba byæ per deskryptor a nie per plik
+            if(t->files[i] != NULL && ISSET(t->files[i]->f_flags, FD_CLOEXEC)) {
                 f_close(t->files[i]);
+                t->files[i] = NULL;
+            }
         }
     }
+    mutex_unlock(&fd->mtx);
 }
 
 void

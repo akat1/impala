@@ -16,7 +16,7 @@ fclose(FILE *stream)
     }
     if(stream->closefn)
         ret = stream->closefn(stream->cookie);
-    else
+    else if(stream->fd!=-1)
         ret = close(stream->fd);
     free(stream);
     return ret;

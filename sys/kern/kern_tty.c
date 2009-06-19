@@ -70,6 +70,7 @@ static devsw_t ttysw = {
 };
 
 static void tty_conf_set_default(termios_t *tconf);
+static void tty_echo(tty_t *tty, char c);
 static void tty_erase(tty_t *tty);
 static void tty_kill(tty_t *tty);
 
@@ -303,7 +304,7 @@ tty_input(tty_t *tty, int ch)
         }
         clist_push(tty->t_clq, ch);
         if(lflag & ECHO) {
-            tty_output(tty, ch);
+            tty_echo(tty, ch);
         }
         if(ch == NL || ch == cc[VEOL]) {
             clist_move(tty->t_inq, tty->t_clq);
@@ -332,6 +333,24 @@ tty_output(tty_t *tty, char c)
     }
     else
         tty->t_lowops->tty_write(tty->t_private, &c, 1);
+}
+
+//wypisuje na ekran echo znaku
+void
+tty_echo(tty_t *tty, char c)
+{
+    if(c > US || c == '\n' || c == '\r' || c == '\t') {
+        tty_output(tty, c);
+        return;
+    }
+    if(((unsigned char)c) == 0233)
+        tty->t_lowops->tty_write(tty->t_private, "^[[", 3);
+    else if(c == 033)
+        tty->t_lowops->tty_write(tty->t_private, "^[", 2);
+    else {
+        char X[2] = {'^', 'A' + c - 1};
+        tty->t_lowops->tty_write(tty->t_private, X, 2);
+    }
 }
 
 /// Canonical processing of ERASE character

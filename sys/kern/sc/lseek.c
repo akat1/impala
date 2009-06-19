@@ -58,7 +58,7 @@ sc_lseek(thread_t *p, syscall_result_t *r, lseek_args args)
         return -EBADF;
 
     r->result = f_seek(f, args.offset, args.whence);
-
+    frele(f);
     return -EOK;
 }
 

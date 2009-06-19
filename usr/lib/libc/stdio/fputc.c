@@ -14,8 +14,10 @@ fputc(int ch, FILE * f)
     if(ISSET(f->status, _FST_NOBUF)) {
         if(f->writefn)
             return f->writefn(f->cookie, &c, 1);
-        return write(f->fd, &c, 1);
+         if(f->fd!=-1)
+             return write(f->fd, &c, 1);
     }
+    printf("fputs: buffering not implemented\n");
     return 0;//todo..
 }
 

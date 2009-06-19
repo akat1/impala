@@ -58,8 +58,11 @@ sc_isatty(thread_t *t, syscall_result_t *r, sc_isatty_args *args)
     if (file == NULL) {
         return -EBADF;
     }
-    if(!vnode_isatty(file->f_vnode))
+    if(!vnode_isatty(file->f_vnode)) {
+        frele(file);
         return -ENOTTY;
+    }
+    frele(file);
     r->result = 1;    
     return -EOK;
 }

@@ -153,7 +153,8 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     ///@todo w ca³ym VFS i fs-ach trzeba przemy¶leæ strategiê blokowania...
     error = vfs_lookup(vn, &tmp, name, NULL, LKP_NORMAL);
     if(error != -ENOENT) {
-        vrele(tmp);
+        if(!error)
+            vrele(tmp);
         return -EEXIST; // a mo¿e raczej powinni¶my zmodyfikowaæ ist. plik?
     }
     //plik nie istnieje -> tworzymy
@@ -321,6 +322,7 @@ devfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
         path->now+=2;
         if(!en->i_parent) {
             *vpp = vn;
+            vref(vn);
             return 0;
         }
         en = en->i_parent;

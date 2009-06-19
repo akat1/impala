@@ -13,5 +13,7 @@ fprintf(FILE *f, const char *format, ...)
     va_end(ap);
     if(f->writefn)
         return f->writefn(f->cookie, buf, strlen(buf));
-    return fwrite(buf, strlen(buf), 1, f);
+    if(f->fd != -1)
+        return fwrite(buf, strlen(buf), 1, f);
+    return -1;
 }

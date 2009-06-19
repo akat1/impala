@@ -61,6 +61,7 @@ sc_getdents(thread_t *t, syscall_result_t *r, sc_getdents_args *args)
     }
     vnode_t *v = file->f_vnode;
     int res = VOP_GETDENTS(v, args->data, args->size);
+    frele(file);
     if(res < 0)
         return res;
     r->result = res;

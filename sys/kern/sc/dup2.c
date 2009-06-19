@@ -51,20 +51,24 @@ errno_t sc_dup2(thread_t *p, syscall_result_t *r, dup2_args *args);
 errno_t
 sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
 {
-    file_t *f;
+    file_t *f_orig, *f;
     
     if ( args->newfd > t->thr_proc->p_fd->max_ds ) {
         return -EINVAL;
     }
-    
+    f_orig = f_get(t->thr_proc->p_fd, args->oldfd);
+    if(!f_orig)
+        return -EBADF;
+
     f = f_get(t->thr_proc->p_fd, args->newfd);
 
     if ( f != NULL ) {
-        f_close(f);
         f_set(t->thr_proc->p_fd, NULL, args->newfd);
+        f_close(f);
     }
-
-    r->result = f_fcntl(t->thr_proc->p_fd, f, F_DUPFD, args->newfd);
+    ///@bug tutaj kto¶ nam mo¿e ukra¶æ wolne miejsce
+    r->result = f_fcntl(t->thr_proc->p_fd, f_orig, F_DUPFD, args->newfd);
+    frele(f_orig);
     return -EOK;
 }
 

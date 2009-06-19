@@ -67,6 +67,8 @@
 
 #ifdef __KERNEL
 
+#include <sys/thread.h>
+
 enum {
     FILES_PER_CHUNK = 32
 };
@@ -74,6 +76,7 @@ enum {
 struct filetable {
     int     max_ds;
     list_t  chunks;
+    mutex_t mtx;
 };
 
 struct filetable_chunk {
@@ -104,6 +107,12 @@ int     f_ioctl(file_t *fd, int cmd, uintptr_t param);
 int     f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
 void    f_close(file_t *fd);
 off_t   f_seek(file_t *fd, off_t o, int whence);
+
+// funkcje do odpowiedzialnego klonowania oraz pozbywania siê prawa do danego
+// wska¼nika na plik
+// Po polsku: zwiêkszanie i zmniejszanie licznika referencji
+void fref(file_t *);
+bool frele(file_t *);
 
 // nie ma sensu ich dostêpniaæ moim zdaniem. // s± wykorzystywane np. w close
 // chyba, ¿e f_close by usuwa³o file z filetable...

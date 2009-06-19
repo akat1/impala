@@ -337,6 +337,7 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
         path->now+=2;
         if(!en->parent) {
             *vpp = vn;
+            vref(vn);
             return 0;
         }
         en = en->parent;

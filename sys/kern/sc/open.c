@@ -104,11 +104,14 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         if((node->v_type == VNODE_TYPE_DIR) && (flags & (O_RDWR | O_WRONLY)))
             return -EISDIR;
     }
-
-    if((error = f_alloc(proc, node, &file, &fd)))
+    if((error = VOP_OPEN(node, flags, arg->mode))) {
+        vrele(node);
         return error;
-    if((error = VOP_OPEN(node, flags, arg->mode)))
+    }
+    if((error = f_alloc(proc, node, &file, &fd))) {
         return error;
+    }
+    
     file->f_flags = flags;
     r->result = fd;
     return -EOK;

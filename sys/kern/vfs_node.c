@@ -60,6 +60,7 @@ void
 vref(vnode_t *vn)
 {
 //     DEBUGF("VREF vn=%p", vn);
+    KASSERT(vn->v_refcnt>0);
     vn->v_refcnt++;
 }
 
@@ -148,8 +149,10 @@ _change_vptr(vnode_t **v, vnode_t *new)
 {
     if(*v == new)
         return;
-    vref(new);
-    vrele(*v);
+    if(new)
+        vref(new);
+    if(*v)
+        vrele(*v);
     *v = new;
 }
 
@@ -161,6 +164,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
     *vpp = NULL;
     if(!sd)
         sd = rootvnode;
+
     vnode_t *cur = sd, *last = sd;
     vref(last); vref(cur);
     if(*(path->now) == '/') {
@@ -170,10 +174,14 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
         else
             _change_vptr(&cur, rootvnode);
     }
-    if(!cur)
+    if(!cur) {
+        vrele(cur); vrele(last);
         return -ENOENT;
-    if(cur->v_type != VNODE_TYPE_DIR)
-            return -ENOTDIR;
+    }
+    if(cur->v_type != VNODE_TYPE_DIR) {
+        vrele(cur); vrele(last);
+        return -ENOTDIR;
+    }
     if(cur->v_vfs_mounted_here) {
             tmp = VFS_GETROOT(cur->v_vfs_mounted_here);
             vrele(cur);
@@ -213,6 +221,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             if((path->flags & LKP_GET_PARENT) && _last_component(path)) {
                 vrele(last);
                 last = cur;
+                vref(cur);
                 errno = 0;
             }
             break;
@@ -247,8 +256,10 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
                 cur = tmp;  //last nie aktualizujemy, zgadza siê? ;)
 
             }
-        if(*(path->now) && (cur->v_type != VNODE_TYPE_DIR))
-            return -ENOTDIR;
+        if(*(path->now) && (cur->v_type != VNODE_TYPE_DIR)) {
+            errno = -ENOTDIR;
+            goto end_error;
+        }
         if(cur->v_vfs_mounted_here) {
             vrele(cur);
             cur = VFS_GETROOT(cur->v_vfs_mounted_here);
