@@ -10,5 +10,5 @@ all:
 	${PDFLATEX} index.tex
 
 clean:
-	rm -f *.pdf *.aux *.log *.toc *.ps *.dvi
+	rm -f *.pdf *.aux *.log *.toc *.ps *.dvi work/*.pdf
 
