@@ -39,7 +39,6 @@ inputline(char *s)
 void handler(int sig)
 {
     printf("HELLO WORLD!\n");
-    sigreturn();
 }
 
 int
