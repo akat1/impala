@@ -33,9 +33,11 @@ fdopen(int fd, const char *mode)
 //     if(strchr(mode, '+'))
 //         flags = (flags & ~(O_RDONLY | O_WRONLY)) | O_RDWR;
     f->err = 0;
-    f->status = _FST_OPEN | _FST_NOBUF;
+    f->status = _FST_OPEN;
     if(isatty(fd))
-        f->status |= _FST_TTY;
+        f->status |= _FST_TTY | _FST_LINEBUF;
+    else
+        f->status |= _FST_FULLBUF;
     list_insert_tail(&__open_files, f);
     return f;
 }

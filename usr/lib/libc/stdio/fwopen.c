@@ -18,7 +18,7 @@ fwopen(void *cookie, int (*writefn)(void *, const char *, int))
     f->buf = NULL;
     f->buf_size = BUFSIZ;
     f->inbuf = 0;
-    f->status = _FST_OPEN | _FST_NOBUF;
+    f->status = _FST_OPEN | _FST_FULLBUF;
     list_insert_tail(&__open_files, f);
     return f;
 }

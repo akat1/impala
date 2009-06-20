@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/list.h>
 #include <stdio_private.h>
@@ -41,7 +42,11 @@ fopen(const char *path, const char *mode)
         free(f);
         return NULL;
     }
-    f->status = _FST_OPEN | _FST_NOBUF;
+    f->status = _FST_OPEN;
+    if(isatty(f->fd))
+        f->status |= _FST_TTY | _FST_LINEBUF;
+    else
+        f->status |= _FST_FULLBUF;
     list_insert_tail(&__open_files, f);
     return f;
 }
