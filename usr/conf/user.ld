@@ -1,7 +1,8 @@
 OUTPUT_FORMAT("a.out-i386")
 OUTPUT_ARCH(i386)
-ENTRY(___start)
+ENTRY(__start)
 SEARCH_DIR("../../lib/crt") 
+INPUT(crt0.o -lgcc -lc)
 SECTIONS
 {
   . = 0;
@@ -15,6 +16,7 @@ SECTIONS
   }
   .data ALIGN(0x1000) :
   {
+    crt0.o(.data)
     *(.data)
     _edata  =  .;
     __edata  =  .;

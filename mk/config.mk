@@ -12,9 +12,8 @@ __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\
 _K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
     -D__KERNEL -Werror -nostdinc -fno-inline -g
 _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_SRCROOT}/usr/lib/libc/include 
-_U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld\
-        -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread\
-    -lgcc -lc
+_U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld -nostdlib\
+        -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread
 _CFLAGS?= ${_K_FLAGS_} ${CFLAGS}
 #CFLAGS?=${_CFLAGS}
 CC= ${PREFIX}gcc
