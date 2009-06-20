@@ -31,30 +31,79 @@
 
 \section{Buforowane wej¶cie-wyj¶cie (BIO).} \label{bio}
 
-Buforowane wej¶cie-wyj¶cie jest warstw± j±dra odpowiedzialn±
-za~operacje wej¶cia-wyj¶cia wykonywane na urz±dzeniach blokowych.
+Poniewa¿ urz±dzenia dyskowe s± o~wiele wolniejsze ni¿ procesor komputera
+to~op³aca siê zapamiêtywaæ w~pamiêci komputera czê¶c danych z~urz±dzenia.
+Operacje czytania danych mog± zostaæ zrealizowane w~bardzo krótkim czasie,
+je¿eli oka¿e siê, ¿e porz±dane dane z~urz±dzenia s± ju¿ w~pamiêci.
+Za~takie buforowanie operacji na~urz±dzeniach blokowych
+(dyskowych) odpowiedzialny jest mechanizm buforowanego wej¶cia-wyj¶cia.
 
-J±dro przydziela z~góry ustalon± liczbê nag³ówków buforów (\texttt{iobuf\_t}),
-w~których przydzielane s± bufory dla~zleconych operacji wej¶cia-wyj¶cia.
-Przy ka¿dym zleceniu przeszukujê siê najpierw wyniki poprzednich zleconych
-operacji, je¿eli takie zlecenie by³o ju¿ wcze¶niej to~mo¿na pomin±æ jego
-faktyczn± realizacjê na~urz±dzeniu, które jest znacznie wolniejsze ni¿
-procesor.
-
-Poniewa¿ mechanizm pos³uguje siê z~góry ustalonym zbiorem nag³ówków
-buforów to~mo¿e zda¿yæ siê sytuacja zleceñ na~dwie takie same operacje.
-W~zwi±zku z~tym bufor dla danej operacji wej¶cia-wyj¶cia mo¿e byæ u¿ywany
-jednocze¶nie przez tylko jednego zleceniodawcê. Ka¿dy inny zleceniodawca
-chc±cy wykonaæ operacjê, której bufor jest ju¿ zajêty zostanie u¶piony
-do czasu zwolnienia buforu.
-
+System pos³uguje siê nag³ówkami buforów (\texttt{iobuf\_t}).
+System przy rozruchu przydziela ustalon± liczbê takich nag³ówków
+(parametr \texttt{iobufs}), a ka¿dy z~nich mo¿e byæ przypisany do~urz±dzenia
+oraz numeru bloku(sektoru). Ustalona ilo¶c nag³ówków jest przydzialana przez
+system podczas rozruchu (parametr j±dra \texttt{iobufs}) systemu. W celu
+przyspieszenia bufory s± trzymane w tablicy haszuj±cej.
 
 \subsection{Tablica haszuj±ca.}
+
+Nag³ówki s± nawlekane na~dwie listy, listê wolnych nag³ówku je¿eli z~danego
+buforu nikt nie korzysta oraz na listê tablicy haszuj±cej. Przyk³adowa
+tablica jest przedstawiona na rysunku \ref{bio:bufhash}.
 
 
 \begin{figure}
  \centering
  \includegraphics{work/bio_bufhash}
- \caption{Przyk³adowa tablica haszuj±ca.}
+ \caption{Przyk³adowa tablica haszuj±ca. Bloczki z~pierwszej kolumny
+ oznaczaja nag³ówki list, a z pozosta³ych kolumn nag³ówki buforów.
+ Listy $h[i]$ oznaczaj± listy tablicy haszuj±cej, a \texttt{free} oznacza
+ listê wolnych nag³ówków.
+}
  \label{bio:bufhash}
 \end{figure}
+
+U¿ywana funkcja haszuj±ca wyra¿a siê wzorem
+
+\begin{eqnarray*}
+ hash(\mbox{\texttt{dev}}, \mbox{{\texttt{blkno}}})
+& = &
+ h(\mbox{\texttt{adres-deskryptora(dev)}} \times \mbox{{\texttt{blkno}}})\\
+ h(k)
+& = &
+ ((ak + b) \mbox{ mod }p) \mbox{ mod }m
+\end{eqnarray*}
+ 
+
+\subsection{Cykl ¿ycia nag³owku buforu.}
+
+Poniewa¿ system pos³uguje siê sta³± ilo¶ci± nag³ówków to~musz± zostaæ
+ustalone zasady pos³ugiwania siê nimi przez klientów tego mechanizmu.
+
+Nag³ówki s± identyfikowane przez urz±dzenie i~numer bloku, aby pobraæ nag³ówek
+nale¿y u¿yæ procedury \texttt{bio\_getblk}. Procedura sprawdza najpierw, czy
+dany sektor z~urz±dzenia nie jest ju¿ zapamiêtany, je¿eli nie jest
+to~przydziela nag³owek z~listy wolnych oraz organizuje pamiêæ na bufor.
+Zwrócony nag³owek jest naznaczony jako zawieraj±cy nieprawid³owe dane.
+
+Je¿eli nag³ówek zawieraj±cy porz±dane sektory znajduje siê w~pamiêci
+to~nale¿y sprawdziæ czy nie jest w³a¶nie u¿ywany przez innego klienta. Je¿eli
+tak to w±tek prosz±cy o~nag³ówek jest usypiany, a¿ do momentu mo¿liwo¶ci
+przydzielania buforu. W przeciwnym wypadku nale¿y naznaczyæ nag³ówek
+jako~u¿ywany i~go zwróciæ.
+
+Inn± drog± otrzymania nag³ówku urz±dzenia jest procedura \texttt{bio\_read},
+która jest nak³adk± na~procedurê omówion± wy¿ej. Jej zadaniem jest zlecenie
+operacji wej¶cia-wyj¶cia sterownikowi urz±dzenia je¿eli zwrócony nag³owek
+jest nieprawid³owy. W tym przypadku równie¿ blokuje obecny w±tek na~czas
+wykonania operacji przez sterownik.
+
+Otrzymany nag³ówek nale¿y zwróciæ do mechanizmu za~pomoc± procedury
+\texttt{bio\_release} lub \texttt{bio\_write}, gdzie druga, jak wskazuje
+nazwa, wysy³a dane z~buforu do~urz±dzenia.
+
+Procedura \texttt{bio\_wait} s³u¿y do~oczekiwania zakoñczenia operacji
+wej¶cia-wyj¶cia wykorzystuj±cej dany bufor, jest wewnêtrznie wykorzystywana
+przez \texttt{bio\_read} i \texttt{bio\_write}. Sterowniki urz±dzeñ pos³uguj±
+siê procedurami \texttt{bio\_done} i \texttt{bio\_error} w~celu poinformowania
+mechanizmu o zakoñczeniu.

@@ -105,7 +105,9 @@ stosy alternatywne w±tków u¿ytkownika s± umieszczane w koñcowych adresach.
 
 Rozk³ad pamiêci fizycznej ró¿ni siê od przedstawionego (wirtualnego) powy¿ej.
 Zawarto¶æ pamiêci w~adresach poni¿ej 1MB jest zwi±zana ze starszymi modelami
-procesorów oraz BIOSem, st±d na rysunku pojawi³a siê nazwa BIOS. Miêdzy
+procesorów oraz BIOSem (kod podprogramów obs³ugi przerwañ w~trybie rzeczywistym
+itp),
+st±d na rysunku pojawi³a siê nazwa BIOS. Miêdzy
 innymi w~tej pamiêci jest odwzorowana pamiêæ karty graficznej, a system
 operacyjny umieszcza tam bufory dla DMA\footnote{Direct Memory Access -
 technologia pozwalaj±ca kopiowaæ dane miêdzy pamiêci± RAM a urz±dzeniem
@@ -120,6 +122,7 @@ ISA, na której znajduje siê kontroler stacji dyskietek.
  \caption{Mapa pamiêci a) wirtualnej, b) fizycznej. Strza³ki oznaczaj± w~któr±
 stronê dany segment ro¶nie.}
  \label{vm:mmap}
+
 \end{figure}
 
 
@@ -245,7 +248,6 @@ Przestrzeñ adresowa jest opisywana przez typ \texttt{vm\_space\_t}, który
 zawiera w~sobie odwzorowanie stron pamiêci oraz opisy trzech wy¿ej wspomnianych
 segmentów.
 
-
 Segment jest opisywany przez adres bazowy, aktualny rozmiar oraz ograniczenie
 górne na~rozmiar. Przydzielanie i~niszczenie stosów podczas pracy programu
 i~j±dra oraz odwzorowywanie ró¿nych fragmentów pamiêci w~stercie j±dra
@@ -260,4 +262,13 @@ w~module pamiêci wirtualnej.
 
 \subsection{Sterta j±dra.}
 
+Stert± j±dra zarz±dza algorytm opracowany przez Jeffa Bonwicka dla~Sun
+Microsystems, przedstawiony na~konferencji USENIX\cite{bonwick}. Ten algorytm,
+zwany alokatorem p³ytowym\footnote{alokator p³ytowy - slab allocator},
+przenikn±³ równie¿ do innych systemów operacyjnych jak FreeBSD, Linux, NetBSD.
 
+Algorytm jest nadbudow± na obs³ugê segmentu realizowan± przez
+pamiêæ wirtualn±. Idea opiera siê o~pojêciê schowka (\texttt{kmem\_cache\_t}),
+który przechowuje w~sobie elementy o~ustalonym rozmiarze.
+
+Schowek przechowuje elementy na p³ytach, które s± tablicami elementów.

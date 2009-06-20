@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:biblio.tex]
 archive=true
-column=4
+column=44
 encoding=ISO 8859-2
 highlight=LaTeX
-line=0
+line=29
 open=true
 order=6
 
@@ -38,16 +38,34 @@ archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=0
+line=35
 open=true
 order=10
+
+[item:chap2/run.tex]
+archive=true
+column=0
+encoding=ISO 8859-2
+highlight=LaTeX
+line=0
+open=true
+order=12
+
+[item:chap2/shell.tex]
+archive=true
+column=0
+encoding=ISO 8859-2
+highlight=LaTeX
+line=42
+open=true
+order=13
 
 [item:chap3/bio.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=60
+line=94
 open=true
 order=2
 
@@ -83,7 +101,7 @@ archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=41
+line=35
 open=true
 order=4
 
@@ -101,7 +119,7 @@ archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=276
+line=119
 open=true
 order=0
 

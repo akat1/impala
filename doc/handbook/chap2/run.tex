@@ -29,7 +29,39 @@
 %
 % $Id$
 
-\chapter{Dokumentacja u¿ytkownika.}
+\section{Uruchomienie systemu.}
 
-\input{chap2/run}
-\input{chap2/shell}
+Dyskietka z~naszym systemem ma zainstalowany program ³aduj±cy GRUB, który mo¿e
+zostaæ uruchomiony przez BIOS. Je¿eli w~komputerze ju¿ istnieje program ³aduj±cy
+obs³uguj±cy format ELF (\ref{tech:elf}) oraz kompresjê programu \texttt{gzip}
+to~mo¿na sprawdziæ czy jest w~stanie rêcznie uruchomiæ nasz system, bez 
+konfiguracji BIOSu aby uruchamia³ stacjê dyskietek.
+Dla przyk³adu, je¿eli ju¿ u¿ywamy programu GRUB na dysku twardym,
+to mo¿na dopisaæ nastêpuj±ce linijki do jego konfiguracji:
+
+\begin{verbatim}
+# Wpis 1
+title Uruchom ze stacji dyskietek A:
+    root (fd0)
+    chainloader +1
+
+# Wpis 2
+title Impala
+    root (fd0)
+    kernel /boot/impala.gz init=/mnt/fd0/sbin/init
+\end{verbatim}
+
+Pierwszy wpis uruchamia program ³aduj±cy z dyskietki, tak jak by to robi³
+BIOS, a drugi wpis bezpo¶rednio uruchamia j±dro naszego systemu.
+
+J±dro obs³uguje wczytywanie parametrów z~linii poleceñ przekazywanej
+przez program GRUB. W~konfiguracji programu na~dyskietce s± dwa wpisy,
+jeden uruchamia system z wy³±czymi dodatkowymi komunikatami j±dra, oraz
+drugi - domy¶lny - z w³±czonymi.
+
+System po inicjalizacji j±dra ³aduje program \texttt{init}, który znajduje siê
+na dyskietke w~katalogu \texttt{/sbin/}. Z~powodów technicznych system
+plików z~dyskietki nie stanowi g³ównego katalogu \texttt{/} w~systemie, ale
+jest podpinany w~\texttt{/mnt/fd0}, st±d nale¿y poinformowaæ j±dro o lokalizacji
+tego programu, poprzez parametr \texttt{init}.
+
