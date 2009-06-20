@@ -3,15 +3,12 @@
 // Tym razem nvi... ma niez³e wymagania, nie ma co...
 
 // _access'
-// `_atol'
 // `_bsearch'
 // `_chmod'
 // `_chown'
 // `_clearerr'
 // `_ctime'
 // `_execl'
-// `_ferror'
-// `_fstat'
 // `_fsync'
 // `_ftruncate'
 // `_getgrnam'

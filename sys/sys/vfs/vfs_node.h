@@ -192,6 +192,7 @@ int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 int vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
+int vnode_stat(vnode_t *vn, struct stat *buf);
 bool vnode_isatty(vnode_t *vn);
 
 vnode_t* vnode_alloc(void);

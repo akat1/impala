@@ -14,6 +14,7 @@ SRCS=\
     stdio/clearerr.c\
     stdio/fdopen.c\
     stdio/ferror.c\
+    stdio/feof.c\
     stdio/fileno.c\
     stdio/fopen.c\
     stdio/fclose.c\
@@ -117,6 +118,7 @@ SRCS=\
     unistd/dup2.c\
     unistd/eaccess.c\
     unistd/execve.c\
+    unistd/fstat.c\
     unistd/getdents.c\
     unistd/ioctl.c\
     unistd/isatty.c\

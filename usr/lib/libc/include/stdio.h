@@ -104,7 +104,7 @@ int      puts(const char *);
 // void     rewind(FILE *);
 // int      scanf(const char *, ...);
 // void     setbuf(FILE *, char *);
-// int      setvbuf(FILE *, char *, int, size_t);
+int      setvbuf(FILE *, char *, int, size_t);
 int      snprintf(char *, size_t, const char *, ...);
 int      sprintf(char *, const char *, ...);
 int      sscanf(const char *, const char *, ...);

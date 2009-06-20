@@ -101,7 +101,7 @@ struct stat {
 #else
 
 int stat(const char *path, struct stat *buf);
-//int fstat(int filedes, struct stat *buf);
+int fstat(int filedes, struct stat *buf);
 int lstat(const char *path, struct stat *buf);
 mode_t umask(mode_t mask);
 

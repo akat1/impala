@@ -332,3 +332,32 @@ vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset)
 {
     return _rdwr(UIO_USERSPACE, rw, vn, addr, len, offset);
 }
+
+int
+vnode_stat(vnode_t *node, struct stat *buf)
+{
+    if(!node)
+        return -EINVAL;
+    vattr_t va;
+    va.va_mask = VATTR_ALL;
+    int res = VOP_GETATTR(node, &va);
+    if(res)
+        return res;
+    buf->st_dev = 0;
+    buf->st_ino = 0;
+    buf->st_mode = va.va_mode | VATYPE_TO_SMODE(va.va_type);
+    buf->st_nlink = va.va_nlink;
+    buf->st_uid = va.va_uid;
+    buf->st_gid = va.va_gid;
+    buf->st_rdev = /*ID(va.va_dev)*/ 0;
+    buf->st_size = va.va_size;
+    buf->st_blksize = va.va_blksize;
+    buf->st_blocks = va.va_blocks;
+    buf->st_atimespec = va.va_atime;
+    buf->st_mtimespec = va.va_mtime;
+    buf->st_ctimespec = va.va_ctime;
+    return 0;
+}
+
+
+

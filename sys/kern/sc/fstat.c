@@ -41,34 +41,29 @@
 #include <sys/stat.h>
 #include <sys/vm.h>
 
-typedef struct stat_args stat_args;
+typedef struct fstat_args fstat_args;
 
-struct stat_args {
-    int          mode;
-    char        *pathname;
+struct fstat_args {
+    int          fd;
     struct stat *buf;
 };
 
 
-errno_t sc_stat(thread_t *p, syscall_result_t *r, stat_args *args);
+errno_t sc_fstat(thread_t *p, syscall_result_t *r, fstat_args *args);
 
 errno_t
-sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
+sc_fstat(thread_t *t, syscall_result_t *r, fstat_args *args)
 {
     int res=0;
     proc_t *p = t->thr_proc;
-    vnode_t *node;
-    char pname[PATH_MAX+1];
-    if((res = copyinstr(pname, args->pathname, PATH_MAX)))
-        return res;
+    file_t *file;
     if((res = vm_is_avail((vm_addr_t)args->buf, sizeof(struct stat))))
         return res;
-    res = vfs_lookup(p->p_curdir, &node, args->pathname, t,
-                      (args->mode == STAT_LINK)?LKP_NO_FOLLOW:LKP_NORMAL);
-    if(res)
-        return res;
-    res = vnode_stat(node, args->buf);
-    vrele(node);
+    file = f_get(p->p_fd, args->fd);
+    if(!file)
+        return -EBADF;
+    res = vnode_stat(file->f_vnode, args->buf);
+    frele(file);
     if(res)
         return res;
 
