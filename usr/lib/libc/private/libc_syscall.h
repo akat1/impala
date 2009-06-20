@@ -6,7 +6,7 @@
 int syscall(int sc,...);
 void __sig_handler(int signum);
 
-extern sighandler_t __sig_handlers[NSIG];
+extern sighandler_t __sig_handlers[NSIG+1];
 
 
 #endif

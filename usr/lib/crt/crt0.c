@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <sys/list.h>
 
 //__asm__( ".weak __pthread_rt");
 
@@ -14,6 +16,17 @@ void _start(void);
 
 int errno = 0;
 static int retval=0;
+
+FILE _stdF[3] = {{.fd=0, .status=_FST_OPEN|_FST_LINEBUF|_FST_TTY,
+                     .buf_size = BUFSIZ},
+                  {.fd=1, .status=_FST_OPEN|_FST_LINEBUF|_FST_TTY,
+                     .buf_size = BUFSIZ},
+                  {.fd=2, .status=_FST_OPEN|_FST_NOBUF|_FST_TTY,
+                     .buf_size = BUFSIZ}};
+
+sighandler_t __sig_handlers[NSIG+1];
+
+list_t __open_files;
 
 int
 _pthread_rt()
@@ -39,6 +52,13 @@ void
 _start()
 {
     _pthread_rt();
+    LIST_CREATE(&__open_files, FILE, L_open_files, FALSE);
+//     _stdF[0] = fdopen(0, "r");
+//     _stdF[1] = fdopen(1, "w");
+//     _stdF[2] = fdopen(2, "w");
+    list_insert_tail(&__open_files, stdin);
+    list_insert_tail(&__open_files, stdout);
+    list_insert_tail(&__open_files, stderr);
     //póki co:
 //     environ = tab;
 //     open("/dev/ttyv1", O_RDONLY /* | O_NOCTTY*/);   //stdin

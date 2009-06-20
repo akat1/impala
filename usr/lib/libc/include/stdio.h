@@ -2,6 +2,7 @@
 #define __STDIO_H
 
 #include <sys/types.h>
+#include <sys/list.h>
 
 typedef int fpos_t;
 
@@ -23,13 +24,26 @@ struct FILE {
     int    (*closefn)(void *);
     int      status;
     int      err;
-    char     buf[BUFSIZ];
+    char    *buf;
+    size_t   buf_size;
+    size_t   inbuf;
+    list_node_t L_open_files;
 };
 typedef struct FILE FILE;
 
+
 #define _FST_OPEN    1
-#define _FST_LINEBUF 2
-#define _FST_NOBUF   4
+#define _FST_NOBUF   2
+#define _FST_LINEBUF 4
+#define _FST_FULLBUF 8
+#define _FST_TTY     16
+
+#define _FER_EOF    1
+#define _FER_ERR    2
+
+#define _IONBF 2
+#define _IOLBF 4
+#define _IOFBF 8
 
 extern FILE _stdF[3];
 
@@ -41,16 +55,17 @@ extern FILE _stdF[3];
 
 
 
-// void     clearerr(FILE *);
+void     clearerr(FILE *);
 // char    *ctermid(char *);
 int      fclose(FILE *);
-// FILE    *fdopen(int, const char *);
-// int      feof(FILE *);
-// int      ferror(FILE *);
+FILE    *fdopen(int, const char *);
+int      feof(FILE *);
+int      ferror(FILE *);
 int      fflush(FILE *);
 int      fgetc(FILE *);
+#define getc fgetc
 // int      fgetpos(FILE *, fpos_t *);
-// char    *fgets(char *, int, FILE *);
+char    *fgets(char *, int, FILE *);
 int      fileno(FILE *);
 // void     flockfile(FILE *);
 FILE    *fopen(const char *, const char *);

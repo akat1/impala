@@ -238,7 +238,7 @@ devfs_getattr(vnode_t *vn, vattr_t *attr)
 {
     devfs_node_t *node = vn->v_private;
     if(attr->va_mask & VATTR_SIZE)
-        return -EINVAL;
+        attr->va_size = 0;
     if(attr->va_mask & VATTR_TYPE)
         attr->va_type = (node->i_type==_INODE_TYPE_DIR)?
                             VNODE_TYPE_DIR:VNODE_TYPE_DEV;
@@ -342,7 +342,7 @@ devfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 }
 
 int
-devfs_getdents(vnode_t *vn, dirent_t *dents, int count)
+devfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
 {
     if(!vn)
         return -EINVAL;
@@ -350,6 +350,8 @@ devfs_getdents(vnode_t *vn, dirent_t *dents, int count)
     devfs_node_t *node = vn->v_private;
     node = node->i_child;
     int bcount = 0;
+    while(node && first-- > 0)
+        node = node->i_next;
     while(node && count>0) {
         dents->d_ino = (int)node;
         str_cpy(dents->d_name, node->i_name);

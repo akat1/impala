@@ -60,7 +60,9 @@ sc_getdents(thread_t *t, syscall_result_t *r, sc_getdents_args *args)
         return -EBADF;
     }
     vnode_t *v = file->f_vnode;
-    int res = VOP_GETDENTS(v, args->data, args->size);
+    int res = VOP_GETDENTS(v, args->data, file->f_offset, args->size);
+    if(res > 0)
+        file->f_offset += res/sizeof(dirent_t);
     frele(file);
     if(res < 0)
         return res;

@@ -42,7 +42,6 @@
 #define SEEK_CUR    1
 #define SEEK_END    2
 
-
 #define O_RDONLY      (1 << 1)
 #define O_WRONLY      (1 << 2)
 #define O_RDWR        (1 << 3)
@@ -52,8 +51,10 @@
 #define O_APPEND      (1 << 7)
 #define O_NONBLOCK    (1 << 8)
 #define O_NOCTTY      (1 << 9)
-#define O_CLOEXEC    (1 << 10)
+#define O_CLOEXEC     (1 << 10)
 #define FD_CLOEXEC    (1 << 10)
+
+#define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 
 #define F_DUPFD       (1 << 0)
 #define F_GETFL       (1 << 1)
@@ -100,7 +101,7 @@ void filetable_clone(filetable_t *dst, filetable_t *src);
 void filetable_prepare_exec(filetable_t *fd);
 filetable_t *filetable_alloc(void);
 
-int     f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result);
+int     f_alloc(proc_t *p, vnode_t  *vn, int flags, int *result);
 ssize_t f_write(file_t *fd, uio_t *u);
 ssize_t f_read(file_t *fd, uio_t *u);
 int     f_ioctl(file_t *fd, int cmd, uintptr_t param);

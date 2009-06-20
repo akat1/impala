@@ -3,8 +3,6 @@
 
 #include "libc_syscall.h"
 
-sighandler_t __sig_handlers[NSIG];
-
 void
 __sig_handler(int signum)
 {

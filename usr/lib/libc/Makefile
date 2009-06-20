@@ -6,11 +6,20 @@ SRCS=\
     fcntl/open.c\
     fcntl/creat.c\
     fcntl/fcntl.c\
+    stdio/_check_buf.c\
+    stdio/_fflush_lb.c\
+    stdio/_put_char.c\
+    stdio/_put_str.c\
+    stdio/_put_data.c\
+    stdio/clearerr.c\
+    stdio/fdopen.c\
+    stdio/ferror.c\
     stdio/fileno.c\
     stdio/fopen.c\
     stdio/fclose.c\
     stdio/fflush.c\
     stdio/fgetc.c\
+    stdio/fgets.c\
     stdio/fprintf.c\
     stdio/fputs.c\
     stdio/fputc.c\
@@ -30,6 +39,8 @@ SRCS=\
     stdlib/abort.c\
     stdlib/atexit.c\
     stdlib/atoi.c\
+    stdlib/atol.c\
+    stdlib/calloc.c\
     stdlib/exit.c\
     stdlib/_Exit.c\
     stdlib/free.c\
@@ -54,6 +65,7 @@ SRCS=\
     string/strcoll.c\
     string/strcpy.c\
     string/strcspn.c\
+    string/strdup.c\
     string/strerror.c\
     string/strlen.c\
     string/strncasecmp.c\
@@ -88,6 +100,7 @@ SRCS=\
     sysvipc/msgget.c\
     sysvipc/msgrcv.c\
     sysvipc/msgsnd.c\
+    termcap/tgetnum.c\
     termios/cfgetospeed.c\
     termios/cfmakeraw.c\
     termios/tcgetattr.c\
@@ -139,6 +152,7 @@ SRCS=\
     unistd/write.c\
     unistd/getopt.c\
     other/closedir.c\
+    other/getmntent.c\
     other/getpwnam.c\
     other/opendir.c\
     other/readdir.c\

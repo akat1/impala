@@ -14,7 +14,7 @@ strtoimax(const char *nptr, char **endptr, int base)
     }
     while(isspace(*nptr))
         nptr++;
-    intmax_t res = 1, sign;
+    intmax_t res = 0, sign;
     if(*nptr == '-') {
         nptr++;
         sign = -1;

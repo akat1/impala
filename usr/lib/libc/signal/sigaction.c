@@ -26,7 +26,7 @@ sigaction(int signum, const sigaction_t *act, sigaction_t *oldact)
     }
 
 
-    if ( r ) {
+    if ( !r ) {
         if ( act != NULL ) {
             __sig_handlers[signum] = handler;
         }

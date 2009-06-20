@@ -29,7 +29,7 @@ main(int argc, char **v)
     char buf[BSIZE];
     ssize_t nbytes;
     int status;
-
+    //printf("A tu mogê pisaæ?\n");
     status = pipe(fildes);
     if (status == -1 ) {
         /* an error occurred */

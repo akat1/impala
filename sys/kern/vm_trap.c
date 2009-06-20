@@ -36,6 +36,7 @@
 #include <sys/thread.h>
 #include <sys/utils.h>
 #include <sys/proc.h>
+#include <sys/wait.h>
 
 // #include <machine/cpu.h>
 
@@ -70,7 +71,7 @@ vm_user_pfault(vm_trap_frame_t *frame)
     kprintf("Process PID=%u: access violation (killed)\n",
         curthread->thr_proc->p_pid);
         panic("AAAA\n");
-    proc_exit(curthread->thr_proc, 0);
+    proc_exit(curthread->thr_proc, MAKE_STATUS_SIGNALED(SIGSEGV));
     // zrobic proc_exit !
 }
 

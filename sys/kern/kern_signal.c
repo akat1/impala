@@ -38,6 +38,7 @@
 #include <sys/thread.h>
 #include <machine/thread.h>
 #include <machine/interrupt.h>
+#include <sys/wait.h>
 
 bool signal_present(proc_t *p);
 int signal_proc(thread_t *t);
@@ -108,14 +109,14 @@ void
 _action_abort(proc_t *p, int sig)
 {
     /* TODO: narazie nie zrzucamy core */
-    _action_term(p, sig);
+    _action_term(p, MAKE_STATUS_SIGNALED(sig));
     return;
 }
 
 void
 _action_term(proc_t *p, int sig)
 {
-    proc_exit(p, sig);
+    proc_exit(p, MAKE_STATUS_SIGNALED(sig));
     return;
 }
 

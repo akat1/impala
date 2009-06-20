@@ -127,7 +127,7 @@ enum {
 #define VOP_SETATTR(v, attr) (v)->v_ops->vop_setattr((v), (attr))
 #define VOP_LOOKUP(v, w, p) (v)->v_ops->vop_lookup((v), (w), (p))
 #define VOP_MKDIR(v, vpp, p, a) (v)->v_ops->vop_mkdir((v), (vpp), (p), (a))
-#define VOP_GETDENTS(v, d, c) (v)->v_ops->vop_getdents((v), (d), (c))
+#define VOP_GETDENTS(v, d, f, c) (v)->v_ops->vop_getdents((v), (d), (f), (c))
 #define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
 #define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
 //#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
@@ -148,7 +148,7 @@ typedef int vnode_setattr_t(vnode_t *v, vattr_t *attr);
 typedef int vnode_lookup_t(vnode_t *v, vnode_t **vpp, lkp_state_t *path);
 typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
                            vattr_t *attr);
-typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int count);
+typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int first, int count);
 typedef int vnode_readlink_t(vnode_t *v, char *buf, int bsize);
 typedef int vnode_symlink_t(vnode_t *v, char *name, char *dst);
 //typedef int vnode_rmdir_t(vnode_t *v);

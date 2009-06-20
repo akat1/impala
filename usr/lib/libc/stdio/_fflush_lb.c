@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <stdio_private.h>
+#include <sys/list.h>
+
+void
+__fflush_line_buffered(void)
+{
+    FILE *f = NULL;
+    while((f = list_next(&__open_files, f))) {
+        if(ISSET(f->status, _FST_LINEBUF))
+            fflush(f);
+    }
+}

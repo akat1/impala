@@ -266,7 +266,7 @@ fatfs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
 }
 
 int
-fatfs_getdents(vnode_t *v, dirent_t *dents, int count)
+fatfs_getdents(vnode_t *v, dirent_t *dents, int first, int count)
 {
     DEBUGF("getdents not supported");
     return -ENOTSUP;

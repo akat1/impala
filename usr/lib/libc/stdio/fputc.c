@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio_private.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -10,15 +11,8 @@ fputc(int ch, FILE * f)
 {
     if(ISUNSET(f->status,_FST_OPEN))
         return EOF;
-    char c = (char)ch;
-    if(ISSET(f->status, _FST_NOBUF)) {
-        if(f->writefn)
-            return f->writefn(f->cookie, &c, 1);
-         if(f->fd!=-1)
-             return write(f->fd, &c, 1);
-    }
-    printf("fputs: buffering not implemented\n");
-    return 0;//todo..
+    __check_buf(f);
+    return __put_char(f, ch);
 }
 
 int

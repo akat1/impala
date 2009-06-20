@@ -3,10 +3,9 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/list.h>
+#include <stdio_private.h>
 
-FILE _stdF[3] = {{.fd=0, .status=_FST_OPEN|_FST_NOBUF},
-                 {.fd=1, .status=_FST_OPEN|_FST_NOBUF},
-                 {.fd=2, .status=_FST_OPEN|_FST_NOBUF}};
 
 FILE *
 fopen(const char *path, const char *mode)
@@ -24,6 +23,9 @@ fopen(const char *path, const char *mode)
     f->readfn = NULL;
     f->seekfn = NULL;
     f->closefn = NULL;
+    f->buf = NULL;
+    f->buf_size = BUFSIZ;
+    f->inbuf = 0;
     int flags = 0;
     if(*mode == 'r')
         flags |= O_RDONLY;
@@ -40,5 +42,6 @@ fopen(const char *path, const char *mode)
         return NULL;
     }
     f->status = _FST_OPEN | _FST_NOBUF;
+    list_insert_tail(&__open_files, f);
     return f;
 }

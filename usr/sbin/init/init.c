@@ -46,15 +46,16 @@ main(int argc, char **v)
 {
 #ifdef __Impala__
     setsid();
-    open("/dev/ttyv1", O_RDONLY /* | O_NOCTTY*/);   //stdin
+    open("/dev/ttyv1", O_RDONLY);   //stdin
     open("/dev/ttyv1", O_WRONLY);   //stdout
     open("/dev/ttyv1", O_WRONLY);   //stderr
 #endif
+    //printf("Oto wynik: %i %i\n", atoi("1234567"), atol("1234567"));
     thr_create(tmain, 0, 0, 0);
 
     int p;
     char buf[512];
-    char *const argv[]={NULL};
+    char *const argv[]={"sh", NULL};
     char *const env[]={NULL};
     while(1) {
         inputline(buf);

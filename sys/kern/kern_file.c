@@ -44,16 +44,17 @@
 bool _chunk_is_empty(filetable_chunk_t *fd);
 void _filetable_expand(filetable_t *ft, int hm);
 filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
-static file_t *file_alloc(vnode_t *vn);
+static file_t *file_alloc(vnode_t *vn, int flags);
 
 file_t*
-file_alloc(vnode_t *vn)
+file_alloc(vnode_t *vn, int flags)
 {
     KASSERT(vn);
     file_t *fp = kmem_zalloc(sizeof(file_t), KM_SLEEP);
     if(!fp)
         return NULL;
     fp->f_vnode = vn;
+    fp->f_flags = flags;
     fp->f_refcnt++;
     return fp;
 }
@@ -301,7 +302,7 @@ _filetable_expand(filetable_t *ft, int hm)
 }
 
 int
-f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
+f_alloc(proc_t *p, vnode_t  *vn, int flags, int *result)
 {
     int fdp = 0;
     file_t *fp;
@@ -319,10 +320,10 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
     {
         for (int i = 0 ; i < FILES_PER_CHUNK ; i++) {
             if ( fc->files[i] == NULL ) {
-                fp = file_alloc(vn);
+                fp = file_alloc(vn, flags);
                 fc->files[i] = fp;
                 *result = fdp;
-                *fpp = fp;
+
                 mutex_unlock(&p->p_fd->mtx);
                 return 0;
             }
@@ -338,9 +339,8 @@ f_alloc(proc_t *p, vnode_t  *vn, file_t **fpp, int *result)
 
     /* brak wolnych miejsc w chunkach */
     _filetable_expand(p->p_fd, 1);
-    fp = file_alloc(vn);
+    fp = file_alloc(vn,flags);
     *result = fdp;
-    *fpp = fp;
     f_set(p->p_fd, fp, fdp);
     mutex_unlock(&p->p_fd->mtx);
     return 0;

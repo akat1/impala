@@ -1,18 +1,39 @@
 
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
+// Tym razem nvi... ma niez³e wymagania, nie ma co...
 
-// `_getopt'
-// `_getrlimit'
-// `_getrusage'
-// `_killpg'
-// `_opterr'
-// `_optind'
-// `_optopt'
-// `_optreset'
-// `_setrlimit' // STUB
-// `_sigaction' // SIG
-// `_sigemptyset' // SIG
-// `_siginterrupt' // SIG
-// `_signal' // SIG
-// `_sigprocmask' // SIG
-// `_sys_siglist' // SIG
+// _access'
+// `_atol'
+// `_bsearch'
+// `_chmod'
+// `_chown'
+// `_clearerr'
+// `_ctime'
+// `_execl'
+// `_ferror'
+// `_fstat'
+// `_fsync'
+// `_ftruncate'
+// `_getgrnam'
+// `_getpwuid'
+// `_gettimeofday'
+// `_idlok'
+// `_iscntrl'
+// `_isprint'
+// `_mkdir'
+// `_mkstemp'
+// `_mmap'
+// `_munmap'
+// `_revoke'
+// `_setvbuf'
+// `_strsep'
+// `_strtoul'
+// `_system'
+// `_time'
+// `_toupper'
+// `_ttyname'
+// `_unlink'
+// `_vfork'
+// `_waddnstr'
+// `_waitpid'
+// `_writev'

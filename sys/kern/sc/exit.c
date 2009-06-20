@@ -36,6 +36,7 @@
 #include <sys/utils.h>
 #include <sys/syscall.h>
 #include <sys/errno.h>
+#include <sys/wait.h>
 
 typedef struct sc_exit_args sc_exit_args;
 
@@ -48,7 +49,7 @@ errno_t sc_exit(thread_t *p, syscall_result_t *r, sc_exit_args *args);
 errno_t
 sc_exit(thread_t *t, syscall_result_t *r, sc_exit_args *args)
 {
-    proc_exit(t->thr_proc, args->error);
+    proc_exit(t->thr_proc, MAKE_STATUS_EXITED(args->error));
     return 0;
 }
 

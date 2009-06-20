@@ -303,8 +303,10 @@ fifofs_inactive(vnode_t *vn)
     if(vn == n->i_writenode)
         n->i_writenode = NULL;
     if(!n->i_writenode && !n->i_readnode) {   //nie ma ¿adnych vnode'ów
+        KASSERT(n->i_buf);
         clist_destroy(n->i_buf);
         kmem_free(n);
+        n->i_buf = NULL;
     }
     return 0;
 }
@@ -316,7 +318,7 @@ fifofs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 }
 
 int
-fifofs_getdents(vnode_t *vn, dirent_t *dents, int count)
+fifofs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
 {
     return -ENOTSUP;
 }

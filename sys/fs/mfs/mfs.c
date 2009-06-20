@@ -359,7 +359,7 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 }
 
 int
-mfs_getdents(vnode_t *vn, dirent_t *dents, int count)
+mfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
 {
     if(!vn)
         return -EINVAL;
@@ -369,6 +369,8 @@ mfs_getdents(vnode_t *vn, dirent_t *dents, int count)
     mfs_node_t *node = vn->v_private;
     node = node->child;
     int bcount = 0;
+    while(node && first-- > 0)
+        node = node->next;
     while(node && count>0) {
         dents->d_ino = (int)node;
         str_cpy(dents->d_name, node->name);

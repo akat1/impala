@@ -51,25 +51,24 @@ sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
         return err;
 
     vnode_t *p_read, *p_write;
-    file_t *f1, *f2;
     int fd1, fd2;
     if((err = fifo_create(&p_read, &p_write)))
         return err;
-    if((err = f_alloc(proc, p_read, &f1, &fd1)))
+    if((err = f_alloc(proc, p_read, O_RDONLY, &fd1)))
         goto end_err;
-    if((err = f_alloc(proc, p_write, &f2, &fd2)))
+    if((err = f_alloc(proc, p_write, O_WRONLY, &fd2)))
         goto end_err2;
-    f1->f_flags = O_RDONLY;
-    f2->f_flags = O_WRONLY;
     args->filedes[0] = fd1;
     args->filedes[1] = fd2;
+    kprintf("PIPE created, %i, %i\n", fd1, fd2);
     return -EOK;
 
 end_err2:
-    f_close(f1);
+    kprintf("Pipe Err. 2\n");
     f_set(proc->p_fd, NULL, fd1);
     p_read = NULL;
 end_err:
+    kprintf("Pipe Err.\n");
     if(p_read)
         vrele(p_read);
     vrele(p_write);

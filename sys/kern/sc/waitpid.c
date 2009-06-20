@@ -62,8 +62,10 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
             p_iter = (proc_t *)list_head(&(p->p_children));
             /* proces nie ma dzieci - czekamy na sygnal */
             if ( p_iter == NULL ) {
-                if(args->options & WNOHANG)
-                    return EOK;
+                if(args->options & WNOHANG) {
+                    ///libc musi to zapatchowaæ i je¶li jest NOHANG zwróciæ 0
+                    return -ECHILD; 
+                }
                 for(;;);
             }
             #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
@@ -81,8 +83,18 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                     proc_delete(p_iter);
                     return -EOK;
                 }
+                if(ISSET(args->options, WUNTRACED) &&
+                   ISSET(p_iter->p_flags, PROC_STOP)) {
+                    r->result = p_iter->p_pid;
+                    // zwracamy status procesu
+                    if ( args->status != NULL ) 
+                        *(args->status) = p_iter->p_status;
+                    return -EOK;
+                }
             } while ((p_iter = NEXTPROC()));
             #undef NEXTPROC
+            if(ISSET(args->options, WNOHANG))
+                return EOK; ///poprawne zachowanie?
         }
     }
     proc_t *to_trace = proc_find(args->pid);
@@ -94,19 +106,27 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
     {
         if ( proc_is_zombie(to_trace) )
         {
-                // odlaczamy dziecko
-                list_remove(&(p->p_children), to_trace);
-                // zwracamy jego pid jako wynik
-                r->result = to_trace->p_pid;
+            // odlaczamy dziecko
+            list_remove(&(p->p_children), to_trace);
+            // zwracamy jego pid jako wynik
+            r->result = to_trace->p_pid;
 
-                // zwracamy status procesu
-                if ( args->status != NULL ) 
-                    *(args->status) = to_trace->p_status;
+            // zwracamy status procesu
+            if ( args->status != NULL ) 
+                *(args->status) = to_trace->p_status;
 
-                // niszczymy dziecko
-                proc_delete(to_trace);
-                
-                return -EOK;
+            // niszczymy dziecko
+            proc_delete(to_trace);
+            
+            return -EOK;
+        }
+        if(ISSET(args->options, WUNTRACED) &&
+           ISSET(to_trace->p_flags, PROC_STOP)) {
+            r->result = to_trace->p_pid;
+            // zwracamy status procesu
+            if ( args->status != NULL ) 
+                *(args->status) = to_trace->p_status;
+            return -EOK;
         }
         if(args->options & WNOHANG)
             return EOK;

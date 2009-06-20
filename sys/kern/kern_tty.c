@@ -233,11 +233,10 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
         case TCSETS: {
             int x = spltty();
             termios_t *tconf = (termios_t*)param;
-            if((err=copyin(&tty->t_conf, tconf, sizeof(termios_t)))) {
-                splx(x);
-                return err;
-            }
+            err=copyin(&tty->t_conf, tconf, sizeof(termios_t));
             splx(x);
+            if(err)
+                return err;
             break;
         }
         case TIOCSPGRP:
@@ -268,7 +267,7 @@ tty_input(tty_t *tty, int ch)
 {
     cc_t *cc = tty->t_conf.c_cc;
     tcflag_t lflag = tty->t_conf.c_lflag;
-    if(lflag & ISIG) {
+    if(ISSET(lflag, ISIG)) {
         if(ch == cc[VINTR]) {
             signal_send_group(tty->t_group, SIGINT);
             return;
@@ -280,7 +279,7 @@ tty_input(tty_t *tty, int ch)
             return;
         }
     }
-    if(lflag & ICANON) { //przetwarzanie KILL, ERASE
+    if(ISSET(lflag, ICANON)) { //przetwarzanie KILL, ERASE
         if(ch == cc[VERASE]) {
             tty_erase(tty);
             return;
@@ -303,7 +302,7 @@ tty_input(tty_t *tty, int ch)
                 ch = CR;
         }
         clist_push(tty->t_clq, ch);
-        if(lflag & ECHO) {
+        if(ISSET(lflag, ECHO)) {
             tty_echo(tty, ch);
         }
         if(ch == NL || ch == cc[VEOL]) {
@@ -361,11 +360,20 @@ tty_erase(tty_t *tty)
         return;
     char c = clist_unpush(tty->t_clq);    
     if(tty->t_conf.c_lflag & ECHOE) {
+        int todel = 0;
         if(c == '\t') {
             ///@todo poprawiæ to; powinno czasem usuwaæ mniej znaków...;)
             for(int i=0; i<6; i++)
                 tty_output(tty, '\b');
-        } else {
+        } else if(c > US) {
+            todel = 1;
+        } else if(((unsigned char)c) == 0233)
+            todel = 3;
+        //else if(c == 033)
+          //  todel = 2; //taki sam wynik jak ni¿ej
+        else
+            todel = 2;
+        while(todel-- > 0) {
             tty_output(tty, '\b');
             tty_output(tty, ' ');
             tty_output(tty, '\b');

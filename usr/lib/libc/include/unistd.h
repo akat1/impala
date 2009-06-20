@@ -42,7 +42,7 @@
 //unsigned     alarm(unsigned);
 //int          chown(const char *, uid_t, gid_t);
 //size_t       confstr(int, char *, size_t);
-//int          execl(const char *, const char *, ...);
+int          execl(const char *, const char *, ...);
 //int          execle(const char *, const char *, ...);
 //int          execlp(const char *, const char *, ...);
 //int          execv(const char *, char *const []);

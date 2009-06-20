@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdio_private.h>
 #include <string.h>
 #include <stdarg.h>
 
@@ -19,6 +20,9 @@ enum {
 int
 vfprintf(FILE *stream, const char *fmt, va_list ap)
 {
+    if(ISUNSET(stream->status,_FST_OPEN))
+        return -1;
+    __check_buf(stream);
     int tot = 0;
     char buf[INTERNAL_BUF];
     char *pbuf;
@@ -74,7 +78,7 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                 // flagi zjedzone - do roboty
                 switch (*fmt) {
                     case '%':
-                        fputc('%', stream);
+                        __put_char(stream, '%');
                         tot++;
                         break;
                     case 'u':
@@ -116,6 +120,7 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
             }
 
             default:
+                __put_char(stream, *fmt);
                 break;
         }
     }
@@ -134,12 +139,12 @@ from_string(FILE *str, char *b, char sep, int fw,
 
     if(to_right) {
         while(pad_count--)
-            fputc(sep, str);
+            __put_char(str, sep);
     }
-    fputs(b, str);
+    __put_str(str, b);
 
     while(pad_count-- > 0)
-        fputc(sep, str);
+        __put_char(str, sep);
 
     return fw;
 }

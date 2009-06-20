@@ -72,7 +72,6 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     int flags = arg->flags;
     int error = 0;
     vnode_t *node;
-    file_t  *file;
     proc_t *proc = p->thr_proc;
     char fname[PATH_MAX+1];
     if((error = copyinstr(fname, arg->fname, PATH_MAX)))
@@ -108,11 +107,10 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         vrele(node);
         return error;
     }
-    if((error = f_alloc(proc, node, &file, &fd))) {
+    if((error = f_alloc(proc, node, flags, &fd))) {
         return error;
     }
-    
-    file->f_flags = flags;
+
     r->result = fd;
     return -EOK;
 }

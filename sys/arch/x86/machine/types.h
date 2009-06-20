@@ -33,10 +33,17 @@
 #ifndef __MACHINE_TYPES_H
 #define __MACHINE_TYPES_H
 
+typedef unsigned char u_char;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
 
 typedef unsigned char  uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int   uint32_t;
+
+typedef uint8_t u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
 
 
 typedef signed char  int8_t;

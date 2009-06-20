@@ -11,7 +11,7 @@ long int
 strtol(const char *nptr, char **endptr, int base)
 {
     char *s = (char *)nptr;
-    long int result = 1;
+    long int result = 0, sign = 1;
     int tmp;
 
     if (!(base == 0 || (base >= 2 && base <= 36))) {
@@ -25,7 +25,7 @@ strtol(const char *nptr, char **endptr, int base)
     /* prefix */
     if (*s == '-' || *s == '+') {
         if ( *s == '-' ) {
-            result = -1;
+            sign = -1;
         }
         s++;
     }
@@ -47,16 +47,13 @@ strtol(const char *nptr, char **endptr, int base)
 
     while(*s)
     {
-        if ( isdigit(*s) ) {
+        if ( isdigit(*s) )
             tmp = *s - '0';
-        }
-        if ( isalpha(*s) ) {
+        if ( isalpha(*s) )
             tmp = tolower(*s) - 'a';
-        }
-
         if ( tmp >= base )
             break;
-
+        s++;
         result = result * base + tmp;
     }
 
@@ -64,6 +61,6 @@ strtol(const char *nptr, char **endptr, int base)
         *endptr = (char *)nptr;
     }
 
-    return result;
+    return sign*result;
 
 }

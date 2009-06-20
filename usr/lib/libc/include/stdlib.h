@@ -38,18 +38,19 @@
 void    _exit(int status);
 void    _Exit(int status);
 void    abort(void); //
-int     atoi(const char *nptr); //
-//void *calloc(size_t nmemb, size_t size);
+int     atoi(const char *nptr);
+long    atol(const char *nptr);
+void   *calloc(size_t nmemb, size_t size);
 void    exit(int status);
 void    free(void *ptr); //
-char   *getenv(const char *name); //
+char   *getenv(const char *name);
 void   *malloc(size_t size); //
 void   *realloc(void *ptr, size_t size);
 int     setenv(const char *name, const char *value, int overwrite);
 int     unsetenv(const char *name);
 long int strtol(const char *nptr, char **endptr, int base);
 void    qsort(void *base, size_t nmemb, size_t size,
-                int(*compar)(const void *, const void *)); //
+                int(*compar)(const void *, const void *));
 long int strotl(const char *nptr, char **endptr, int base);
 
 #define EXIT_FAILURE 1

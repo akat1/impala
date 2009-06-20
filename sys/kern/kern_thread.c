@@ -199,8 +199,10 @@ mutex_lock(mutex_t *m, const char *file, const char *func, int line,
     } else {
         spinlock_lock(&m->mtx_slock);
         list_insert_tail(&m->mtx_locking, curthread);
+        int x = spltty();
         spinlock_unlock(&m->mtx_slock);
         sched_wait(file,func,line,descr);
+        splx(x);
     }
 }
 
