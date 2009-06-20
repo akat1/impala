@@ -32,7 +32,7 @@ commit:
 	svn commit
 
 update:
-	svn log -r BASE > CHANGES
+	svn log -r BASE:HEAD > CHANGES
 	svn update && cat CHANGES
 
 debug: build
