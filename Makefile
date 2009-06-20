@@ -31,6 +31,10 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 commit:
 	svn commit
 
+update:
+	svn log -r BASE > CHANGES
+	svn update && cat CHANGES
+
 debug: build
 	gdb -x tools/gdbscript sys/kern/impala
 
