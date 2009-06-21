@@ -88,6 +88,6 @@ sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args)
 
     /* Uzupelnic wg. TODO */
     r->result = -1;
-    return ENOSTR;
+    return -ENOSTR;
 }
 

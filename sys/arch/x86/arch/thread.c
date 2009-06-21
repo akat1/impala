@@ -128,9 +128,9 @@ thread_sigreturn(thread_t *t)
 }
 
 void
-thread_prepare(thread_t *t)
+thread_prepare(thread_t *t, vm_addr_t av, vm_addr_t ev, vm_size_t off)
 {
-    uint32_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - 4;
+    uint32_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - 4 - off;
     interrupt_frame *frame = t->thr_context.c_frame;
     mem_zero(t->thr_kstack, t->thr_kstack_size);
     if (t->thr_flags & THREAD_USER) {
@@ -146,6 +146,8 @@ thread_prepare(thread_t *t)
     frame->f_eip = (uint32_t)t->thr_entry_point;
     frame->f_eflags = t->thr_context.c_eflags;
     frame->f_esp = ESP;
+    frame->f_edi = av;
+    frame->f_esi = ev;
 #if 0
     kprintf("[%p] %p %p %p %p %p\n", frame, frame->f_cs, frame->f_ds, frame->f_eip,
         frame->f_esp, frame->f_ebp);

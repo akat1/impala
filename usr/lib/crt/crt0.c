@@ -9,7 +9,7 @@
 //__asm__( ".weak __pthread_rt");
 
 int syscall(int SC, ...);
-int main(int argc, char **argv);
+int main(int argc, char **argv, char **envp);
 int _pthread_rt(void);
 
 void _start(void);
@@ -51,6 +51,16 @@ char *tab[2] = {NULL, NULL};
 void
 _start()
 {
+    char **argv;
+    char **envp;
+    __asm__(
+        "movl %%edi, %0;"
+        "movl %%esi, %1;"
+        : "=m"(argv), "=m"(envp)
+        :
+    );
+    int c = 0;
+    for (int i = 0; argv[i]; i++) c++;
     _pthread_rt();
     LIST_CREATE(&__open_files, FILE, L_open_files, FALSE);
 //     _stdF[0] = fdopen(0, "r");
@@ -66,7 +76,7 @@ _start()
 //     open("/dev/ttyv1", O_WRONLY);   //stderr
 //     printf("Environ: %x\n", 0);//environ);
 //     close(2); close(1); close(0);
-    char ex = main(0, tab);
+    char ex = main(c, argv, envp);
     syscall(SYS_exit, ex);
     for (;;); // tymczasowo
 }

@@ -59,7 +59,7 @@ kthread_create(kthread_t *kthr, kthread_entry_f *f, void *arg)
     kthr->kt_arg = arg;
     kthr->kt_entry = f;
     kthr->kt_thread = thr;
-    thread_prepare(thr);
+    thread_prepare(thr, 0,0,0);
     sched_insert(kthr->kt_thread);
 }
 

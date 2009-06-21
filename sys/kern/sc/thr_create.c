@@ -59,7 +59,7 @@ sc_thr_create(thread_t *t, syscall_result_t *r, thr_create_args_t *args)
 //    }
     ct->thr_stack_size = args->stack_size;
     TRACE_IN("new thread stack=%p+%p", ct->thr_stack, ct->thr_stack_size);
-    thread_prepare(ct);
+    thread_prepare(ct, 0, 0, 0);
     sched_insert(ct);
     r->result = (uintptr_t)ct;
     return -EOK;

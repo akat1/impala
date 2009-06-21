@@ -1,4 +1,4 @@
-SUBDIRS= test vttest sh
+SUBDIRS= cat test vttest sh
 
 include ${IMPALA_MK}/subdir.mk
 

@@ -67,7 +67,7 @@ void thread_context_destroy(thread_context *ctx);
 void thread_context_load(thread_context *ctx);
 int thread_context_store(thread_context *ctx);
 void thread_context_init(thread_t *t, thread_context *ctx);
-void thread_prepare(thread_t *c);
+void thread_prepare(thread_t *c, vm_addr_t a, vm_addr_t e, vm_size_t o);
 void thread_switch(thread_t *t_to, thread_t *t_from);
 void thread_resume(thread_t *t);
 
