@@ -32,6 +32,13 @@
 
 #ifndef __SYS_VFS_H
 #define __SYS_VFS_H
+
+struct mountinfo {
+    char    type[10];
+    char    mpoint[255];
+    char    dev[20];
+};
+
 #ifdef __KERNEL
 
 #include <sys/vfs/vfs_types.h>
@@ -47,6 +54,7 @@ struct vfs {
      vnode_t      *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
      devd_t       *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
      void         *vfs_private;   ///< prywatne dane systemu plików
+     vfs_conf_t   *vfs_conf;
      list_node_t   L_mountlist;   ///< wêze³ z listy zamontowanych fs
 };
 
@@ -55,7 +63,7 @@ int vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev);
 int vfs_destroy(vfs_t *vp);
 void vfs_init(void);
 void vfs_mountroot(void);
-
+int vfs_getinfos(int off, struct mountinfo *tab, int n);
 extern vnode_t *rootvnode;
 
 #define VFS_MOUNT(fs) (fs)->vfs_ops->vfs_mount((fs))
@@ -81,6 +89,11 @@ struct vfs_ops {
     vfs_sync_t      *vfs_sync;
 };
 
+
+
+#else
+
+int getmountinfo(int off, struct mountinfo *tab, int n);
 
 
 #endif

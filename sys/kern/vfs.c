@@ -62,6 +62,29 @@ vfs_init()
     register_fss();
 }
 
+int
+vfs_getinfos(int off, struct mountinfo *tab, int n)
+{
+    int r = 0;
+    MUTEX_LOCK(&global_lock, "mountinfo");
+    int i;
+    vfs_t *v = list_head(&mounted_fs);
+    for (i = 0; i < off && v; i++, v = list_next(&mounted_fs, v));
+    if (i == off && v != NULL) {
+        for (i = 0; i < n && v; i++, v = list_next(&mounted_fs, v)) {
+            str_cpy(tab[i].type, v->vfs_conf->name);
+            str_cpy(tab[i].mpoint, "<unknown>");
+            if (v->vfs_mdev)
+                str_cpy(tab[i].dev, v->vfs_mdev->name);
+                else str_cpy(tab[i].dev, "null");
+        
+        }
+        r = i;
+    }
+    mutex_unlock(&global_lock);
+    return r;
+}
+
 void
 register_fss()
 {
@@ -113,6 +136,7 @@ vfs_create(vfs_t **fs, const char *fstype)
     rfs->vfs_private = NULL;
     rfs->vfs_mpoint = NULL;
     rfs->vfs_mdev = NULL;
+    rfs->vfs_conf = conf;
     rfs->vfs_ops = conf->ops;
     *fs = rfs;
     return 0;
