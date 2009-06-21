@@ -52,7 +52,7 @@ void         _exit(int);
 void         exit(int);
 //int          fchown(int, uid_t, gid_t);
 //long         fpathconf(int, int);
-//int          ftruncate(int, off_t);
+int          ftruncate(int, off_t);
 char        *getcwd(char *, size_t);
 gid_t        getegid(void);
 uid_t        geteuid(void);
@@ -83,6 +83,7 @@ int          tcsetpgrp(int, pid_t);
 int          eaccess(const char *pathname, int mode);    //chc±, to dajemy
 mode_t       getmode(const void *set, mode_t omode);
 void *       setmode(const char *p);
+pid_t        vfork(void);
 
 
 #define R_OK (1<<0)

@@ -106,6 +106,7 @@ ssize_t f_write(file_t *fd, uio_t *u);
 ssize_t f_read(file_t *fd, uio_t *u);
 int     f_ioctl(file_t *fd, int cmd, uintptr_t param);
 int     f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
+int     f_truncate(file_t *f, off_t len);
 void    f_close(file_t *fd);
 off_t   f_seek(file_t *fd, off_t o, int whence);
 

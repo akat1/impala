@@ -42,6 +42,7 @@
 #include <sys/device.h>
 #include <sys/string.h>
 #include <sys/uio.h>
+#include <sys/kmem.h>
 #include <fs/mfs/mfs_internal.h>
 
 vfs_init_t           mfs_init;
@@ -118,7 +119,7 @@ int
 _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
     *vpp = NULL;
-    if(!vn || !name || !attr)
+    if(!name || !attr)
         return -EINVAL;
     if(vn->v_type != VNODE_TYPE_DIR)
         return -ENOTDIR;
@@ -176,10 +177,18 @@ mfs_read(vnode_t *vn, uio_t *u, int flags)
 int
 mfs_write(vnode_t *vn, uio_t *u, int flags)
 {
-    if(!vn || vn->v_type != VNODE_TYPE_REG)
+    if(vn->v_type != VNODE_TYPE_REG)
         return -EINVAL;
-    return -ENOTSUP;
-    return 0;
+    
+    mfs_node_t *node = vn->v_private;
+    off_t start = u->offset;
+    //na razie zapis tylko do granicy rozmiaru
+    if(node->size < start)
+        return -1;
+    size_t size = MIN(node->size-start, u->size);
+    u->resid = u->size;
+    uio_move(node->data+start, size, u);
+    return size;
 }
 
 int
@@ -191,8 +200,6 @@ mfs_ioctl(vnode_t *vn, int cmd, uintptr_t arg)
 int
 mfs_seek(vnode_t *vn, off_t off)
 {
-    if(!vn)
-        return -EINVAL;
     mfs_node_t *n = vn->v_private;
     if(n->size > off)
         return 0;
@@ -202,7 +209,33 @@ mfs_seek(vnode_t *vn, off_t off)
 int
 mfs_truncate(vnode_t *vn, off_t off)
 {
-    return -ENOTSUP;
+    mfs_node_t *n = vn->v_private;
+    if(off == n->size)
+        return 0;
+    if(off > 10000000)
+        return -EINVAL; //póki co MFS nie chce du¿ych plików ;)
+    if(off < n->size)
+        n->size = off;
+    else { //off > n->size
+        if(off > n->alloc_size) {
+            //realloc by siê przydal
+            
+            void *new_data = kmem_zalloc(off, KM_SLEEP);
+            mem_cpy(new_data, n->data, n->size);
+            void *old = n->data;
+            n->data = new_data;
+            if(!n->in_image)
+                kmem_free(old);
+            n->in_image = FALSE;
+            n->size = off;
+            n->alloc_size = off;
+        } else {
+            for(int i = n->size; i<off; i++)
+                n->data[i] = '\0';
+            n->size = off;
+        }
+    }
+    return 0;
 }
 
 int
@@ -361,8 +394,6 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
 int
 mfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
 {
-    if(!vn)
-        return -EINVAL;
     if(vn->v_type != VNODE_TYPE_DIR)
         return -ENOTDIR;
     count /= sizeof(dirent_t);
@@ -414,6 +445,7 @@ mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)
     for(int i=0; i<ncount; i++) {
         nptr[i]->name = str_dup(data->name);
         nptr[i]->size = data->size;
+        nptr[i]->alloc_size = data->size;
         nptr[i]->type = data->type;
         nptr[i]->attr = data->attr;
         nptr[i]->uid = 0;   // w obrazie nie mamy informacji o uid ani gid
@@ -422,6 +454,7 @@ mfs_from_image(mfs_data_t *mfs, unsigned char *image, int im_size)
         nptr[i]->parent = data->parent_id? nptr[data->parent_id-1]: NULL;
         nptr[i]->child = data->child_id? nptr[data->child_id-1]: NULL;
         nptr[i]->next = data->next_id? nptr[data->next_id-1]: NULL;
+        nptr[i]->in_image = TRUE;
         data++;
 //        kprintf("--Ent: %s\n", nptr[i]->name);
     }

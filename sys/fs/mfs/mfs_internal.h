@@ -55,6 +55,8 @@ struct mfs_data_entry {
 struct mfs_node {
     char       *name;
     size_t      size;
+    size_t      alloc_size;
+    bool        in_image;
     int         type;
     int         attr;
     uid_t    uid;

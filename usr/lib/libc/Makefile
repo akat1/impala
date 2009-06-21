@@ -31,6 +31,7 @@ SRCS=\
     stdio/printf.c\
     stdio/putchar.c\
     stdio/puts.c\
+    stdio/setvbuf.c\
     stdio/snprintf.c\
     stdio/sprintf.c\
     stdio/sscanf.c\
@@ -125,6 +126,7 @@ SRCS=\
     unistd/lseek.c\
     unistd/lstat.c\
     unistd/fork.c\
+    unistd/ftruncate.c\
     unistd/getcwd.c\
     unistd/getegid.c\
     unistd/geteuid.c\
@@ -151,6 +153,7 @@ SRCS=\
     unistd/tcgetpgrp.c\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
+    unistd/vfork.c\
     unistd/write.c\
     unistd/getopt.c\
     other/closedir.c\
@@ -161,6 +164,7 @@ SRCS=\
     other/setlocale.c\
     other/strtoimax.c\
     other/wait3.c\
+    other/waitpid.c\
     ${IMPALA_ARCH}/setjmp.s\
 
 include ${IMPALA_MK}/lib.mk

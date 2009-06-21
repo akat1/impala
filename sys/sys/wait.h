@@ -30,8 +30,8 @@
 
 #include <sys/resource.h>
 
-pid_t wait3(int *status, int opcje, struct rusage *ruzycie);
-
+pid_t wait3(int *status, int options, struct rusage *rusage);
+pid_t waitpid(pid_t pid, int *status, int options); 
 
 
 #endif

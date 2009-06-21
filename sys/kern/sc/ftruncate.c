@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,33 +26,31 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 418 2009-06-14 00:48:52Z takeshi $
  */
 
-#ifndef __CTYPE_H
-#define __CTYPE_H
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/syscall.h>
+#include <sys/vm.h>
 
-//is in range
-#define __iir(c, a, b) ((a<=(c)) && ((c)<=b))
+typedef struct ftruncate_args ftruncate_args_t;
+struct ftruncate_args {
+    int fd;
+    off_t length;
+};
 
-#define isalnum(c) (isalpha(c) || isdigit(c))
-#define isalpha(c) (isupper(c) || islower(c))
-#define isascii(c) (!((c)&(~0x7f)))
-#define isblank(c) ((c)==' ' || (c)=='\t')
-#define iscntrl(c) ((c) == 0177 || __iir((c), 0, ' '-1))
-#define isdigit(c) __iir((c), '0', '9')
-///@todo do punct sporo ró¿nych nale¿y... mo¿e warto by by³o u¿ywaæ locale?
-#define ispunct(c) (__iir((c), '!', '/') || __iir((c), ',', '@'))
-#define isgraph(c) (isalnum(c) || ispunct(c))
-#define islower(c) __iir((c), 'a', 'z')
-#define isprint(c) (isgraph(c) || (c)==' ')
+int sc_ftruncate(thread_t *p, syscall_result_t *r, ftruncate_args_t *args);
 
-#define isspace(c) ((c)==' ' || (c)=='\f' || (c)=='\n' || (c)=='\r' \
-                    || (c)=='\t' || (c)=='\v')
-#define isupper(c) __iir((c), 'A', 'Z')
-#define isxdigit(c) (isdigit(c) || __iir((c), 'a', 'f') || __iir((c), 'A', 'F'))
-#define tolower(c) ((c) >= 'A'&& (c) <= 'Z'?(c-('A'-'a')):(c))
-#define toupper(c) ((c) >= 'a'&& (c) <= 'z'?(c-('a'-'A')):(c))
+int
+sc_ftruncate(thread_t *t, syscall_result_t *r, ftruncate_args_t *args)
+{
+    file_t *f = f_get(t->thr_proc->p_fd, args->fd);
+    if(!f)
+        return -EBADF;
+    f_truncate(f, args->length);
+    frele(f);
+    return -EOK;
+}
 
 
-#endif

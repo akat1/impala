@@ -122,6 +122,15 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
     return VOP_IOCTL(f->f_vnode, cmd, param);
 }
 
+int
+f_truncate(file_t *f, off_t len)
+{
+    if (!f)
+        return -EBADF;
+    KASSERT(f->f_vnode);
+    return VOP_TRUNCATE(f->f_vnode, len);
+}
+
 ssize_t
 f_write(file_t *f, uio_t *u)
 {

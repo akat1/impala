@@ -6,6 +6,7 @@ SYS exit
 SYS fcntl
 SYS fork
 SYS fstat
+SYS ftruncate
 SYS getcwd
 SYS getegid
 SYS geteuid
