@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/vm.h>
+#include <sys/termios.h>
+#include <sys/device.h>
 #include <sys/file.h>
 #include <sys/ipc.h>
 
@@ -67,6 +69,29 @@ proc_dtor(void *obj)
     filetable_free(proc->p_fd);
 }
 
+int
+proc_getinfos(int off, struct procinfo *tab, int n)
+{
+//    MUTEX_LOCK(&proc_mtx, "procinfo");
+    int r = 0;
+    int i;
+    proc_t *p = list_head(&procs_list);
+    for (i = 0; i < off && (p = list_next(&procs_list,p)); i++);
+    if (i == off && p != NULL) {
+        for (i = 0; i < n && p; i++, p = list_next(&procs_list,p)) {
+            tab[i].pid = p->p_pid;
+            tab[i].ppid = p->p_ppid;
+            tab[i].threads = list_length(&p->p_threads);
+            if (p->p_ctty)
+                str_ncpy(tab[i].tty, p->p_ctty->t_dev->name, 20);
+                else tab[i].tty[0] = 0;
+            tab[i].cmd[0] = 0;
+        }
+        r = i;
+    }
+//    mutex_unlock(&pro_mtx);
+    return r;
+}
 
 /// Inicjalizuje obs³ugê procesów.
 void

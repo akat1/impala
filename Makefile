@@ -21,6 +21,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/test/test output/bin/test
 	cp usr/bin/vttest/vttest output/bin/vttest
 	cp usr/bin/sh/sh output/bin/sh
+	cp usr/bin/ps/ps output/bin/ps
 	cp usr/bin/cat/cat output/bin/cat
 	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
 	./tools/mfsutil -i ./tools/root.image ./output

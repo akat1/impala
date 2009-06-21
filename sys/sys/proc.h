@@ -33,11 +33,32 @@
 #ifndef __SYS_PROC_H
 #define __SYS_PROC_H
 
+enum PROC_FLAGS
+{
+    PROC_NEW    = 1<<0, // proces zosta³ utworzony
+    PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
+    PROC_RUN    = 1<<2, // proces w kolejce uruchomieniowej
+    PROC_AFTER_EXEC = 1<<3, // proces wykona³ ju¿ exec
+    PROC_STOP   = 1<<4
+};
+
+
+struct procinfo {
+    pid_t   pid;
+    pid_t   ppid;
+    int     threads;
+    int     flags;
+    char    tty[10];
+    char    cmd[100];
+};
+
+#ifdef __KERNEL
 #include <sys/signal.h>
 #include <sys/thread.h>
 #include <sys/termios.h>
 #include <sys/vfs/vfs_node.h>
 #include <sys/vfs/vfs_types.h>
+//^^^^^^^^^^^^^ ???
 
 struct pcred {
     uid_t           p_uid;       ///< identyfikator u¿ytkownika
@@ -73,7 +94,6 @@ struct proc {
     list_node_t     L_children;  ///< wêze³ listy dzieci
 };
 
-#ifdef __KERNEL
 
 /// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
@@ -96,19 +116,16 @@ bool proc_is_zombie(proc_t *p);
 bool proc_is_parent(proc_t *parent, proc_t *child);
 int proc_fork(proc_t *p, proc_t **child);
 void proc_exit(proc_t *p, int e);
-enum PROC_FLAGS
-{
-    PROC_NEW    = 1<<0, // proces zosta³ utworzony
-    PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
-    PROC_RUN    = 1<<2, // proces w kolejce uruchomieniowej
-    PROC_AFTER_EXEC = 1<<3, // proces wykona³ ju¿ exec
-    PROC_STOP   = 1<<4
-};
+int proc_getinfos(int off, struct procinfo *info, int n);
 
 enum
 {
     INIT_PID    = 0
 };
+
+#else
+
+int getprocinfo(int off, struct procinfo *tab, int n);
 
 #endif
 #endif

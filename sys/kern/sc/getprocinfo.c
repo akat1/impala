@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 418 2009-06-14 00:48:52Z takeshi $
  */
 
 #include <sys/types.h>
@@ -34,16 +34,26 @@
 #include <sys/syscall.h>
 #include <sys/vm.h>
 
-typedef struct XXX_args XXX_args_t;
-struct XXX_args {
-    int fd;
+typedef struct getprocinfo_args getprocinfo_args_t;
+
+struct getprocinfo_args {
+	int off;
+	struct procinfo *tab;
+	int n;
 };
 
-int sc_XXX(thread_t *p, syscall_result_t *r, XXX_args_t *args);
+int sc_getprocinfo(thread_t *p, syscall_result_t *r, getprocinfo_args_t *args);
 
 int
-sc_XXX(thread_t *t, syscall_result_t *r, XXX_args_t *args)
+sc_getprocinfo(thread_t *t, syscall_result_t *r, getprocinfo_args_t *args)
 {
+    enum {
+        N = 50
+    };
+    struct procinfo tab[N];
+    int n = MIN(N,args->n);
+    r->result = proc_getinfos(args->off,tab,n);
+    copyout(args->tab, tab, r->result*sizeof(struct procinfo));
     return 0;
 }
 

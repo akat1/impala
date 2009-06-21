@@ -97,6 +97,7 @@ SRCS=\
     signal/raise.c\
     sys/sched_yield.c\
     sys/sys_siglist.c\
+    sys/getprocinfo.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
     sysvipc/msgget.c\
