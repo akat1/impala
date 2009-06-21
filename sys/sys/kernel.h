@@ -41,6 +41,7 @@
 #include <sys/sched.h>
 #include <sys/kmem.h>
 #include <sys/utils.h>
+#include <sys/kargs.h>
 #include <sys/errno.h>
 #include <sys/uio.h>
 #include <sys/string.h>

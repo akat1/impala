@@ -45,15 +45,19 @@ static int parse_int(const char *s);
 
 static karg_t kargs[20];
 static int kargc;
-
+static char *name = 0;
 
 void
 kargs_init()
 {
     int needv;
     char *kargv = kernarg;
+    name = kargv;
     while (*kargv && *kargv != ' ') kargv++;
-    if (*kargv == ' ') kargv++;
+    if (*kargv == ' ') {
+        *kargv = 0;
+        kargv++;
+    }
 
     for (kargc = 0; kargc < 20 && *kargv; kargc++) {
         needv = 0;
@@ -94,6 +98,12 @@ karg_get_s(const char *name, const char **s)
         }
     }
     return -1;
+}
+
+const char *
+karg_get_name()
+{
+    return name;
 }
 
 int

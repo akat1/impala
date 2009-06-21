@@ -145,6 +145,8 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     einfo.header = header;
     einfo.header_size = len;
     if ( (err = image_exec(p, &einfo)) ) goto fail;
+    if (p->p_cmd) kmem_free((void*)p->p_cmd);
+    p->p_cmd = str_dup(path);
     vrele(vp);
     return 0;
 fail:

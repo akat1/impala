@@ -38,6 +38,7 @@ void kargs_init(void);
 bool karg_is_set(const char *);
 int karg_get_i(const char *, int *);
 int karg_get_s(const char *, const char **);
+const char *karg_get_name(void);
 
 #endif
 #endif

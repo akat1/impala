@@ -55,6 +55,7 @@ proc_ctor(void *obj)
     proc->vm_space = 0;
     proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
     proc->p_fd = filetable_alloc();
+    proc->p_cmd = NULL;
     mutex_init(&proc->p_mtx, MUTEX_NORMAL);
     LIST_CREATE(&proc->p_umtxs, mutex_t, L_user, FALSE);
 }
@@ -63,6 +64,7 @@ void
 proc_dtor(void *obj)
 {
     proc_t *proc = obj;
+    if (proc->p_cmd) kmem_free((void*)proc->p_cmd);
     kmem_free(proc->p_cred);
     kmem_free(proc->vm_space);
     mutex_destroy(&proc->p_mtx);
@@ -83,9 +85,11 @@ proc_getinfos(int off, struct procinfo *tab, int n)
             tab[i].ppid = p->p_ppid;
             tab[i].threads = list_length(&p->p_threads);
             if (p->p_ctty)
-                str_ncpy(tab[i].tty, p->p_ctty->t_dev->name, 20);
+                str_ncpy(tab[i].tty, p->p_ctty->t_dev->name, sizeof(tab[i].tty));
                 else tab[i].tty[0] = 0;
-            tab[i].cmd[0] = 0;
+            if (p->p_cmd)
+                str_ncpy(tab[i].cmd, p->p_cmd, sizeof(tab[i].cmd));
+                else tab[i].cmd[0] = 0;
         }
         r = i;
     }
@@ -106,6 +110,7 @@ proc_init(void)
     proc0.p_group = proc0.p_pid;
     proc0.p_ppid = 0;
     proc0.p_cred = NULL;
+    proc0.p_cmd = str_dup(karg_get_name());
     LIST_CREATE(&proc0.p_threads, thread_t, L_pthreads, FALSE);
     LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
 

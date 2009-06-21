@@ -92,6 +92,7 @@ struct proc {
     list_t          p_umtxs;     ///< lista zamków u¿ytkownika
     list_node_t     L_procs;     ///< wêze³ procesów
     list_node_t     L_children;  ///< wêze³ listy dzieci
+    const char     *p_cmd;
 };
 
 
