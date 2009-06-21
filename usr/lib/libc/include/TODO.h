@@ -9,7 +9,6 @@
 // `_ctime'
 // `_execl'
 // `_fsync'
-// `_ftruncate'
 // `_getgrnam'
 // `_getpwuid'
 // `_gettimeofday'
