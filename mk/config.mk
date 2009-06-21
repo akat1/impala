@@ -5,6 +5,7 @@ ELF_PREFIX?=
 ELF_CC=${ELF_PREFIX}gcc
 AOUT_PREFIX?=i386-aout-
 AOUT_CC=${AOUT_PREFIX}gcc
+AOUT_PATH=/usr/local/i386-aout/
 __INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
 _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\

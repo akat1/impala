@@ -6,7 +6,6 @@ FLOPPY_DEV?=/dev/fd0
 
 all: build
 
-
 build-image: ${IMAGE_FILE} build
 	cp -f sys/kern/impala.gz image/root/boot/
 	cd image && ./mtools.sh
@@ -38,6 +37,14 @@ commit:
 update:
 	svn log -r BASE:HEAD > CHANGES
 	svn update && cat CHANGES
+
+install_sdk:
+	ln -sf ${IMPALA_SRCROOT}/sys/sys usr/lib/libc/include/
+	ln -sf ${IMPALA_SRCROOT}/sys/arch/x86/machine usr/lib/libc/include/
+	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libc/include ${AOUT_PATH}/
+	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${AOUT_PATH}/lib/
+	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/crt/crt0.o ${AOUT_PATH}/lib/
+	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libpthread/libpthread.a ${AOUT_PATH}/lib/
 
 debug: build
 	gdb -x tools/gdbscript sys/kern/impala
