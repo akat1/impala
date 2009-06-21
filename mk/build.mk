@@ -12,9 +12,9 @@ OBJS= ${OBJS_2}
 
 .c.o:
 	@echo " CC $<"
-	@${CC} -c ${_CFLAGS} ${CFLAGS} -o $@ $<
+	${CC} -c ${_CFLAGS} ${CFLAGS} -o $@ $<
 
 .s.o:
 	@echo " AS $<"
-	@${AS} ${AS_FLAGS} -o $@ $<
+	${AS} ${AS_FLAGS} -o $@ $<
 
