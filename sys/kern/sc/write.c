@@ -64,6 +64,7 @@ sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
     iov.iov_base = args->data;
     iov.iov_len = args->size;
     u.size = args->size;
+    u.resid = u.resid;
     u.iovs = &iov;
     u.iovcnt = 1;
     u.oper = UIO_WRITE;

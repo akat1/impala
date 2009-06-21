@@ -1,4 +1,5 @@
-/*
+/* Impala Operating System
+ *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,51 +31,68 @@
  */
 
 #include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/utils.h>
-#include <sys/string.h>
-#include <sys/syscall.h>
-#include <machine/video.h>
-#include <machine/interrupt.h>
-#include <sys/file.h>
-#include <sys/errno.h>
-#include <sys/proc.h>
+#include <sys/kernel.h>
+#include <sys/device.h>
 #include <sys/uio.h>
 
-typedef struct sc_read_args sc_read_args;
 
-struct sc_read_args {
-    int fd;
-    addr_t *data;
-    size_t size;
+d_init_t zero_init;
+d_open_t zero_open;
+d_close_t zero_close;
+d_write_t zero_write;
+d_read_t zero_read;
+
+static devsw_t zero_devsw = {
+    zero_open,
+    zero_close,
+    noioctl,
+    zero_read,
+    zero_write,
+    nostrategy,
+    DEV_CDEV,
+    "zero"
 };
 
 
-errno_t sc_read(thread_t *p, syscall_result_t *r, sc_read_args *args);
-
-errno_t
-sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
+void
+zero_init(void)
 {
-    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
-    if (file == NULL) {
-        return -EBADF;
-    }
-    uio_t u;
-    iovec_t iov;
-    iov.iov_base = args->data;
-    iov.iov_len = args->size;
-    u.iovs = &iov;
-    u.iovcnt = 1;
-    u.size = args->size;
-    u.resid = u.size;
-    u.oper = UIO_READ;
-    u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
-    int res = f_read(file, &u);
-    frele(file);
-    if(res < 0)
-        return res;
-    r->result = res;
-    return -EOK;
+    devd_create(&zero_devsw, -1, NULL);
 }
 
+
+/*========================================================================
+ * Obs³uga pliku urz±dzenia znakowego /dev/zero
+ */
+
+int
+zero_open(devd_t *d, int flags)
+{
+    return 0;
+}
+
+int
+zero_close(devd_t *d)
+{
+    return 0;
+}
+
+int
+zero_read(devd_t *d, uio_t *u, int flags)
+{
+    char buf[256];
+    mem_zero(buf, sizeof(buf));
+    while (u->resid) {
+        int n = MIN(sizeof(buf), u->resid);
+        uio_move(buf, n, u);
+    }
+    return u->size;
+}
+
+int
+zero_write(devd_t *d, uio_t *u, int flags)
+{
+    u->resid = 0;
+    return u->size;
+}
 

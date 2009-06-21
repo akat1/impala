@@ -5,6 +5,8 @@ SRCS=\
 	devtable.c\
 	fdc/fdc.c\
 	md/md.c\
+    pseudo/null.c\
+    pseudo/zero.c\
 
 
 
