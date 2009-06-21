@@ -37,6 +37,7 @@
 #include <sys/vm/vm_internal.h>
 #include <sys/string.h>
 #include <sys/utils.h>
+#include <sys/errno.h>
 
 static bool has_hole_after_reg(const vm_region_t *reg, vm_size_t size);
 static bool is_prev(const vm_region_t *regA, const vm_region_t *regB);
@@ -372,6 +373,7 @@ is_prev(const vm_region_t *regA, const vm_region_t *regB)
 bool
 has_hole_after_reg(const vm_region_t *reg, vm_size_t size)
 {
+    KASSERT(reg->segment!=NULL);
     vm_region_t *regnext = list_next(&reg->segment->regions, reg);
     if (regnext == NULL) return FALSE;
     // je¿eli nie to sprawdzamy czy zanim jest dziura o odpowiedniej wielko¶ci.
@@ -388,6 +390,8 @@ int
 do_first_region(vm_seg_t *vseg, vm_region_t **reg)
 {
     vm_region_t *region = vm_lpool_alloc(&vm_unused_regions);
+    if(!region)
+        return -ENOMEM;
     region->segment = vseg;
     region->begin = vseg->base;
     region->size = vseg->size;

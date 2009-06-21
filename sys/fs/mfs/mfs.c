@@ -182,12 +182,14 @@ mfs_write(vnode_t *vn, uio_t *u, int flags)
     
     mfs_node_t *node = vn->v_private;
     off_t start = u->offset;
-    //na razie zapis tylko do granicy rozmiaru
-    if(node->size < start)
+    //na razie zapis tylko do granicy zaalokowanego rozmiaru
+    if(node->alloc_size < start)
         return -1;
-    size_t size = MIN(node->size-start, u->size);
+    size_t size = MIN(node->alloc_size-start, u->size);
     u->resid = u->size;
     uio_move(node->data+start, size, u);
+    if(node->size < start+size)
+        node->size = start+size;
     return size;
 }
 

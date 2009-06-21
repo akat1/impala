@@ -98,15 +98,22 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
             return error;
     } else {
         //plik istnieje
-        if((flags & O_CREAT) && (flags & O_EXCL))
+        if((flags & O_CREAT) && (flags & O_EXCL)) {
+            vrele(node);
             return -EEXIST;
-        if((node->v_type == VNODE_TYPE_DIR) && (flags & (O_RDWR | O_WRONLY)))
+        }
+        if((node->v_type == VNODE_TYPE_DIR) && (flags & (O_RDWR | O_WRONLY))) {
+            vrele(node);
             return -EISDIR;
+        }
     }
     if((error = VOP_OPEN(node, flags, arg->mode))) {
         vrele(node);
         return error;
     }
+    if(ISSET(flags, O_RDWR | O_WRONLY) && ISSET(flags, O_TRUNC)
+       && node->v_type == VNODE_TYPE_REG)
+        VOP_TRUNCATE(node, 0);
     if((error = f_alloc(proc, node, flags, &fd))) {
         return error;
     }

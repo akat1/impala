@@ -1,9 +1,13 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <stdlib.h>
+#include <stdio_private.h>
 
 void
 exit(int status)
 {
-    syscall(SYS_exit, status&0377); //to &0377 tutaj czy w sc_exit?
+    FILE *f = NULL;
+    while ((f = list_head(&__open_files)))
+        fclose(f);
+    syscall(SYS_exit, status);
 }

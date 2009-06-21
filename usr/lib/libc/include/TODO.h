@@ -18,7 +18,6 @@
 // `_munmap'
 // `_revoke'
 // `_strsep'
-// `_strtoul'
 // `_system'
 // `_time'
 // `_ttyname'

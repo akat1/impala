@@ -110,7 +110,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     vnode_t *vp = NULL;
     mem_zero(header, HEADER_SIZE);
     mem_zero(&einfo, sizeof(einfo));
-    if ( (err = vfs_lookup(NULL, &vp, path, NULL, LKP_NORMAL)) ) {
+    if ( (err = vfs_lookup(p->p_curdir, &vp, path, NULL, LKP_NORMAL)) ) {
         TRACE_IN("cannot lookup");
         return err;
     }

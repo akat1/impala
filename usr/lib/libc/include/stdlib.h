@@ -52,6 +52,7 @@ long int strtol(const char *nptr, char **endptr, int base);
 void    qsort(void *base, size_t nmemb, size_t size,
                 int(*compar)(const void *, const void *));
 long int strotl(const char *nptr, char **endptr, int base);
+unsigned long int strtoul(const char *nptr, char **endptr, int base);
 
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
