@@ -17,6 +17,7 @@ run: build-image
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp COPYRIGHT output
 	cp usr/sbin/init/init output/sbin/init
+	cp usr/sbin/ttyvrun/ttyvrun output/sbin/ttyvrun
 	cp usr/bin/test/test output/bin/test
 	cp usr/bin/vttest/vttest output/bin/vttest
 	cp usr/bin/sh/sh output/bin/sh
