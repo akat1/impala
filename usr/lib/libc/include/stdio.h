@@ -6,6 +6,7 @@
 
 typedef int fpos_t;
 
+
 #define FILENAME_MAX 4096
 #define BUFSIZ 8192
 
@@ -45,11 +46,11 @@ typedef struct FILE FILE;
 #define _IOLBF 4
 #define _IOFBF 8
 
-extern FILE _stdF[3];
+extern FILE *_stdF[3];
 
-#define stdin (&_stdF[0])
-#define stdout (&_stdF[1])
-#define stderr (&_stdF[2])
+#define stdin (_stdF[0])
+#define stdout (_stdF[1])
+#define stderr (_stdF[2])
 
 //typedef uint32_t size_t;
 

@@ -16,6 +16,7 @@ fclose(FILE *stream)
         return ret;
     }
     list_remove(&__open_files, stream);
+//    kprintf("a");
     if(stream->closefn)
         ret = stream->closefn(stream->cookie);
     else if(stream->fd!=-1)

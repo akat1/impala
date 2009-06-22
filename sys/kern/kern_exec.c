@@ -64,8 +64,10 @@ struct exec_info {
     size_t  header_size;
     size_t  image_size;
     bool    interpreted;
+    char   *safe_argv[PAGE_SIZE/sizeof(char*)];
     char    argv_data[PAGE_SIZE];
     size_t  argv_size;
+    char   *safe_envp[PAGE_SIZE/sizeof(char*)];
     char    envp_data[PAGE_SIZE];
     size_t  envp_size;
     vm_addr_t   u_argv;
@@ -180,39 +182,40 @@ image_exec(proc_t *p, exec_info_t *einfo)
 int
 copyin_params(proc_t *p, exec_info_t *einfo)
 {
-    ///@todo u¿ywaæ copyinstr, przerobiê to jak przerobiê najpierw
-    ///      copyinstr aby zwraca³ length
     int argc = 0;
     int envc = 0;
     size_t cur = 0;
 
     if (einfo->argv) {
-        for (int i = 0; i < MAX_ARGV && einfo->argv[i] && cur < PAGE_SIZE;
-                i++, argc++) {
+        for (int i = 0; i < MAX_ARGV && cur < PAGE_SIZE;    i++, argc++) {
+            if( vm_is_avail((vm_addr_t)&(einfo->argv[i]), sizeof(char*)) )
+                return -EFAULT;
             char *uaddr = (char*) einfo->argv[i];
-            ///@bug mo¿na nas wyeksploitowaæ! :D
-            einfo->argv[i] = cur;
-            str_cpy(&einfo->argv_data[cur],uaddr);
-            cur += str_len(uaddr);
-            einfo->argv_data[cur++] = 0;
+            if(uaddr == NULL)
+                break;
+            einfo->safe_argv[i] = (char*)cur;
+            copyinstr(&einfo->argv_data[cur], uaddr, PAGE_SIZE-cur);
+            cur += str_len(uaddr) + 1;
         }
-        einfo->argv[argc] = 0;
+        einfo->safe_argv[argc] = 0;
         einfo->argc = argc;
         einfo->argv_size = cur;
     }
     if (!einfo->envp) return 0;
     cur = 0;
-    for (int i = 0; i < MAX_ARGV && einfo->envp[i] && cur < PAGE_SIZE;
+    for (int i = 0; i < MAX_ARGV && cur < PAGE_SIZE;
             i++, envc++) {
+        if( vm_is_avail((vm_addr_t)&(einfo->envp[i]), sizeof(char*)) )
+            return -EFAULT;        
         char *uaddr = (char*) einfo->envp[i];
+        if(uaddr == NULL)
+            break;
 
-        ///@bug mo¿na nas wyeksploitowaæ! :D
-        einfo->envp[i] = cur;
-        str_cpy(&einfo->envp_data[cur],uaddr);
-        cur += str_len(uaddr);
-        einfo->envp_data[cur++] = 0;
+        einfo->safe_envp[i] = (char*)cur;
+        copyinstr(&einfo->envp_data[cur], uaddr, PAGE_SIZE-cur);
+        cur += str_len(uaddr) + 1;
     }
-    einfo->envp[envc] = 0;
+    einfo->safe_envp[envc] = 0;
     einfo->envp_size = cur;
     einfo->envc = envc;
     return 0;
@@ -237,11 +240,11 @@ copyout_params(thread_t *t, exec_info_t *einfo)
         _STACK -= einfo->argv_size;
         mem_cpy(STACK, einfo->argv_data, einfo->argv_size);
         for (int i = 0; i < einfo->argc; i++) {
-            einfo->argv[i] = (uintptr_t)_STACK + einfo->argv[i];
+            einfo->safe_argv[i] = (uintptr_t)_STACK + einfo->safe_argv[i];
         }
         STACK -= (einfo->argc+1) * sizeof(char*);
         _STACK -= (einfo->argc+1) * sizeof(char*);
-        mem_cpy(STACK, einfo->argv, (einfo->argc+1) * sizeof(char*));
+        mem_cpy(STACK, einfo->safe_argv, (einfo->argc+1) * sizeof(char*));
         einfo->u_argv = (vm_addr_t)_STACK;
     }
     if (einfo->envp_size > 0) {
@@ -249,11 +252,11 @@ copyout_params(thread_t *t, exec_info_t *einfo)
         _STACK -= einfo->envp_size;
         mem_cpy(STACK, einfo->envp_data, einfo->envp_size);
         for (int i = 0; i < einfo->envc; i++) {
-            einfo->envp[i] = (uintptr_t)_STACK + einfo->envp[i];
+            einfo->safe_envp[i] = (uintptr_t)_STACK + einfo->safe_envp[i];
         }
         STACK -= (einfo->envc+1) * sizeof(char*);
         _STACK -= (einfo->envc+1) * sizeof(char*);
-        mem_cpy(STACK, einfo->envp, (einfo->envc+1) * sizeof(char*));
+        mem_cpy(STACK, einfo->safe_envp, (einfo->envc+1) * sizeof(char*));
         einfo->u_envp = (vm_addr_t)_STACK;
     }
     einfo->u_off = (MAP+3*PAGE_SIZE) - (vm_addr_t)STACK;

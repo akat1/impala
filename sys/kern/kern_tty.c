@@ -126,6 +126,8 @@ tty_open(devd_t *d, int flags)
         && (p->p_session == p->p_pid)
         && (tty->t_session == -1)) {
         //ustawiamy terminal steruj±cy procesu
+        kprintf("TTY Open: Setting as CTTY for session leader - pid %i\n",
+                 p->p_pid);
         p->p_ctty = tty;
         tty->t_session = p->p_session;
         tty->t_group = p->p_group;

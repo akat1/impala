@@ -93,6 +93,9 @@ typedef struct sigaction sigaction_t;
 #include <sys/vm/vm_types.h>
 #endif
 
+#ifdef __KERNEL
 #include <sys/list.h>
+#endif
+
 
 #endif

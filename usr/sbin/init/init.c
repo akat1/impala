@@ -52,7 +52,8 @@ main(int argc, char **v)
 #endif
     //printf("Oto wynik: %i %i\n", atoi("1234567"), atol("1234567"));
     thr_create(tmain, 0, 0, 0);
-
+    if(!stdin)
+        while(1);
     int p;
     char buf[512];
     char *const argv[]={"sh", NULL};

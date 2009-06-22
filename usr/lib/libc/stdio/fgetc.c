@@ -9,7 +9,7 @@
 int
 fgetc(FILE * f)
 {
-    if(ISUNSET(f->status, _FST_OPEN))
+    if(!f || ISUNSET(f->status, _FST_OPEN))
         return EOF;
     char ch[2];
     int ret;

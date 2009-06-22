@@ -10,7 +10,7 @@
 char *
 fgets(char *s, int size, FILE *f)
 {
-    if(ISUNSET(f->status,_FST_OPEN))
+    if(!f || ISUNSET(f->status,_FST_OPEN))
         return NULL;
     __check_buf(f);
     if(ISSET(f->status, _FST_TTY))

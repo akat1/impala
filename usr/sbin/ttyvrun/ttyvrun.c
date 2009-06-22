@@ -23,6 +23,7 @@ main(int argc, char **v)
         "TERM=vt100-8025",
         NULL
     };
+    printf("Running\n");
     if (argc != 2) {
         printf("%s terminal-device\n", v[0]);
         return -1;
@@ -31,10 +32,14 @@ main(int argc, char **v)
     close(0);
     close(1);
     close(2);
+    // je¿eli jeste¶my leaderem grupy, to nie mo¿emy zrobiæ setsid -> trik ;)
+    pid_t p = fork();
+    if (p) exit(0); 
     setsid();
-    open(v[1], O_RDONLY);
-    open(v[1], O_WRONLY); 
-    open(v[1], O_WRONLY); 
+    int d1 = open(v[1], O_RDONLY);
+    open(v[1], O_WRONLY);
+    open(v[1], O_WRONLY);
+    printf("D1 = %i\n", d1);
     execve("/bin/cat", args , env);
     return 0;
 }

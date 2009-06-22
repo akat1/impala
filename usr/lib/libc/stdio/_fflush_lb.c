@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdio_private.h>
-#include <sys/list.h>
 
 void
 __fflush_line_buffered(void)

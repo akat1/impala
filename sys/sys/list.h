@@ -112,11 +112,16 @@ list_prev(const list_t *ls, const void *elem)
     return (elem==NULL)? ls->ls_root.prev : __elem_node(ls,elem)->prev;
 }
 
+static inline bool list_is_member(list_t *ls, const void *elem);
+
 static inline void *
 list_remove(list_t *ls, void *x)
 {
     if (x == NULL) return NULL;
     KASSERT(ls->ls_length!=0);
+#ifdef __KERNEL
+    KASSERT(list_is_member(ls, x));///kosztowne
+#endif
     list_node_t *x_node = __elem_node(ls, x);
     void *y = x_node->next;
     if (x_node->prev) __prev_node(ls, x)->next = x_node->next;
@@ -126,6 +131,11 @@ list_remove(list_t *ls, void *x)
     x_node->next = NULL;
     x_node->prev = NULL;
     ls->ls_length--;
+#ifdef __KERNEL
+    KASSERT(list_length(ls)==ls->ls_length);///kosztowne
+#endif
+    KASSERT(ls->ls_length>0 || ls->ls_root.next == NULL);
+  //      while(1);
     return y;
 }
 
@@ -293,7 +303,6 @@ list_is_member(list_t *ls, const void *elem)
         if (x == elem) return TRUE;
     }
     return FALSE;
-
 }
 
 #undef __elem_node

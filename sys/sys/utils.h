@@ -86,8 +86,13 @@ __LS(const char *file)
     return last;
 }
 
-#else
-#define KASSERT(x) 
+#else   //not in kernel
+
+int printf(const char *, ...);
+#define KASSERT(x) if(!(x)){ \
+    printf("Assertion failed\n expr: %s\n inile: %s:%u\n in function: %s",\
+        #x , __FILE__, __LINE__,  __func__);while(1);};
+
 #endif
 #endif
 

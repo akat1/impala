@@ -20,7 +20,7 @@ enum {
 int
 vfprintf(FILE *stream, const char *fmt, va_list ap)
 {
-    if(ISUNSET(stream->status,_FST_OPEN))
+    if(!stream || ISUNSET(stream->status,_FST_OPEN))
         return -1;
     __check_buf(stream);
     int tot = 0;

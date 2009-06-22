@@ -97,7 +97,8 @@ vm_seg_alloc(vm_seg_t *vseg, vm_size_t size, void *_res)
     vm_addr_t na;
     if (vm_seg_reserve(vseg, size, &na)) return -1;
 //     TRACE_IN("seg=%p size=%p fill=%p", vseg, size, na);
-    vm_pmap_fill(&vseg->space->pmap, na, size, vseg->prot);
+    if(FALSE == vm_pmap_fill(&vseg->space->pmap, na, size, vseg->prot))
+        return -ENOMEM;
     vm_addr_t *res = _res;
     *res = na;
     return 0;
@@ -155,7 +156,8 @@ void
 vm_seg_free(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
 {
     vm_seg_release(vseg, vaddr, size);
-    vm_pmap_erase(&vseg->space->pmap, vaddr, size);
+    if(vm_pmap_erase(&vseg->space->pmap, vaddr, size)==FALSE)
+        panic("Segment inforamtion not consistent!\n");
 }
 
 /**
@@ -242,6 +244,7 @@ vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
         clonereg->begin = reg->begin;
         clonereg->size = reg->size;
         clonereg->end = reg->end;
+        clonereg->segment = dst;
         list_insert_tail(&dst->regions, clonereg);
 //         TRACE_IN("%p-%p", clonereg->begin, clonereg->end);
         vm_pmap_fill(&space->pmap, clonereg->begin, clonereg->size,
@@ -309,14 +312,9 @@ vm_seg_protect(vm_seg_t *seg, vm_prot_t newprot)
 void
 vm_seg_destroy(vm_seg_t *seg)
 {
-    vm_region_t *reg = NULL;
-    vm_region_t *next;
-    while ( reg ) {
-        vm_seg_free(seg, reg->begin, reg->size);
-        next = list_next(&seg->regions, reg);
-        list_remove(&seg->regions, reg);
-        vm_lpool_free(&vm_unused_regions, reg);
-        reg = next;
+    vm_region_t *reg;
+    while ( (reg = list_head(&seg->regions)) ) {
+        vm_seg_free(seg, reg->begin, reg->size);    //usuwa region
     }
 }
 
@@ -324,7 +322,6 @@ int
 expand_region(vm_seg_t *seg, vm_region_t *region, vm_size_t size, int m,
     void *_newaddr)
 {
-
     vm_addr_t newaddr;
     if (m == EXPAND_UP) {
         vm_region_t *nextreg = list_next(&seg->regions, region);

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdio_private.h>
 #include <stdlib.h>
-#include <sys/list.h>
 
 FILE *
 fwopen(void *cookie, int (*writefn)(void *, const char *, int))

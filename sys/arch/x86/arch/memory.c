@@ -37,6 +37,8 @@
 #include <sys/vm/vm_internal.h>
 #include <sys/utils.h>
 #include <sys/string.h>
+#include <sys/thread.h>
+#include <machine/interrupt.h>
 #include <machine/memory.h>
 #include <machine/cpu.h>
 #include <machine/io.h>
@@ -69,6 +71,7 @@ static vm_addr_t kstart;
 static vm_addr_t kend;
 static vm_addr_t ktextend;
 
+static mutex_t mem_mtx;
 
 extern int kernel_start;
 extern int kernel_text_end;
@@ -136,6 +139,8 @@ vm_low_init()
     kstart = (uintptr_t)&KERNEL_START;
     kbootstrap = (uintptr_t)&KERNEL_BOOTSTRAP;
 
+    mutex_init(&mem_mtx, MUTEX_NORMAL);
+    
     vm_physmem_max = _avail_physmem();
     _collect_pages();
     create_kernel_space();
@@ -146,7 +151,10 @@ vm_low_init()
 
 vm_page_t *page;
 
-
+#define mem_lock() int xxx=spltty()
+//MUTEX_LOCK(&mem_mtx, "mem")
+#define mem_unlock() splx(xxx);
+//mutex_unlock(&mem_mtx)
 
 /// Inicjalizuje przestrzeñ adresow± j±dra.
 void
@@ -325,7 +333,7 @@ vm_pmap_init0(vm_pmap_t *vpm)
  * @param p strona.
  * @param va wirtualny adres strony.
  * @param prot poziom ochrony strony.
- * @return FALSE wtedy i tylko wtedy gdy mo¿na by³o przydzieliæ pamiêci
+ * @return FALSE wtedy i tylko wtedy gdy nie mo¿na by³o przydzieliæ pamiêci
  *         na now± tablicê stron.
  */
 bool
@@ -334,11 +342,15 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
     bool _G = _GLOBAL(va, PTE_G);
     vm_addr_t pa = p->phys_addr;
     int pte = PAGE_TBL(va);
+    mem_lock();
     vm_ptable_t *pt = _pmap_pde(vpm, va);
     tlb_flush(va);
     if (pt == NULL) {
         pt = _alloc_ptable(NULL);
-        if (pt == NULL) return FALSE;
+        if (pt == NULL) {
+            mem_unlock();
+            return FALSE;
+        }
         _pmap_insert_pte_(vpm, pt, va);
     }
     p->refcnt++;
@@ -346,7 +358,7 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
     pt->table[pte] = PTE_ADDR(pa) | PTE_PRESENT
         | PROT_TO_PTEFLAGS(prot)
         | _G;
-
+    mem_unlock();
     return TRUE;
 }
 
@@ -369,13 +381,15 @@ vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, vm_prot_t prot)
     return vm_pmap_insert(vpm, &vm_pages[PAGE_NUM(pa)], va, prot);
 }
 
-void
+bool
 vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, vm_prot_t prot)
 {
     for (size+=addr; addr < size; addr += PAGE_SIZE) {
         vm_page_t *p = vm_alloc_page();
-        vm_pmap_insert(pmap, p, addr, prot);
+        if(!vm_pmap_insert(pmap, p, addr, prot))
+            return FALSE;
     }
+    return TRUE;
 }
 
 /**
@@ -431,18 +445,26 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 void
 vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
 {
-        vm_pmap_init(dst);
-        vm_ptable_t *sdir = src->pdir;
-        vm_ptable_t *ddir = dst->pdir;
-        for (int i = 0; i < PAGE_TBL(VM_SPACE_KERNEL); i++) {
-            if (sdir->table[i] & PDE_PRESENT) {
-                vm_page_t *page;
-                vm_ptable_t *newpt = _alloc_ptable(&page);
-                vm_ptable_t *oldpt = _pmap_pde(src, sdir->table[i]);
-                mem_cpy(newpt, oldpt, PAGE_SIZE);
-                ddir->table[i] = PTE_FLAGS(sdir->table[i]) | page->phys_addr;
+    vm_pmap_init(dst);
+    vm_ptable_t *sdir = src->pdir;
+    vm_ptable_t *ddir = dst->pdir;
+    for (int i = 0; i < PAGE_TBL(VM_SPACE_KERNEL); i++) {
+        if (sdir->table[i] & PDE_PRESENT) {
+            vm_page_t *page;
+            vm_ptable_t *newpt = _alloc_ptable(&page);
+            vm_ptable_t *oldpt = _pmap_pde(src, sdir->table[i]);
+            mem_cpy(newpt, oldpt, PAGE_SIZE);
+            ddir->table[i] = PTE_FLAGS(sdir->table[i]) | page->phys_addr;
+            for(int pte=0; pte<1024; pte++) {
+                if (newpt->table[pte] & PTE_PRESENT) {
+                    vm_page_t *pg = &vm_pages[PAGE_NUM(newpt->table[pte])];
+                    KASSERT(pg != NULL);
+                    pg->refcnt++;
+                }
             }
+         
         }
+    }
 }
 
 /**
@@ -454,8 +476,10 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     int pte = PAGE_TBL(va);
     int pde = PAGE_DIR(va);
     int _G = _GLOBAL(va, TRUE);
+    mem_lock();
     vm_ptable_t *pt = _pmap_pde(pmap, va);
     if (pt == NULL) {
+        mem_unlock();
         return FALSE;
     }
     if (pt->table[pte] & PTE_PRESENT) {
@@ -465,29 +489,34 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
         ///@todo zastanowiæ siê nad sensem poprzedniego todo
         vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
         KASSERT(pg != NULL);
+        KASSERT(pg->refcnt>0);
         pg->refcnt--;
         if (pg->refcnt == 0) {
             list_insert_tail(&vm_free_pages, pg);
         }
     }
+    pt->table[pte] = 0;
     if (!_G) {
+        KASSERT(pmap->pdircount[pde]>0);
         if (--pmap->pdircount[pde] == 0) {
             vm_seg_free(vm_kspace.seg_data, (vm_addr_t)pt, PAGE_SIZE);
             pmap->pdir->table[pde] = 0;
         }
     }
-    pt->table[pte] = 0;
     tlb_flush(va);
+    mem_unlock();
     return TRUE;
 }
 
 
-void
+bool
 vm_pmap_erase(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
 {
     for (size += addr; addr < size; addr += PAGE_SIZE) {
-        vm_pmap_remove(pmap, addr);
+        if(vm_pmap_remove(pmap, addr)==FALSE)
+            return FALSE;
     }
+    return TRUE;
 }
 
 

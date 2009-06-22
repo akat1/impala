@@ -2,12 +2,11 @@
 #include <stdio_private.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/list.h>
 
 FILE *
 fdopen(int fd, const char *mode)
 {
-    if(!mode || fd<0) {
+    if(fd<0) { //nie sprawdzam czy mode nie jest NULL, bo w crt to wywo³uje ;)
         errno = EINVAL;
         return NULL;
     }
