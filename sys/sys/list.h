@@ -119,9 +119,6 @@ list_remove(list_t *ls, void *x)
 {
     if (x == NULL) return NULL;
     KASSERT(ls->ls_length!=0);
-#ifdef __KERNEL
-    KASSERT(list_is_member(ls, x));///kosztowne
-#endif
     list_node_t *x_node = __elem_node(ls, x);
     void *y = x_node->next;
     if (x_node->prev) __prev_node(ls, x)->next = x_node->next;
@@ -131,11 +128,7 @@ list_remove(list_t *ls, void *x)
     x_node->next = NULL;
     x_node->prev = NULL;
     ls->ls_length--;
-#ifdef __KERNEL
-    KASSERT(list_length(ls)==ls->ls_length);///kosztowne
-#endif
-    KASSERT(ls->ls_length>0 || ls->ls_root.next == NULL);
-  //      while(1);
+//    KASSERT(ls->ls_length>0 || ls->ls_root.next == NULL);
     return y;
 }
 
@@ -220,6 +213,7 @@ list_insert_after(list_t *ls, void *xs, void *x)
         list_insert_tail(ls, x);
     } else {
         __list_insert_after(ls, xs, x);
+        ls->ls_length++;
     }
 }
 
@@ -233,6 +227,7 @@ list_insert_before(list_t *ls, void *xs, void *x)
         list_insert_head(ls, x);
     } else {
         __list_insert_before(ls, xs, x);
+        ls->ls_length++;
     }
 }
 
