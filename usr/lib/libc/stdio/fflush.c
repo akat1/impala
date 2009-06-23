@@ -9,13 +9,19 @@
 int
 fflush(FILE *stream)
 {
+    if(stream == NULL) {
+        printf("Fflushing NULL not implemented\n");
+        return 0;
+    }
     if(ISUNSET(stream->status,_FST_OPEN)) {
         errno = EBADF;
         return EOF;
     }
     if(ISSET(stream->status, _FST_NOBUF))
         return 0;
-    __check_buf(stream);
+    if(stream->buf == NULL)
+        return 0;
+    //__check_buf(stream); //na pewno chcemy to tu?
     int res = 0;
     int beg = 0;
     while(stream->inbuf > 0) {
@@ -23,8 +29,10 @@ fflush(FILE *stream)
             res = stream->writefn(stream->cookie, stream->buf+beg, stream->inbuf); 
         else if(stream->fd != -1)
             res = write(stream->fd, stream->buf+beg, stream->inbuf);
-        if(res <= 0)
+        if(res <= 0) {
+            stream->inbuf = 0;//¿eby nie przepe³ni³o siê.. :/
             return EOF;
+        }
         beg += res;
         stream->inbuf -= res;
     }

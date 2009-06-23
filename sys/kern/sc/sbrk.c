@@ -46,9 +46,17 @@ sc_sbrk(thread_t *t, syscall_result_t *r, sbrk_args_t *args)
 {
     proc_t *p = t->thr_proc;
     if (args->diff > 0) {
-        uintptr_t newend;
-        vm_seg_alloc(t->vm_space->seg_data, args->diff, &newend);
-        r->result = newend;
+        uintptr_t oldbrk = p->p_brk_addr;
+        uintptr_t last_byte = p->p_brk_addr-1;
+//        KASSERT(PAGE_ROUND(oldbrk) == p->vm_space->seg_data->end);
+        if(PAGE_OF_ADDR(last_byte) != PAGE_OF_ADDR(last_byte+args->diff)) {
+            //musimy alokowaæ
+            uintptr_t allocbeg;
+            uintptr_t need = args->diff - (PAGE_ROUND(oldbrk)-oldbrk);
+            vm_seg_alloc(t->vm_space->seg_data, need, &allocbeg);
+        }
+        r->result = p->p_brk_addr = oldbrk + args->diff;
+//        kprintf("Sbrk: res = %x, diff = %i\n", r->result, args->diff);
     } else {
         TRACE_IN("PID: %u - decreasing heap not supported yet by kernel\n");
         proc_exit(p, 0);

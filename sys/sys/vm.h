@@ -44,6 +44,7 @@
 #define PAGE_MASK (PAGE_SIZE-1)
 #define YPAGE_ROUND(x) (((x) + PAGE_MASK)/PAGE_SIZE)
 #define PAGE_ROUND(x) (((x) + PAGE_MASK) & ~PAGE_MASK)
+#define PAGE_OF_ADDR(x) ((x) & ~PAGE_MASK)
 
 extern list_t vm_free_pages;
 extern vm_space_t vm_kspace;

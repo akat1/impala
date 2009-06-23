@@ -9,8 +9,11 @@
 int
 fclose(FILE *stream)
 {
-    int ret;
-    ret = fflush(stream);
+    if(!stream || ISUNSET(stream->status, _FST_OPEN)) {
+        errno = EBADF;
+        return EOF;
+    }
+    int ret = fflush(stream);
     if(ret) {
         UNSET(stream->status, _FST_OPEN);
         return ret;
@@ -21,6 +24,9 @@ fclose(FILE *stream)
     else if(stream->fd!=-1)
         ret = close(stream->fd);
     stream->status = 0;
+    for(int i=0; i<3; i++)
+        if(_stdF[i]==stream)
+            _stdF[i]=NULL;
     free(stream);
     return ret;
 }

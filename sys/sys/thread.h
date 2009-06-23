@@ -41,7 +41,7 @@
 #include <machine/atomic.h>
 
 enum {
-    THREAD_STACK_SIZE = 0x8000,
+    THREAD_STACK_SIZE = 0x10000,
     THREAD_KSTACK_SIZE = 0x8000
 };
 

@@ -36,6 +36,7 @@ fopen(const char *path, const char *mode)
     if(strchr(mode, '+'))
         flags = (flags & ~(O_RDONLY | O_WRONLY)) | O_RDWR;
     f->err = 0;
+    f->status = 0;
     f->fd = open(path, flags, 0666);
     if(f->fd == -1) {
         free(f);

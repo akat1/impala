@@ -201,7 +201,8 @@ copyin_params(proc_t *p, exec_info_t *einfo)
         einfo->argc = argc;
         einfo->argv_size = cur;
     }
-    if (!einfo->envp) return 0;
+    if (!einfo->envp)
+        return 0;
     cur = 0;
     for (int i = 0; i < MAX_ARGV && cur < PAGE_SIZE;
             i++, envc++) {
@@ -224,6 +225,7 @@ copyin_params(proc_t *p, exec_info_t *einfo)
 int
 copyout_params(thread_t *t, exec_info_t *einfo)
 {
+    einfo->u_argv = einfo->u_envp = 0;
     if (einfo->argv_size + einfo->envp_size == 0) return 0;
     vm_addr_t MAP;
     char *STACK;
@@ -240,7 +242,7 @@ copyout_params(thread_t *t, exec_info_t *einfo)
         _STACK -= einfo->argv_size;
         mem_cpy(STACK, einfo->argv_data, einfo->argv_size);
         for (int i = 0; i < einfo->argc; i++) {
-            einfo->safe_argv[i] = (uintptr_t)_STACK + einfo->safe_argv[i];
+            einfo->safe_argv[i] += (uintptr_t)_STACK;
         }
         STACK -= (einfo->argc+1) * sizeof(char*);
         _STACK -= (einfo->argc+1) * sizeof(char*);
@@ -252,7 +254,7 @@ copyout_params(thread_t *t, exec_info_t *einfo)
         _STACK -= einfo->envp_size;
         mem_cpy(STACK, einfo->envp_data, einfo->envp_size);
         for (int i = 0; i < einfo->envc; i++) {
-            einfo->safe_envp[i] = (uintptr_t)_STACK + einfo->safe_envp[i];
+            einfo->safe_envp[i] += (uintptr_t)_STACK;
         }
         STACK -= (einfo->envc+1) * sizeof(char*);
         _STACK -= (einfo->envc+1) * sizeof(char*);
@@ -319,6 +321,7 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     vm_space_create_stack(vm_space, &t->thr_stack, thread_stack_size);
     t->thr_stack_size = thread_stack_size;
 //     thread_prepare(t, einfo->u_argv, einfo->u_envp, einfo->u_off);
+    p->p_brk_addr = vm_space->seg_data->end;
     copyout_params(t, einfo);
     thread_prepare(t, einfo->u_argv, einfo->u_envp, einfo->u_off);
     sched_insert(t);

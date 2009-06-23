@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/list.h>
+#include <string.h>
 
 //__asm__( ".weak __pthread_rt");
 
@@ -17,7 +18,7 @@ void _start(void);
 int errno = 0;
 static int retval=0;
 
-FILE *_stdF[3];
+FILE *_stdF[3]={NULL, NULL, NULL};
 // = {{.fd=0, .status=_FST_OPEN|_FST_LINEBUF|_FST_TTY,
 //                      .buf_size = BUFSIZ},
 //                   {.fd=1, .status=_FST_OPEN|_FST_LINEBUF|_FST_TTY,
@@ -35,6 +36,11 @@ _pthread_rt()
     return 0;
 }
 
+char **environ = NULL;
+//char *tab2[2] = {NULL, NULL};
+//char **environ = tab2;
+#define MAX_ENV 256
+
 int
 syscall(int SC, ...)
 {
@@ -46,8 +52,6 @@ syscall(int SC, ...)
     );
     return retval;
 }
-
-char *tab[2] = {NULL, NULL};
 
 void
 _start()
@@ -67,23 +71,22 @@ _start()
     _stdF[0] = fdopen(0, "r");
     _stdF[1] = fdopen(1, "w");
     _stdF[2] = fdopen(2, "w");
+///w teorii dla 0 i 1 powinno byæ dobrze ustawione, ale lepiej siê upewniæ:
     _stdF[0]->status =
     _stdF[1]->status = _FST_OPEN|_FST_LINEBUF|_FST_TTY;
     _stdF[2]->status = _FST_OPEN|_FST_NOBUF|_FST_TTY;
-
-    if(!_stdF[0] || !_stdF[1] || !_stdF[2])
-        while(1);
-//     list_insert_tail(&__open_files, stdin);
-//     list_insert_tail(&__open_files, stdout);
-//     list_insert_tail(&__open_files, stderr);
     //póki co:
-//     environ = tab;
-//     open("/dev/ttyv1", O_RDONLY /* | O_NOCTTY*/);   //stdin
-//     open("/dev/ttyv1", O_WRONLY);   //stdout
-//     open("/dev/ttyv1", O_WRONLY);   //stderr
-//     printf("Environ: %x\n", 0);//environ);
-//     close(2); close(1); close(0);
-    char ex = main(c, argv, envp);
+    //environ = envp;
+    environ = malloc(MAX_ENV*sizeof(char*));
+    environ[0] = NULL;
+    if(envp) {
+        char **ee = envp;
+        int i=0;
+        for( ; *ee; i++, ee++)
+            environ[i] = strdup(*ee);
+        environ[i] = NULL;
+    }
+    char ex = main(c, argv, environ);
     syscall(SYS_exit, ex);
     for (;;); // tymczasowo
 }

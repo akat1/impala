@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-
-char *tab2[2] = {NULL, NULL};
-char **environ = tab2;
+#include <unistd.h>
 
 char *
 getenv(const char *name)

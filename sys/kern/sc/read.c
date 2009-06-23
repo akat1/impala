@@ -40,6 +40,7 @@
 #include <sys/errno.h>
 #include <sys/proc.h>
 #include <sys/uio.h>
+#include <sys/vm.h>
 
 typedef struct sc_read_args sc_read_args;
 
@@ -55,9 +56,14 @@ errno_t sc_read(thread_t *p, syscall_result_t *r, sc_read_args *args);
 errno_t
 sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
 {
+    int err = 0;
     file_t *file = f_get(t->thr_proc->p_fd, args->fd);
     if (file == NULL) {
         return -EBADF;
+    }
+    if((err = vm_is_avail((vm_addr_t)args->data, args->size))) {
+        frele(file);
+        return err;
     }
     uio_t u;
     iovec_t iov;

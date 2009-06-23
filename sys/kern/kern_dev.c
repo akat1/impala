@@ -82,6 +82,7 @@ devd_create(devsw_t *dsw, int unit, void *priv)
     }
     dev->devsw = dsw;
     dev->priv = priv;
+    dev->type = dsw->type;
     list_insert_tail(&devs, dev);
     devfs_register(dev->name, dev, 0, 0, 0777);
     return dev;

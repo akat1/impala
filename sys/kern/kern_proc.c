@@ -257,6 +257,7 @@ proc_reset_vmspace(proc_t *p)
         p->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
     }
     vm_space_create(p->vm_space, VM_SPACE_USER);
+    p->p_brk_addr = p->vm_space->seg_data->end;
     mutex_unlock(&p->p_mtx);
 }
 

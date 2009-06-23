@@ -36,6 +36,7 @@
 #include <sys/proc.h>
 #include <sys/uio.h>
 #include <sys/utils.h>
+#include <sys/vm.h>
 #include <sys/syscall.h>
 #include <sys/console.h>
 #include <machine/video.h>
@@ -55,16 +56,21 @@ errno_t sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args);
 errno_t
 sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
 {
+    int err = 0;
     file_t *file = f_get(t->thr_proc->p_fd, args->fd);
     if (file == NULL) {
         return -EBADF;
+    }
+    if((err = vm_is_avail((vm_addr_t)args->data, args->size))) {
+        frele(file);
+        return err;
     }
     uio_t u;
     iovec_t iov;
     iov.iov_base = args->data;
     iov.iov_len = args->size;
     u.size = args->size;
-    u.resid = u.resid;
+    u.resid = u.size;
     u.iovs = &iov;
     u.iovcnt = 1;
     u.oper = UIO_WRITE;

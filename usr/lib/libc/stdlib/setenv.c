@@ -9,7 +9,7 @@ char *
 get_espace(size_t s)
 {
     ///jak zmieniæ? co z alokacj± / zwalnianiem? póki co naiwnie:
-    return malloc(s); ///nie powinno tak byæ..
+    return malloc(s); ///nie powinno tak byæ..?
 }
 
 int

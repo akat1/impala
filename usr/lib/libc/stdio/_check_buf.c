@@ -5,7 +5,7 @@
 void
 __check_buf(FILE *f)
 {
-    if(f->buf)
+    if(!f || f->buf)
         return;
     if(f->buf_size == 0)
         return;
