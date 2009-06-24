@@ -111,6 +111,7 @@ enum {
     LKP_NORMAL = 0,
     LKP_GET_PARENT = 1<<0,
     LKP_NO_FOLLOW = 1<<1,   //je¿eli ostatnia czê¶æ path to link - nie pod±¿aj
+    LKP_ACCESS = 1<<2,
 };
 
 
@@ -131,6 +132,7 @@ enum {
 #define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
 #define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
 //#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
+#define VOP_SYNC(v) (v)->v_ops->vop_sync((v))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
 ///@todo chyba wypada dodaæ proces otwieraj±cy
@@ -152,6 +154,7 @@ typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int first, int count);
 typedef int vnode_readlink_t(vnode_t *v, char *buf, int bsize);
 typedef int vnode_symlink_t(vnode_t *v, char *name, char *dst);
 //typedef int vnode_rmdir_t(vnode_t *v);
+typedef int vnode_sync_t(vnode_t *v);
 typedef int vnode_inactive_t(vnode_t *v);
 
 
@@ -171,7 +174,8 @@ struct vnode_ops {
     vnode_mkdir_t     *vop_mkdir;
     vnode_getdents_t  *vop_getdents;
     vnode_readlink_t  *vop_readlink;
-    vnode_symlink_t  *vop_symlink;
+    vnode_symlink_t   *vop_symlink;
+    vnode_sync_t      *vop_sync;
     vnode_inactive_t  *vop_inactive;
 //    vnode_rmdir_t     *vop_rmdir;
 /*    vnode_link_t      *vop_link;

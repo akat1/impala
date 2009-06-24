@@ -9,7 +9,7 @@ struct passwd onlyuser = {
 };
 
 struct passwd *
-getpwnam(const char *name)
+getpwuid(uid_t uid)
 {
-    return &onlyuser;   ///@todo impl. getpwnam
+    return &onlyuser;
 }

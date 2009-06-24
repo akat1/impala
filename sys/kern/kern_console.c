@@ -553,6 +553,7 @@ vcons_code(vconsole_t *vc, int c)
         case ESC_RESET:
             textscreen_clear(&vc->screen);
             textscreen_set_margins(&vc->screen, 0, TS_HEIGHT-1);
+            textscreen_init_tab(&vc->screen);
             vc->mode = CONS_MODE_AWRAP | CONS_MODE_NEWLINE;
             vc->sattr = TS_FG(DEFAULT_FG)|TS_BG(DEFAULT_BG);
             break;

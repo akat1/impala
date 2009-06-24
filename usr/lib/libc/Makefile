@@ -159,9 +159,12 @@ SRCS=\
     unistd/vfork.c\
     unistd/write.c\
     unistd/getopt.c\
+    other/chmod.c\
     other/closedir.c\
     other/getmntent.c\
     other/getpwnam.c\
+    other/getpwuid.c\
+    other/mkdir.c\
     other/opendir.c\
     other/readdir.c\
     other/setlocale.c\

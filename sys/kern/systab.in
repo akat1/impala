@@ -1,11 +1,14 @@
 # Z poni¿szej tabeli s± generowane tablice wywo³an systemowych:
 # kern/systab.c oraz sys/systab.h
 
+SYS access
 SYS execve
 SYS exit
+SYS chmod
 SYS fcntl
 SYS fork
 SYS fstat
+SYS fsync
 SYS ftruncate
 SYS getcwd
 SYS getegid
@@ -19,6 +22,7 @@ SYS ioctl
 SYS isatty
 SYS kill
 SYS lseek
+SYS mkdir
 SYS nanosleep
 SYS open
 SYS pause

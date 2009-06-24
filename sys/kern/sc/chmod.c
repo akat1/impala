@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,50 +26,26 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 457 2009-06-21 14:41:46Z wieczyk $
  */
 
-#ifndef __MACHINE_TYPES_H
-#define __MACHINE_TYPES_H
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/syscall.h>
+#include <sys/vm.h>
 
-typedef unsigned char u_char;
-typedef unsigned int u_int;
-typedef unsigned long u_long;
+typedef struct chmod_args chmod_args_t;
+struct chmod_args {
+    char *fname;
+    mode_t mode;
+};
 
-typedef unsigned char  uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int   uint32_t;
-typedef unsigned long long int uint64_t;
+int sc_chmod(thread_t *p, syscall_result_t *r, chmod_args_t *args);
 
-typedef uint8_t u_int8_t;
-typedef uint16_t u_int16_t;
-typedef uint32_t u_int32_t;
-
-
-typedef signed char  int8_t;
-typedef signed short int16_t;
-typedef signed int   int32_t;
-typedef signed long long int int64_t;
-
-typedef uint32_t uintptr_t;
-typedef int32_t  intptr_t;
-
-// adres (wzgledny)
-typedef void* addr_t;
-typedef const void* caddr_t;
-
-#ifndef __SIZE_T
-#define __SIZE_T
-typedef uint32_t size_t;
-#endif
-
-#ifndef __PTRDIFF_T
-#define __PTRDIFF_T
-typedef uint32_t ptrdiff_t;
-#endif
+int
+sc_chmod(thread_t *t, syscall_result_t *r, chmod_args_t *args)
+{
+    return 0;
+}
 
 
-typedef int32_t  ssize_t;
-
-
-#endif

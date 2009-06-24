@@ -39,7 +39,9 @@ typedef unsigned char  uchar;
 typedef unsigned short ushort;
 typedef unsigned int   uint;
 #define addr_t void*
+#ifndef bool
 typedef int bool;
+#endif
 #define FALSE 0
 #define TRUE  1
 

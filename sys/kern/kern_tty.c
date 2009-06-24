@@ -146,8 +146,11 @@ tty_read(devd_t *d, uio_t *u, int flags)
     /// czy to zawsze curthread?
     proc_t *proc = curthread->thr_proc;
     if(proc->p_group != tty->t_group) {
+        if(signal_ign_or_blk(proc, SIGTTIN)
+           ||  0 /* proc_grp_is_orphaned(proc->p_group)*/)
+            return -EIO;
         signal_send_group(proc->p_group, SIGTTIN);
-        return -1;   ///< zrobiæ prawid³ow± reakcje
+        return -EINTR; //tak?
     }
     if(ISSET(lflag, ICANON)) {
         if(clist_size(tty->t_inq) == 0) {
@@ -201,6 +204,21 @@ tty_write(devd_t *d, uio_t *u, int flags)
     tty_t *tty = d->priv;
     if(u->size == 0)
         return 0;
+    proc_t *proc = curthread->thr_proc;
+    if(proc->p_group != tty->t_group) {
+        //Musimy jako¶ zareagowaæ...
+        if(ISSET(tty->t_conf.c_lflag, TOSTOP)) {
+            if(signal_ign_or_blk(proc, SIGTTOU)) {
+                //do nothing, ... write allowed
+            } else if( 0 /* proc_grp_is_orphaned(proc->p_group)*/ ) {
+                return -EIO; //write zwraca -1 z errno= EIO
+            } else {
+                signal_send_group(proc->p_group, SIGTTOU);
+                return -EINTR; //tak?
+            }
+        }
+    }
+    
     char *buf = kmem_alloc(u->size, KM_SLEEP);
     if(!buf)
         return -ENOMEM;

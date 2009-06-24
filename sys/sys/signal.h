@@ -96,6 +96,7 @@ int signal_proc(thread_t *t);
 bool signal_send(proc_t *p, int sig);
 bool signal_send_group(pid_t pgid, int sig);
 void signal_handle(thread_t *t);
+bool signal_ign_or_blk(proc_t *p, int sig);
 #endif
 
 #endif

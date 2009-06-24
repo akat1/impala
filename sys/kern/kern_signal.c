@@ -136,7 +136,7 @@ signal_proc(thread_t *t)
 
     /* nie mamy nic do zrobienia */
     if ( sig == 0 ) {
-        return ENOMSG;
+        return -ENOMSG;
     }
 
     /* sprawdzamy czy sygna³ jest ignorowany lub blokowany */
@@ -181,6 +181,16 @@ signal_send(proc_t *p, int sig)
 
     p->p_sig |= sigmask(sig) & (~p->p_sigignore);
     return TRUE;
+}
+
+bool
+signal_ign_or_blk(proc_t *p, int sig)
+{
+    if(//(sigmask(sig) & p->p_sigblock) ||  // jak sprawdzaæ blokowanie?
+       (sigmask(sig) & p->p_sigignore) ||
+        signal_action(p, sig) == SIG_IGN) // niech kto¶ to zweryfikuje
+        return TRUE;
+    return FALSE;
 }
 
 bool

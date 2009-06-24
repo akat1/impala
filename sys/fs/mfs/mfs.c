@@ -73,6 +73,7 @@ static vnode_mkdir_t mfs_mkdir;
 static vnode_getdents_t mfs_getdents;
 static vnode_readlink_t mfs_readlink;
 static vnode_symlink_t mfs_symlink;
+static vnode_sync_t mfs_node_sync;
 static vnode_inactive_t mfs_inactive;
 
 static vnode_ops_t mfs_vnode_ops = {
@@ -91,6 +92,7 @@ static vnode_ops_t mfs_vnode_ops = {
     .vop_getdents = mfs_getdents,
     .vop_readlink = mfs_readlink,
     .vop_symlink = mfs_symlink,
+    .vop_sync   = mfs_node_sync,
     .vop_inactive = mfs_inactive,
 };
 
@@ -329,6 +331,13 @@ mfs_inactive(vnode_t *vn)
 {
     mfs_node_t *n = vn->v_private;
     n->vnode = NULL;
+    return 0;
+}
+
+int
+mfs_node_sync(vnode_t *vn)
+{
+    //nie mamy nic do roboty
     return 0;
 }
 
