@@ -121,7 +121,7 @@ void gz_compress(in, out)
         if (gzwrite(out, buf, (unsigned)len) != len) error(gzerror(out, &err));
     }
     fclose(in);
-    if (gzclose(out) != Z_OK) error("failed gzclose");
+/// if (gzclose(out) != Z_OK) error("failed gzclose");
 }
 
 #ifdef USE_MMAP /* MMAP version, Miguel Albrecht <malbrech@eso.org> */
@@ -183,7 +183,7 @@ void gz_uncompress(in, out)
     }
     if (fclose(out)) error("failed fclose");
 
-    if (gzclose(in) != Z_OK) error("failed gzclose");
+//    if (gzclose(in) != Z_OK) error("failed gzclose");
 }
 
 

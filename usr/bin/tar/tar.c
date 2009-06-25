@@ -208,7 +208,7 @@ start_gzip(const char *file, const char *mode)
     pid = fork();
     if (pid == -1) return NULL;
     if (pid == 0) {
-//         close(my_pipe);
+        close(my_pipe);
         char *gzipv[] = {
             "gzip",
             NULL,   // -d
@@ -236,7 +236,7 @@ start_gzip(const char *file, const char *mode)
         fprintf(stderr, "%s: cannot run \"%s\"\n", tar, gzip);
         exit(-1);
     }
-//     close(gzip_pipe);
+    close(gzip_pipe);
     pipefile = fdopen(my_pipe, mode);
     return pipefile;
 }
