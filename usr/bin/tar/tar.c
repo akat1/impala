@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -311,6 +312,39 @@ is_zero(const char *buf)
 }
 
 void
+progressbar(int percent, const char *fmt, ...)
+{   
+    va_list ap;
+    int i;
+    int win;
+    char buf[256];
+    char *msg = buf;
+    win = 80;   // czekamy na jaki¶ TIOCGETWINSZ czy tam co¶ innego
+    percent /= (win < 100)? (100/win) : (win/100);
+    va_start(ap, fmt);
+    vsnprintf(buf, win+1, fmt, ap);
+    
+    printf("\033[2K\r\033[7m");
+    for (i = 0; i < percent; i++) {
+        if (*msg) {
+            fputc(*msg, stdout);
+            msg++;
+        } else {
+            fputc(' ', stdout);
+        }
+    }
+    printf("\033[0m");
+    for (; i < win; i++) {
+        if (*msg) {
+            fputc(*msg, stdout);
+            msg++;
+        }
+    }
+    fflush(stdout);
+    sleep(1);
+}
+
+void
 extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
     int t)
 {
@@ -391,7 +425,8 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
             if (file) {
                 if (everb && lastline) {
                     int total = ((tsize-size)*100)/tsize*100;
-                    printf("\rx %s [%u%%]", path, total/100);
+                    total/=100;
+                    progressbar(total, "x %s [%u%%]", path, total);
                 }
                 fwrite(buf, (fbs==1)? size : 512, 1, file);
             }
