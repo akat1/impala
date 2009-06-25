@@ -377,8 +377,8 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
                 fclose(file);
                 file = NULL;
             }
-            if (everb && lastline) {
-                printf("\r\033[2Kx %s\n", path);
+            if (everb) {
+                printf("\r\033[2Kx %s", path);
             }
             if (is_zero(buf)) {
                 zeros--;
@@ -407,11 +407,13 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
                          path);
                     else printf("%s\n", path);
             } else  {
-                if (verb) {
-                    printf("x %s %s", path, (everb)? "": "\n");
+                if (verb && !everb) {
+                    printf("x %s\n", path);
+                } else
+                if (everb) {
+                    printf("%s", path);
                 }
                 if (entry->typeflag == REGTYPE) {
-                    lastline = 1;
                     file = fopen(path, "w");
                     if (file == NULL) {
                         fprintf(stderr, "%s: cannot create file %s\n",
@@ -420,21 +422,19 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
                     }
                 } else
                 if (entry->typeflag == DIRTYPE) {
-                    lastline = 0;
                     if (mkdir(path, READ_NUM(entry->mode)) && errno != EEXIST){
                         fprintf(stderr, "%s: cannot create dir %s\n", tar,path);
                         exit(-1);
                     }
                     size = 1;
                 }
-                if (everb && !lastline) printf("\n");
             }
         } else {
             if (file) {
-                if (everb && lastline) {
+                if (everb) {
                     int total = ((tsize-size)*100)/tsize*100;
                     total/=100;
-                    progressbar(total, "x %s [%u%%]", path, total);
+                    progressbar(total, "%s [%u%%]", path, total);
                 }
                 fwrite(buf, (fbs==1)? size : 512, 1, file);
             }
@@ -442,7 +442,7 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
             fbs--;
         }
     }
-    if (everb && lastline) printf("\r\033[2Kx %s\n", path);
+    if (everb) printf("\r\033[2K\n", path);
 }
 
 /*=============================================================================
