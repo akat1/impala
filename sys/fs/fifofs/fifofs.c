@@ -68,9 +68,10 @@ static vnode_setattr_t fifofs_setattr;
 static vnode_lookup_t fifofs_lookup;
 static vnode_mkdir_t fifofs_mkdir;
 static vnode_getdents_t fifofs_getdents;
-static vnode_inactive_t fifofs_inactive;
 static vnode_readlink_t fifofs_readlink;
 static vnode_symlink_t fifofs_symlink;
+static vnode_sync_t fifofs_node_sync;
+static vnode_inactive_t fifofs_inactive;
 
 static vnode_ops_t fifofs_vnode_ops = {
     .vop_open = fifofs_open,
@@ -88,6 +89,7 @@ static vnode_ops_t fifofs_vnode_ops = {
     .vop_getdents = fifofs_getdents,
     .vop_readlink = fifofs_readlink,
     .vop_symlink = fifofs_symlink,
+    .vop_sync    = fifofs_node_sync,
     .vop_inactive = fifofs_inactive,
 };
 
@@ -291,6 +293,12 @@ int
 fifofs_symlink(vnode_t *v, char *name, char *dst)
 {
     return -ENOTSUP;
+}
+
+int
+fifofs_node_sync(vnode_t *vn)
+{
+    return 0;
 }
 
 int

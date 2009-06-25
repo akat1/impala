@@ -336,6 +336,7 @@ void
 sleepq_init(sleepq_t *q)
 {
     LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
+//    mutex_init(&q->sq_mtx, MUTEX_NORMAL);
 }
 
 void
@@ -377,6 +378,6 @@ void
 sleepq_destroy(sleepq_t *q)
 {
     sleepq_wakeup(q);
-    mutex_destroy(&q->sq_mtx);
+//    mutex_destroy(&q->sq_mtx);
 }
 
