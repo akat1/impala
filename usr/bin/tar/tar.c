@@ -530,7 +530,7 @@ static int xoptind = 3;
 static int
 xgetopt(int argc, char * const argv[], const char *optstring)
 {
-    static char res[] = { 'x', 'z', 'V', 'f', -1 };
+    static char res[] = { 'x', 'z', 'v', 'f', -1 };
     static int i = 0;
     return res[i++];
 }
