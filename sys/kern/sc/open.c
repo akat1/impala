@@ -77,8 +77,6 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     if((error = copyinstr(fname, arg->fname, PATH_MAX)))
         return error;
     KASSERT(proc->p_rootdir!=NULL);
-    kprintf("fname: %p, flags: %u, mode: %u\n", arg->fname, flags,
-             arg->mode);
     error = vfs_lookup(proc->p_curdir, &node, fname, p, LKP_NORMAL);
     if(error) {
         if(!(flags & O_CREAT))
@@ -92,7 +90,8 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         attr.va_type = VNODE_TYPE_REG;
         attr.va_uid = proc->p_cred->p_uid;
         attr.va_gid = proc->p_cred->p_gid;
-        attr.va_size = 0; attr.va_dev = NULL;
+        attr.va_size = 0;
+        attr.va_dev = NULL;
         error = VOP_CREATE(parent, &node, _get_last_cmpt(fname), &attr);
         if(error)
             return error;

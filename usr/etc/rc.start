@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# $Id$
+
+# To jest startowy skrypt systemu Impala.
+#
+
+
+echo "Initializing system...";
+
+export PATH=/bin:/sbin
+echo "Umounting /dev/fd0."
+
+echo -n "Preparing terminals:"
+cd /dev
+for ttyv in ttyv*
+do
+    if [ ! $ttyv = "ttyv1" ]
+    then
+        echo -n " $ttyv"
+        #/sbin/ttyvrun /dev/$ttyv /bin/sh /etc/rc.ttyv
+    fi
+done
+cd /
+echo "."
+
+
+exec /bin/sh /etc/rc.ttyv

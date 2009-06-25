@@ -13,11 +13,11 @@ ${_PROG_BUILD}: ${PROG}
 
 ${PROG}: ${OBJS} ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${IMPALA_SRCROOT}/usr/lib/crt/crt0.o
 	@echo " LINK ${PROG}"
-	${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS} ${LIBS}
+	@${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS} ${LIBS}
 
 ${_PROG_CLEAN}:
 	@echo " CLEAN"
-	@rm -f ${OBJS} ${PROGRARY}.a
+	@rm -f ${OBJS} ${PROGRAM}
 
 .depend ${_PROG_DEPEND}: ${SRCS}
 	@rm -f .depend

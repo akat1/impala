@@ -129,7 +129,7 @@ static inline void irq_enable(void)
 int splhigh(void);
 int splclock(void);
 int splbio(void);
-#define splsofclock splbio
+#define splsoftclock splbio
 int spltty(void);
 int spl0(void);
 void splx(int pl);

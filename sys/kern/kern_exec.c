@@ -133,7 +133,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
         TRACE_IN("bad length");
         err = len;
         goto fail;
-    }
+    } else
     if (len == 0) {
         TRACE_IN("uio error");
         err = -EINVAL;
@@ -278,7 +278,9 @@ aout_exec(proc_t *p, exec_info_t *einfo)
 {
     if (einfo->image_size < PAGE_SIZE) return -EINVAL;
     exec_t *exec = einfo->header;
-    if (N_BADMAG(*exec)) return -EINVAL;
+    if (N_BADMAG(*exec)) {
+        return -EINVAL;
+    }
     // skoro plik wydaje siê byæ OK, to bezgranicznie mu zaufajmy
 
     // zniszczmy aktualny obraz procesu.
@@ -316,11 +318,10 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     // niszczymy odwzorowania
     vm_unmap((vm_addr_t)TEXT, exec->a_text);
     vm_unmap((vm_addr_t)DATA, exec->a_data + exec->a_bss);
-
     thread_t *t = proc_create_thread(p, exec->a_entry);
     vm_space_create_stack(vm_space, &t->thr_stack, thread_stack_size);
     t->thr_stack_size = thread_stack_size;
-//     thread_prepare(t, einfo->u_argv, einfo->u_envp, einfo->u_off);
+    p->p_brk_addr = vm_space->seg_data->end;
     p->p_brk_addr = vm_space->seg_data->end;
     copyout_params(t, einfo);
     thread_prepare(t, einfo->u_argv, einfo->u_envp, einfo->u_off);

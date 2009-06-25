@@ -36,7 +36,6 @@ SRCS=\
 	vm_segment.c\
 	vm_space.c\
 	vm_trap.c\
-    tmp_rootimage.c\
 	${SC_SRCS}
 
 include Makefile.sc

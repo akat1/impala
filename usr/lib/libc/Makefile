@@ -8,6 +8,7 @@ SRCS=\
     fcntl/fcntl.c\
     stdio/_check_buf.c\
     stdio/_fflush_lb.c\
+    stdio/_get_data.c\
     stdio/_put_char.c\
     stdio/_put_str.c\
     stdio/_put_data.c\
@@ -24,6 +25,7 @@ SRCS=\
     stdio/fprintf.c\
     stdio/fputs.c\
     stdio/fputc.c\
+    stdio/fread.c\
     stdio/fwopen.c\
     stdio/fwrite.c\
     stdio/getchar.c\
@@ -100,6 +102,7 @@ SRCS=\
     sys/sys_siglist.c\
     sys/getprocinfo.c\
     sys/getmountinfo.c\
+    sys/mkdir.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
     sysvipc/msgget.c\
@@ -161,10 +164,8 @@ SRCS=\
     unistd/getopt.c\
     other/chmod.c\
     other/closedir.c\
-    other/getmntent.c\
     other/getpwnam.c\
     other/getpwuid.c\
-    other/mkdir.c\
     other/opendir.c\
     other/readdir.c\
     other/setlocale.c\

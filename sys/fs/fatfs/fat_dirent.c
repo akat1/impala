@@ -66,8 +66,7 @@ fatfs_dirent_lookup(fatfs_inode_t *inode, fatfs_inode_t **r, const char *name)
     fatfs_dirent_t *entry = NULL;
     while ( (entry = list_next(&inode->un.dir.dirents, entry)) ) {
         if ( str_eq(name,entry->name) ) {
-//             DEBUGF("=%s",entry->name);
-            if (!entry->inode) {
+            if (entry->inode == NULL) {
                 fatfs_inode_create(inode->fatfs, entry);
             }
             *r = entry->inode;
@@ -140,6 +139,7 @@ fatfs_dirent_read(fatfs_inode_t *inode)
             entry->attr = dents[j].attr;
             entry->size = FAT_D_GET_SIZE(&dents[j]);
             entry->clustart = FAT_D_GET_INDEX(&dents[j]);
+            entry->inode = NULL;
 //             DEBUGF("+%s %u %u",entry->name, entry->clustart, entry->size);
             list_insert_tail(&inode->un.dir.dirents, entry);
             lfn_cache_reset(&lfn);

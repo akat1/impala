@@ -10,6 +10,6 @@ fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     __check_buf(stream);
     int res = __put_data(stream, ptr, size*nmemb);
     if(res>=0)
-        return res/size;
+        return res;
     return 0;
 }

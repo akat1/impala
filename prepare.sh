@@ -35,4 +35,4 @@ recur() {
 
 cpath="" recur
 
-mkdir -p output/bin output/sbin output/usr/include output/etc output/boot/grub output/lib output/dev
+mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala

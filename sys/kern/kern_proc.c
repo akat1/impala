@@ -125,7 +125,6 @@ proc_init(void)
 void
 proc_exit(proc_t *p, int exit)
 {
-    TRACE_IN("p=%p",p);
     thread_t *t = NULL;
     bool alive = FALSE;
     while ( (t = list_next(&p->p_threads, t)) ) {
@@ -209,7 +208,6 @@ proc_destroy(proc_t *proc)
 {
     proc_t *p;
 
-    kprintf("%i - dlugosc\n", list_length(&proc->p_threads));
     list_remove(&procs_list, proc);
     signal_send(proc_find(proc->p_ppid), SIGCHLD);
 
@@ -269,7 +267,6 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
     thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
     t->thr_entry_point = (void*)entry;
-    DEBUGF("Entry: 0x%08x", entry);
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
     list_insert_tail(&proc->p_threads, t);

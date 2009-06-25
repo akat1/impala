@@ -76,7 +76,7 @@ static vnode_ops_t fatfs_node_ops = {
 vnode_t *
 fatfs_getvnode(fatfs_inode_t *inode)
 {
-    if (!inode->vn) {
+    if (inode->vn == NULL) {
         inode->vn = vnode_alloc();
         inode->vn->v_ops = &fatfs_node_ops;
         inode->vn->v_private = inode;
@@ -128,7 +128,8 @@ fatfs_inode_create(fatfs_t *fatfs, fatfs_dirent_t *dirent)
     if (dirent->attr & FATFS_SUBDIR) {
         dirent->inode->type = FATFS_DIR;
     } else panic("unknown type dirent %b", dirent->inode->type);
-
+    fatfs_getvnode(dirent->inode);
+    vref(dirent->inode->vn);
 }
 
 
@@ -139,13 +140,12 @@ fatfs_inode_create(fatfs_t *fatfs, fatfs_dirent_t *dirent)
 int
 fatfs_open(vnode_t *v, int flags, mode_t mode)
 {
-    DEBUGF("open not supported");
-    return -ENOTSUP;
+    return 0;
 }
 
 int
 fatfs_create(vnode_t *v, vnode_t **vpp, const char *name,
-                            vattr_t *attr)
+    vattr_t *attr)
 {
     DEBUGF("create not supported");
     return -ENOTSUP;
@@ -287,7 +287,8 @@ fatfs_symlink(vnode_t *v, char *name, char *dst)
 int
 fatfs_inactive(vnode_t *v)
 {
-    DEBUGF("inactive not supported yet!");
-    return -ENOTSUP;
+    fatfs_inode_t *inode = v->v_private;
+    DEBUGF("inactive (%s)", inode->name);
+    return 0;
 }
 

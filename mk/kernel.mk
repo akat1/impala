@@ -19,11 +19,7 @@ ${_KERNEL_BUILD}: ${KERNEL}
 ${_KERNEL_CLEAN}:
 	@rm -f ${OBJS} ${KERNEL}
 
-
-tmp_rootimage.c:
-	cp _tmp_rootimage.c tmp_rootimage.c
-
-${KERNEL}: tmp_rootimage.c ${LIBDEPS} ${OBJS} ${LD_SCRIPT}
+${KERNEL}: ${LIBDEPS} ${OBJS} ${LD_SCRIPT}
 	@echo " LD ${KERNEL} (compressed)"
 	@${LD} ${LD_FLAGS} -o ${KERNEL} ${OBJS} ${LIBS}
 	@${GZIP} -f -c ${KERNEL} > ${KERNEL}.gz

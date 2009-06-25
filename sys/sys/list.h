@@ -133,6 +133,16 @@ list_remove(list_t *ls, void *x)
 }
 
 static inline void *
+list_get_n(list_t *ls, int n)
+{
+    void *x = list_head(ls);
+    for (int i = 0; i < n && x; i++) {
+        x = list_next(ls, x);
+    }
+    return x;
+}
+
+static inline void *
 list_extract_first(list_t *ls)
 {
     void *x = list_head(ls);

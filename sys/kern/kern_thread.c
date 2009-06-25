@@ -133,9 +133,8 @@ void
 thread_destroy(thread_t *t)
 {
     t->thr_flags |= THREAD_ZOMBIE;
-    kprintf("Thr destroy: %08x\n", t);
     list_remove(&threads_list, t);
-    int x = splbio();
+    int x = splsoftclock();
 
     if (t != curthread) {
         //bie¿±cego w±tku nie mo¿emy szybciej zwolniæ, bo jest w runq

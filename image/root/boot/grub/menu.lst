@@ -3,10 +3,10 @@ color blue/green black/light-gray
 timeout 5
 title Impala (with debug messages) (/boot/impala.gz)
 	root (fd0)
-	kernel /boot/impala.gz debug iobufs=1 init=/sbin/init
+	kernel /boot/impala.gz debug iobufs=1 init=/mnt/fd0/impala/preinit
 
 title Impala (/boot/impala.gz)
     root (fd0)
-    kernel /boot/impala.gz init=/sbin/init
+    kernel /boot/impala.gz init=/mnt/fd0/impala/preinit
 
 

@@ -26,18 +26,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: TEMPLATE.c 457 2009-06-21 14:41:46Z wieczyk $
+ * $Id: TEMPLATE.c 468 2009-06-23 14:37:15Z wieczyk $
  */
 
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/syscall.h>
-#include <sys/vm.h>
+#include <sys/vfs.h>
 
 typedef struct mkdir_args mkdir_args_t;
 struct mkdir_args {
-    char *fname;
-    mode_t mode;
+    const char *name;
+    mode_t m;
 };
 
 int sc_mkdir(thread_t *p, syscall_result_t *r, mkdir_args_t *args);
@@ -45,7 +45,11 @@ int sc_mkdir(thread_t *p, syscall_result_t *r, mkdir_args_t *args);
 int
 sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
 {
-    return 0;
+    vnode_t *vp;
+    vattr_t a;
+    mem_zero(&a, sizeof(a));
+    a.va_type = VNODE_TYPE_DIR;
+    return VOP_MKDIR(t->thr_proc->p_curdir, &vp, args->name, &a);
 }
 
 

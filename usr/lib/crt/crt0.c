@@ -4,22 +4,22 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/list.h>
 #include <string.h>
 
-//__asm__( ".weak __pthread_rt");
-
+int syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
 int _pthread_rt(void);
-
 void _start(void);
-
 int errno = 0;
 static int retval=0;
-
 FILE *_stdF[3]={NULL, NULL, NULL};
 list_t __open_files;
-
 sighandler_t __sig_handlers[NSIG+1];
+list_t __open_files;
+
+char **environ = NULL;
+#define MAX_ENV 256
 
 int
 _pthread_rt()
@@ -27,8 +27,6 @@ _pthread_rt()
     return 0;
 }
 
-char **environ = NULL;
-#define MAX_ENV 256
 
 int
 syscall(int SC, ...)
@@ -75,6 +73,6 @@ _start()
         environ[i] = NULL;
     }
     exit(main(c, argv, environ));
-    for (;;); // tymczasowo
+    for (;;); 
 }
 

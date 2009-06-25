@@ -69,19 +69,81 @@ kmain()
     prepare_root();
     start_init_process();
 }
+semaph_t s;
+kthread_t t0,t1;
+
+struct range {
+    int a;
+    int b;
+};
+void f(void *arg);
+void g(void *arg);
+
+devd_t *dev;
+
+void
+f(void *arg)
+{
+    struct range *r = arg;
+    if (r->a) {
+        DEBUGF("doing sleep");
+    }
+    kprintf("test started [%u;%u) %p\n", r->a, r->b, &r);
+    for (int i = r->a; i < r->b; i++) {
+        iobuf_t *bp = bio_read(dev, i);
+        bio_release(bp);
+    }
+    DEBUGF("test [%u;%u) done %p", r->a, r->b, &r);
+    semaph_post(&s);
+}
+
+void
+g(void *arg)
+{
+    struct range *r = arg;
+    if (r->a) {
+        DEBUGF("doing sleep");
+    }
+    kprintf("test started [%u;%u) %p\n", r->a, r->b, &r);
+    for (int i = r->a; i < r->b; i++) {
+        iobuf_t *bp = bio_read(dev, i);
+        bio_release(bp);
+    }
+    DEBUGF("test [%u;%u) done %p", r->a, r->b, &r);
+    semaph_post(&s);
+}
 
 void
 prepare_root()
 {
-    extern unsigned char image[];
-    extern unsigned int image_size;
-    md_create(0, &image, image_size);
     vfs_mountroot();
+
+    vnode_t *res;
+    vattr_t attr;
+    attr.va_type = VNODE_TYPE_DIR;
+    attr.va_size = 0;
+    VOP_MKDIR(rootvnode, &res, "dev", &attr);
+    VOP_MKDIR(rootvnode, &res, "bin", &attr);
+
+    VOP_MKDIR(rootvnode, &res, "mnt", &attr);
+    VOP_MKDIR(res, &res, "fd0", &attr);
+
     vnode_t *devdir;
     if(!vfs_lookup(NULL, &devdir, "/dev", NULL, LKP_NORMAL))
     {
         vfs_mount("devfs", devdir, NULL);
     } else kprintf("No /dev dir on root filesystem -> devfs not mounted\n");
+
+    const char *_rootdev = "fd0";
+    // Na sztywno wpisane mfs:/dev/md0
+    vnode_t *devn = NULL;
+    karg_get_s("rootdev", &_rootdev);
+    DEBUGF("trying to mount /mnt/fd0 from fatfs:/dev/%s", _rootdev);
+    if (vnode_opendev(_rootdev, 0/*O_RDWR*/, &devn) != 0) {
+        panic("cannot open root device %s", _rootdev);
+    }
+
+    vfs_mount("fatfs", res, devn->v_dev);
 }
 
 void
@@ -140,7 +202,7 @@ init_kernel()
     cons_init();
     sysvipc_init();
     dev_initdevs();
-    SSLEEP(1, "kinit");
     kprintf("kernel initialized\n");
+    SSLEEP(1, "kinit");
     kprintf("current time: %i\n", curtime.tv_sec);
 }

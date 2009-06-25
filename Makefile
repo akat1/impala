@@ -2,6 +2,9 @@ SUBDIRS= sys usr
 IMAGE_FILE=image/floppy.img
 IMAGE_FILE_=image/_floppy.img
 FLOPPY_DEV?=/dev/fd0
+GDB?=gdb
+DISTDIR=output/dist
+SPECDIR=output/impala
 .PHONY: all build build-image run init
 
 all: build
@@ -11,22 +14,23 @@ build-image: ${IMAGE_FILE} build
 	cd image && ./mtools.sh
 
 run: build-image
-	cd image && qemu -s -m 32 -fda floppy.img # bochs -f impala-usr-local.bochs && qemu -s -m 32 -fda floppy.img 
+	cd image && qemu -s -fda floppy.img # bochs -f impala-usr-local.bochs 
 
+dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
-	cp COPYRIGHT output
-	cp usr/sbin/init/init output/sbin/init
-	cp usr/sbin/ttyvrun/ttyvrun output/sbin/ttyvrun
-	cp usr/sbin/mount/mount output/sbin/mount
-	cp usr/bin/test/test output/bin/test
-	cp usr/bin/vttest/vttest output/bin/vttest
-	cp usr/bin/sh/sh output/bin/sh
-	cp usr/bin/ps/ps output/bin/ps
-	cp usr/bin/cat/cat output/bin/cat
-	cd tools; gcc -std=c99 mfsutil.c -o mfsutil 
-	./tools/mfsutil -i ./tools/root.image ./output
-	cd misc; gcc -std=c99 -o toC toC.c
-	./misc/toC tools/root.image > sys/kern/tmp_rootimage.c
+	cp COPYRIGHT ${DISTDIR}/
+	cp usr/sbin/init/init ${DISTDIR}/sbin/init
+	cp usr/sbin/ttyvrun/ttyvrun ${DISTDIR}/sbin/ttyvrun
+	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
+	cp usr/bin/test/test ${DISTDIR}/bin/test
+	cp usr/bin/vttest/vttest ${DISTDIR}/bin/vttest
+	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
+	cp usr/bin/ps/ps ${DISTDIR}/bin/ps
+	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
+	cp usr/etc/rc.* ${DISTDIR}/etc/
+	cp usr/bin/tar/tar ${SPECDIR}/tar
+	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
+	cd output/dist && tar cvf ../impala/dist.tar *
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
@@ -47,7 +51,7 @@ install_sdk:
 	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libpthread/libpthread.a ${AOUT_PATH}/lib/
 
 debug: build
-	gdb -x tools/gdbscript sys/kern/impala
+	${GDB} -x tools/gdbscript sys/kern/impala
 
 burn: build-image
 	sudo dd if=image/floppy.img of=${FLOPPY_DEV}

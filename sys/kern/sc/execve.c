@@ -55,14 +55,10 @@ sc_execve(thread_t *t, syscall_result_t *r, execve_args_t *ap)
     int err=0;
     if((err=copyinstr(path, ap->path, 256)))
         return err;
-    TRACE_IN("from pid=%u t=%p path=%s", t->thr_proc->p_pid, t, path);
-
     int res = execve(t->thr_proc, path, ap->argv, ap->envp);
-    DEBUGF("execve result %i", r->result);
     if (res == 0) {
-        //we did it ;)
         thread_exit_last(t);
-        panic("still working\n");
+        panic("thread still working after execve\n");
     }
     return res;
 }

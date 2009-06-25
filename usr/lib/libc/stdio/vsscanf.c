@@ -3,9 +3,14 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-static int _parse_int(const char **src);
+static int _parse_int(const char **src, int base);
 static void _parse_str(const char **src, char *res);
+//static char digits[] = "0123456789abcdef";
 
+#define isdigit(c)\
+    (('0' <= (c) && (c) <= '9') || ('a' <= (c) && (c) <= 'f'))
+
+#define todigit(c) (( (c) <= '9' )? (c) - '0' : (c) - 'a')
 void
 _parse_str(const char **src, char *res)
 {
@@ -17,13 +22,15 @@ _parse_str(const char **src, char *res)
     *res = '\0';
 }
 
+
+
 int
-_parse_int(const char **src)
+_parse_int(const char **src, int base)
 {
     int res=0;
     
     while(isdigit(**src)) {
-        res = 10*res + (**src - '0');
+        res = base*res + todigit(**src);
         (*src)++;
     }
     return res;
@@ -49,7 +56,13 @@ vsscanf(const char *src, const char *fmt, va_list ap)
                 }
                 case 'd': {
                     int *iptr = va_arg(ap, int*);
-                    *iptr = _parse_int(&s);
+                    *iptr = _parse_int(&s, 10);
+                    res++;
+                    break;
+                }
+                case 'o': {
+                    int *iptr = va_arg(ap, int*);
+                    *iptr = _parse_int(&s, 8);
                     res++;
                     break;
                 }

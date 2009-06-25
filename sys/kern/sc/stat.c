@@ -71,7 +71,6 @@ sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
     vrele(node);
     if(res)
         return res;
-
-    return -EOK;
+    return 0;
 }
 
