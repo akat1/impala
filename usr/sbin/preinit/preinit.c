@@ -45,7 +45,7 @@ main(int argc, char **v)
         printf("cannot fork\n");
         while (1);
     }
-    sleep(3);
+    sleep(50);
     printf(" * executing %s\n", init);
     close(0);
     close(1);

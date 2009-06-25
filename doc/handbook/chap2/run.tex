@@ -48,7 +48,7 @@ title Uruchom ze stacji dyskietek A:
 # Wpis 2
 title Impala
     root (fd0)
-    kernel /boot/impala.gz init=/mnt/fd0/sbin/init
+    kernel /boot/impala.gz init=/mnt/fd0/impala/preinit
 \end{verbatim}
 
 Pierwszy wpis uruchamia program ³aduj±cy z dyskietki, tak jak by to robi³
@@ -59,9 +59,11 @@ przez program GRUB. W~konfiguracji programu na~dyskietce s± dwa wpisy,
 jeden uruchamia system z wy³±czymi dodatkowymi komunikatami j±dra, oraz
 drugi - domy¶lny - z w³±czonymi.
 
-System po inicjalizacji j±dra ³aduje program \texttt{init}, który znajduje siê
-na dyskietke w~katalogu \texttt{/sbin/}. Z~powodów technicznych system
-plików z~dyskietki nie stanowi g³ównego katalogu \texttt{/} w~systemie, ale
-jest podpinany w~\texttt{/mnt/fd0}, st±d nale¿y poinformowaæ j±dro o lokalizacji
-tego programu, poprzez parametr \texttt{init}.
+G³ównym systemem plików jest pamiêciowy system plików (MFS),
+a~system plików z~dyskietki jest podczepiony pod katalog \texttt{/mnt/fd0}.
+Za inicjacjê systemu jest odpowiedzialny program \texttt{/sbin/init}, lecz nie
+mo¿e on zostaæ uruchiony przed przygotowaniem plików.
 
+Na~dyskietce w~katalogu \texttt{impala} znajduje siê program \texttt{preinit},
+odpowiedzialny za zainstalowanie systemu w~pamiêci z~archiwum
+\texttt{dist.tar}, oraz uruchomienie programu \texttt{/sbin/init}.

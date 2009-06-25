@@ -245,7 +245,7 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
 {
     struct tentry entry;
     struct stat st;
-    char *linkname;
+//    char *linkname;
     int namelen;
     char path[256];
     memset(&entry, 0, sizeof(entry));
@@ -298,7 +298,8 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
  * rozpakowywanie elementów z archiwum (i testowanie)
  */
 
-static void extract_from_arch(FILE *, char **, int, int, int);
+static void extract_from_arch(FILE *, char **, int, int, int, int);
+static int is_zero(const char *buf);
 
 int
 is_zero(const char *buf)
@@ -310,18 +311,21 @@ is_zero(const char *buf)
 }
 
 void
-extract_from_arch(FILE *archive, char **names, int verb, int blocks,
+extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
     int t)
 {
+    int lastline = 0;
     int zeros = 2;
     char buf[512];
     struct tentry *entry = (struct tentry *) buf;
     char path[256];
     int fbs = 0;
     int size = 0;
+    int tsize = 0;
     int i;
     FILE *file = NULL;
     for (i = 0; i < blocks-2 && zeros; i++) {
+        if (everb) fflush(stdout);
         if (fread(buf, 512, 1, archive) != 1) {
             fprintf(stderr, "%s: unexpected end of archive\n", tar);
             exit(-1);
@@ -330,6 +334,9 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
             if (file) {
                 fclose(file);
                 file = NULL;
+            }
+            if (everb && lastline) {
+                printf("\r\033[2Kx %s\n", path);
             }
             if (is_zero(buf)) {
                 zeros--;
@@ -345,6 +352,7 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
                 exit(-1);
             }
             size = READ_NUM(entry->size);
+            tsize = size;
             fbs = (size+511)/512;
             if (names != NULL && !is_in_list(names,path)) {
                 continue;
@@ -358,9 +366,10 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
                     else printf("%s\n", path);
             } else  {
                 if (verb) {
-                    printf("x %s\n", path);
+                    printf("x %s %s", path, (everb)? "": "\n");
                 }
                 if (entry->typeflag == REGTYPE) {
+                    lastline = 1;
                     file = fopen(path, "w");
                     if (file == NULL) {
                         fprintf(stderr, "%s: cannot create file %s\n",
@@ -369,18 +378,28 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
                     }
                 } else
                 if (entry->typeflag == DIRTYPE) {
+                    lastline = 0;
                     if (mkdir(path, READ_NUM(entry->mode)) && errno != EEXIST){
                         fprintf(stderr, "%s: cannot create dir %s\n", tar,path);
                         exit(-1);
                     }
+                    size = 1;
                 }
+                if (everb && !lastline) printf("\n");
             }
         } else {
-            if (file) fwrite(buf, (fbs==1)? size : 512, 1, file);
+            if (file) {
+                if (everb && lastline) {
+                    int total = ((tsize-size)*100)/tsize*100;
+                    printf("\rx %s [%u%%]", path, total/100);
+                }
+                fwrite(buf, (fbs==1)? size : 512, 1, file);
+            }
             size -= 512;
             fbs--;
         }
     }
+    if (everb && lastline) printf("\r\033[2Kx %s\n", path);
 }
 
 /*=============================================================================
@@ -389,6 +408,8 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
 
 int main(int argc, char **argv);
 
+int operate(int, char **, int, const char *, const char *, int, int);
+
 #ifdef __Impala__
 static char *xoptarg = "/mnt/fd0/impala/dist.tar";
 static int xoptind = 3;
@@ -396,7 +417,7 @@ static int xoptind = 3;
 static int
 xgetopt(int argc, char * const argv[], const char *optstring)
 {
-    static char res[] = { 'x', 'v', 'f', -1 };
+    static char res[] = { 'x', 'v', 'V', 'f', -1 };
     static int i = 0;
     return res[i++];
 }
@@ -407,8 +428,8 @@ xgetopt(int argc, char * const argv[], const char *optstring)
 #endif
 
 int
-operate(int argc, char **argv, int oper, char *file, const char *mode,
-    int verb)
+operate(int argc, char **argv, int oper, const char *file, const char *mode,
+    int verb, int everb)
 {
     FILE *archive;
     struct stat st;
@@ -449,14 +470,14 @@ operate(int argc, char **argv, int oper, char *file, const char *mode,
     } else
     if (oper == EXTRACT || oper == TEST) {
         int bs = st.st_size / 512;
-        int i;
         if (st.st_size % 512) {
             fprintf(stderr, "%s: strange file size (ignored error)\n", tar);
         }
-        extract_from_arch(archive, (argc==0)? NULL: argv, verb, bs,
+        extract_from_arch(archive, (argc==0)? NULL: argv, verb, everb, bs,
             oper==TEST);
     }
     fclose(archive);
+    return 0;
 }
 
 
@@ -466,6 +487,7 @@ main(int argc, char **argv)
     int oper = 0;
     char ch;
     int verb = 0;
+    int everb = 0;
     const char *mode = NULL;
     const char *file = NULL;
     char historic[10];
@@ -477,7 +499,7 @@ main(int argc, char **argv)
         strncat(historic, argv[1], sizeof(historic)-3);
         argv[1] = historic;
     }
-    while ( (ch = getopt(argc, argv, "hrtxcf:v")) != -1 ) 
+    while ( (ch = getopt(argc, argv, "hrtxcf:Vv")) != -1 ) 
     switch (ch) {
         case 't':
             if (oper) {
@@ -487,6 +509,8 @@ main(int argc, char **argv)
             oper = TEST;
             mode = "r";
             break;
+        case 'V':
+            everb = 1;
         case 'v':
             verb = 1;
             break;
@@ -541,5 +565,5 @@ main(int argc, char **argv)
         fprintf(stderr, "%s: operation not specified\n", tar);
         return -1;
     }
-    return operate(argc, argv, oper, file, mode, verb);
+    return operate(argc, argv, oper, file, mode, verb, everb);
 }
