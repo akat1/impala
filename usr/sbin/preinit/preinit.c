@@ -48,7 +48,7 @@ main(int argc, char **v)
     printf(" * extracting distribution archive\n");
     if ( (p = fork()) == 0 ) {
         chdir("/");
-        execve(tar, argv, envp);
+        execve(gzip, argv, envp);
         printf("preinit: cannot run tar\n");
         exit(-1);
     } else

@@ -121,7 +121,7 @@ void gz_compress(in, out)
         if (gzwrite(out, buf, (unsigned)len) != len) error(gzerror(out, &err));
     }
     fclose(in);
-/// if (gzclose(out) != Z_OK) error("failed gzclose");
+    if (gzclose(out) != Z_OK) error("failed gzclose");
 }
 
 #ifdef USE_MMAP /* MMAP version, Miguel Albrecht <malbrech@eso.org> */
@@ -174,6 +174,7 @@ void gz_uncompress(in, out)
 
     for (;;) {
         len = gzread(in, buf, sizeof(buf));
+        fprintf(stderr, "gzip: uncompressing file res=%i\n", len);
         if (len < 0) error (gzerror(in, &err));
         if (len == 0) break;
 
@@ -183,7 +184,7 @@ void gz_uncompress(in, out)
     }
     if (fclose(out)) error("failed fclose");
 
-//    if (gzclose(in) != Z_OK) error("failed gzclose");
+    if (gzclose(in) != Z_OK) error("failed gzclose");
 }
 
 
@@ -302,6 +303,7 @@ int main(argc, argv)
         SET_BINARY_MODE(stdin);
         SET_BINARY_MODE(stdout);
         if (uncompr) {
+            fprintf(stderr, "gzip: using stdin\n");
             file = gzdopen(fileno(stdin), "rb");
             if (file == NULL) error("can't gzdopen stdin");
             gz_uncompress(file, stdout);
