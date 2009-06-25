@@ -301,6 +301,7 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
 
 static void extract_from_arch(FILE *, char **, int, int, int, int);
 static int is_zero(const char *buf);
+static void progressbar(int percent, const char *fmt, ...);
 
 int
 is_zero(const char *buf)
@@ -314,18 +315,22 @@ is_zero(const char *buf)
 void
 progressbar(int percent, const char *fmt, ...)
 {   
+    enum {
+        FIX = 1000
+    };
     va_list ap;
     int i;
     int win;
     char buf[256];
     char *msg = buf;
     win = 80;   // czekamy na jaki¶ TIOCGETWINSZ czy tam co¶ innego
-    percent /= (win < 100)? (100/win) : (win/100);
+    int size = win;
+    int used = ((win*FIX)/100 * percent) / FIX;
     va_start(ap, fmt);
     vsnprintf(buf, win+1, fmt, ap);
     
     printf("\033[2K\r\033[7m");
-    for (i = 0; i < percent; i++) {
+    for (i = 0; i < used; i++) {
         if (*msg) {
             fputc(*msg, stdout);
             msg++;
@@ -334,14 +339,16 @@ progressbar(int percent, const char *fmt, ...)
         }
     }
     printf("\033[0m");
-    for (; i < win; i++) {
+    for (; i < size; i++) {
         if (*msg) {
             fputc(*msg, stdout);
             msg++;
+        } else {
+            fputc(' ', stdout);
         }
     }
     fflush(stdout);
-    sleep(1);
+    printf("\r");
 }
 
 void

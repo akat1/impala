@@ -23,6 +23,7 @@ main(int argc, char **v)
         NULL
     };
     pid_t p;
+    int status;
 #ifdef __Impala__
     setsid();
     open("/dev/ttyv1", O_RDONLY|O_NOCTTY);  //stdin
@@ -45,7 +46,11 @@ main(int argc, char **v)
         printf("cannot fork\n");
         while (1);
     }
-    sleep(50);
+    waitpid(p, &status, 0);
+    if (!WIFEXITED(status) || WEXITSTATUS(status)!=0 ) {
+        printf("tar exited with non zero code\n");
+        while(1);
+    }
     printf(" * executing %s\n", init);
     close(0);
     close(1);
