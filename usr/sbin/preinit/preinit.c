@@ -9,17 +9,22 @@
 #include <signal.h>
 #include <sys/thread.h>
 
-const char *dist_tar = "/mnt/fd0/impala/dist.tar";
-const char *tar = "/mnt/fd0/impala/tar";
-const char *init = "/sbin/init";
+#define dist_tar "/mnt/fd0/impala/dist.tar"
+#define tar "/mnt/fd0/impala/tar"
+#define init "/sbin/init"
+#define gzip "/mnt/fd0/impala/gzip"
 
 int
 main(int argc, char **v)
 {
-    char **argv[] = {
+    char * const argv[] = {
         "tar",
-        "xvf",
+        "xVf",
         dist_tar,
+        NULL
+    };
+    char * const envp[] = {
+        "GZIP=" gzip,
         NULL
     };
     pid_t p;
@@ -34,11 +39,12 @@ main(int argc, char **v)
     printf(" distribution archive: %s\n", dist_tar);
     printf(" tape archivizer: %s\n", tar);
     printf(" init program: %s\n", init);
+    printf(" gzip program: %s\n", gzip);
 
     printf(" * extracting distribution archive\n");
     if ( (p = fork()) == 0 ) {
         chdir("/");
-        execve(tar, argv, NULL);
+        execve(tar, argv, envp);
         printf("cannot run tar\n");
         exit(-1);
     } else

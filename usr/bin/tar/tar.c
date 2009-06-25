@@ -80,6 +80,7 @@ struct tentry {
 
 
 static const char *tar = "tar";
+static const char *gzip = "/bin/gzip";
 
 /*=============================================================================
  * pomocnicze procedury
@@ -534,6 +535,7 @@ main(int argc, char **argv)
     const char *file = NULL;
     char historic[10];
     tar = argv[0];
+    if ( getenv("GZIP") ) gzip = getenv("GZIP");
     // historic
     if (argc > 1 && argv[1][0] != '-') {
         historic[0] = '-';
