@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -30,15 +29,28 @@
  * $Id$
  */
 
-#ifndef __SYS_PARAM_H
-#define __SYS_PARAM_H
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/utsname.h>
+#include <sys/syscall.h>
 
-#include <machine/param.h>
+typedef struct uname_args uname_args_t;
+struct uname_args {
+    struct utsname *name;
+};
 
-#define SYSVMSG_MAX     20
-#define MSGMAX          1024
+int sc_uname(thread_t *p, syscall_result_t *r, uname_args_t *args);
 
-#define IMPALA_VERSION  "1"
-#define IMPALA_RELEASE  "devel"
-#endif
+int
+sc_uname(thread_t *t, syscall_result_t *r, uname_args_t *args)
+{
+    struct utsname uname;
+    str_cpy(uname.sysname, "Impala");
+    str_cpy(uname.nodename, "");
+    str_cpy(uname.release, IMPALA_RELEASE);
+    str_cpy(uname.version, IMPALA_VERSION);
+    str_cpy(uname.machine, IMPALA_MACHINE);
+    return copyout(args->name, &uname, sizeof(uname));
+}
+
 

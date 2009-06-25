@@ -67,3 +67,4 @@ SYS sigprocmask
 SYS sigreturn
 SYS getprocinfo
 SYS getmountinfo
+SYS uname

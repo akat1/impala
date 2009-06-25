@@ -27,6 +27,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
 	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
 	cp usr/bin/ps/ps ${DISTDIR}/bin/ps
+	cp usr/bin/uname/uname ${DISTDIR}/bin/uname
 	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/

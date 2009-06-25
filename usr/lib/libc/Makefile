@@ -102,6 +102,7 @@ SRCS=\
     sys/sys_siglist.c\
     sys/getprocinfo.c\
     sys/getmountinfo.c\
+    sys/uname.c\
     sys/mkdir.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\

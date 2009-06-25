@@ -30,15 +30,10 @@
  * $Id$
  */
 
-#ifndef __SYS_PARAM_H
-#define __SYS_PARAM_H
+#ifndef __MACHINE_PARAM_H
+#define __MACHINE_PARAM_H
 
-#include <machine/param.h>
+#define IMPALA_MACHINE "x86"
 
-#define SYSVMSG_MAX     20
-#define MSGMAX          1024
-
-#define IMPALA_VERSION  "1"
-#define IMPALA_RELEASE  "devel"
 #endif
 

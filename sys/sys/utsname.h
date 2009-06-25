@@ -29,16 +29,20 @@
  *
  * $Id$
  */
+#ifndef __SYS_UTSNAME_H
+#define __SYS_UTSNAME_H
 
-#ifndef __SYS_PARAM_H
-#define __SYS_PARAM_H
+struct utsname {
+    char sysname[20];
+    char nodename[20];
+    char release[20];
+    char version[20];
+    char machine[20];
+};
 
-#include <machine/param.h>
+#ifndef __KERNEL
+int uname(struct utsname *name);
+#endif
 
-#define SYSVMSG_MAX     20
-#define MSGMAX          1024
-
-#define IMPALA_VERSION  "1"
-#define IMPALA_RELEASE  "devel"
 #endif
 
