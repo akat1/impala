@@ -77,10 +77,10 @@ size_t   fread(void *, size_t, size_t, FILE *);
 // FILE    *freopen(const char *, const char *,
 //             FILE *);
 // int      fscanf(FILE *, const char *, ...);
-// int      fseek(FILE *, long, int);
+int      fseek(FILE *, long, int);
 // int      fseeko(FILE *, off_t, int);
 // int      fsetpos(FILE *, const fpos_t *);
-// long     ftell(FILE *);
+long     ftell(FILE *);
 // off_t    ftello(FILE *);
 // int      ftrylockfile(FILE *);
 // void     funlockfile(FILE *);

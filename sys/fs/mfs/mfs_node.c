@@ -108,7 +108,7 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     node->mfs = pnode->mfs;
     node->alloc_size = 0;
     node->type = VNODE_TO_MFS_TYPE(attr->va_type);
-    node->attr = attr->va_mode & 0777;
+    node->attr = attr->va_mode;
     node->data = (attr->va_size>0)?kmem_alloc(attr->va_size, KM_SLEEP):NULL;
     if(node->data == NULL)
         node->size = 0;
@@ -235,7 +235,7 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
         node->type = VNODE_TO_MFS_TYPE(attr->va_type);
     }
     if(attr->va_mask & VATTR_MODE)
-        node->attr = attr->va_mode & 0777;
+        node->attr = attr->va_mode;
     return 0;
 }
 

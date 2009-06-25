@@ -26,51 +26,60 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 486 2009-06-25 07:51:47Z wieczyk $
  */
 
-#include <sys/errno.h>
 #include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/sched.h>
-#include <sys/utils.h>
+#include <sys/kernel.h>
 #include <sys/syscall.h>
-#include <sys/file.h>
-#include <sys/proc.h>
-#include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/vm.h>
 
-typedef struct stat_args stat_args;
-
-struct stat_args {
-    int          mode;
-    char        *pathname;
-    struct stat *buf;
+typedef struct chown_args chown_args_t;
+struct chown_args {
+    char *fname;
+    uid_t uid;
+    gid_t gid;
 };
 
+int sc_chown(thread_t *p, syscall_result_t *r, chown_args_t *args);
 
-errno_t sc_stat(thread_t *p, syscall_result_t *r, stat_args *args);
-
-errno_t
-sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
+int
+sc_chown(thread_t *t, syscall_result_t *r, chown_args_t *args)
 {
-    int res=0;
+   int res=0;
     proc_t *p = t->thr_proc;
     vnode_t *node;
     char pname[PATH_MAX];
-    if((res = copyinstr(pname, args->pathname, PATH_MAX)))
+    if((res = copyinstr(pname, args->fname, PATH_MAX)))
         return res;
-    if((res = vm_is_avail((vm_addr_t)args->buf, sizeof(struct stat))))
-        return res;
-    res = vfs_lookup(p->p_curdir, &node, pname, t,
-                      (args->mode == STAT_LINK)?LKP_NO_FOLLOW:LKP_NORMAL);
+
+    res = vfs_lookup(p->p_curdir, &node, pname, t, LKP_NORMAL);
     if(res)
         return res;
-    res = vnode_stat(node, args->buf);
-    vrele(node);
-    if(res)
-        return res;
+    vattr_t va;
+    va.va_mask=VATTR_ALL;
+    if((res = VOP_GETATTR(node, &va)))
+        goto err;
+    res = -EPERM;
+    if(p->p_cred->p_euid != 0 && p->p_cred->p_euid != va.va_uid)
+        goto err;
+    if(p->p_cred->p_euid != 0)  //tak... póki co nie ma zmian dla nie roota
+        goto err;
+    va.va_mask = VATTR_UID | VATTR_GID | VATTR_MODE;
+    if(args->uid!=-1)
+        va.va_uid = args->uid;
+    if(args->gid!=-1)
+        va.va_gid = args->gid;
+    if(p->p_cred->p_euid!=0)   //tymczasowo niemo¿liwe
+        UNSET(va.va_mode, S_ISUID | S_ISGID);
+    if((res = VOP_SETATTR(node, &va)))
+        goto err;
+    vrele(node);    
     return 0;
+err:
+    vrele(node);
+    return res;
 }
+
 

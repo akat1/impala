@@ -40,7 +40,7 @@
 //TODO: odkomentowa³em rzeczy wymagane przez ash
 int          access(const char *, int);
 //unsigned     alarm(unsigned);
-//int          chown(const char *, uid_t, gid_t);
+int          chown(const char *, uid_t, gid_t);
 //size_t       confstr(int, char *, size_t);
 int          execl(const char *, const char *, ...);
 //int          execle(const char *, const char *, ...);
@@ -52,6 +52,7 @@ void         _exit(int);
 void         exit(int);
 //int          fchown(int, uid_t, gid_t);
 //long         fpathconf(int, int);
+int          fsync(int fd);
 int          ftruncate(int, off_t);
 char        *getcwd(char *, size_t);
 gid_t        getegid(void);

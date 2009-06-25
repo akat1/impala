@@ -26,51 +26,30 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: TEMPLATE.c 486 2009-06-25 07:51:47Z wieczyk $
  */
 
-#include <sys/errno.h>
 #include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/sched.h>
-#include <sys/utils.h>
+#include <sys/kernel.h>
 #include <sys/syscall.h>
-#include <sys/file.h>
-#include <sys/proc.h>
-#include <sys/errno.h>
-#include <sys/stat.h>
 #include <sys/vm.h>
 
-typedef struct stat_args stat_args;
-
-struct stat_args {
-    int          mode;
-    char        *pathname;
-    struct stat *buf;
+typedef struct ftell_args ftell_args_t;
+struct ftell_args {
+    int fd;
 };
 
+int sc_ftell(thread_t *p, syscall_result_t *r, ftell_args_t *args);
 
-errno_t sc_stat(thread_t *p, syscall_result_t *r, stat_args *args);
-
-errno_t
-sc_stat(thread_t *t, syscall_result_t *r, stat_args *args)
+int
+sc_ftell(thread_t *t, syscall_result_t *r, ftell_args_t *args)
 {
-    int res=0;
-    proc_t *p = t->thr_proc;
-    vnode_t *node;
-    char pname[PATH_MAX];
-    if((res = copyinstr(pname, args->pathname, PATH_MAX)))
-        return res;
-    if((res = vm_is_avail((vm_addr_t)args->buf, sizeof(struct stat))))
-        return res;
-    res = vfs_lookup(p->p_curdir, &node, pname, t,
-                      (args->mode == STAT_LINK)?LKP_NO_FOLLOW:LKP_NORMAL);
-    if(res)
-        return res;
-    res = vnode_stat(node, args->buf);
-    vrele(node);
-    if(res)
-        return res;
+    file_t *f = f_get(t->thr_proc->p_fd, args->fd);
+    if (!f)
+        return -EBADF;
+    r->result = f->f_offset;
+    frele(f);
     return 0;
 }
+
 

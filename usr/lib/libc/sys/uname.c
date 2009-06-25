@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <sys/utsname.h>
+#include <string.h>
 
 int
 uname(struct utsname *un)

@@ -101,6 +101,7 @@ struct stat {
 
 #else
 
+int chmod(const char *path, mode_t mode);
 int stat(const char *path, struct stat *buf);
 int fstat(int filedes, struct stat *buf);
 int lstat(const char *path, struct stat *buf);

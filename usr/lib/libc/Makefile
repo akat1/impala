@@ -26,6 +26,8 @@ SRCS=\
     stdio/fputs.c\
     stdio/fputc.c\
     stdio/fread.c\
+    stdio/fseek.c\
+    stdio/ftell.c\
     stdio/fwopen.c\
     stdio/fwrite.c\
     stdio/getchar.c\
@@ -79,6 +81,7 @@ SRCS=\
     string/strncpy.c\
     string/strpbrk.c\
     string/strrchr.c\
+    string/strsep.c\
     string/strspn.c\
     string/strtok.c\
     string/strxfrm.c\
@@ -98,6 +101,7 @@ SRCS=\
     signal/siginterrupt.c\
     signal/sigprocmask.c\
     signal/raise.c\
+    sys/chmod.c\
     sys/sched_yield.c\
     sys/sys_siglist.c\
     sys/getprocinfo.c\
@@ -121,6 +125,7 @@ SRCS=\
     thr/thr_getid.c\
     time/nanosleep.c\
     unistd/chdir.c\
+    unistd/chown.c\
     unistd/close.c\
     unistd/dup.c\
     unistd/dup2.c\
@@ -133,6 +138,7 @@ SRCS=\
     unistd/lseek.c\
     unistd/lstat.c\
     unistd/fork.c\
+    unistd/fsync.c\
     unistd/ftruncate.c\
     unistd/getcwd.c\
     unistd/getegid.c\
@@ -163,7 +169,6 @@ SRCS=\
     unistd/vfork.c\
     unistd/write.c\
     unistd/getopt.c\
-    other/chmod.c\
     other/closedir.c\
     other/getpwnam.c\
     other/getpwuid.c\

@@ -45,7 +45,36 @@ int sc_chmod(thread_t *p, syscall_result_t *r, chmod_args_t *args);
 int
 sc_chmod(thread_t *t, syscall_result_t *r, chmod_args_t *args)
 {
+    int res=0;
+    proc_t *p = t->thr_proc;
+    vnode_t *node;
+    char pname[PATH_MAX];
+    if((res = copyinstr(pname, args->fname, PATH_MAX)))
+        return res;
+
+    res = vfs_lookup(p->p_curdir, &node, pname, t, LKP_NORMAL);
+    if(res)
+        return res;
+    vattr_t va;
+    va.va_mask=VATTR_ALL;
+    if((res = VOP_GETATTR(node, &va)))
+        goto err;
+    res = -EPERM;
+    if(p->p_cred->p_euid != 0 && p->p_cred->p_euid != va.va_uid)
+        goto err;
+    mode_t mode = args->mode & 07777;
+    if(ISSET(mode, S_ISGID) && p->p_cred->p_euid!=0 
+        && va.va_gid!=p->p_cred->p_egid)
+        UNSET(mode, S_ISGID); //mamy prawo kasowaæ bit suid/sgid?
+    va.va_mask = VATTR_MODE;
+    va.va_mode = mode;
+    if((res = VOP_SETATTR(node, &va)))
+        goto err;
+    vrele(node);    
     return 0;
+err:
+    vrele(node);
+    return res;
 }
 
 

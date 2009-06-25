@@ -7,8 +7,6 @@ static int _parse_int(const char **src, int base);
 static void _parse_str(const char **src, char *res);
 //static char digits[] = "0123456789abcdef";
 
-#define isdigit(c)\
-    (('0' <= (c) && (c) <= '9') || ('a' <= (c) && (c) <= 'f'))
 
 #define todigit(c) (( (c) <= '9' )? (c) - '0' : (c) - 'a')
 void
