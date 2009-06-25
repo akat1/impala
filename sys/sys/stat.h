@@ -55,6 +55,7 @@ struct stat {
 #define st_mtime st_mtimespec.tv_sec
 #define st_ctime st_ctimespec.tv_sec
 
+#define S_TMASK    0770000
 
 #define S_IFMT     0170000
 #define S_IFSOCK   0140000
@@ -80,23 +81,23 @@ struct stat {
 #define S_IWOTH    00002
 #define S_IXOTH    00001
 
-#define S_ISREG(m) (m&S_IFREG)
-#define S_ISDIR(m) (m&S_IFDIR)
-#define S_ISCHR(m) (m&S_IFCHR)
-#define S_ISBLK(m) (m&S_IFBLK)
-#define S_ISFIFO(m) (m&S_IFIFO)
-#define S_ISSOCK(m) (m&S_IFSOCK)
-#define S_ISLNK(m) (m&S_IFLNK)
+#define S_ISREG(m) ((m&S_TMASK)==S_IFREG)
+#define S_ISDIR(m) ((m&S_TMASK)==S_IFDIR)
+#define S_ISCHR(m) ((m&S_TMASK)==S_IFCHR)
+#define S_ISBLK(m) ((m&S_TMASK)==S_IFBLK)
+#define S_ISFIFO(m) ((m&S_TMASK)==S_IFIFO)
+#define S_ISSOCK(m) ((m&S_TMASK)==S_IFSOCK)
+#define S_ISLNK(m) ((m&S_TMASK)==S_IFLNK)
 
 #define STAT_NORMAL 0
 #define STAT_LINK   1
 
 #ifdef __KERNEL
 
-#define VATYPE_TO_SMODE(t) ((t==VNODE_TYPE_DIR)?S_IFDIR:\
-                           ((t==VNODE_TYPE_REG)?S_IFREG:\
-                           ((t==VNODE_TYPE_DEV)?S_IFBLK:\
-                           ((t==VNODE_TYPE_LNK)?S_IFLNK:0))))
+#define VATYPE_TO_SMODE(t) (((t)==VNODE_TYPE_DIR)?S_IFDIR:\
+                           (((t)==VNODE_TYPE_REG)?S_IFREG:\
+                           (((t)==VNODE_TYPE_DEV)?S_IFBLK:\
+                           (((t)==VNODE_TYPE_LNK)?S_IFLNK:0))))
 
 #else
 

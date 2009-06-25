@@ -185,6 +185,7 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     if (!fs)
         return -1;
     fs->vfs_mdev = dev;
+    vref(mpoint);   //niech mpoint bêdzie nasz
     fs->vfs_mpoint = mpoint;
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");

@@ -107,10 +107,8 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     node->size = attr->va_size;
     node->mfs = pnode->mfs;
     node->alloc_size = 0;
-    node->type = (attr->va_type==VNODE_TYPE_REG)?MFS_TYPE_REG:
-                 (attr->va_type==VNODE_TYPE_DIR)?MFS_TYPE_DIR:
-                 (attr->va_type==VNODE_TYPE_LNK)?MFS_TYPE_LNK:0;
-    node->attr = attr->va_mode;
+    node->type = VNODE_TO_MFS_TYPE(attr->va_type);
+    node->attr = attr->va_mode & 0777;
     node->data = (attr->va_size>0)?kmem_alloc(attr->va_size, KM_SLEEP):NULL;
     if(node->data == NULL)
         node->size = 0;
@@ -198,12 +196,12 @@ int
 mfs_getattr(vnode_t *vn, vattr_t *attr)
 {
     mfs_node_t *node = vn->v_private;
+    if(!node)
+        return -EINVAL;
     if(attr->va_mask & VATTR_SIZE)
         attr->va_size = node->size;
     if(attr->va_mask & VATTR_TYPE)
-        attr->va_type = (node->type==MFS_TYPE_DIR)? VNODE_TYPE_DIR:
-                        (node->type==MFS_TYPE_REG)? VNODE_TYPE_REG:
-                        (node->type==MFS_TYPE_LNK)? VNODE_TYPE_LNK:0;
+        attr->va_type = MFS_TO_VNODE_TYPE(node->type);
     if(attr->va_mask & VATTR_MODE)
         attr->va_mode = node->attr;
     if(attr->va_mask & VATTR_UID)
@@ -234,16 +232,10 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
             node->size = attr->va_size; //obicinamy
     }
     if(attr->va_mask & VATTR_TYPE) {
-        if(attr->va_type == VNODE_TYPE_DIR)
-            node->type = MFS_TYPE_DIR;
-        else if(attr->va_type == VNODE_TYPE_REG)
-            node->type = MFS_TYPE_REG;
-        else if(attr->va_type == VNODE_TYPE_LNK)
-            node->type = MFS_TYPE_LNK;
-        else return -EINVAL;
+        node->type = VNODE_TO_MFS_TYPE(attr->va_type);
     }
     if(attr->va_mask & VATTR_MODE)
-        node->attr = attr->va_mode;
+        node->attr = attr->va_mode & 0777;
     return 0;
 }
 

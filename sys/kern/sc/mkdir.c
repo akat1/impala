@@ -40,16 +40,24 @@ struct mkdir_args {
     mode_t m;
 };
 
-int sc_mkdir(thread_t *p, syscall_result_t *r, mkdir_args_t *args);
+int sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args);
 
 int
 sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
 {
     vnode_t *vp;
+    int err = 0;
+    proc_t *p = t->thr_proc;
     vattr_t a;
     mem_zero(&a, sizeof(a));
     a.va_type = VNODE_TYPE_DIR;
-    return VOP_MKDIR(t->thr_proc->p_curdir, &vp, args->name, &a);
+    a.va_mode = args->m & ~(p->p_umask) & 0777;
+    a.va_uid = p->p_cred->p_uid;
+    a.va_gid = p->p_cred->p_gid;
+    if((err = VOP_MKDIR(p->p_curdir, &vp, args->name, &a)))
+        return err;
+    vrele(vp);
+    return 0;
 }
 
 

@@ -118,15 +118,16 @@ prepare_root()
 {
     vfs_mountroot();
 
-    vnode_t *res;
+    vnode_t *res, *res2;
     vattr_t attr;
     attr.va_type = VNODE_TYPE_DIR;
+    attr.va_mode = 755;
     attr.va_size = 0;
-    VOP_MKDIR(rootvnode, &res, "dev", &attr);
-    VOP_MKDIR(rootvnode, &res, "bin", &attr);
+    VOP_MKDIR(rootvnode, &res, "dev", &attr); vrele(res);
+    VOP_MKDIR(rootvnode, &res, "bin", &attr); vrele(res);
 
-    VOP_MKDIR(rootvnode, &res, "mnt", &attr);
-    VOP_MKDIR(res, &res, "fd0", &attr);
+    VOP_MKDIR(rootvnode, &res, "mnt", &attr); 
+    VOP_MKDIR(res, &res2, "fd0", &attr); vrele(res);
 
     vnode_t *devdir;
     if(!vfs_lookup(NULL, &devdir, "/dev", NULL, LKP_NORMAL))
@@ -143,7 +144,8 @@ prepare_root()
         panic("cannot open root device %s", _rootdev);
     }
 
-    vfs_mount("fatfs", res, devn->v_dev);
+    vfs_mount("fatfs", res2, devn->v_dev);
+    vrele(res2);
 }
 
 void

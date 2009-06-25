@@ -86,7 +86,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         if(error)
             return error;
         vattr_t attr;
-        attr.va_mode = arg->mode & ~(proc->p_umask);
+        attr.va_mode = arg->mode & ~(proc->p_umask) & 0777;
         attr.va_type = VNODE_TYPE_REG;
         attr.va_uid = proc->p_cred->p_uid;
         attr.va_gid = proc->p_cred->p_gid;

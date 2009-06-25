@@ -78,8 +78,7 @@ _get_vnode(mfs_node_t *en, vnode_t **vpp, vfs_t *fs)
         res->v_vfs = fs;
         res->v_flags = (en->parent)?0:VNODE_FLAG_ROOT;
         res->v_ops = &mfs_vnode_ops;
-        res->v_type = (en->type==MFS_TYPE_DIR)?
-                        VNODE_TYPE_DIR:VNODE_TYPE_REG;
+        res->v_type = MFS_TO_VNODE_TYPE(en->type);
         res->v_private = en;
         en->vnode = res;
     } else vref(en->vnode);

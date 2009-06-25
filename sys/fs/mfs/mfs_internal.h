@@ -34,6 +34,15 @@ struct mfs_data {
 };
 
 
+#define MFS_TO_VNODE_TYPE(tt) (((tt)==MFS_TYPE_DIR)? VNODE_TYPE_DIR: \
+                                ((tt)==MFS_TYPE_REG)? VNODE_TYPE_REG: \
+                                ((tt)==MFS_TYPE_LNK)? VNODE_TYPE_LNK:0)
+                                
+#define VNODE_TO_MFS_TYPE(tt)   (((tt) == VNODE_TYPE_DIR)? MFS_TYPE_DIR: \
+                                 ((tt) == VNODE_TYPE_REG)? MFS_TYPE_REG: \
+                                 ((tt) == VNODE_TYPE_LNK)? MFS_TYPE_LNK:0)
+
+
 int mfs_blk_write(mfs_node_t *n, uio_t *uio);
 int mfs_blk_read(mfs_node_t *n, uio_t *uio);
 int mfs_blk_set_area(mfs_node_t *n, size_t s);
