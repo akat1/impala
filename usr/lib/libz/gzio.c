@@ -974,7 +974,7 @@ int ZEXPORT gzclose (file)
 #ifdef STDC
 #  define zstrerror(errnum) strerror(errnum)
 #else
-#  define zstrerror(errnum) ""
+#  define zstrerror(errnum) "nozstrerror()"
 #endif
 
 /* ===========================================================================
@@ -992,11 +992,12 @@ const char * ZEXPORT gzerror (file, errnum)
     gz_stream *s = (gz_stream*)file;
 
     if (s == NULL) {
+        fprintf(stderr, "zlib: s == NULL\n");
         *errnum = Z_STREAM_ERROR;
         return (const char*)ERR_MSG(Z_STREAM_ERROR);
     }
     *errnum = s->z_err;
-    if (*errnum == Z_OK) return (const char*)"";
+    if (*errnum == Z_OK) { fprintf(stderr, "zlib: OK\n"); return (const char*)""; }
 
     m = (char*)(*errnum == Z_ERRNO ? zstrerror(errno) : s->stream.msg);
 
@@ -1004,10 +1005,11 @@ const char * ZEXPORT gzerror (file, errnum)
 
     TRYFREE(s->msg);
     s->msg = (char*)ALLOC(strlen(s->path) + strlen(m) + 3);
-    if (s->msg == Z_NULL) return (const char*)ERR_MSG(Z_MEM_ERROR);
+    if (s->msg == Z_NULL) { fprintf(stderr, "zlib: !?\n"); return (const char*)ERR_MSG(Z_MEM_ERROR); }
     strcpy(s->msg, s->path);
     strcat(s->msg, ": ");
     strcat(s->msg, m);
+    fprintf(stderr, "zlib: ret\n");
     return (const char*)s->msg;
 }
 

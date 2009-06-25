@@ -16,7 +16,7 @@
 #if defined(VMS) || defined(RISCOS)
 #  define TESTFILE "foo-gz"
 #else
-#  define TESTFILE "foo.gz"
+#  define TESTFILE "/foo.gz"
 #endif
 
 #define CHECK_ERR(err, msg) { \

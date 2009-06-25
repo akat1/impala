@@ -18,7 +18,8 @@ int
 main(int argc, char **v)
 {
     char * const argv[] = {
-        "tar",
+        "example",
+        NULL,
         "xVf",
         dist_tar,
         NULL

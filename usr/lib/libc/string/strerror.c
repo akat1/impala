@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
 
 static char *__err_list[] =
@@ -89,6 +90,7 @@ static char *__noerr = "No error.";
 char *
 strerror(int errnum)
 {
+    fprintf(stderr, "asking about %u\n", errnum);
     if(errnum == 0)
         return __noerr;
     if(errnum>=E2BIG && errnum<=EXDEV)
