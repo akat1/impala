@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: fdc.h 155 2009-04-28 12:50:35Z wieczyk $
+ * $Id$
  */
 
 #ifndef __DEV_FDC_FDC_H

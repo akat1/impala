@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: bus_isa.c 155 2009-04-28 12:50:35Z wieczyk $
+ * $Id$
  */
 
 #include <sys/types.h>

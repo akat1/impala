@@ -92,13 +92,8 @@ fatfs_dirent_read(fatfs_inode_t *inode)
     int i = inode->clustart;
 
     lfn_cache_reset(&lfn);
-//     SDEBUGF("need to load directory from device clu=%u/%u %p", i,N, inode);
-//     SDEBUGF("inode=%p vnode=%p fatfs=%p clubuf=%p",
-//         inode, inode->vn, inode->fatfs, inode->clubuf);
     do {
-//         SDEBUGF("current clu=%i", i);
         if (isRoot) {
-//             SDEBUGF("reading sector");
             iobuf_t *bp = bio_read(fatfs->dev, i);
             if (ISSET(bp->flags, BIO_ERROR)) {
                 bio_release(bp);
@@ -107,12 +102,11 @@ fatfs_dirent_read(fatfs_inode_t *inode)
             mem_cpy(inode->clubuf, bp->addr, fatfs->secsize);
             bio_release(bp);
             i++;
-        } else { //SDEBUGF("reading cluster");
+        } else {
         if (fatfs_clu_read(fatfs, i, inode)) {
             goto error;
         }}
         fatfs_dentry_t *dents = inode->clubuf;
-//         SDEBUGF("Interpreting content...");
         for (int j = 0; j < N; j++) {
             if (dents[j].attr == FATFS_LONGNAME) {
                 lfn_cache_insert(&lfn, &dents[j]);
@@ -120,7 +114,6 @@ fatfs_dirent_read(fatfs_inode_t *inode)
             }
             if (dents[j].attr == 0 || ISSET(dents[j].attr,FATFS_SKIP))
                 continue;
-//             SDEBUGF("entry");
             fatfs_dirent_t *entry = NEW_DIRENT();
             if (lfn_cache_parse(&lfn, entry->name)) {
                 char *ptr = entry->name;
@@ -140,7 +133,6 @@ fatfs_dirent_read(fatfs_inode_t *inode)
             entry->size = FAT_D_GET_SIZE(&dents[j]);
             entry->clustart = FAT_D_GET_INDEX(&dents[j]);
             entry->inode = NULL;
-//             DEBUGF("+%s %u %u",entry->name, entry->clustart, entry->size);
             list_insert_tail(&inode->un.dir.dirents, entry);
             lfn_cache_reset(&lfn);
         }
@@ -258,8 +250,6 @@ lfn_cache_insert(lfn_cache_t *cache, fatfs_dentry_t *d)
 int
 lfn_cache_parse(lfn_cache_t *lfn, char *output)
 {
-//     const char *p = output;
-
 #define NOT_END(j,name)\
     (lfn->chunks[i].name[2*j] != 0x00 && \
     lfn->chunks[i].name[2*j]  != 0xff)
@@ -278,7 +268,6 @@ lfn_cache_parse(lfn_cache_t *lfn, char *output)
         }
         *output = 0;
     }
-
 #undef NOT_END
     return err;
 }

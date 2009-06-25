@@ -169,10 +169,7 @@ fatfs_read(vnode_t *v, uio_t *u, int flags)
     size_t wsize = fatfs->clusize*fatfs->secsize;
     size_t xfer = 0;
     u->resid = u->size;
-//     DEBUGF("!!!!!!!!transfer off=%p size=%x", u->offset, u->size);
     do {
-//          DEBUGF("window(%x,%x) :- off=%x resid=%u", window, window+wsize,
-//              u->offset, u->resid);
         if ( INRNG_COL(u->offset,window,wsize) ) {
             off_t off = u->offset - window;
             int min = MIN(wsize-off, u->resid);
@@ -181,10 +178,8 @@ fatfs_read(vnode_t *v, uio_t *u, int flags)
             uio_move(buf+off, min , u);
             xfer += min;
         }
-//         ssleep(2);
         window += wsize;
     } while ( FATFS_UNTIL_EOF(fatfs, clu) && u->resid );
-//     DEBUGF("readed %u bytes", xfer);
     return xfer;
 }
 

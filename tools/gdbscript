@@ -2,11 +2,40 @@
 #
 # Skrypciki s± dla GDB 6.8, w 6.1 jest inna sk³adnia.
 
-define adder
-    if $argc == 2
-        $arg0 + $arg1
-    end
+# Czasem GDB nie rozpoznaje niektórych typów,
+# i trzeba rzutowaæ przy print(). cprint automatycznie
+# rzutuje.
+
+define cprint
+    print (const char*) $arg0
 end
+
+#
+# watch() oferowany przez GDB automatycznie
+# kasuje punkt wstrzymania, je¿eli wyjdzie z zasiêgu
+# symbolu który obserwujemy.
+#
+# g(lobal)watch uruchamia watch'a bezpo¶rednio na danej
+# pamiêci, pomijaj±c symbole.
+#
+
+define gwatch
+    watch *(void*) $arg0
+end
+
+define gwatch32
+    watch *(uint32_t*) $arg0
+end
+
+define gwatch16
+    watch *(uint16_t*) $arg0
+end
+
+define gwatch8
+    watch *(uint8_t*) $arg0
+end
+
+
 
 # zakomentuj poni¿sz± linie je¿eli nie u¿ywasz Bochs
 # set can-use-hw-watchpoints 0

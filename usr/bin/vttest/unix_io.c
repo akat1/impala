@@ -1,4 +1,4 @@
-/* $Id: unix_io.c,v 1.21 2006/11/26 17:30:44 tom Exp $ */
+/* $Id$ */
 
 #include <stdarg.h>
 #include <unistd.h>

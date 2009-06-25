@@ -1,4 +1,4 @@
-/* $Id: draw.h,v 1.2 2004/08/01 22:51:46 tom Exp $ */
+/* $Id$ */
 
 typedef struct {
   int top;

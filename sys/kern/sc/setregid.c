@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: setregid.c 249 2009-05-24 15:14:24Z shm $
+ * $Id$
  */
 
 #include <sys/errno.h>

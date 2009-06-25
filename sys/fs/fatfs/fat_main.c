@@ -66,7 +66,7 @@ int
 fat_mount(vfs_t *fs)
 {
     int err;
-    DEBUGF("OK, trying to get superblock");
+    DEBUGF("reading super block");
     iobuf_t *bp = bio_read(fs->vfs_mdev, 0);
     if ( ISSET(bp->flags,BIO_ERROR) ) {
         DEBUGF("cannot read superblock");
@@ -76,7 +76,7 @@ fat_mount(vfs_t *fs)
     fatfs_sblock_t *sblock = bp->addr;
 
     if (sblock->media != 0xf0) {
-        DEBUGF("FAT12 on 1440kB floppy is supported only");
+        DEBUGF("only FAT12 on 1440kB floppy is supported");
         bio_release(bp);
         return -ENOTSUP;
     }
@@ -102,7 +102,7 @@ fat_mount(vfs_t *fs)
     bio_release(bp);
     fatfs->clubsize = fatfs->secsize * fatfs->clusize;
 
-    DEBUGF("FAT12: diskmap FAT1=%u FAT2=%u ROOT=%u DATA=%u CS=%u",
+    DEBUGF("FAT: diskmap FAT1=%u FAT2=%u ROOT=%u DATA=%u CS=%u",
         fatfs->blkno_fat[0], fatfs->blkno_fat[1], fatfs->blkno_root,
         fatfs->blkno_data, fatfs->clubsize);
 

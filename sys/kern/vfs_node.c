@@ -211,7 +211,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
                 (path->now)-=2;
             } else  //brak drugiej kropki
             if(*(path->now) == '/' || *(path->now)=='\0') { // zostajemy gdzie jeste¶my
-                (path->now)++;
+                if (*path->now) (path->now)++;
                 continue;
             } else  // co¶ innego z kropk±..
                 (path->now)--;

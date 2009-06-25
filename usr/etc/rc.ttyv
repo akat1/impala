@@ -1,4 +1,6 @@
 #!/bin/sh
 
-echo "Welcome."
+echo 
+cd /
+cat /etc/motd
 exec /bin/sh

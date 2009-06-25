@@ -1,4 +1,4 @@
-/* $Id: reports.c,v 1.28 2004/08/03 01:07:35 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <ttymodes.h>

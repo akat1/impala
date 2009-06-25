@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: kern_console.c 281 2009-05-28 16:04:04Z takeshi $
+ * $Id$
  */
 
 #include <fs/devfs/devfs.h>

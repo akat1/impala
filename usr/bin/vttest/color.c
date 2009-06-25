@@ -1,4 +1,4 @@
-/* $Id: color.c,v 1.29 2007/12/16 15:45:44 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <draw.h>

@@ -1,4 +1,4 @@
-/* $Id: vttest.h,v 1.72 2007/01/07 16:43:08 tom Exp $ */
+/* $Id$ */
 
 #ifndef VTTEST_H
 #define VTTEST_H 1

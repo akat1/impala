@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: setreuid.c 277 2009-05-27 15:36:10Z shm $
+ * $Id$
  */
 
 #include <sys/errno.h>

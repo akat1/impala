@@ -28,7 +28,7 @@ main(int argc, char **v)
     open(v[1], O_RDONLY);
     open(v[1], O_WRONLY);
     open(v[1], O_WRONLY);
-    v++;
-    execve(v[2], v , environ);
+    v+=2;
+    execve(v[0], v , environ);
     return 0;
 }

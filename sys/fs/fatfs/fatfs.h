@@ -185,6 +185,7 @@ struct fatfs_inode {
     vnode_t    *vn;
     void       *clubuf;
     int         clunum;
+    int         refcnt;
     union {
         struct {
             int dents;
@@ -211,6 +212,9 @@ int fatfs_dirent_lookup(fatfs_inode_t *, fatfs_inode_t **, const char *);
 void fatfs_inode_prepare(fatfs_t *fatfs, fatfs_inode_t *inode, int type);
 void fatfs_inode_create(fatfs_t *fatfs, fatfs_dirent_t *);
 int fatfs_dirent_read(fatfs_inode_t *i);
+
+void fatfs_inode_ref(fatfs_inode_t *);
+void fatfs_inode_rel(fatfs_inode_t *);
 
 #define FATFS_UNTIL_EOF(fatfs,clu)\
     ((clu = fatfs_fat_next(fatfs,clu)) <= fatfs->clu_used)

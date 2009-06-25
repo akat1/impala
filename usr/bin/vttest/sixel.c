@@ -1,4 +1,4 @@
-/* $Id: sixel.c,v 1.9 2007/01/07 17:03:13 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <ttymodes.h>

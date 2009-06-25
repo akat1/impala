@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: getdents.c 269 2009-05-26 12:45:39Z takeshi $
+ * $Id$
  */
 
 #include <sys/types.h>

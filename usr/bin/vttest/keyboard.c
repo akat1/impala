@@ -1,4 +1,4 @@
-/* $Id: keyboard.c,v 1.32 2007/01/07 16:51:03 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <ttymodes.h>

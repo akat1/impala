@@ -1,4 +1,4 @@
-/* $Id: xterm.c,v 1.36 2007/12/16 15:46:52 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

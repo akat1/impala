@@ -1,4 +1,4 @@
-/* $Id: esc.h,v 1.56 2007/01/07 17:02:26 tom Exp $ */
+/* $Id$ */
 
 #ifndef ESC_H
 #define ESC_H 1

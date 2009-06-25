@@ -1,4 +1,4 @@
-/* $Id: vt420.c,v 1.77 2007/12/16 20:01:53 tom Exp $ */
+/* $Id$ */
 
 /*
  * Reference:  Installing and Using the VT420 Video Terminal (North American

@@ -1,4 +1,4 @@
-/* $Id: mouse.c,v 1.8 2007/12/16 15:46:25 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

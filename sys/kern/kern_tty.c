@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: kern_console.c 281 2009-05-28 16:04:04Z takeshi $
+ * $Id$
  */
 
 #include <fs/devfs/devfs.h>
@@ -126,8 +126,8 @@ tty_open(devd_t *d, int flags)
         && (p->p_session == p->p_pid)
         && (tty->t_session == -1)) {
         //ustawiamy terminal steruj±cy procesu
-        kprintf("TTY Open: Setting as CTTY for session leader - pid %i\n",
-                 p->p_pid);
+//        kprintf("TTY Open: Setting as CTTY for session leader - pid %i\n",
+//                 p->p_pid);
         p->p_ctty = tty;
         tty->t_session = p->p_session;
         tty->t_group = p->p_group;

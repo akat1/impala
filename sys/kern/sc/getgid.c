@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: getuid.c 189 2009-05-09 18:31:20Z wieczyk $
+ * $Id$
  */
 
 #include <sys/errno.h>

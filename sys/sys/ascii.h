@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: aout.h 241 2009-05-21 09:45:17Z wieczyk $
+ * $Id$
  */
 
 #ifndef __SYS_ASCII_H

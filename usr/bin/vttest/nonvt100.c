@@ -1,4 +1,4 @@
-/* $Id: nonvt100.c,v 1.39 2006/11/26 17:22:13 tom Exp $ */
+/* $Id$ */
 
 /*
  * The list of non-VT320 codes was compiled using the list of non-VT320 codes

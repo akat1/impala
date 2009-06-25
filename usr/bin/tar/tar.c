@@ -30,12 +30,6 @@
  * $Id$
  */
 
-#ifdef __Impala__
-#define getopt getopt_
-#define optind optind_
-#define optarg optarg_
-#endif
-
 #define __POSIX_C_SOURCE 200112L
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -48,15 +42,8 @@
 #include "tar.h"
 
 
-#ifdef __Impala__
-#undef getopt
-#undef optind
-#undef optarg
-#endif
-
-
-/*
- * Bardzo prosta implementacja USTAR (Uniform Standard TAR - POSIX), obs³ugujemy
+/*=============================================================================
+ * Bardzo prosta implementacja USTAR (Uniform Standard TAR), obs³ugujemy
  * te¿ GNU sygnaturê (GNU tar produkuje tary oznaczone "prawie" jako USTAR).
  *      -- wieczyk
  */
@@ -90,25 +77,23 @@ struct tentry {
 };
 
 
-int main(int argc, char **argv);
-
-static void write_header(FILE *, struct tentry *, const char *, const char *,
-        uid_t, gid_t, size_t, mode_t, time_t );
-static void append_dir_to_arch(FILE *, const char *, int, const char *);
-static void append_file_to_arch(FILE *, const char *, int, const char *);
-static void append_to_arch(FILE *, const char *, int, const char *);
-static void extract_from_arch(FILE *, char **, int, int, int);
-
-static void write_num(char *, int, int);
-unsigned int read_num(const char *, int );
-static int is_in_list(char **, const char *);
-const char *mode2str(const char *, int);
 
 static const char *tar = "tar";
 
+/*=============================================================================
+ * pomocnicze procedury
+ */
+
+static void write_header(FILE *, struct tentry *, const char *, const char *,
+        uid_t, gid_t, size_t, mode_t, time_t );
+static void write_num(char *, int, int);
+static unsigned int read_num(const char *, int );
+static int is_in_list(char **, const char *);
+static const char *mode2str(const char *, int);
 
 #define WRITE_NUM(dst, num) write_num(dst, sizeof(dst), num)
 #define READ_NUM(src) read_num(src, sizeof(src))
+
 
 void
 write_num(char *dst, int size, int num)
@@ -138,6 +123,7 @@ mode2str(const char *_m, int type)
     static char out[11];
     mode_t m = read_num(_m, 12);
     switch (type) {
+        case AREGTYPE:
         case REGTYPE:
             out[0] = '-';
             break;
@@ -150,15 +136,15 @@ mode2str(const char *_m, int type)
     }
     // tak, mo¿na to zrobiæ w 3 iteracjach jakiej¶
     // pêtli interpretuj±cej po 3 bity, ale po co?
-    out[1] = iss(TUREAD, 'r');
+    out[1] = iss(TUREAD,  'r');
     out[2] = iss(TUWRITE, 'w');
-    out[3] = iss(TUEXEC, 'x');
-    out[4] = iss(TGREAD, 'r');
+    out[3] = iss(TUEXEC,  'x');
+    out[4] = iss(TGREAD,  'r');
     out[5] = iss(TGWRITE, 'w');
-    out[6] = iss(TGEXEC, 'x');
-    out[7] = iss(TOREAD, 'r');
+    out[6] = iss(TGEXEC,  'x');
+    out[7] = iss(TOREAD,  'r');
     out[8] = iss(TOWRITE, 'w');
-    out[9] = iss(TOEXEC, 'x');
+    out[9] = iss(TOEXEC,  'x');
     out[10] = 0;
 #undef iss
     return out;
@@ -208,6 +194,10 @@ write_header(FILE *archive, struct tentry *entry, const char *uname,
  * oraz append_dir_to_arch gdy to katalog - wtedy jest wzajemna rekursja
  * miêdzy tymi dwoma procedurami.
  */
+
+static void append_dir_to_arch(FILE *, const char *, int, const char *);
+static void append_file_to_arch(FILE *, const char *, int, const char *);
+static void append_to_arch(FILE *, const char *, int, const char *);
 
 void
 append_dir_to_arch(FILE *archive, const char *dirname, int verb, const char *PREFIX)
@@ -304,6 +294,12 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
 
 }
 
+/*=============================================================================
+ * rozpakowywanie elementów z archiwum (i testowanie)
+ */
+
+static void extract_from_arch(FILE *, char **, int, int, int);
+
 int
 is_zero(const char *buf)
 {
@@ -387,19 +383,81 @@ extract_from_arch(FILE *archive, char **names, int verb, int blocks,
     }
 }
 
+/*=============================================================================
+ * program w³a¶ciwy
+ */
+
+int main(int argc, char **argv);
+
 #ifdef __Impala__
-static char *optarg = "/mnt/fd0/impala/dist.tar";
-static int optind = 3;
+static char *xoptarg = "/mnt/fd0/impala/dist.tar";
+static int xoptind = 3;
 
 static int
-getopt(int argc, char * const argv[], const char *optstring)
+xgetopt(int argc, char * const argv[], const char *optstring)
 {
     static char res[] = { 'x', 'v', 'f', -1 };
     static int i = 0;
     return res[i++];
 }
 
+#define getopt xgetopt
+#define optind xoptind
+#define optarg xoptarg
 #endif
+
+int
+operate(int argc, char **argv, int oper, char *file, const char *mode,
+    int verb)
+{
+    FILE *archive;
+    struct stat st;
+
+    if (!file) {
+        fprintf(stderr, "%s: forgot to specify archive file\n", tar);
+        return -1;
+    }
+    if (oper == APPEND) {
+        fprintf(stderr, "%s: operation -r not supported\n", tar);
+        return -1;
+    }
+    if (oper == CREATE && argc == 0) {
+        fprintf(stderr, "%s: no files\n", tar);
+        return -1;
+    }
+    if (oper != CREATE) {
+        if (stat(file, &st)) {
+            fprintf(stderr, "%s: cannot stat(2) on file %s\n", tar, file);
+            return -1;
+        }
+    }
+    archive = fopen(file, mode);
+    if (!archive) {
+        ///@todo bledy
+        fprintf(stderr, "%s: cannot open archive\n", tar);
+        return -1;
+    }
+    if (oper == CREATE) {
+        int i;
+        for (i = 0; i < argc; i++) {
+            append_to_arch(archive, argv[i], verb, "");
+        }
+        char block[512];
+        memset(block, 0, 512);
+        fwrite(block, 512, 1, archive);
+        fwrite(block, 512, 1, archive);
+    } else
+    if (oper == EXTRACT || oper == TEST) {
+        int bs = st.st_size / 512;
+        int i;
+        if (st.st_size % 512) {
+            fprintf(stderr, "%s: strange file size (ignored error)\n", tar);
+        }
+        extract_from_arch(archive, (argc==0)? NULL: argv, verb, bs,
+            oper==TEST);
+    }
+    fclose(archive);
+}
 
 
 int
@@ -408,10 +466,8 @@ main(int argc, char **argv)
     int oper = 0;
     char ch;
     int verb = 0;
-    const char *file = NULL;
     const char *mode = NULL;
-    FILE *archive;
-    struct stat st;
+    const char *file = NULL;
     char historic[10];
     tar = argv[0];
     // historic
@@ -485,49 +541,5 @@ main(int argc, char **argv)
         fprintf(stderr, "%s: operation not specified\n", tar);
         return -1;
     }
-    if (!file) {
-        fprintf(stderr, "%s: forgot to specify archive file\n", tar);
-        return -1;
-    }
-    if (oper == APPEND) {
-        fprintf(stderr, "%s: operation -r not supported\n", tar);
-        return -1;
-    }
-    if (oper == CREATE && argc == 0) {
-        fprintf(stderr, "%s: no files\n", tar);
-        return -1;
-    }
-    if (oper != CREATE) {
-        if (stat(file, &st)) {
-            fprintf(stderr, "%s: cannot stat(2) on file %s\n", tar, file);
-            return -1;
-        }
-    }
-    archive = fopen(file, mode);
-    if (!archive) {
-        ///@todo bledy
-        fprintf(stderr, "%s: cannot open archive\n", tar);
-        return -1;
-    }
-    if (oper == CREATE) {
-        int i;
-        for (i = 0; i < argc; i++) {
-            append_to_arch(archive, argv[i], verb, "");
-        }
-        char block[512];
-        memset(block, 0, 512);
-        fwrite(block, 512, 1, archive);
-        fwrite(block, 512, 1, archive);
-    } else
-    if (oper == EXTRACT || oper == TEST) {
-        int bs = st.st_size / 512;
-        int i;
-        if (st.st_size % 512) {
-            fprintf(stderr, "%s: strange file size (ignored error)\n", tar);
-        }
-        extract_from_arch(archive, (argc==0)? NULL: argv, verb, bs,
-            oper==TEST);
-    }
-    fclose(archive);
-    return 0;
+    return operate(argc, argv, oper, file, mode, verb);
 }

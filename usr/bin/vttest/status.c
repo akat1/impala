@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.4 1996/09/09 23:46:53 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

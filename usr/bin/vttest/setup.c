@@ -1,4 +1,4 @@
-/* $Id: setup.c,v 1.28 2007/12/16 15:45:14 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

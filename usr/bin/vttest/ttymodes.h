@@ -1,4 +1,4 @@
-/* $Id: ttymodes.h,v 1.3 1996/08/22 10:56:18 tom Exp $ */
+/* $Id$ */
 
 #ifndef TTYMODES_H
 #define TTYMODES_H 1

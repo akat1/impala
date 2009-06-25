@@ -1,4 +1,4 @@
-/* $Id: reset.c,v 1.5 1996/09/28 12:36:27 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: read.c 281 2009-05-28 16:04:04Z takeshi $
+ * $Id$
  */
 
 #include <sys/types.h>

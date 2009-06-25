@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: dup.c 254 2009-05-24 23:23:10Z wieczyk $
+ * $Id$
  */
 
 #include <sys/errno.h>

@@ -1,4 +1,4 @@
-/* $Id: tek4014.c,v 1.10 2007/12/16 15:45:25 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

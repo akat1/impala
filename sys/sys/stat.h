@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: types.h 286 2009-05-30 00:00:10Z wieczyk $
+ * $Id$
  */
 #ifndef __SYS_STAT_H
 #define __SYS_STAT_H

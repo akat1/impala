@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: write.c 278 2009-05-27 15:36:45Z takeshi $
+ * $Id$
  */
 
 #include <sys/types.h>

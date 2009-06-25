@@ -18,7 +18,7 @@ do
     if [ ! $ttyv = "ttyv1" ]
     then
         echo -n " $ttyv"
-        #/sbin/ttyvrun /dev/$ttyv /bin/sh /etc/rc.ttyv
+        /sbin/ttyvrun /dev/$ttyv /bin/sh /etc/rc.ttyv
     fi
 done
 cd /

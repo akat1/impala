@@ -25,9 +25,11 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/test/test ${DISTDIR}/bin/test
 	cp usr/bin/vttest/vttest ${DISTDIR}/bin/vttest
 	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
+	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
 	cp usr/bin/ps/ps ${DISTDIR}/bin/ps
 	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
 	cp usr/etc/rc.* ${DISTDIR}/etc/
+	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
 	cd output/dist && tar cvf ../impala/dist.tar *

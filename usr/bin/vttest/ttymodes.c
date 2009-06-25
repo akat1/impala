@@ -1,4 +1,4 @@
-/* $Id: ttymodes.c,v 1.19 2007/03/04 13:50:41 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <ttymodes.h>

@@ -1,4 +1,4 @@
-/* $Id: vt220.c,v 1.18 2006/11/26 17:30:11 tom Exp $ */
+/* $Id$ */
 
 /*
  * Reference:  VT220 Programmer Pocket Guide (EK-VT220-HR-002).

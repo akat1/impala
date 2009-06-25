@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 1.36 2005/10/19 22:50:13 tom Exp $
+# $Id$
 # Makefile-template for 'vttest'
 
 THIS = vttest

@@ -1,4 +1,4 @@
-/* $Id: vt320.c,v 1.13 2007/01/07 17:03:32 tom Exp $ */
+/* $Id$ */
 
 /*
  * Reference:  VT330/VT340 Programmer Reference Manual (EK-VT3XX-TP-001)

@@ -1,4 +1,4 @@
-/* $Id: printer.c,v 1.6 2007/01/07 17:02:50 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

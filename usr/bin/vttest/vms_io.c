@@ -1,4 +1,4 @@
-/* $Id: vms_io.c,v 1.22 2004/11/05 10:11:43 tom Exp $ */
+/* $Id$ */
 
 #define DEBUG
 

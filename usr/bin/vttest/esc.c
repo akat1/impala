@@ -1,4 +1,4 @@
-/* $Id: esc.c,v 1.78 2007/01/07 17:02:19 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <esc.h>

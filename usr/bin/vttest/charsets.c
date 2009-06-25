@@ -1,4 +1,4 @@
-/* $Id: charsets.c,v 1.29 2006/11/26 17:18:20 tom Exp $ */
+/* $Id$ */
 
 /*
  * Test character-sets (e.g., SCS control, DECNRCM mode)

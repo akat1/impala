@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: TEMPLATE.c 340 2009-06-02 18:36:34Z wieczyk $
+ * $Id$
  */
 
 #include <sys/types.h>

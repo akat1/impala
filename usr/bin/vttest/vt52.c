@@ -1,4 +1,4 @@
-/* $Id: vt52.c,v 1.14 2004/08/03 01:21:13 tom Exp $ */
+/* $Id$ */
 
 #include <vttest.h>
 #include <ttymodes.h>

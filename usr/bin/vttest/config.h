@@ -1,5 +1,5 @@
 /* config.h.  Generated from config.hin by configure.  */
-/* $Id: config.hin,v 1.11 2004/08/02 23:39:47 tom Exp $ */
+/* $Id$ */
 
 /* define this if you have the alarm() function */
 /* #undef HAVE_ALARM */
