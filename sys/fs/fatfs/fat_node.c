@@ -154,8 +154,7 @@ fatfs_create(vnode_t *v, vnode_t **vpp, const char *name,
 int
 fatfs_close(vnode_t *v)
 {
-    DEBUGF("close not supported");
-    return -ENOTSUP;
+    return 0;
 }
 
 int

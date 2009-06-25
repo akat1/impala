@@ -51,7 +51,8 @@
 #endif
 
 #ifndef WIN32 /* unlink already in stdio.h for WIN32 */
-  extern int unlink OF((const char *));
+//  extern int unlink OF((const char *));
+    int unlink(const char *d) { return 0; }
 #endif
 
 #ifndef GZ_SUFFIX

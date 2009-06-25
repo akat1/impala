@@ -1,4 +1,4 @@
-/* Impala Operating System
+ /* Impala Operating System
  *
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <errno.h>
 #include "tar.h"
 
@@ -81,6 +82,7 @@ struct tentry {
 
 static const char *tar = "tar";
 static const char *gzip = "/bin/gzip";
+
 
 /*=============================================================================
  * pomocnicze procedury
@@ -187,6 +189,57 @@ write_header(FILE *archive, struct tentry *entry, const char *uname,
     fwrite(entry, 512, 1, archive);
 } 
 
+FILE *
+start_gzip(const char *file, const char *mode)
+{
+    enum {
+        READ_PIPE = 0,
+        WRITE_PIPE = 1
+    };
+    FILE *pipefile;
+    int pipes[2];
+    pid_t pid;
+    int my_pipe;
+    int gzip_pipe;
+    if ( pipe(pipes) == -1 ) return NULL;
+    my_pipe = pipes[(mode[0] == 'r')? READ_PIPE : WRITE_PIPE];
+    gzip_pipe = pipes[(mode[0] == 'r')? WRITE_PIPE : READ_PIPE];
+
+    pid = fork();
+    if (pid == -1) return NULL;
+    if (pid == 0) {
+//         close(my_pipe);
+        char *gzipv[] = {
+            "gzip",
+            NULL,   // -d
+            NULL
+        };
+        if (mode[0] == 'w') {
+            int fd = open(file, O_WRONLY, 0650);
+            if (fd == -1) {
+                fprintf(stderr, "%s: cannot create file %s\n", tar, file);
+            }
+            dup2(gzip_pipe, 0);
+            dup2(fd, 1);
+        } else
+        if (mode[0] == 'r') {
+            int fd = open(file, O_RDONLY);
+            gzipv[1] = "-d";
+            close(0);
+            dup2(gzip_pipe, 1);
+            dup2(fd, 0);
+        } else {
+            fprintf(stderr, "%s: unknown mode \"%s\"\n", tar, mode);
+            exit(-1);
+        }
+        execve(gzip, gzipv, NULL);
+        fprintf(stderr, "%s: cannot run \"%s\"\n", tar, gzip);
+        exit(-1);
+    }
+//     close(gzip_pipe);
+    pipefile = fdopen(my_pipe, mode);
+    return pipefile;
+}
 
 /*=============================================================================
  * dopisywanie elementów do archiwum
@@ -300,9 +353,12 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
  * rozpakowywanie elementów z archiwum (i testowanie)
  */
 
-static void extract_from_arch(FILE *, char **, int, int, int, int);
+static void extract_from_arch(FILE *, char **, int, int, int,
+    const char *);
 static int is_zero(const char *buf);
 static void progressbar(int percent, const char *fmt, ...);
+
+
 
 int
 is_zero(const char *buf)
@@ -330,7 +386,7 @@ progressbar(int percent, const char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(buf, win+1, fmt, ap);
     
-    printf("\033[2K\r\033[7m");
+    printf("\r\033[7m");
     for (i = 0; i < used; i++) {
         if (*msg) {
             fputc(*msg, stdout);
@@ -352,97 +408,111 @@ progressbar(int percent, const char *fmt, ...)
     printf("\r");
 }
 
-void
-extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
-    int t)
+struct extract_ctl {
+    char            path[256];
+    struct tentry   *entry;
+    int             empty_left;
+    int             file_blks;
+    int             size;
+    int             test_only;
+    FILE            *file;
+};
+
+int
+extract_header(struct extract_ctl *ex, int verb, int everb, const char *buf)
 {
-    int lastline = 0;
-    int zeros = 2;
+    if (ex->file) {
+        fclose(ex->file);
+        ex->file = NULL;
+    }
+    if (is_zero(buf)) {
+        ex->empty_left--;
+        return 0;
+    };
+    if (ex->entry->prefix[0]) 
+        snprintf(ex->path, 256, "%s/%s", ex->entry->prefix, ex->entry->name);
+        else snprintf(ex->path, 256, "%s", ex->entry->name);
+    if (strncmp(ex->entry->magic, TMAGIC, 5) != 0 
+        || (strncmp(ex->entry->version, TVERSION, 2)
+        && strncmp(ex->entry->version, TGNUVERSION, 2))) {
+        fprintf(stderr, "%s: invalid format, it is USTAR?\n", tar);
+        exit(-1);
+    }
+    ex->size = READ_NUM(ex->entry->size);
+    ex->file_blks = (ex->size+511)/512;
+    if (ex->test_only) {
+        if (verb)
+            printf("%6s %7s %7s %10u !time! %s\n",
+                mode2str(ex->entry->mode, ex->entry->typeflag),
+                ex->entry->uname, ex->entry->gname, READ_NUM(ex->entry->size),
+                /*!time!*/ ex->path);
+            else printf("%s\n", ex->path);
+    } else  {
+        if (verb && !everb) {
+            printf("x %s\n", ex->path);
+        } else
+        if (everb) {
+            printf("%s", ex->path);
+        }
+        if (ex->entry->typeflag == REGTYPE || ex->entry->typeflag == AREGTYPE){
+            ex->file = fopen(ex->path, "w");
+            if (ex->file == NULL) {
+                fprintf(stderr, "%s: cannot create file %s\n",
+                tar, ex->path);
+                return -1;
+            }
+        } else
+        if (ex->entry->typeflag == DIRTYPE) {
+            if (mkdir(ex->path, READ_NUM(ex->entry->mode)) && errno != EEXIST){
+                fprintf(stderr, "%s: cannot create dir %s\n", tar, ex->path);
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+void
+extract_from_arch(FILE *archive, char **names, int verb, int everb,
+    int t, const char *aname)
+{
+    struct extract_ctl ex;
     char buf[512];
-    struct tentry *entry = (struct tentry *) buf;
-    char path[256];
-    int fbs = 0;
-    int size = 0;
-    int tsize = 0;
     int i;
-    FILE *file = NULL;
-    for (i = 0; i < blocks-2 && zeros; i++) {
-        if (everb) fflush(stdout);
-        if (fread(buf, 512, 1, archive) != 1) {
+    int tsize;
+    ex.test_only = t;
+    ex.entry = (struct tentry*) buf;
+    ex.empty_left = 2;
+    ex.file_blks = 0;
+    ex.size = 0;
+    ex.file = NULL;
+    while (!feof(archive) && ex.empty_left) {
+        int r = fread(buf, 512, 1, archive);
+        if (r == -1) {
+            fprintf(stderr, "%s: error\n", tar);
+            exit(-1);
+        } else
+        if (r == 0) {
             fprintf(stderr, "%s: unexpected end of archive\n", tar);
             exit(-1);
         }
-        if (fbs == 0) {
-            if (file) {
-                fclose(file);
-                file = NULL;
-            }
-            if (everb) {
-                printf("\r\033[2Kx %s", path);
-            }
-            if (is_zero(buf)) {
-                zeros--;
-                continue;
-            };
-            if (entry->prefix[0]) 
-                snprintf(path, 256, "%s/%s", entry->prefix, entry->name);
-                else snprintf(path, 256, "%s", entry->name);
-            if (strncmp(entry->magic, TMAGIC, 5) != 0 
-                || (strncmp(entry->version, TVERSION, 2)
-                && strncmp(entry->version, TGNUVERSION, 2))) {
-                fprintf(stderr, "%s: invalid format, it is USTAR?\n", tar);
-                exit(-1);
-            }
-            size = READ_NUM(entry->size);
-            tsize = size;
-            fbs = (size+511)/512;
-            if (names != NULL && !is_in_list(names,path)) {
-                continue;
-            }
-            if (t) {
-                if (verb)
-                    printf("%6s %7s %7s %10u !time! %s\n",
-                        mode2str(entry->mode,entry->typeflag), entry->uname,
-                         entry->gname, READ_NUM(entry->size), /*!time!*/
-                         path);
-                    else printf("%s\n", path);
-            } else  {
-                if (verb && !everb) {
-                    printf("x %s\n", path);
-                } else
-                if (everb) {
-                    printf("%s", path);
-                }
-                if (entry->typeflag == REGTYPE) {
-                    file = fopen(path, "w");
-                    if (file == NULL) {
-                        fprintf(stderr, "%s: cannot create file %s\n",
-                            tar, path);
-                        exit(-1);
-                    }
-                } else
-                if (entry->typeflag == DIRTYPE) {
-                    if (mkdir(path, READ_NUM(entry->mode)) && errno != EEXIST){
-                        fprintf(stderr, "%s: cannot create dir %s\n", tar,path);
-                        exit(-1);
-                    }
-                    size = 1;
-                }
-            }
+        if (ex.file_blks == 0) {
+            if (extract_header(&ex, verb, everb, buf)) exit(-1);
+            tsize = ex.size;
         } else {
-            if (file) {
+            if (ex.file) {
                 if (everb) {
-                    int total = ((tsize-size)*100)/tsize*100;
-                    total/=100;
-                    progressbar(total, "%s [%u%%]", path, total);
+                    int pr = (tsize-ex.size)*100/tsize;
+                    progressbar(pr, "%s: %s [%u%%]", aname, ex.path, pr);
                 }
-                fwrite(buf, (fbs==1)? size : 512, 1, file);
+                fwrite(buf, (ex.file_blks==1)? ex.size : 512, 1, ex.file);
             }
-            size -= 512;
-            fbs--;
+            ex.size -= 512;
+            tsize += 512;
+            ex.file_blks--;
         }
     }
-    if (everb) printf("\r\033[2K\n", path);
+    if (everb) printf("\r\033[2K");
 }
 
 /*=============================================================================
@@ -451,7 +521,7 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb, int blocks,
 
 int main(int argc, char **argv);
 
-int operate(int, char **, int, const char *, const char *, int, int);
+int operate(int, char **, int, const char *, const char *, int, int, int);
 
 #ifdef __Impala__
 static char *xoptarg = "/mnt/fd0/impala/dist.tar";
@@ -460,7 +530,7 @@ static int xoptind = 3;
 static int
 xgetopt(int argc, char * const argv[], const char *optstring)
 {
-    static char res[] = { 'x', 'v', 'V', 'f', -1 };
+    static char res[] = { 'x', 'z', 'V', 'f', -1 };
     static int i = 0;
     return res[i++];
 }
@@ -472,10 +542,9 @@ xgetopt(int argc, char * const argv[], const char *optstring)
 
 int
 operate(int argc, char **argv, int oper, const char *file, const char *mode,
-    int verb, int everb)
+    int verb, int everb, int zlib)
 {
     FILE *archive;
-    struct stat st;
 
     if (!file) {
         fprintf(stderr, "%s: forgot to specify archive file\n", tar);
@@ -489,13 +558,11 @@ operate(int argc, char **argv, int oper, const char *file, const char *mode,
         fprintf(stderr, "%s: no files\n", tar);
         return -1;
     }
-    if (oper != CREATE) {
-        if (stat(file, &st)) {
-            fprintf(stderr, "%s: cannot stat(2) on file %s\n", tar, file);
-            return -1;
-        }
+    if (zlib) {
+        archive = start_gzip(file, mode);
+    } else {
+        archive = fopen(file, mode);
     }
-    archive = fopen(file, mode);
     if (!archive) {
         ///@todo bledy
         fprintf(stderr, "%s: cannot open archive\n", tar);
@@ -512,12 +579,8 @@ operate(int argc, char **argv, int oper, const char *file, const char *mode,
         fwrite(block, 512, 1, archive);
     } else
     if (oper == EXTRACT || oper == TEST) {
-        int bs = st.st_size / 512;
-        if (st.st_size % 512) {
-            fprintf(stderr, "%s: strange file size (ignored error)\n", tar);
-        }
-        extract_from_arch(archive, (argc==0)? NULL: argv, verb, everb, bs,
-            oper==TEST);
+        extract_from_arch(archive, (argc==0)? NULL: argv, verb, everb,
+            oper==TEST, file);
     }
     fclose(archive);
     return 0;
@@ -528,6 +591,7 @@ int
 main(int argc, char **argv)
 {
     int oper = 0;
+    int zlib;
     char ch;
     int verb = 0;
     int everb = 0;
@@ -543,8 +607,11 @@ main(int argc, char **argv)
         strncat(historic, argv[1], sizeof(historic)-3);
         argv[1] = historic;
     }
-    while ( (ch = getopt(argc, argv, "hrtxcf:Vv")) != -1 ) 
+    while ( (ch = getopt(argc, argv, "hrtxcf:Vvz")) != -1 ) 
     switch (ch) {
+        case 'z':
+            zlib = 1;
+            break;
         case 't':
             if (oper) {
                 fprintf(stderr, "%s: bad options\n", tar);
@@ -609,5 +676,5 @@ main(int argc, char **argv)
         fprintf(stderr, "%s: operation not specified\n", tar);
         return -1;
     }
-    return operate(argc, argv, oper, file, mode, verb, everb);
+    return operate(argc, argv, oper, file, mode, verb, everb, zlib);
 }

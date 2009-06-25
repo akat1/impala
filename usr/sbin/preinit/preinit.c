@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <sys/thread.h>
 
-#define dist_tar "/mnt/fd0/impala/dist.tar"
+#define dist_tar "/mnt/fd0/impala/dist.tar.gz"
 #define tar "/mnt/fd0/impala/tar"
 #define init "/sbin/init"
 #define gzip "/mnt/fd0/impala/gzip"
@@ -35,6 +35,10 @@ main(int argc, char **v)
     open("/dev/ttyv1", O_WRONLY|O_NOCTTY);  //stdout
     open("/dev/ttyv1", O_WRONLY|O_NOCTTY);  //stderr
 #endif
+    if (getpid() != 1) {
+        printf("sorry, only kernel can run this program\n");
+        return -1;
+    }
     printf("Impala floppy preinit\n");
     printf(" distribution archive: %s\n", dist_tar);
     printf(" tape archivizer: %s\n", tar);
@@ -45,16 +49,16 @@ main(int argc, char **v)
     if ( (p = fork()) == 0 ) {
         chdir("/");
         execve(tar, argv, envp);
-        printf("cannot run tar\n");
+        printf("preinit: cannot run tar\n");
         exit(-1);
     } else
     if (p == -1) {
-        printf("cannot fork\n");
+        printf("preinit: cannot fork\n");
         while (1);
     }
     waitpid(p, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status)!=0 ) {
-        printf("tar exited with non zero code\n");
+        printf("preinit: tar exited with non zero code\n");
         while(1);
     }
     printf(" * executing %s\n", init);
