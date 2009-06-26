@@ -493,7 +493,6 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
             exit(-1);
         } else
         if (r == 0) {
-            break; /// naprawiæ feof
             fprintf(stderr, "%s: unexpected end of archive\n", tar);
             exit(-1);
         }

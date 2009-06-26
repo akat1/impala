@@ -20,7 +20,9 @@ fgetc(FILE * f)
         ret = f->readfn(f->cookie, ch, 1);
     else
         ret = read(f->fd, ch, 1);
-    if(ret<=0)
+    if(ret<=0) {
+        f->err |= _FER_EOF;
         return EOF;
+    }
     return (int)ch[0];
 }

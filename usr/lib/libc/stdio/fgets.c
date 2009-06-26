@@ -29,8 +29,10 @@ fgets(char *s, int size, FILE *f)
     if(res == 0)    //EOF
         cnt--;
     s[cnt] = '\0';
-    if(cnt <= 0)
+    if(cnt <= 0) {
+        f->err |= _FER_EOF;
         return NULL;
+    }
     return s;
 }
 

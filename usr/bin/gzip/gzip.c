@@ -174,7 +174,7 @@ void gz_uncompress(in, out)
 
     for (;;) {
         len = gzread(in, buf, sizeof(buf));
-        fprintf(stderr, "gzip: uncompressing file res=%i\n", len);
+//        fprintf(stderr, "gzip: uncompressing file res=%i\n", len);
         if (len < 0) error (gzerror(in, &err));
         if (len == 0) break;
 
