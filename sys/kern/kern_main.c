@@ -187,6 +187,14 @@ print_welcome()
     kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
 }
+void idlefunc(void*);
+void
+idlefunc(void *a)
+{
+    while(1) sched_yield();
+}
+
+kthread_t idle;
 
 void
 init_kernel()
@@ -207,4 +215,6 @@ init_kernel()
     kprintf("kernel initialized\n");
     SSLEEP(1, "kinit");
     kprintf("current time: %i\n", curtime.tv_sec);
+    kthread_create(&idle, idlefunc, NULL);
+
 }

@@ -211,6 +211,7 @@ signal_send_group(pid_t pgid, int sig)
 void
 signal_handle(thread_t *t)
 {
+    if (ISUNSET(t->thr_flags, THREAD_USER)) return;
     while ( signal_present(t->thr_proc) ) {
         if ( signal_proc(t) != EOK ) {
             break;

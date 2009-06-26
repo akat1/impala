@@ -589,6 +589,5 @@ fd_strategy(devd_t *d, iobuf_t *bp)
         splx(s);
     }
     bioq_unlock(&fd->ctrl->bioq);
-//     msleep(50);
     return 0;
 }

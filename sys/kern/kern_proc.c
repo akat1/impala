@@ -51,6 +51,7 @@ proc_t *initproc;
 void
 proc_ctor(void *obj)
 {
+    mem_zero(obj, sizeof(proc_t));
     proc_t *proc = obj;
     proc->vm_space = 0;
     proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);

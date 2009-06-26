@@ -115,7 +115,6 @@ bio_init()
     LIST_CREATE(&bufhash.free, iobuf_t, L_free, FALSE);
     for (int i = 0; i < nbufs; i++) {
         iobuf_t *bp = kmem_cache_alloc(buf_cache, KM_SLEEP);
-        mem_zero(bp, sizeof(*bp));
         list_insert_tail(&bufhash.free, bp);
     }
 }

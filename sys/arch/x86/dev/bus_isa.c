@@ -218,7 +218,6 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     io_out8(IO_CHMODE(ch),  mode);
     io_out8(IO_CHMASK(ch),  _IDX(ch));
 
-/*
     io_out8(0x0a, 0x06);   // mask chan 2
 
     io_out8(0x0c, 0xff);   // reset flip-flop
@@ -230,7 +229,6 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     io_out8(IO_COUNT(ch),   (size >> 8) & 0xff);
     io_out8(0x0b, 0x46);   // set mode (see above)
     io_out8(0x0a, 0x02);   // unmask chan 2
-*/
     splx(s);
     return 0;
 }

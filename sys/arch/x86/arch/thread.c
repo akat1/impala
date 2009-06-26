@@ -212,12 +212,12 @@ thread_resume(thread_t *t)
     if (t->thr_flags & THREAD_USER) {
         cpu_resume(t->thr_context.c_frame);
     } else {
+        irq_enable();
         __asm__ volatile (
             "movl %1, %%esp;"
             "jmp *%0" :
             : "r"(t->thr_entry_point), "r"(t->thr_context.c_esp)
         );
-
     }
 }
 

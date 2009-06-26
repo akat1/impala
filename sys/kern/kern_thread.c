@@ -60,6 +60,7 @@ size_t thread_kstack_size = THREAD_KSTACK_SIZE;
 void
 thread_ctor(void *_thr)
 {
+        mem_zero(_thr, sizeof(thread_t));
         thread_t *t = _thr;
         mutex_init(&t->thr_mtx, MUTEX_NORMAL);
 }

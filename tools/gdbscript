@@ -35,10 +35,17 @@ define gwatch8
     watch *(uint8_t*) $arg0
 end
 
-
+# sprawdza czy procesor ma w³±czone przerwania
+define can_int
+    if $eflags & 512
+        printf "YES, CIPL=%i\n", CIPL
+    else
+        printf "NO\n"
+    end
+end
 
 # zakomentuj poni¿sz± linie je¿eli nie u¿ywasz Bochs
-# set can-use-hw-watchpoints 0
+set can-use-hw-watchpoints 0
 
 #display /5i $pc
 #display curthread->thr_wdescr
