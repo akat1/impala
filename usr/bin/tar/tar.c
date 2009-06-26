@@ -493,6 +493,7 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
             exit(-1);
         } else
         if (r == 0) {
+            break; /// naprawiæ feof
             fprintf(stderr, "%s: unexpected end of archive\n", tar);
             exit(-1);
         }
@@ -524,13 +525,13 @@ int main(int argc, char **argv);
 int operate(int, char **, int, const char *, const char *, int, int, int);
 
 #if __Impala__
-static char *xoptarg = "/mnt/fd0/impala/dist.tar";
-static int xoptind = 3;
+static char *xoptarg = "/mnt/fd0/impala/dist.tar.gz";
+static int xoptind = 4;
 
 static int
 xgetopt(int argc, char * const argv[], const char *optstring)
 {
-    static char res[] = { 'x','V', 'f', -1 };
+    static char res[] = { 'z', 'x','V', 'f', -1 };
     static int i = 0;
     return res[i++];
 }

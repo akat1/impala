@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <sys/thread.h>
 
-#define dist_tar "/mnt/fd0/impala/dist.tar"
+#define dist_tar "/mnt/fd0/impala/dist.tar.gz"
 #define tar "/mnt/fd0/impala/tar"
 #define init "/sbin/init"
 #define gzip "/mnt/fd0/impala/gzip"
@@ -48,11 +48,11 @@ main(int argc, char **v)
     printf(" * extracting distribution archive\n");
     if ( strlen(dist_tar) > 2) {
         int l = strlen(dist_tar);
-        if (dist_tar[l-2] == 'g' && (dist_tar[-1]) == 'z') {
+        if (dist_tar[l-2] == 'g' && (dist_tar[l-1]) == 'z') {
             argv[1] = "zxVf";
         }
     }
-    printf("? %s %s %s\r", argv[0], argv[1], argv[2]);
+    printf("? %s %s %s\r\n", argv[0], argv[1], argv[2]);
     if ( (p = fork()) == 0 ) {
         chdir("/");
         execve(tar, argv, envp);

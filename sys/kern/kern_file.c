@@ -89,7 +89,7 @@ f_seek(file_t *f, off_t o, int whence)
     if ( f == NULL ) {
         return -EBADF;
     }
-
+    off_t oldoff = f->f_offset;
     switch(whence) {
         case SEEK_SET:
             f->f_offset = o;
@@ -108,8 +108,11 @@ f_seek(file_t *f, off_t o, int whence)
         default:
             return -EINVAL;
     }
-
-    return f->f_offset;
+    int res = VOP_SEEK(f->f_vnode, f->f_offset);
+    if(!res)
+        return 0;
+    f->f_offset = oldoff;
+    return res;
 }
 
 int
@@ -125,7 +128,7 @@ f_ioctl(file_t *f, int cmd, uintptr_t param)
 int
 f_truncate(file_t *f, off_t len)
 {
-    if (!f)
+    if (!f || !(f->f_flags & O_WRONLY || f->f_flags & O_RDWR))
         return -EBADF;
     KASSERT(f->f_vnode);
     return VOP_TRUNCATE(f->f_vnode, len);
@@ -137,7 +140,6 @@ f_write(file_t *f, uio_t *u)
     if(!(f->f_flags & O_WRONLY || f->f_flags & O_RDWR))
         return -EBADF;
     u->offset = f->f_offset;
-//    KASSERT(f->f_vnode);
     int res = VOP_WRITE(f->f_vnode, u, f->f_flags);
     if(res < 0) 
         return res;
@@ -151,7 +153,6 @@ f_read(file_t *f, uio_t *u)
     if(!(f->f_flags & O_RDONLY || f->f_flags & O_RDWR))
         return -EBADF;
     u->offset = f->f_offset;
-//    KASSERT(f->f_vnode);
     int res = VOP_READ(f->f_vnode, u, f->f_flags);
     if(res < 0)
         return res;

@@ -10,11 +10,18 @@ fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
     int r;
     __check_buf(stream);
     fflush(stream);
+    r = __get_data(stream, ptr, size*nmemb);
+    if(r>=0)
+        return r/size;
+    return 0;
     while( nmemb-- ) {
         r = __get_data(stream, ptr, size);
         if (r == size) {
             i++;
-        } else return i;
+            ptr+=size;
+        } else {
+            return i;
+        }
     }
     return i;
 }

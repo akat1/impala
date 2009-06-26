@@ -32,9 +32,9 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
-#i	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
+	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cd output/dist && tar cvf ../impala/dist.tar *
+	cd output/dist && tar zcvf ../impala/dist.tar.gz *
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
