@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <sys/thread.h>
 
-#define dist_tar "/mnt/fd0/impala/dist.tar.gz"
+#define dist_tar "/mnt/fd0/impala/dist.tar"
 #define tar "/mnt/fd0/impala/tar"
 #define init "/sbin/init"
 #define gzip "/mnt/fd0/impala/gzip"
@@ -17,9 +17,8 @@
 int
 main(int argc, char **v)
 {
-    char * const argv[] = {
-        "example",
-        NULL,
+    char *argv[] = {
+        "tar",
         "xVf",
         dist_tar,
         NULL
@@ -45,21 +44,28 @@ main(int argc, char **v)
     printf(" tape archivizer: %s\n", tar);
     printf(" init program: %s\n", init);
     printf(" gzip program: %s\n", gzip);
-
+    
     printf(" * extracting distribution archive\n");
+    if ( strlen(dist_tar) > 2) {
+        int l = strlen(dist_tar);
+        if (dist_tar[l-2] == 'g' && (dist_tar[-1]) == 'z') {
+            argv[1] = "zxVf";
+        }
+    }
+    printf("? %s %s %s\r", argv[0], argv[1], argv[2]);
     if ( (p = fork()) == 0 ) {
         chdir("/");
-        execve(gzip, argv, envp);
-        printf("preinit: cannot run tar\n");
+        execve(tar, argv, envp);
+        printf(" * system cannot startup (cannot run tar)\n");
         exit(-1);
     } else
     if (p == -1) {
-        printf("preinit: cannot fork\n");
+        printf(" * system cannot startup (cannot fork)\n");
         while (1);
     }
     waitpid(p, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status)!=0 ) {
-        printf("preinit: tar exited with non zero code\n");
+        printf(" * system cannot srtartup (tar exited with non zero status)\n");
         while(1);
     }
     printf(" * executing %s\n", init);

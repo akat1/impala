@@ -1,6 +1,5 @@
 #!/bin/sh
 
-echo "Unmounting file systems.";
 echo "Goodbye."
 
 

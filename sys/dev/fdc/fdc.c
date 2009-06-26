@@ -287,6 +287,7 @@ void seek_done(fdctrl_t *ctrl, iobuf_t *bp);
 void io_done(fdctrl_t *ctrl, iobuf_t *bp);
 /// Obs³uga przerwania.
 
+#include <sys/console.h>
 bool
 fdinterrupt()
 {

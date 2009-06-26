@@ -523,14 +523,14 @@ int main(int argc, char **argv);
 
 int operate(int, char **, int, const char *, const char *, int, int, int);
 
-#ifdef __Impala__
+#if __Impala__
 static char *xoptarg = "/mnt/fd0/impala/dist.tar";
 static int xoptind = 3;
 
 static int
 xgetopt(int argc, char * const argv[], const char *optstring)
 {
-    static char res[] = { 'x', 'z', 'v', 'f', -1 };
+    static char res[] = { 'x','V', 'f', -1 };
     static int i = 0;
     return res[i++];
 }
@@ -591,7 +591,7 @@ int
 main(int argc, char **argv)
 {
     int oper = 0;
-    int zlib;
+    int zlib = 0;
     char ch;
     int verb = 0;
     int everb = 0;
@@ -604,7 +604,7 @@ main(int argc, char **argv)
     if (argc > 1 && argv[1][0] != '-') {
         historic[0] = '-';
         historic[1] = 0;
-        strncat(historic, argv[1], sizeof(historic)-3);
+        strcat(historic, argv[1]);
         argv[1] = historic;
     }
     while ( (ch = getopt(argc, argv, "hrtxcf:Vvz")) != -1 ) 
@@ -664,7 +664,6 @@ main(int argc, char **argv)
     }
     argv += optind;
     argc -= optind;
-
     if (oper == USAGE) {
         printf("tar keys files..\n");
         printf(" keys: c (create) r (add/replace) t (test) x (extract)\n");

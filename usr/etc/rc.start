@@ -9,7 +9,8 @@
 echo "Initializing system...";
 
 export PATH=/bin:/sbin
-echo "Umounting /dev/fd0."
+#echo "Unmounting /dev/fd0."
+#umount /dev/fd0
 
 echo -n "Preparing terminals:"
 cd /dev

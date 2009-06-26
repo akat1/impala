@@ -14,15 +14,15 @@ build-image: ${IMAGE_FILE} build
 	cd image && ./mtools.sh
 
 run: build-image
-	cd image && qemu -s -fda floppy.img # bochs -f impala-usr-local.bochs 
+	cd image && qemu -s -fda floppy.img #bochs -f impala-usr-local.bochs 
 
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp COPYRIGHT ${DISTDIR}/
 	cp usr/sbin/init/init ${DISTDIR}/sbin/init
 	cp usr/sbin/ttyvrun/ttyvrun ${DISTDIR}/sbin/ttyvrun
-	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
-	cp usr/bin/test/test ${DISTDIR}/bin/test
+#	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
+#	cp usr/bin/test/test ${DISTDIR}/bin/test
 	cp usr/bin/vttest/vttest ${DISTDIR}/bin/vttest
 	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
 	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
@@ -32,9 +32,9 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
-	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
+#i	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cd output/dist && tar zcvf ../impala/dist.tar.gz *
+	cd output/dist && tar cvf ../impala/dist.tar *
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
