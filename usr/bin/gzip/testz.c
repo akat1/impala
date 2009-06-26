@@ -97,30 +97,44 @@ void test_gzio(fname, uncompr, uncomprLen)
 
     file = gzopen(fname, "wb");
     if (file == NULL) {
-        fprintf(stderr, "gzopen error\n");
+        fprintf(stderr, "gzopen error, fname: %s\n", fname);
         exit(1);
     }
+//    gzflush(file, Z_FULL_FLUSH);
     gzputc(file, 'h');
+  /*  gzflush(file, Z_FULL_FLUSH);
+    gzflush(file, Z_FULL_FLUSH);
+    gzflush(file, Z_FULL_FLUSH);
+    gzflush(file, Z_FULL_FLUSH);
+    gzflush(file, Z_FULL_FLUSH);
+  */
     if (gzputs(file, "ello") != 4) {
         fprintf(stderr, "gzputs err: %s\n", gzerror(file, &err));
         exit(1);
     }
+//    gzflush(file, Z_FULL_FLUSH);
     if (gzprintf(file, ", %s!", "hello") != 8) {
         fprintf(stderr, "gzprintf err: %s\n", gzerror(file, &err));
         exit(1);
     }
+//    gzflush(file, Z_FULL_FLUSH);
     gzseek(file, 1L, SEEK_CUR); /* add one zero byte */
+//    fprintf(stderr, "TYYYY\n");
     gzclose(file);
+//    fprintf(stderr, "TYYYY\n");
 
     file = gzopen(fname, "rb");
     if (file == NULL) {
-        fprintf(stderr, "gzopen error\n");
+        fprintf(stderr, "gzopen error, fname: %s\n", fname);
         exit(1);
     }
     strcpy((char*)uncompr, "garbage");
-
-    if (gzread(file, uncompr, (unsigned)uncomprLen) != len) {
-        fprintf(stderr, "gzread err: %s\n", gzerror(file, &err));
+int l = gzread(file, uncompr, (unsigned)uncomprLen);
+    if (l != len) {
+        for(int i=0; i<l; i++)
+            fprintf(stderr, "%c", uncompr[i]);
+        fprintf(stderr, "\ngzread err len=%i, should be %i, text: %s: %s\n", l, len,
+               uncompr,  gzerror(file, &err));
         exit(1);
     }
     if (strcmp((char*)uncompr, hello)) {

@@ -14,7 +14,7 @@ __get_data(FILE *f, char *str, size_t size)
         res = read(f->fd, str, size);
         if(res <= 0)
             return EOF;
-        } else
-            return EOF;
+    } else
+        return EOF;
     return res;
 }

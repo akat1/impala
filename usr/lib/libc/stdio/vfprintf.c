@@ -26,7 +26,6 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
     int tot = 0;
     char buf[INTERNAL_BUF];
     char *pbuf;
-    char cbuf[2];
     uint32_t arg_u32;
     if(!stream || !fmt) {
         errno = EINVAL;
@@ -75,6 +74,8 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                 }
                 if(!pad_to_right)
                     separator = ' ';
+                if(*fmt == 'l') //long
+                    fmt++;
                 // flagi zjedzone - do roboty
                 switch (*fmt) {
                     case '%':
@@ -108,9 +109,8 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                         pbuf = va_arg(ap, char *);
                         break;
                     case 'c':
-                        cbuf[0] = va_arg(ap, uint32_t);
-                        cbuf[1] = 0;
-                        pbuf = cbuf;
+                        __put_char(stream, (unsigned char)va_arg(ap, int));
+                        tot++;
                         break;
                 }
                 if (pbuf)

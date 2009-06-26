@@ -181,6 +181,7 @@ mfs_blk_read(mfs_node_t *n, uio_t *uio)
     if (uio->size == 0) return 0;
     mfs_blk_t *bs = list_get_n(&n->blks, uio->offset/512);
     int off = uio->offset % 512;
+    uio->resid = MIN(uio->resid, n->size - uio->offset);
     while (uio->resid && bs) {
         int min = MIN(uio->resid, 512-off);
         if (uio_move(bs->data+off, min, uio) == -1) return -1;

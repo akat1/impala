@@ -25,7 +25,6 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
     int left = size - 1;
     char buf[INTERNAL_BUF];
     char *pbuf;
-    char cbuf[2];
     uint32_t arg_u32;
     if(!dst || !fmt) {
         errno = EINVAL;
@@ -74,6 +73,8 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                 }
                 if(!pad_to_right)
                     separator = ' ';
+                if(*fmt == 'l') //long
+                    fmt++;
                 // flagi zjedzone - do roboty
                 switch (*fmt) {
                     case '%':
@@ -107,9 +108,8 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         pbuf = va_arg(ap, char *);
                         break;
                     case 'c':
-                        cbuf[0] = va_arg(ap, uint32_t);
-                        cbuf[1] = 0;
-                        pbuf = cbuf;
+                        if(left-- > 0)
+                            *(dst++)=(unsigned char)va_arg(ap, uint32_t);
                         break;
                 }
                 if (pbuf)

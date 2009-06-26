@@ -178,7 +178,7 @@ mfs_seek(vnode_t *vn, off_t off)
     mfs_node_t *n = vn->v_private;
     if(n->size > off)
         return 0;
-    return -EINVAL;
+    return mfs_blk_set_area(n, off);
 }
 
 int

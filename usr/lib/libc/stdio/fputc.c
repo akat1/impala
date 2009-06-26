@@ -9,7 +9,7 @@
 int
 fputc(int ch, FILE * f)
 {
-    if(ISUNSET(f->status,_FST_OPEN))
+    if(!f || ISUNSET(f->status,_FST_OPEN))
         return EOF;
     __check_buf(f);
     return __put_char(f, ch);
