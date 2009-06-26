@@ -194,6 +194,8 @@ fifofs_mkdir(vnode_t *vn, vnode_t **vpp, const char *path, vattr_t *attr)
 int
 fifofs_close(vnode_t *vn)
 {
+    fifofs_node_t *n = vn->v_private;
+    DEBUGF("closing pipe fd: in=%u out=%u\n", n->stat_in, n->stat_out);
     return 0;
 }
 
@@ -220,6 +222,7 @@ fifofs_read(vnode_t *vn, uio_t *u, int flags)
             l->end = 0;
         l->size -= read_size;
     }
+    n->stat_out += want;
     return want;
 }
 
@@ -250,6 +253,7 @@ fifofs_write(vnode_t *vn, uio_t *u, int flags)
             l->beg = 0;
         l->size += write_size;
     }
+    n->stat_in += want;
     return want;
 }
 
@@ -305,6 +309,8 @@ int
 fifofs_inactive(vnode_t *vn)
 {
     fifofs_node_t *n = vn->v_private;
+    DEBUGF("inactiving pipe channe: in=%u out=%u delta=%u\n",
+            n->stat_in, n->stat_out, n->stat_in - n->stat_out);
     // zwolnione vnode do odczytu lub zapisu, ale nie koniecznie oba
     if(vn == n->i_readnode)
         n->i_readnode = NULL;
@@ -344,6 +350,7 @@ fifo_create(vnode_t **re, vnode_t **we)
     int err = -ENOMEM;
     vnode_t *v1, *v2;
     fifofs_node_t *n = kmem_alloc(sizeof(fifofs_node_t), KM_SLEEP);
+    n->stat_in = n->stat_out = 0;
     if(!n)
         return err;
     n->i_buf = clist_create(FIFO_SIZE);

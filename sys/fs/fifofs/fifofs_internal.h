@@ -18,6 +18,8 @@ struct fifofs_node {
     vnode_t       *i_readnode;
     vnode_t       *i_writenode;
     clist_t       *i_buf;
+    int            stat_in;
+    int            stat_out;
 };
 
 
