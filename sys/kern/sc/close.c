@@ -51,7 +51,6 @@ errno_t
 sc_close(thread_t *t, syscall_result_t *r, close_args *args)
 {
     file_t *f = f_get(t->thr_proc->p_fd, args->fd);
-    
     if ( f == NULL )
         return -EBADF;
 

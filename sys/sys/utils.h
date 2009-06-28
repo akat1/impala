@@ -42,8 +42,20 @@ extern bool SYSTEM_DEBUG;
         #x , __FILE__, __LINE__,  __func__);
 
 
-#define MIN(a,b) ( (a) < (b) )? (a) : (b)
-#define MAX(a,b) ( (a) < (b) )? (b) : (a)
+static inline int min(int a, int b)
+{
+    if(a<b) return a;
+    return b;
+}
+
+static inline int max(int a, int b)
+{
+    if(a<b) return b;
+    return a;
+}
+        
+#define MIN(a,b) (( (a) < (b) )? (a) : (b))
+#define MAX(a,b) (( (a) < (b) )? (b) : (a))
 #define _INRNG(x,a,b,R1,R2) ((a) R1 (x)) && ((x) R2 (b))
 #define _INRNG_L(x,a,l,R1,R2) _INRNG(x,a,a+l,R1,R2)
 #define INRNG_OOL(x,a,l) _INRNG_L(x,a,l,<,<)

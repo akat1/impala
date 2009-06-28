@@ -52,7 +52,8 @@ errno_t
 sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
 {
     file_t *f_orig, *f;
-    
+    if(args->oldfd == args->newfd)
+        return 0;
     if ( args->newfd > t->thr_proc->p_fd->max_ds ) {
         return -EINVAL;
     }

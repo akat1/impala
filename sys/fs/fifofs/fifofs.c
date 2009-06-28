@@ -195,7 +195,10 @@ int
 fifofs_close(vnode_t *vn)
 {
     fifofs_node_t *n = vn->v_private;
-    DEBUGF("closing pipe fd: in=%u out=%u\n", n->stat_in, n->stat_out);
+    char *which = (n->i_readnode == vn) ? "read": "write";
+    kprintf("curthread: 0x%08x\n", curthread);
+    DEBUGF("closing pipe 0x%08x- %s end fd: in=%u out=%u\n", vn, which, n->stat_in,
+            n->stat_out);
     return 0;
 }
 
@@ -203,17 +206,21 @@ int
 fifofs_read(vnode_t *vn, uio_t *u, int flags)
 {
     fifofs_node_t *n = vn->v_private;
-    clist_t *l = n->i_buf;
-    KASSERT(l->buf!=NULL);
+    clist_t volatile *l = n->i_buf;
+    KASSERT(l && l->buf!=NULL);
     int size = l->size;
     int want = u->resid = ISSET(flags, O_NONBLOCK) ?
-                        MIN(u->size, size) : u->size;
+                        min(u->size, size) : u->size;
     while(u->resid > 0) {
         char *read_beg = &l->buf[l->end];
-        size_t read_size= MIN(MIN(l->buf_size - l->end, u->resid), l->size);
+        
+        size_t read_size= min(min((l->buf_size - l->end), u->resid), l->size);
         if(read_size == 0) {
-            if(!n->i_writenode)
+            if(!n->i_writenode) {
+                if(l->size > 0)
+                    continue;
                 return want-u->resid;
+            }
             continue;   //busy waiting... naprawiæ..
         }
         uio_move(read_beg, read_size, u);
@@ -231,21 +238,21 @@ fifofs_write(vnode_t *vn, uio_t *u, int flags)
 {
     fifofs_node_t *n = vn->v_private;
     clist_t *l = n->i_buf;
-    KASSERT(l->buf!=NULL);
+    KASSERT(l && l->buf!=NULL);
     int size = l->buf_size - l->size;
     if(ISSET(flags, O_NONBLOCK) && u->size <= PIPE_BUF && size < u->size)
         return -EAGAIN;
-    int want = u->resid = ISSET(flags, O_NONBLOCK) ?
-                        MIN(u->size, size) : u->size;
+    int want= u->resid = ISSET(flags, O_NONBLOCK)? min(u->size, size) : u->size;
     while(u->resid > 0) {
         char *write_beg = &l->buf[l->beg];
         size_t write_size =
-            MIN(MIN(l->buf_size - l->beg, u->resid), l->buf_size - l->size);
+            min(min(l->buf_size - l->beg, u->resid), l->buf_size - l->size);
         if(write_size == 0) {
             if(!n->i_readnode) {
                 //signal(...., SIGPIPE);
-            }                    
-            continue;   //busy waiting... naprawiæ..
+            }
+            sched_yield();
+            continue;
         }
         uio_move(write_beg, write_size, u);
         l->beg += write_size;
@@ -308,20 +315,20 @@ fifofs_node_sync(vnode_t *vn)
 int
 fifofs_inactive(vnode_t *vn)
 {
-    return 0;
     fifofs_node_t *n = vn->v_private;
-    DEBUGF("inactiving pipe channe: in=%u out=%u delta=%u\n",
-            n->stat_in, n->stat_out, n->stat_in - n->stat_out);
+//    DEBUGF("inactiving pipe channe: in=%u out=%u delta=%u, szleft=%u\n",
+//            n->stat_in, n->stat_out, n->stat_in - n->stat_out, n->i_buf->size);
     // zwolnione vnode do odczytu lub zapisu, ale nie koniecznie oba
     if(vn == n->i_readnode)
         n->i_readnode = NULL;
-    if(vn == n->i_writenode)
+    else if(vn == n->i_writenode)
         n->i_writenode = NULL;
+    else return 0;
     if(!n->i_writenode && !n->i_readnode) {   //nie ma ¿adnych vnode'ów
         KASSERT(n->i_buf);
         clist_destroy(n->i_buf);
-        kmem_free(n);
         n->i_buf = NULL;
+        kmem_free(n);
     }
     return 0;
 }

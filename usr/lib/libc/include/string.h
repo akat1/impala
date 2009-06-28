@@ -53,6 +53,7 @@ int    strncmp(const char *s1, const char *s2, size_t n);
 char  *strncpy(char *dest, const char *src, size_t n); 
 char  *strpbrk(const char *s, const char *accept);
 char  *strrchr(const char *s, int c);
+char  *strsep(char **stringp, const char *delim);
 size_t strspn(const char *s, const char *accept);
 char  *strstr(const char *haystack, const char *needle); //
 char  *strtok(char *s, const char *delim); 
