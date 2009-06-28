@@ -37,13 +37,15 @@
  * POSIX nie wymaga pola key, ale jest ono na BSD. Zatem niektóre
  * programy mog± z tego korzystaæ.
  */
+
+/// ochrona IPC systemu pi±tego
 struct ipc_perm {
-    uid_t       uid;
-    gid_t       gid;
-    uid_t       cuid;
-    gid_t       cgid;
-    mode_t      mode;
-    key_t       key;
+    uid_t       uid;        ///< obecny w³a¶ciciel
+    gid_t       gid;        ///< obecna grupa
+    uid_t       cuid;       ///< twórca
+    gid_t       cgid;       ///< grupa tworz±ca
+    mode_t      mode;       ///< tryb dostêpu
+    key_t       key;        ///< klucz
 };
 
 typedef unsigned int    msgqnum_t;

@@ -227,7 +227,8 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
 {
     bp->dev = d;
     bp->blkno = n;
-    bp->bcount = 1;
+    bp->bcount = bsize/512;
+    bp->resid = bsize;
     // rozmiar bufora siê zgadza, no to po robocie.
     if (bp->size == bsize) return;
     UNSET(bp->flags, BIO_DONE);
@@ -262,7 +263,7 @@ buf_destroy(iobuf_t *bp)
  */
 
 iobuf_t *
-bio_getblk(devd_t *d, blkno_t n)
+bio_getblk(devd_t *d, blkno_t n, size_t bsize)
 {
     iobuf_t *bp;
     bufhash_lock();
@@ -283,58 +284,17 @@ bio_getblk(devd_t *d, blkno_t n)
     if (!bp) {
         bp = bufhash_getfree();
     }
-    buf_alloc(bp, d, n, 512);
+    buf_alloc(bp, d, n, bsize);
     bufhash_insert(bp);
     bufhash_unlock();
     splx(s);
     return bp;
 }
 
-#if 0
 iobuf_t *
-bio_getblk(devd_t *d, blkno_t n)
+bio_read(devd_t *d, blkno_t n, size_t bsize)
 {
-    iobuf_t *bp = NULL;
-    do {
-        bp = bufhash_find(d, n);
-        if (bp) {
-            int s = splbio();
-            if ( ISSET(bp->flags,BIO_BUSY) ) {
-      //           DEBUGF("getblk blk %u on %s found BUSY buffer in cache",
-       //              n, d->name);
-                SET(bp->flags,BIO_WANTED);
-                splx(s);
-                sleepq_wait(&bp->sleepq);
-                bp = NULL;
-            } else {
-                SET(bp->flags, BIO_BUSY);
-                splx(s);
-                bufhash_remfree(bp);
-  //              DEBUGF("getblk blk %u on %s found buffer in cache",
-    //                n, d->name);
-                return bp;
-            }
-        } else {
-//             DEBUGF("getblk blk %u on %s not found buffer in cache",
-//                 n, d->name);
-            bp = bufhash_getfree();
-            bufhash_remove(bp);
-        }
-    } while (bp == NULL);
-
-    if ( ISSET(bp->flags,BIO_DELWRI) ) {
-        bio_write(bp);
-    }
-    buf_alloc(bp, d, n, 512);
-    bufhash_insert(bp);
-    return bp;
-}
-#endif
-
-iobuf_t *
-bio_read(devd_t *d, blkno_t n)
-{
-    iobuf_t *bp = bio_getblk(d, n);
+    iobuf_t *bp = bio_getblk(d, n, bsize);
     if ( ISUNSET(bp->flags,BIO_VALID) ) {
 //         DEBUGF("read blk %u on %s buffer data is invalid, starting I/O",
 //             n, d->name);

@@ -30,6 +30,19 @@
  * $Id$
  */
 
+/** @file
+ * Sterownik kontrolera stacji dyskietek na szynie ISA.
+ *
+ * Dokumentacja kontrolera:
+ *   http://www.isdaman.com/alsos/hardware/fdc/floppy.htm
+ *
+ * Sterownik mo¿e wydawaæ siê "zbyt elastyczny", ale fajnie by³o spróbowaæ
+ * napisaæ jaki¶ kod, który ³atwo by³oby rozszerzyæ do obs³ugi wiêkszej
+ * ilo¶ci kontrolerów lub innych portów I/O.
+ *
+ */
+
+
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/device.h>
@@ -42,20 +55,6 @@
 #include <machine/io.h>
 #include <machine/cmos.h>
 #include <machine/atomic.h>
-
-
-/** @file
- * Sterownik kontrolera stacji dyskietek na szynie ISA.
- *
- * Dokumentacja kontrolera:
- *   http://www.isdaman.com/alsos/hardware/fdc/floppy.htm
- *
- * Sterownik mo¿e wydawaæ siê "zbyt elastyczny", ale fajnie by³o spróbowaæ
- * napisaæ jaki¶ kod, który ³atwo by³oby rozszerzyæ do obs³ugi wiêkszej
- * ilo¶ci kontrolerów lub innych portów I/O.
-*/
-
-
 
 enum {
     FDC_IRQ     = 6,        ///< Numer przerwania
@@ -125,6 +124,10 @@ enum {
     CCR_500KB       = 0
 };
 
+enum {
+    MAX_TRANSFER    = 512*36
+};
+
 /// Adres sektora na dyskietce.
 typedef struct fdsec fdsec_t;
 struct fdsec {
@@ -141,6 +144,9 @@ struct fdctrl {
     spinlock_t      busy;   ///<
     bio_queue_t     bioq;   ///< kolejka operacji wej-wyj
     iobuf_t        *cbp;    ///< obecnie obs³ugiwany bufor
+    char*          *iobuf;  ///< bufor transferu
+    size_t          iosize; ///< rozmiar transferu
+    
 };
 
 /// Rodzaj stacji dyskietek.
@@ -193,6 +199,7 @@ int blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds);
 void fdc_init(void);
 void fdc_reset(fdctrl_t *ctrl);
 int fdc_calibrate(fddrive_t *drv);
+void fdc_io(fdctrl_t *ctrl);
 void fdc_motor_on(fddrive_t *drv);
 void fdc_motor_off(fddrive_t *drv);
 void fdc_readsec(fddrive_t *drv, iobuf_t *b);
@@ -268,16 +275,8 @@ blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds)
 
 
 /*========================================================================
- * Podprogram przerwania.
+ * Podprogram obs³ugi przerwania.
  *
- * Wydaj±c polecenia kontrolerowi nale¿y czekaæ na jego odpowied¼, któr±
- * sygnalizuje przez przerwanie sprzêtowe. W celu synchronizacji u¿yty
- * jest wiruj±cy zamek 'ilock'. Zamek jest zablokowany od momentu
- * inicjalizacji sterownika. Obs³uga przerwania odblokowuje go, a procedura
- * oczekuj±ca na przerwanie ponownie zablokowuje. Ten schemat dzia³a tak, ¿e
- * wydajemy polecenie sterownikowi i próbujemy zamkn±æ zamek, poniewa¿ jest
- * on ju¿ zamkniêty to oczekujemy na jego odblokowanie. Przerwanie odblokowuje
- * zamek - i tym samym - kod sterownika, który zamyka ponownie zamek.
  *
  */
 
@@ -299,7 +298,6 @@ fdinterrupt()
         case FDC_READ:
         case FDC_WRITE:
             io_done(ctrl, ctrl->cbp);
-            ctrl->cbp = 0;
             fdc_work(ctrl);
             break;
         case -1:
@@ -350,12 +348,20 @@ io_done(fdctrl_t *ctrl, iobuf_t *bp)
 
     if (st0 >> 6) {
         bio_error(bp, EIO);
+        ctrl->cmd = -1;
+        ctrl->cbp = 0;
         return;
     }
-    bus_isa_dma_finish(fd_dma);
-    bio_done(bp);
-    ctrl->cmd = -1;
-    fdc_motor_off(bp->dev->priv);
+    bp->resid -= ctrl->iosize;
+    ctrl->iobuf += ctrl->iosize;
+    if (bp->resid == 0) {
+        bus_isa_dma_finish(fd_dma);
+        bio_done(bp);
+        ctrl->cmd = -1;
+        ctrl->cbp = 0;
+    } else {
+        fdc_io(ctrl);
+    }
 }
 
 void
@@ -364,7 +370,6 @@ seek_done(fdctrl_t *ctrl, iobuf_t *bp)
     if (!bp) return;
 
     uint8_t st0, cyl;
-    int dma_cmd;
     wrfifo(ctrl, FDC_CHECKINTRPT);
     st0 = rdfifo(ctrl);
     cyl = rdfifo(ctrl);
@@ -374,37 +379,8 @@ seek_done(fdctrl_t *ctrl, iobuf_t *bp)
         return;
     }
 
-    switch (bp->oper) {
-        case BIO_READ:
-            ctrl->cmd = FDC_READ;
-            dma_cmd = ISA_DMA_READ;
-            break;
-        case BIO_WRITE:
-            ctrl->cmd = FDC_WRITE;
-            dma_cmd = ISA_DMA_WRITE;
-            break;
-        default:
-            ctrl->cmd = -1;
-            return;
-    }
-
-    fdsec_t sec;
-    fddrive_t *drv = bp->dev->priv;
-    if (blkno_to_fdsec(drv, bp->blkno, &sec)) {
-        bio_error(bp, EINVAL);
-        return;
-    }
-    bus_isa_dma_prepare(fd_dma, dma_cmd, bp->addr, bp->size);
-    wrfifo(ctrl, ctrl->cmd);
-    wrfifo(ctrl, drv->unit | (sec.head << 2));
-    wrfifo(ctrl, sec.track);
-    wrfifo(ctrl, sec.head);
-    wrfifo(ctrl, sec.sec);
-    wrfifo(ctrl, 2);
-    wrfifo(ctrl, drv->spec->sectrack);
-    wrfifo(ctrl, drv->spec->gap);
-    wrfifo(ctrl, 0xff);
-
+    ctrl->iobuf = bp->addr;
+    fdc_io(ctrl);
 }
 
 
@@ -493,6 +469,50 @@ fdc_motor_off(fddrive_t *drv)
     wrreg(drv->ctrl, IO_REG_DOR, r|DOR_DMA|DOR_REST);
 }
 
+void
+fdc_io(fdctrl_t *ctrl)
+{
+    int dma_cmd;
+    iobuf_t *bp = ctrl->cbp;
+    fddrive_t *drv = bp->dev->priv;
+    fdsec_t sec;
+
+    if (blkno_to_fdsec(drv, bp->blkno, &sec)) {
+        bio_error(bp, EINVAL);
+        ctrl->cmd = -1;
+        ctrl->cbp = 0;
+        return;
+    }
+
+    switch (bp->oper) {
+        case BIO_READ:
+            ctrl->cmd = FDC_READ;
+            dma_cmd = ISA_DMA_READ;
+            break;
+        case BIO_WRITE:
+            ctrl->cmd = FDC_WRITE;
+            dma_cmd = ISA_DMA_WRITE;
+            break;
+        default:
+            ctrl->cmd = -1;
+            ctrl->cbp = 0;
+            bio_error(bp, EIO);
+            return;
+    }
+
+    ctrl->iosize = MIN(MAX_TRANSFER, bp->resid);
+    bus_isa_dma_prepare(fd_dma, dma_cmd, ctrl->iobuf, ctrl->iosize);
+    wrfifo(ctrl, ctrl->cmd);
+    wrfifo(ctrl, drv->unit | (sec.head << 2));
+    wrfifo(ctrl, sec.track);
+    wrfifo(ctrl, sec.head);
+    wrfifo(ctrl, sec.sec);
+    wrfifo(ctrl, 2);
+    wrfifo(ctrl, drv->spec->sectrack);
+    wrfifo(ctrl, drv->spec->gap);
+    wrfifo(ctrl, 0xff);
+
+}
 
 /*========================================================================
  * Inicjalizacja sterownika

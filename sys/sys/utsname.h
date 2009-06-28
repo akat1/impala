@@ -32,6 +32,7 @@
 #ifndef __SYS_UTSNAME_H
 #define __SYS_UTSNAME_H
 
+/// nazwa systemu UNIX
 struct utsname {
     char sysname[20];
     char nodename[20];

@@ -33,10 +33,11 @@
 #ifndef __SYS_VFS_H
 #define __SYS_VFS_H
 
+/// informacje o punkcie podpiêcia systemu plików
 struct mountinfo {
-    char    type[10];
-    char    mpoint[255];
-    char    dev[20];
+    char    type[10];           ///< nazwa sterownika systemu plików
+    char    mpoint[255];        ///< punkt zamontowania
+    char    dev[20];            ///< urz±dzenie
 };
 
 #ifdef __KERNEL

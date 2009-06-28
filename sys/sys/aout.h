@@ -30,37 +30,47 @@
  * $Id$
  */
 
+/** @file Format Aout
+ *
+ * Plik zawiera standardowe definicje nag³ówków i makr do obs³ugi
+ * formatu a.out.
+ */
+
 #ifndef __SYS_AOUT_H
 #define __SYS_AOUT_H
 
+
+/// nag³ówek pliku.
 typedef struct exec exec_t;
 struct exec {
-    uint32_t    a_midmag;
-    uint32_t    a_text;
-    uint32_t    a_data;
-    uint32_t    a_bss;
-    uint32_t    a_syms;
-    uint32_t    a_entry;
-    uint32_t    a_trsize;
-    uint32_t    a_drsize;
+    uint32_t    a_midmag;           ///< 
+    uint32_t    a_text;             ///< rozmiar sekcji .text
+    uint32_t    a_data;             ///< rozmiar sekcji .data
+    uint32_t    a_bss;              ///< rozmiar sekcji .bss
+    uint32_t    a_syms;             ///< rozmiar sekcji .syms
+    uint32_t    a_entry;            ///< adres procedury wej¶ciowej
+    uint32_t    a_trsize;           ///< rozmiar sekcji z relokacjami .text
+    uint32_t    a_drsize;           ///< rozmiar sekcji z relokacjami .data
 };
 
+/// symbol.
 typedef struct nlist nlist_t;
 struct nlist {
     union {
-        char    *n_name;
-        long    n_strx;
+        char    *n_name;            ///< nazwa symbolu
+        long    n_strx;             ///< adres symbolu w .syms
     } n_un;
-    int8_t      n_type;
-    int8_t      n_other;
-    int16_t     n_desc;
-    uint32_t    n_value;
+    int8_t      n_type;             ///< typ symbolu
+    int8_t      n_other;            ///< 
+    int16_t     n_desc;             ///< 
+    uint32_t    n_value;            ///< warto¶c symbolu
 };
 
 #define OMAGIC      0407
 #define NMAGIC      0410
 #define ZMAGIC      0413
 #define QMAGIC      0314
+
 #define MID_ZERO    0
 #define EX_PIC      0x10
 #define EX_DYNAMIC  0x20
@@ -83,8 +93,6 @@ struct nlist {
 #define N_RELOFF(ex) (N_DATAOFF(ex) + (ex).a_data)
 #define N_SYMOFF(ex) (N_RELOFF(ex) + (ex).a_trsize + (ex).a_drsize)
 #define N_STROFF(ex) (N_SYMOFF(ex) + (ex).a_syms)
-
-
 
 #ifdef __KERNEL
 bool aout_check(const void *first_page);

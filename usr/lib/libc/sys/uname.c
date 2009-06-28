@@ -6,7 +6,7 @@
 int
 uname(struct utsname *un)
 {
-	if(syscall(SYS_uname, un)) return -1;
+	syscall(SYS_uname, un);
     strcat(un->nodename, "czarny_specjal");
     return 0;
 }

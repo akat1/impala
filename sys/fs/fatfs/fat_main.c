@@ -67,7 +67,7 @@ fat_mount(vfs_t *fs)
 {
     int err;
     DEBUGF("reading super block");
-    iobuf_t *bp = bio_read(fs->vfs_mdev, 0);
+    iobuf_t *bp = bio_read(fs->vfs_mdev, 0, 512);
     if ( ISSET(bp->flags,BIO_ERROR) ) {
         DEBUGF("cannot read superblock");
         bio_release(bp);
@@ -153,8 +153,9 @@ read_fat(fatfs_t *fatfs, int x)
 {
     DEBUGF("Trying read FAT%u", x+1);
     fatfs->fat[x] = kmem_alloc(fatfs->tablesize*512, KM_SLEEP);
+#if 0
     for (int i = 0; i < fatfs->tablesize; i++) {
-        iobuf_t *bp = bio_read(fatfs->vfs->vfs_mdev, fatfs->blkno_fat[x] + i);
+        iobuf_t *bp = bio_read(fatfs->vfs->vfs_mdev, fatfs->blkno_fat[x] + i, 512);
         if (ISSET(bp->flags,BIO_ERROR)) {
             kmem_free(fatfs->fat[x]);
             bio_release(bp);
@@ -163,6 +164,16 @@ read_fat(fatfs_t *fatfs, int x)
         mem_cpy(fatfs->fat[x] + i*512, bp->addr, 512);
         bio_release(bp);
     }
+#else
+    iobuf_t *bp = bio_read(fatfs->vfs->vfs_mdev, fatfs->blkno_fat[x],fatfs->tablesize*512);
+    if (ISSET(bp->flags, BIO_ERROR)) {
+        kmem_free(fatfs->fat[x]);
+        bio_release(bp);
+        return bp->errno;
+    }
+    mem_cpy(fatfs->fat[x], bp->addr, 512*fatfs->tablesize);
+    bio_release(bp);
+#endif
     return 0;
 }
 
@@ -181,7 +192,7 @@ fatfs_clu_read(fatfs_t *fatfs, int clu, fatfs_inode_t *inode)
     int err = 0;
     if (inode->clunum == clu) return 0;
     clu-=2;
-    iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_data + clu);
+    iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_data + clu, 512);
     if (ISSET(bp->flags,BIO_ERROR)) {
         err = -bp->errno;
     } else {

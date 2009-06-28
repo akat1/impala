@@ -29,6 +29,12 @@
  *
  * $Id$
  */
+
+/** @file implementacja ogólnych list.
+ *
+ * Ogólna obs³uga list, wzorowana na systemie Solaris.
+ */
+
 #ifndef __SYS_LIST_H
 #define __SYS_LIST_H
 
@@ -36,21 +42,26 @@
 
 // Proste listy, wzorowane na interfejsie z systemu Solaris
 
+
+/// lista
 typedef struct list list_t;
+/// wêze³
 typedef struct list_node list_node_t;
+/// predykat binarny x < y
 typedef bool list_less_f(const void *x, const void *y);
+/// predykat unarny
 typedef bool list_pred_f(const void *x, uintptr_t arg);
 
 struct list_node {
-    void     *prev;
-    void     *next;
+    void     *prev;             ///< poprzedni element
+    void     *next;             ///< nastêpny element
 };
 
 struct list {
-    uintptr_t   ls_offset;
-    list_node_t ls_root;
-    size_t      ls_length;
-    bool        ls_cyclic;
+    uintptr_t   ls_offset;      ///< przesuniêcie wêz³a w elementach
+    list_node_t ls_root;        ///< korzeñ
+    size_t      ls_length;      ///< ilo¶c elementów
+    bool        ls_cyclic;      ///< czy cykliczna
 };
 
 #define __elem_node(ls, object)\

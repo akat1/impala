@@ -11,37 +11,78 @@ define cprint
 end
 
 #
+# gwatch (adres)
+#
 # watch() oferowany przez GDB automatycznie
 # kasuje punkt wstrzymania, je¿eli wyjdzie z zasiêgu
-# symbolu który obserwujemy.
+# symboli, które wystêpuj± obserwowanym wyra¿eniu.
 #
 # g(lobal)watch uruchamia watch'a bezpo¶rednio na danej
 # pamiêci, pomijaj±c symbole.
 #
+# Przyk³ad u¿ycia:
+#   gwatch &bp->flags
+#
 
 define gwatch
-    watch *(void*) $arg0
+    set $tmp = $arg0
+    watch *(void*) $tmp
 end
 
 define gwatch32
-    watch *(uint32_t*) $arg0
+    set $tmp = $arg0
+    watch *(uint32_t*) $tmp
 end
 
 define gwatch16
-    watch *(uint16_t*) $arg0
+    set $tmp = $arg0
+    watch *(uint16_t*) $tmp
 end
 
 define gwatch8
-    watch *(uint8_t*) $arg0
+    set $tmp = $arg0
+    watch *(uint8_t*) $tmp
 end
 
+document gwatch
+Watch wrap for given address, independent from symbol.
+end
+
+#
+# can_inta
+#
 # sprawdza czy procesor ma w³±czone przerwania
+# 
+
 define can_int
     if $eflags & 512
-        printf "YES, CIPL=%i\n", CIPL
+        printf "YES, IPL=%i\n", CIPL
     else
         printf "NO\n"
     end
+end
+
+document can_int
+Checking if interrupt can occur.
+end
+
+#
+# ps
+#
+# Wy¶wietla listê procesów.
+#
+
+define ps
+    output/fmt "PID     PPID    %u\n", "IMAGE"
+    $p = (proc_t*) procs_list.ls_root.next
+    while ($p)
+    end
+    
+end
+
+
+document ps
+Showing current processes.
 end
 
 # zakomentuj poni¿sz± linie je¿eli nie u¿ywasz Bochs

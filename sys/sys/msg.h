@@ -30,12 +30,15 @@
  * $Id$
  */
 
+/** @file kolejki wiadomo¶ci w Systemie pi±tym
+ */
 #ifndef __SYS_MSG_H
 #define __SYS_MSG_H
 
+/// deskryptor kolejek wiadomo¶ci w systemie pi±tym
 struct msqid_ds {
-    struct ipc_perm     msg_perm;
-    msgqnum_t           msg_qnum;
+    struct ipc_perm     msg_perm;           ///< prawa dostêpu.
+    msgqnum_t           msg_qnum;           
     msglen_t            msg_qbytes;
     pid_t               msg_lspid;
     pid_t               msg_lrpid;
@@ -45,13 +48,14 @@ struct msqid_ds {
 
 #ifdef __KERNEL
 
+/// kolejka wiadomo¶ci systemu pi±tego
 struct ipcmsq {
-    struct msqid_ds     msq_ds;
-    mutex_t             msq_mtx;
-    list_t              msq_data;
-    int                 msq_refcnt;
-    bool                msq_working;
-    key_t               msq_key;
+    struct msqid_ds     msq_ds;         /// deskryptor u¿ytkownika
+    mutex_t             msq_mtx;        /// zamek do synchronizacji
+    list_t              msq_data;       /// kolejka wiadomo¶ci
+    int                 msq_refcnt;     /// ilo¶æ referencji
+    bool                msq_working;    /// czy jest w³±czona
+    key_t               msq_key;        /// klucz dostêpu.
 };
 
 int ipc_msg_get(proc_t *proc, key_t key, int flags, int *id, ipcmsq_t **);

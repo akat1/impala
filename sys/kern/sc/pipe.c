@@ -60,7 +60,6 @@ sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
         goto end_err2;
     args->filedes[0] = fd1;
     args->filedes[1] = fd2;
-    kprintf("PIPE created, %i, %i\n", fd1, fd2);
     return -EOK;
 
 end_err2:

@@ -30,26 +30,32 @@
  * $Id$
  */
 
+/** @file procesy
+ */
 #ifndef __SYS_PROC_H
 #define __SYS_PROC_H
 
+/// znaczniki procesu
 enum PROC_FLAGS
 {
-    PROC_NEW    = 1<<0, // proces zosta³ utworzony
-    PROC_ZOMBIE = 1<<1, // proces zostaje niszczony
-    PROC_RUN    = 1<<2, // proces w kolejce uruchomieniowej
-    PROC_AFTER_EXEC = 1<<3, // proces wykona³ ju¿ exec
-    PROC_STOP   = 1<<4
+    PROC_NEW        = 1<<0,         ///< proces zosta³ utworzony
+    PROC_ZOMBIE     = 1<<1,         ///< proces zostaje niszczony
+    PROC_RUN        = 1<<2,         ///< proces w kolejce uruchomieniowej
+    PROC_AFTER_EXEC = 1<<3,         ///< proces wykona³ ju¿ exec
+    PROC_STOP       = 1<<4          ///< 
 };
 
-
+enum {
+    INIT_PID =  1
+};
+/// opis dzia³aj±cego procesu dla u¿ytkownika
 struct procinfo {
-    pid_t   pid;
-    pid_t   ppid;
-    int     threads;
-    int     flags;
-    char    tty[10];
-    char    cmd[100];
+    pid_t   pid;        ///< PID
+    pid_t   ppid;       ///< PPID
+    int     threads;    ///< ilo¶æ w±tków
+    int     flags;      ///< znaczniki
+    char    tty[10];    ///< terminal kontroluj±cy
+    char    cmd[100];   ///< obraz
 };
 
 #ifdef __KERNEL
@@ -60,6 +66,7 @@ struct procinfo {
 #include <sys/vfs/vfs_types.h>
 //^^^^^^^^^^^^^ ???
 
+/// 
 struct pcred {
     uid_t           p_uid;       ///< identyfikator u¿ytkownika
     uid_t           p_euid;      ///< efektywny identyfikator u¿ytkownika
@@ -68,6 +75,7 @@ struct pcred {
     int             refcnt;      ///< licznik referencji
 };
 
+/// deskryptor procesu
 struct proc {
     pid_t           p_pid;       ///< identyfikator procesu
     pid_t           p_ppid;      ///< identyfikator rodzica
@@ -88,7 +96,7 @@ struct proc {
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
     ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci.
     vm_addr_t       p_brk_addr;  ///< adres koñca segmentu danych (*)
-    mutex_t         p_mtx;
+    mutex_t         p_mtx;       ///< zamek do synchronizacji
     mask_t          p_umask;     ///< maska tworzonych plików
     list_t          p_umtxs;     ///< lista zamków u¿ytkownika
     list_node_t     L_procs;     ///< wêze³ procesów
@@ -97,11 +105,9 @@ struct proc {
 };
 
 
-/// Lista procesów dzia³aj±ych w systemie.
 extern list_t procs_list;
-/// Aktualnie wykonywany proces.
 extern proc_t * volatile curproc;
-extern proc_t *initproc;
+extern proc_t * initproc;
 extern proc_t proc0;
 
 void proc_init(void);
@@ -119,11 +125,6 @@ bool proc_is_parent(proc_t *parent, proc_t *child);
 int proc_fork(proc_t *p, proc_t **child);
 void proc_exit(proc_t *p, int e);
 int proc_getinfos(int off, struct procinfo *info, int n);
-
-enum
-{
-    INIT_PID    = 0
-};
 
 #else
 

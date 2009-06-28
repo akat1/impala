@@ -30,45 +30,47 @@
  * $Id$
  */
 
+/** @file buforowane wej¶cie-wyj¶cie.
+ *
+ * Plik zawiera deklaracje dla modu³u BIO.
+ */
+
 #ifndef __SYS_BIO_H
 #define __SYS_BIO_H
 #ifdef __KERNEL
 
-/*
- * Standardowy UNIXowy model mo¿na powiedzieæ.
- *
- */
-
+/// Nag³ówek buforu wej¶cia-wyj¶cia.
 struct iobuf {
-    void        *addr;
-    int          oper;
-    int          errno;
-    blkno_t      blkno;
-    size_t       bcount;
-    size_t       size;
-    int          flags;
-    devd_t      *dev;
-    sleepq_t     sleepq;
-    list_node_t  L_bioq;
+    void        *addr;      ///< adres buforu.
+    int          oper;      ///< operacja BIO_READ/WRITE
+    int          errno;     ///< numer b³êdu
+    blkno_t      blkno;     ///< numer bloku
+    size_t       bcount;    ///< wielko¶æ buforu w blokach(sektorach)
+    size_t       size;      ///< wielko¶c buforu w bajtach
+    size_t       resid;     ///< ilo¶æ pozosta³ych bajtów do wys³ania
+    int          flags;     ///< znaczniki
+    devd_t      *dev;       ///< buforowane urz±dzenie
+    sleepq_t     sleepq;    ///< ¶pi±ca kolejka do czekania na wynik
+    list_node_t  L_bioq; 
     list_node_t  L_bufs;
     list_node_t  L_hash;
     list_node_t  L_free;
 };
 
-
+/// znaczniki nag³ówka buforu
 enum BUF_FLAGS {
     BIO_BUSY      = 0x00001,    ///< bufor jest u¿ywany
-    BIO_DONE      = 0x00002,    ///< operacja I/O zakoñczona
+    BIO_DONE      = 0x00002,    ///< operacja I/O zakoñczona pomy¶lnie
     BIO_WRITE     = 0x00004,    ///< bufor zaw. dane do zapisu
     BIO_READ      = 0x00008,    ///< bufor do odczytu
-    BIO_ERROR     = 0x00020,    ///< b³±d
-    BIO_DIRTY     = 0x00040,    ///< bufor jest brudny
-    BIO_CACHE     = 0x00080,    ///< bufor jest w CACHE
+    BIO_ERROR     = 0x00020,    ///< operacja I/O zakoñczona z b³êdem
+    BIO_CACHE     = 0x00080,    ///< bufor jest w pamiêci podrêcznej
     BIO_DELWRI    = 0x00100,    ///< opó¼niony zapis
     BIO_WANTED    = 0x00200,    ///< kto¶ oczekuje na bufor
-    BIO_VALID     = 0x00400
+    BIO_VALID     = 0x00400,    ///< blkno i dev s± poprawne
 };
 
+/// kolejka oparacji BIO (dla sterowników)
 typedef struct bio_queue bio_queue_t;
 struct bio_queue {
     mutex_t     bq_mtx;
@@ -76,8 +78,8 @@ struct bio_queue {
 };
 
 void bio_init(void);
-iobuf_t *bio_getblk(devd_t *d, blkno_t n);
-iobuf_t *bio_read(devd_t *d, blkno_t n);
+iobuf_t *bio_getblk(devd_t *d, blkno_t n, size_t bsize);
+iobuf_t *bio_read(devd_t *d, blkno_t n, size_t bsize);
 void bio_write(iobuf_t *bp);
 void bio_delwrite(iobuf_t *bp);
 void bio_release(iobuf_t *bp);

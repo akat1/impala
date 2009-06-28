@@ -128,6 +128,7 @@ enum {
 
 static vconsole_t vcons[VCONS_MAX];
 static vconsole_t *current_vcons = NULL;
+static vconsole_t *log_vcons = NULL;
 static tty_t  *current_vcons_tty = NULL;
 //static devd_t *consttydev;
 
@@ -202,7 +203,7 @@ cons_init()
     }
     textscreen_clone(&vcons[0].screen);
     textscreen_switch(&vcons[0].screen);
-    current_vcons = &vcons[0];
+    log_vcons = current_vcons = &vcons[0];
     current_vcons_tty = current_vcons->tty;
 }
 
@@ -224,10 +225,10 @@ cons_output(int t, const char *c)
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
             str_cat(ptr, "\033[0m");
-            int old_mode = current_vcons->mode; //zabezpieczyæ gdzie¶ mutexem?
-            current_vcons->mode |= CONS_MODE_NEWLINE;
-            vcons_putstr(current_vcons, buf);
-            current_vcons->mode = old_mode;
+            int old_mode = log_vcons->mode; //zabezpieczyæ gdzie¶ mutexem?
+            log_vcons->mode |= CONS_MODE_NEWLINE;
+            vcons_putstr(log_vcons, buf);
+            log_vcons->mode = old_mode;
         } else {
             vcons_putstr(current_vcons, c);
         }

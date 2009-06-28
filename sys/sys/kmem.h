@@ -33,8 +33,8 @@
 #define __SYS_KMEM_H
 
 enum MALLOC_FLAGS {
-    KM_SLEEP,
-    KM_NOSLEEP
+    KM_SLEEP,           ///< je¿eli brakuje pamiêci to czekaj
+    KM_NOSLEEP          ///< nigdy nie czekaj
 };
 
 typedef void kmem_ctor_t(void *);

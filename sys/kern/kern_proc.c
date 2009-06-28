@@ -102,7 +102,7 @@ proc_getinfos(int off, struct procinfo *tab, int n)
 void
 proc_init(void)
 {
-    last_pid = INIT_PID;
+    last_pid = 0;
     LIST_CREATE(&procs_list, proc_t, L_procs, FALSE);
     proc_cache = kmem_cache_create("proc", sizeof(proc_t), proc_ctor,
         proc_dtor);

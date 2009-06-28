@@ -69,49 +69,6 @@ kmain()
     prepare_root();
     start_init_process();
 }
-semaph_t s;
-kthread_t t0,t1;
-
-struct range {
-    int a;
-    int b;
-};
-void f(void *arg);
-void g(void *arg);
-
-devd_t *dev;
-
-void
-f(void *arg)
-{
-    struct range *r = arg;
-    if (r->a) {
-        DEBUGF("doing sleep");
-    }
-    kprintf("test started [%u;%u) %p\n", r->a, r->b, &r);
-    for (int i = r->a; i < r->b; i++) {
-        iobuf_t *bp = bio_read(dev, i);
-        bio_release(bp);
-    }
-    DEBUGF("test [%u;%u) done %p", r->a, r->b, &r);
-    semaph_post(&s);
-}
-
-void
-g(void *arg)
-{
-    struct range *r = arg;
-    if (r->a) {
-        DEBUGF("doing sleep");
-    }
-    kprintf("test started [%u;%u) %p\n", r->a, r->b, &r);
-    for (int i = r->a; i < r->b; i++) {
-        iobuf_t *bp = bio_read(dev, i);
-        bio_release(bp);
-    }
-    DEBUGF("test [%u;%u) done %p", r->a, r->b, &r);
-    semaph_post(&s);
-}
 
 void
 prepare_root()
@@ -191,7 +148,7 @@ void idlefunc(void*);
 void
 idlefunc(void *a)
 {
-    while(1) sched_yield();
+    while(1);
 }
 
 kthread_t idle;

@@ -49,6 +49,9 @@ main(int argc, char **v)
     open("/dev/ttyv1", O_WRONLY);   //stderr
 #endif
 
+    if (getpid() != 1) {
+        return 0;
+    }
     p = fork();
     if (p == -1) {
         fprintf(stderr, "cannot fork\n");

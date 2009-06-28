@@ -51,14 +51,15 @@ enum UIO_OPER {
     UIO_WRITE
 };
 
+/// wej¶cie-wyj¶cie 
 struct uio {
-    iovec_t    *iovs;
-    size_t      iovcnt;
-    int         space;
-    int         oper;
-    size_t      size; // <- do wywalenia
-    size_t      resid;
-    off_t       offset;
+    iovec_t    *iovs;       ///< tablica buforów
+    size_t      iovcnt;     ///< ilo¶c buforów w tablicy
+    int         space;      ///< przestrzeñ UIO_SPACE
+    int         oper;       ///< operacja UIO_OPER
+    size_t      size;       ///< rozmiar
+    size_t      resid;      ///< ilo¶æ pozosta³ych danych
+    off_t       offset;     ///< przesuniêcie
 };
 
 int uio_move(void *dstbuf, size_t len, uio_t *uio);

@@ -52,7 +52,8 @@ main(int argc, char **v)
             argv[1] = "zxVf";
         }
     }
-    printf("? %s %s %s\r\n", argv[0], argv[1], argv[2]);
+    printf("invoking %s %s %s\r", argv[0], argv[1], argv[2]);
+    fflush(stdout);
     if ( (p = fork()) == 0 ) {
         chdir("/");
         execve(tar, argv, envp);

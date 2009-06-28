@@ -94,7 +94,7 @@ fatfs_dirent_read(fatfs_inode_t *inode)
     lfn_cache_reset(&lfn);
     do {
         if (isRoot) {
-            iobuf_t *bp = bio_read(fatfs->dev, i);
+            iobuf_t *bp = bio_read(fatfs->dev, i, 512);
             if (ISSET(bp->flags, BIO_ERROR)) {
                 bio_release(bp);
                 goto error;
@@ -155,7 +155,7 @@ read_root(fatfs_inode_t *inode)
     fatfs_t *fatfs = inode->fatfs;
     lfn_cache_reset(&lfn);
     for (int i = 0; i < fatfs->tablesize; i++) {
-        iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_root+i);
+        iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_root+i, 512);
         if (ISSET(bp->flags, BIO_ERROR)) {
             bio_release(bp);
             goto error;
@@ -210,7 +210,7 @@ load(fatfs_inode_t *inode, int i)
         if (inode->clunum != i) {
             inode->clunum = i;
             mem_zero(inode->clubuf, fatfs->secsize*fatfs->clusize);
-            iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_root + i);
+            iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_root + i, 512);
             if (ISSET(bp->flags, BIO_ERROR)) {
                 err = -1;
             } else {

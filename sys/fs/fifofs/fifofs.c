@@ -308,6 +308,7 @@ fifofs_node_sync(vnode_t *vn)
 int
 fifofs_inactive(vnode_t *vn)
 {
+    return 0;
     fifofs_node_t *n = vn->v_private;
     DEBUGF("inactiving pipe channe: in=%u out=%u delta=%u\n",
             n->stat_in, n->stat_out, n->stat_in - n->stat_out);

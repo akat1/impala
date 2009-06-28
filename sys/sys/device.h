@@ -39,23 +39,31 @@ enum {
     DEVD_MAXDESCR = 128
 };
 
+/// inicjacja sterownika pliku urz±dzenia
 typedef void d_init_t(void);
+/// operacja otwarcia
 typedef int d_open_t(devd_t *d, int flags);
+/// operacja wej¶cia znakowego
 typedef int d_read_t(devd_t *d, uio_t *u, int flags);
+/// operacja wyj¶cia znakowego
 typedef int d_write_t(devd_t *d, uio_t *u, int flags);
+/// operacja zamkniêcia
 typedef int d_close_t(devd_t *d);
+/// operacja kontroli
 typedef int d_ioctl_t(devd_t *d, int cmd, uintptr_t param);
+/// operacja wej¶cia-wyj¶cia blokowego
 typedef int d_strategy_t(devd_t *d, iobuf_t *b);
 
+/// deska rozdzielcza pliku urz±dzenia.
 struct devsw {
-    d_open_t        *d_open;
-    d_close_t       *d_close;
-    d_ioctl_t       *d_ioctl;
-    d_read_t        *d_read;
-    d_write_t       *d_write;
-    d_strategy_t    *d_strategy;
+    d_open_t        *d_open;        ///< obs³uga otwarcia
+    d_close_t       *d_close;       ///< obs³uga zamkniêcia
+    d_ioctl_t       *d_ioctl;       ///< obs³uga kontroli
+    d_read_t        *d_read;        ///< obs³uga wej¶cia
+    d_write_t       *d_write;       ///< obs³uga wyj¶cia
+    d_strategy_t    *d_strategy;    ///< obs³uga wej-wyj blokowego
     int              type;
-    const char      *name;
+    const char      *name;          ///< ogólna nazwa plików urz.
 };
 
 int dnotsupported(devd_t *d);
@@ -67,20 +75,21 @@ int dnotsupported(devd_t *d);
 #define nowrite (d_write_t*) dnotsupported
 #define nostrategy (d_strategy_t*) dnotsupported
 
+/// deskryptor pliku urz±dzenia
 struct devd {
-    int          unit;
-    char         name[DEVD_MAXNAME];
-    char         descr[DEVD_MAXDESCR];
-    void        *priv;
-    int          type;
-    devsw_t     *devsw;
+    int          unit;                  ///< numer jednostki
+    char         name[DEVD_MAXNAME];    ///< nazwa
+    char         descr[DEVD_MAXDESCR];  ///< opis
+    void        *priv;                  ///< prywatny uchwyt sterownika
+    int          type;                  ///< rodzaj pliku
+    devsw_t     *devsw;                 ///< deska rozdzielcza
     list_node_t  L_devs;
 };
 
 enum {
-    DEV_CDEV,
-    DEV_BDEV,
-    DEV_TTY
+    DEV_CDEV,       ///< urz±dzenie znakowe
+    DEV_BDEV,       ///< urz±dzenie blokowe
+    DEV_TTY         ///< terminal
 };
 
 

@@ -83,6 +83,9 @@ struct tentry {
 static const char *tar = "tar";
 static const char *gzip = "/bin/gzip";
 
+#ifndef MIN
+#   define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 /*=============================================================================
  * pomocnicze procedury
@@ -94,6 +97,8 @@ static void write_num(char *, int, int);
 static unsigned int read_num(const char *, int );
 static int is_in_list(char **, const char *);
 static const char *mode2str(const char *, int);
+FILE * open_gzip(const char *, const char *);
+
 
 #define WRITE_NUM(dst, num) write_num(dst, sizeof(dst), num)
 #define READ_NUM(src) read_num(src, sizeof(src))
@@ -190,7 +195,7 @@ write_header(FILE *archive, struct tentry *entry, const char *uname,
 } 
 
 FILE *
-start_gzip(const char *file, const char *mode)
+open_gzip(const char *file, const char *mode)
 {
     enum {
         READ_PIPE = 0,
@@ -353,10 +358,27 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
  * rozpakowywanie elementów z archiwum (i testowanie)
  */
 
+enum {
+    MAX_READ_SIZE   = 10,
+};
+
+struct extract_ctl {
+    char            path[256];
+    struct tentry   *entry;
+    int             empty_left;
+    int             file_blks;
+    int             size;
+    int             test_only;
+    int             read_size;
+    FILE            *file;
+};
+
+
 static void extract_from_arch(FILE *, char **, int, int, int,
     const char *);
 static int is_zero(const char *buf);
 static void progressbar(int percent, const char *fmt, ...);
+int extract_header(struct extract_ctl *, int, int, const char *);
 
 
 
@@ -408,16 +430,6 @@ progressbar(int percent, const char *fmt, ...)
     printf("\r");
 }
 
-struct extract_ctl {
-    char            path[256];
-    struct tentry   *entry;
-    int             empty_left;
-    int             file_blks;
-    int             size;
-    int             test_only;
-    FILE            *file;
-};
-
 int
 extract_header(struct extract_ctl *ex, int verb, int everb, const char *buf)
 {
@@ -440,6 +452,7 @@ extract_header(struct extract_ctl *ex, int verb, int everb, const char *buf)
     }
     ex->size = READ_NUM(ex->entry->size);
     ex->file_blks = (ex->size+511)/512;
+    ex->read_size = 1;
     if (ex->test_only) {
         if (verb)
             printf("%6s %7s %7s %10u !time! %s\n",
@@ -455,6 +468,7 @@ extract_header(struct extract_ctl *ex, int verb, int everb, const char *buf)
             printf("%s", ex->path);
         }
         if (ex->entry->typeflag == REGTYPE || ex->entry->typeflag == AREGTYPE){
+            ex->read_size = MIN(MAX_READ_SIZE, ex->file_blks);
             ex->file = fopen(ex->path, "w");
             if (ex->file == NULL) {
                 fprintf(stderr, "%s: cannot create file %s\n",
@@ -477,17 +491,17 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
     int t, const char *aname)
 {
     struct extract_ctl ex;
-    char buf[512];
-    int i;
+    char buf[512*MAX_READ_SIZE];
     int tsize;
     ex.test_only = t;
     ex.entry = (struct tentry*) buf;
     ex.empty_left = 2;
     ex.file_blks = 0;
     ex.size = 0;
+    ex.read_size = 1;
     ex.file = NULL;
     while (!feof(archive) && ex.empty_left) {
-        int r = fread(buf, 512, 1, archive);
+        int r = fread(buf, 512*ex.read_size, 1, archive);
         if (r == -1) {
             fprintf(stderr, "%s: error\n", tar);
             exit(-1);
@@ -500,16 +514,18 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
             if (extract_header(&ex, verb, everb, buf)) exit(-1);
             tsize = ex.size;
         } else {
+            int local_size = MIN(ex.size,512*ex.read_size);
+            ex.size -= local_size;
+            ex.file_blks -=  ex.read_size;
             if (ex.file) {
                 if (everb) {
                     int pr = (tsize-ex.size)*100/tsize;
                     progressbar(pr, "%s: %s [%u%%]", aname, ex.path, pr);
                 }
-                fwrite(buf, (ex.file_blks==1)? ex.size : 512, 1, ex.file);
+                fwrite(buf, local_size , 1, ex.file);
             }
-            ex.size -= 512;
-            tsize += 512;
-            ex.file_blks--;
+            ex.read_size = MIN(MAX_READ_SIZE, ex.file_blks);
+            if (ex.read_size == 0) ex.read_size = 1;
         }
     }
     if (everb) printf("\r\033[2K");
@@ -559,7 +575,7 @@ operate(int argc, char **argv, int oper, const char *file, const char *mode,
         return -1;
     }
     if (zlib) {
-        archive = start_gzip(file, mode);
+        archive = open_gzip(file, mode);
     } else {
         archive = fopen(file, mode);
     }

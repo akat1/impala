@@ -174,7 +174,6 @@ void gz_uncompress(in, out)
 
     for (;;) {
         len = gzread(in, buf, sizeof(buf));
-//        fprintf(stderr, "gzip: uncompressing file res=%i\n", len);
         if (len < 0) error (gzerror(in, &err));
         if (len == 0) break;
 
@@ -303,7 +302,6 @@ int main(argc, argv)
         SET_BINARY_MODE(stdin);
         SET_BINARY_MODE(stdout);
         if (uncompr) {
-            fprintf(stderr, "gzip: using stdin\n");
             file = gzdopen(fileno(stdin), "rb");
             if (file == NULL) error("can't gzdopen stdin");
             gz_uncompress(file, stdout);

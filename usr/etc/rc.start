@@ -19,11 +19,11 @@ do
     if [ ! $ttyv = "ttyv1" ]
     then
         echo -n " $ttyv"
-        /sbin/ttyvrun /dev/$ttyv /bin/sh /etc/rc.ttyv
+        TTY="/dev/$ttyv" AUTOLOGIN="root" /sbin/ttyvrun /dev/$ttyv /bin/sh /etc/rc.ttyv
     fi
 done
 cd /
 echo "."
 
 
-exec /bin/sh /etc/rc.ttyv
+TTY="/dev/ttyv1" AUTOLOGIN="root" exec /bin/sh /etc/rc.ttyv

@@ -41,8 +41,8 @@
 #include <machine/atomic.h>
 
 enum {
-    THREAD_STACK_SIZE = 0x10000,
-    THREAD_KSTACK_SIZE = 0x8000
+    THREAD_STACK_SIZE = 0x10000,  ///< domy¶lny rozmiar stosu
+    THREAD_KSTACK_SIZE = 0x8000   ///< domy¶lny rozmiar stosu alt.
 };
 
 /// wiruj±cy zamek.
@@ -56,10 +56,8 @@ struct mutex {
     int           mtx_locked;  ///< stan zamka.
     int           mtx_flags;   ///< opcje.
     spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
-    /// lista w±tków oczekuj±cych na wej¶cie
-    list_t        mtx_locking; // thread_t.L_wait
-    /// lista w±tków oczekuj±cych na poinformowanie
-    list_t        mtx_waiting; // thread_t.L_wait
+    list_t        mtx_locking; 
+    list_t        mtx_waiting; 
     list_node_t   L_user;
 };
 
@@ -86,7 +84,7 @@ struct thread {
     size_t          thr_kstack_size;///< rozmiar stosu dla jadra
     proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
     sleepq_t       *thr_sleepq;     ///< kolejka w której ¶pi w±tek
-    wdescr_t        thr_wdescr;
+    wdescr_t        thr_wdescr;     ///<
     mutex_t         thr_mtx;        ///< do synchronizacji
     bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
     sigset_t        thr_sigblock;   ///< blokowane sygna³y
@@ -104,6 +102,7 @@ struct thread {
         (t)->thr_wdescr.descr = d;\
     } while (0)
 
+/// ¶pi±ca kolejka
 struct sleepq {
     mutex_t     sq_mtx;
     list_t      sq_waiting;
@@ -154,17 +153,16 @@ enum {
     SPINLOCK_LOCK
 };
 
-extern thread_t * volatile curthread;     // nie lepiej curthread ?
+extern thread_t * volatile curthread;
 extern thread_t *thread_idle;
-extern list_t threads_list;              // thread_t.L_threads
+extern list_t threads_list; 
 
 void thread_init(void);
 thread_t *thread_create(int space, addr_t entry, addr_t arg);
 void thread_destroy(thread_t *t);
 void thread_exit_last(thread_t *t);
 void thread_clone(thread_t *dst, thread_t *src);
-// do wywalenia
-void thread_suspend(thread_t *t);
+void thread_suspend(thread_t *t); // <- do wywalenia
 uintptr_t thread_get_pc(thread_t *t);
 void thread_fork(thread_t *t, thread_t *ct);
 void thread_join(thread_t *t);

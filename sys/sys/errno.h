@@ -32,6 +32,8 @@
 #ifndef __SYS_ERRNO_H
 #define __SYS_ERRNO_H
 
+
+/// do wywalenia ?
 #define EOK             0  ///< no error
 
 /**

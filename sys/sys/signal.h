@@ -52,35 +52,35 @@ struct sigaction {
 };
 
 // Sygna³y
-#define SIGHUP          1
-#define SIGINT          2
-#define SIGQUIT         3
-#define SIGILL          4
-#define SIGTRAP         5
-#define SIGABRT         6
-#define SIGIOT          6
-#define SIGBUS          7
-#define SIGFPE          8
-#define SIGKILL         9
-#define SIGUSR1         10
-#define SIGSEGV         11
-#define SIGUSR2         12
-#define SIGPIPE         13
-#define SIGALRM         14
-#define SIGTERM         15
-#define SIGSTKFLT       16
-#define SIGCHLD         17
-#define SIGCONT         18
-#define SIGSTOP         19
-#define SIGTSTP         20
-#define SIGTTIN         21
-#define SIGTTOU         22
-#define SIGURG          23
-#define SIGXCPU         24
-#define SIGXFSZ         25
-#define SIGVTALRM       26
-#define SIGPROF         27
-#define SIGWINCH        28
+#define SIGHUP          1   ///< 
+#define SIGINT          2   ///< przerwanie
+#define SIGQUIT         3   ///< wyj¶cie
+#define SIGILL          4   ///< nieprawid³owa instrukcja
+#define SIGTRAP         5   ///< 
+#define SIGABRT         6   ///< abort
+#define SIGIOT          6   ///< co¶ staro¿ytnego
+#define SIGBUS          7   ///< b³±d szyny
+#define SIGFPE          8   ///< b³±d FPU
+#define SIGKILL         9   ///< zabicie
+#define SIGUSR1         10  ///< syg. u¿ytkownika #1
+#define SIGSEGV         11  ///< naruszenie ochrony pamiêci
+#define SIGUSR2         12  ///< syg. u¿ytkownika #2
+#define SIGPIPE         13  ///< zapis na nieczytany potok
+#define SIGALRM         14  ///< 
+#define SIGTERM         15  ///< zakoñczenie pracy
+#define SIGSTKFLT       16  ///<
+#define SIGCHLD         17  ///< dziecko unar³o
+#define SIGCONT         18  ///< kontynuuj dzia³anie
+#define SIGSTOP         19  ///< zatrzymaj dzia³anie
+#define SIGTSTP         20  ///< zatrzymaj dzia³anie (gen. przez tty)
+#define SIGTTIN         21  ///< 
+#define SIGTTOU         22  ///<
+#define SIGURG          23  ///< 
+#define SIGXCPU         24  ///<
+#define SIGXFSZ         25  ///<
+#define SIGVTALRM       26  ///<
+#define SIGPROF         27  ///<
+#define SIGWINCH        28  ///< zmiana rozmiaru okna tty
 
 #define _NSIG    32   
 

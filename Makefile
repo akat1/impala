@@ -21,8 +21,9 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp COPYRIGHT ${DISTDIR}/
 	cp usr/sbin/init/init ${DISTDIR}/sbin/init
 	cp usr/sbin/ttyvrun/ttyvrun ${DISTDIR}/sbin/ttyvrun
-#	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
-#	cp usr/bin/test/test ${DISTDIR}/bin/test
+	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
+	cp usr/sbin/login/login ${DISTDIR}/sbin/login
+	cp usr/bin/test/test ${DISTDIR}/bin/test
 	cp usr/bin/vttest/vttest ${DISTDIR}/bin/vttest
 	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
 	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
@@ -31,6 +32,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
+	cp usr/etc/profile ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
@@ -40,7 +42,12 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
 
 commit:
-	svn commit
+	if [ -e COMMIT ];\
+	then\
+		svn commit -F COMMIT && rm COMMIT;\\
+	else\
+		svn commit;\
+	fi
 
 update:
 	svn log -r BASE:HEAD > CHANGES

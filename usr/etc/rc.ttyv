@@ -1,6 +1,4 @@
 #!/bin/sh
 
-echo 
 cd /
-cat /etc/motd
-exec /bin/sh
+exec /sbin/login
