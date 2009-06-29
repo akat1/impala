@@ -170,6 +170,7 @@ SRCS=\
     unistd/write.c\
     unistd/getopt.c\
     other/closedir.c\
+    other/getgrnam.c\
     other/getpwnam.c\
     other/getpwuid.c\
     other/opendir.c\

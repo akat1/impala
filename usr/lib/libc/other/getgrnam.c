@@ -1,3 +1,5 @@
+#include <unistd.h>
+#include <string.h>
 #include <grp.h>
 
 struct group *
@@ -10,14 +12,14 @@ getgrnam(const char *name)
     FILE *f = fopen("/etc/group", "r");
     if(!f)
         return NULL;
-    while(fgets(buf, 128, f) != EOF) {
+    while(fgets(buf, 128, f) != NULL) {
         char *sptr = buf;
         res->gr_name   = strsep(&sptr, ":");
         if(strcmp(res->gr_name, name))
             continue;
         res->gr_name = strdup(res->gr_name);
         res->gr_passwd = strdup(strsep(&sptr, ":"));
-        res->gr_gid    = strdup(strsep(&sptr, ":"));
+        res->gr_gid    = atol(strsep(&sptr, ":"));
         char *tmp = sptr;
         int ucount = 0;
         while(*tmp) {

@@ -2,22 +2,14 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 // Tym razem nvi... ma niez³e wymagania, nie ma co...
 
-// `_access'
 // `_bsearch'
-// `_chmod'
-// `_chown'
 // `_ctime'
 // `_execl'
-// `_fsync'
-// `_getgrnam'
-// `_getpwuid'
 // `_gettimeofday'
-// `_mkdir'
 // `_mkstemp'
 // `_mmap'
 // `_munmap'
 // `_revoke'
-// `_strsep'
 // `_system'
 // `_time'
 // `_ttyname'
