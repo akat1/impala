@@ -146,7 +146,8 @@ struct fdctrl {
     iobuf_t        *cbp;    ///< obecnie obs³ugiwany bufor
     char*          *iobuf;  ///< bufor transferu
     size_t          iosize; ///< rozmiar transferu
-    
+    bus_isa_dma_t  *dma;    ///< deskryptor ISA DMA
+    fdsec_t         pos;    ///< pozycja g³owicy    
 };
 
 /// Rodzaj stacji dyskietek.
@@ -204,7 +205,6 @@ void fdc_motor_on(fddrive_t *drv);
 void fdc_motor_off(fddrive_t *drv);
 void fdc_readsec(fddrive_t *drv, iobuf_t *b);
 
-static bus_isa_dma_t *fd_dma;
 static fdctrl_t fdctrl;
 static fddrive_t fddrive[2];
 
@@ -355,7 +355,7 @@ io_done(fdctrl_t *ctrl, iobuf_t *bp)
     bp->resid -= ctrl->iosize;
     ctrl->iobuf += ctrl->iosize;
     if (bp->resid == 0) {
-        bus_isa_dma_finish(fd_dma);
+        bus_isa_dma_finish(ctrl->dma);
         bio_done(bp);
         ctrl->cmd = -1;
         ctrl->cbp = 0;
@@ -501,7 +501,7 @@ fdc_io(fdctrl_t *ctrl)
     }
 
     ctrl->iosize = MIN(MAX_TRANSFER, bp->resid);
-    bus_isa_dma_prepare(fd_dma, dma_cmd, ctrl->iobuf, ctrl->iosize);
+    bus_isa_dma_prepare(ctrl->dma, dma_cmd, ctrl->iobuf, ctrl->iosize);
     wrfifo(ctrl, ctrl->cmd);
     wrfifo(ctrl, drv->unit | (sec.head << 2));
     wrfifo(ctrl, sec.track);
@@ -552,7 +552,7 @@ fdc_init(void)
     }
     // jak jakie¶ stacje s± dostêpne to przydzialny kana³ DMA,
     // instalujemy podprogram przerwania i takie tam
-    fd_dma = bus_isa_dma_alloc(ISA_DMA_FDC);
+    fdctrl.dma = bus_isa_dma_alloc(ISA_DMA_FDC);
     spinlock_init(&ilock);
     spinlock_lock(&ilock);
     irq_install_handler(FDC_IRQ, fdinterrupt, IPL_BIO);

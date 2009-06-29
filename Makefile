@@ -44,7 +44,7 @@ ${IMAGE_FILE}: ${IMAGE_FILE_}
 commit:
 	if [ -e COMMIT ];\
 	then\
-		svn commit -F COMMIT && rm COMMIT;\\
+		svn commit -F COMMIT && rm COMMIT;\
 	else\
 		svn commit;\
 	fi
