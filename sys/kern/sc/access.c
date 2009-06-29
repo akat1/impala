@@ -51,12 +51,11 @@ sc_access(thread_t *t, syscall_result_t *r, access_args_t *args)
     char fname[PATH_MAX];
     if((error = copyinstr(fname, args->fname, PATH_MAX)))
         return error;
-    if((error = vfs_lookup(proc->p_curdir, &node, fname, t, LKP_ACCESS)))
+    if((error = vfs_lookup(proc->p_curdir, &node, fname, t, LKP_ACCESS_REAL_ID)))
         return error;
-    
+    int res = VOP_ACCESS(node, args->mode, proc->p_cred);
     vrele(node);
-    
-    return 0;
+    return res;
 }
 
 

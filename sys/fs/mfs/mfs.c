@@ -117,6 +117,7 @@ mfs_mount(vfs_t *fs)
     mfs->rootinode->mfs = mfs;
     mfs->rootinode->name = "";
     mfs->rootinode->size = 0;
+    mfs->rootinode->attr = 0777;
     mfs->rootinode->type = MFS_TYPE_DIR;
 
     return 0;

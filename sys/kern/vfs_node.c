@@ -159,7 +159,11 @@ _change_vptr(vnode_t **v, vnode_t *new)
 int
 vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
 {
+    if(*(path->now) == '\0')
+        return -ENOENT;
     int errno = 0;
+    int dirmode = X_OK|(ISSET(path->flags,LKP_ACCESS_REAL_ID)?ACCESS_REAL_ID:0);
+    pcred_t *cred = (thr && thr->thr_proc) ? thr->thr_proc->p_cred:NULL;
     vnode_t *tmp;
     *vpp = NULL;
     if(!sd)
@@ -175,7 +179,8 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             _change_vptr(&cur, rootvnode);
     }
     if(!cur) {
-        vrele(cur); vrele(last);
+        if(last)
+            vrele(last);
         return -ENOENT;
     }
     if(cur->v_type != VNODE_TYPE_DIR) {
@@ -187,7 +192,6 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             vrele(cur);
             cur = tmp;
     }
-
     while(*(path->now)) {
         if(*(path->now) == '/') {
             (path->now)++;
@@ -216,6 +220,8 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             } else  // co¶ innego z kropk±..
                 (path->now)--;
         }
+        if((errno = VOP_ACCESS(cur, dirmode, cred)))
+            goto end_error;
         errno = VOP_LOOKUP(cur, &tmp, path);  //niech vnode dalej szuka...
         if(errno == -ENOENT) {
             if((path->flags & LKP_GET_PARENT) && _last_component(path)) {
@@ -359,5 +365,32 @@ vnode_stat(vnode_t *node, struct stat *buf)
     return 0;
 }
 
+/// funkcja przeznaczona g³ównie do wykorzystania przez implementacje fs
+/// sprawdza dla danego poziomu ochrony pliku, danych uprawnieñ u¿ytkownika
+/// i ¿±danego poziomu dostêpu, czy dostêp ten jest mo¿liwy
+int
+vnode_access_ok(uid_t nuid, gid_t ngid, mode_t attr, int mode, pcred_t *cred)
+{
+    KASSERT(cred != NULL);
+    bool rid = (mode & ACCESS_REAL_ID)>0;
+    uid_t uid = rid ? cred->p_uid : cred->p_euid;
+//    if(uid == 0)
+//      return 0;
+    gid_t gid = rid ? cred->p_gid : cred->p_egid;
+    bool uok = uid == nuid;
+    bool gok = gid == ngid;    
+    int res = attr & 7;
+    attr >>= 3;
+    if(gok)
+        res |= attr & 7;
+    attr >>= 3;
+    if(uok)
+        res |= attr & 7;
+    if((mode & 7) & ~res) {
+        kprintf("Priv test failed - wanted %b, got %b\n", mode, res);
+        return -EACCES;
+    }
+    return 0;
+}
 
 

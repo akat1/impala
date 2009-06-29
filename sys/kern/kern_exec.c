@@ -118,7 +118,10 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     }
     vattr_t attr;
 
-    ///@todo sprawdziæ prawa dostêpu
+    if((err = VOP_ACCESS(vp, X_OK, p->p_cred))) {
+        kprintf("Execve failed - perm. denied\n");
+        return err;
+    }
     attr.va_mask = VATTR_SIZE;
     VOP_GETATTR(vp, &attr);
     einfo.image_size = attr.va_size;

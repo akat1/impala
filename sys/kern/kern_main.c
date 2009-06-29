@@ -78,7 +78,7 @@ prepare_root()
     vnode_t *res, *res2;
     vattr_t attr;
     attr.va_type = VNODE_TYPE_DIR;
-    attr.va_mode = 755;
+    attr.va_mode = 0755;
     attr.va_size = 0;
     VOP_MKDIR(rootvnode, &res, "dev", &attr); vrele(res);
     VOP_MKDIR(rootvnode, &res, "bin", &attr); vrele(res);

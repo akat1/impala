@@ -250,7 +250,7 @@ open_gzip(const char *file, const char *mode)
  * dopisywanie elementów do archiwum
  *
  * Do dorzucania s³u¿y append_to_arch, który w wykorzystuje
- * appennd_file_to_arch gdy dorzucany element to regularny plik
+ * append_file_to_arch gdy dorzucany element to regularny plik
  * oraz append_dir_to_arch gdy to katalog - wtedy jest wzajemna rekursja
  * miêdzy tymi dwoma procedurami.
  */
@@ -475,6 +475,8 @@ extract_header(struct extract_ctl *ex, int verb, int everb, const char *buf)
                 tar, ex->path);
                 return -1;
             }
+            //->fchmod
+            chmod(ex->path, READ_NUM(ex->entry->mode));
         } else
         if (ex->entry->typeflag == DIRTYPE) {
             if (mkdir(ex->path, READ_NUM(ex->entry->mode)) && errno != EEXIST){

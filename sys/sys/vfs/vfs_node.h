@@ -111,9 +111,16 @@ enum {
     LKP_NORMAL = 0,
     LKP_GET_PARENT = 1<<0,
     LKP_NO_FOLLOW = 1<<1,   //je¿eli ostatnia czê¶æ path to link - nie pod±¿aj
-    LKP_ACCESS = 1<<2,
+    LKP_ACCESS_REAL_ID = 1<<2,
 };
 
+enum {
+    X_OK = 1<<0,
+    W_OK = 1<<1,
+    R_OK = 1<<2,
+    F_OK = 1<<3,
+    ACCESS_REAL_ID = 1<<4 //sprawdzaæ uid / gid a nie euid / egid
+};
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
 #define VOP_CREATE(v, vpp, name, attr) (v)->v_ops->vop_create((v), (vpp), \
@@ -132,6 +139,7 @@ enum {
 #define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
 #define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
 //#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
+#define VOP_ACCESS(v, m, c) (v)->v_ops->vop_access((v), (m), (c))
 #define VOP_SYNC(v) (v)->v_ops->vop_sync((v))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 
@@ -153,6 +161,7 @@ typedef int vnode_mkdir_t(vnode_t *v, vnode_t **vpp, const char *path,
 typedef int vnode_getdents_t(vnode_t *v, dirent_t *dents, int first, int count);
 typedef int vnode_readlink_t(vnode_t *v, char *buf, int bsize);
 typedef int vnode_symlink_t(vnode_t *v, char *name, char *dst);
+typedef int vnode_access_t(vnode_t *v, int mode, pcred_t *cred);
 //typedef int vnode_rmdir_t(vnode_t *v);
 typedef int vnode_sync_t(vnode_t *v);
 typedef int vnode_inactive_t(vnode_t *v);
@@ -175,6 +184,7 @@ struct vnode_ops {
     vnode_getdents_t  *vop_getdents;
     vnode_readlink_t  *vop_readlink;
     vnode_symlink_t   *vop_symlink;
+    vnode_access_t    *vop_access;
     vnode_sync_t      *vop_sync;
     vnode_inactive_t  *vop_inactive;
 //    vnode_rmdir_t     *vop_rmdir;
@@ -198,6 +208,7 @@ int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 int vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 int vnode_stat(vnode_t *vn, struct stat *buf);
 bool vnode_isatty(vnode_t *vn);
+int vnode_access_ok(uid_t nuid, gid_t ngid, mode_t attr,int mode,pcred_t *cred);
 
 vnode_t* vnode_alloc(void);
 void vrele(vnode_t *vn);

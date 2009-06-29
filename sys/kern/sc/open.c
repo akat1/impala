@@ -85,6 +85,10 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         error = vfs_lookup_parent(proc->p_curdir, &parent, fname, p);
         if(error)
             return error;
+        if((error = VOP_ACCESS(parent, W_OK, proc->p_cred))) {
+            vrele(parent);
+            return error;
+        }
         vattr_t attr;
         attr.va_mode = arg->mode & ~(proc->p_umask) & 0777;
         attr.va_type = VNODE_TYPE_REG;
@@ -105,6 +109,12 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
             vrele(node);
             return -EISDIR;
         }
+    }
+    int wmode = (flags & O_RDWR) ? (W_OK | R_OK) :
+                (flags & O_RDONLY) ? (R_OK) : (W_OK);
+    if((error = VOP_ACCESS(node, wmode, proc->p_cred))) {
+        vrele(node);
+        return error;
     }
     if((error = VOP_OPEN(node, flags, arg->mode))) {
         vrele(node);

@@ -51,6 +51,7 @@ static vnode_mkdir_t     fatfs_mkdir;
 static vnode_getdents_t  fatfs_getdents;
 static vnode_readlink_t  fatfs_readlink;
 static vnode_symlink_t   fatfs_symlink;
+static vnode_access_t    fatfs_access;
 static vnode_sync_t      fatfs_sync;
 static vnode_inactive_t  fatfs_inactive;
 
@@ -71,6 +72,7 @@ static vnode_ops_t fatfs_node_ops = {
     fatfs_getdents,
     fatfs_readlink,
     fatfs_symlink,
+    fatfs_access,
     fatfs_sync,
     fatfs_inactive
 };
@@ -278,6 +280,12 @@ int
 fatfs_symlink(vnode_t *v, char *name, char *dst)
 {
     return -ENOTSUP;
+}
+
+int
+fatfs_access(vnode_t *v, int mode, pcred_t *c)
+{
+    return 0;
 }
 
 int

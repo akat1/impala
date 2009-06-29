@@ -43,6 +43,7 @@
 #include <sys/string.h>
 #include <sys/uio.h>
 #include <sys/kmem.h>
+#include <sys/proc.h>
 #include <fs/mfs/mfs_internal.h>
 
 
@@ -61,6 +62,7 @@ static vnode_mkdir_t mfs_mkdir;
 static vnode_getdents_t mfs_getdents;
 static vnode_readlink_t mfs_readlink;
 static vnode_symlink_t mfs_symlink;
+static vnode_access_t mfs_access;
 static vnode_inactive_t mfs_inactive;
 static int pc_cmp(lkp_state_t *path, const char *fname);
 
@@ -80,6 +82,7 @@ vnode_ops_t mfs_vnode_ops = {
     .vop_mkdir = mfs_mkdir,
     .vop_getdents = mfs_getdents,
     .vop_readlink = mfs_readlink,
+    .vop_access = mfs_access,
     .vop_symlink = mfs_symlink,
     .vop_inactive = mfs_inactive,
 };
@@ -268,6 +271,15 @@ mfs_symlink(vnode_t *v, char *name, char *dst)
     mem_cpy(n->data, dst, n->size);
     vrele(vn);
     return 0;
+}
+
+int
+mfs_access(vnode_t *vn, int mode, pcred_t *cred)
+{
+    if(!cred)
+        return 0;
+    mfs_node_t *n = vn->v_private;
+    return vnode_access_ok(n->uid, n->gid, n->attr&0777, mode, cred);
 }
 
 int

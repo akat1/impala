@@ -86,10 +86,9 @@ mode_t       getmode(const void *set, mode_t omode);
 void *       setmode(const char *p);
 pid_t        vfork(void);
 
-
-#define R_OK (1<<0)
+#define X_OK (1<<0)
 #define W_OK (1<<1)
-#define X_OK (1<<2)
+#define R_OK (1<<2)
 #define F_OK (1<<3)
 
 #define STDIN_FILENO   0

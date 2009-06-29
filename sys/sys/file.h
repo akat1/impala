@@ -63,7 +63,6 @@
 #define F_SETFD       (1 << 4)
 
 
-
 #define PATH_MAX    4096
 
 #ifdef __KERNEL

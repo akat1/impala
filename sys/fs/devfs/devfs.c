@@ -70,6 +70,7 @@ static vnode_getdents_t devfs_getdents;
 static vnode_inactive_t devfs_inactive;
 static vnode_readlink_t devfs_readlink;
 static vnode_symlink_t devfs_symlink;
+static vnode_access_t devfs_access;
 
 static vnode_ops_t devfs_vnode_ops = {
     .vop_open = devfs_open,
@@ -87,6 +88,7 @@ static vnode_ops_t devfs_vnode_ops = {
     .vop_getdents = devfs_getdents,
     .vop_readlink = devfs_readlink,
     .vop_symlink = devfs_symlink,
+    .vop_access = devfs_access,
     .vop_inactive = devfs_inactive,
 };
 
@@ -291,6 +293,15 @@ devfs_symlink(vnode_t *v, char *name, char *dst)
 }
 
 int
+devfs_access(vnode_t *v, int mode, pcred_t *c)
+{
+    if(!c)
+        return 0;
+    devfs_node_t *n = v->v_private;
+    return vnode_access_ok(n->i_uid, n->i_gid, n->i_attr&0777, mode, c);
+}
+
+int
 devfs_inactive(vnode_t *vn)
 {
     devfs_node_t *n = vn->v_private;
@@ -377,6 +388,7 @@ devfs_init()
     n->i_attr = 0;
     n->i_uid = 0;
     n->i_gid = 0;
+    n->i_attr = 0755;
     n->i_dirvnode = NULL;
     n->i_dev = NULL;
     n->i_parent = NULL;

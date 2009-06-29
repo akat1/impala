@@ -221,6 +221,7 @@ fifofs_read(vnode_t *vn, uio_t *u, int flags)
                     continue;
                 return want-u->resid;
             }
+            sched_yield();
             continue;   //busy waiting... naprawiæ..
         }
         uio_move(read_beg, read_size, u);

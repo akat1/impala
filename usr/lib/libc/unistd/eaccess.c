@@ -1,9 +1,9 @@
+#include <sys/types.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 int
 eaccess(const char *pathname, int mode)
 {
-    ///@todo implem. eaccess
-    ///wsadziæ w j±dro, czy w LibC?
-    return 0;
+    return syscall(SYS_access, pathname, mode&15);
 }
