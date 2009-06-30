@@ -12,8 +12,6 @@ int optind = 1, opterr, optopt, optreset;
 int
 getopt(int argc, char * const argv[], const char *optstring)
 {
-    return -1;
-    // ^^^ co¶ nie ¶miga 
     static char *p = "";
     char *opt;
 
