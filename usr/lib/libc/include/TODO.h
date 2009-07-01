@@ -2,7 +2,6 @@
 // Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
 // Tym razem nvi... ma niez³e wymagania, nie ma co...
 
-// `_bsearch'
 // `_ctime'
 // `_execl'
 // `_gettimeofday'

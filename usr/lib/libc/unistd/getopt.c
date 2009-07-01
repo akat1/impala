@@ -4,7 +4,7 @@
 #include <string.h>
 
 char *optarg;
-int optind = 1, opterr, optopt, optreset;
+int optind = 1, opterr = 0, optopt, optreset;
 
 #define UNKNOWN_OPT ((int)'?')
 #define MISSING_ARG ((int)':')
@@ -22,7 +22,7 @@ getopt(int argc, char * const argv[], const char *optstring)
             return -1;
         }
 
-        p = argv[optind++];
+        p = argv[optind];
 
         /* oczekujemy opcji */
         if ( p[0] != '-' ) {
@@ -37,6 +37,7 @@ getopt(int argc, char * const argv[], const char *optstring)
         }
 
         /* dostali¶my jak±¶ opcje */
+        optind++;
         p++;
     }
 

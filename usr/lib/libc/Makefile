@@ -54,6 +54,7 @@ SRCS=\
     stdlib/malloc.c\
     stdlib/qsort.c\
     stdlib/realloc.c\
+    stdlib/bsearch.c\
     stdlib/setenv.c\
     stdlib/strtol.c\
     stdlib/strtoul.c\
