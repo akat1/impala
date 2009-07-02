@@ -59,7 +59,6 @@ vnode_alloc()
 void
 vref(vnode_t *vn)
 {
-//     DEBUGF("VREF vn=%p", vn);
     KASSERT(vn->v_refcnt>0);
     vn->v_refcnt++;
 }
@@ -67,7 +66,6 @@ vref(vnode_t *vn)
 void
 vrele(vnode_t *vn)
 {
-//     DEBUGF("VRELE vn=%p", vn);
     KASSERT(vn->v_refcnt>0);
     vn->v_refcnt--;
     if(vn->v_refcnt == 0) {
@@ -350,7 +348,7 @@ vnode_stat(vnode_t *node, struct stat *buf)
     if(res)
         return res;
     buf->st_dev = 0;
-    buf->st_ino = 0;
+    buf->st_ino = va.va_ino;
     buf->st_mode = va.va_mode | VATYPE_TO_SMODE(va.va_type);
     buf->st_nlink = va.va_nlink;
     buf->st_uid = va.va_uid;
@@ -387,8 +385,8 @@ vnode_access_ok(uid_t nuid, gid_t ngid, mode_t attr, int mode, pcred_t *cred)
     if(uok)
         res |= attr & 7;
     if((mode & 7) & ~res) {
-        kprintf("Priv test failed - wanted %b, got %b\n", mode, res);
-        return -EACCES;
+//        kprintf("Priv test failed - wanted %b, got %b\n", mode, res);
+//        return -EACCES;
     }
     return 0;
 }

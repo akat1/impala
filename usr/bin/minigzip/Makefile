@@ -1,5 +1,5 @@
-PROG=gzip
-SRCS=gzip.c
+PROG=minigzip
+SRCS=minigzip.c
 LIBS=-lz
 
 #.include <bsd.prog.mk>

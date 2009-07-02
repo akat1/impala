@@ -252,6 +252,10 @@ devfs_getattr(vnode_t *vn, vattr_t *attr)
         attr->va_gid = node->i_gid;
     if(attr->va_mask & VATTR_DEV)
         attr->va_dev = node->i_dev;
+    if (attr->va_mask & VATTR_NLINK)
+        attr->va_nlink = 1;
+    if (attr->va_mask & VATTR_INO)
+        attr->va_ino = (ino_t) node;
     return 0;
 }
 

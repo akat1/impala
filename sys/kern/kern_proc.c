@@ -54,7 +54,7 @@ proc_ctor(void *obj)
     mem_zero(obj, sizeof(proc_t));
     proc_t *proc = obj;
     proc->vm_space = 0;
-    proc->p_cred = kmem_alloc(sizeof(pcred_t), KM_SLEEP);
+    proc->p_cred = kmem_zalloc(sizeof(pcred_t), KM_SLEEP);
     proc->p_fd = filetable_alloc();
     proc->p_cmd = NULL;
     mutex_init(&proc->p_mtx, MUTEX_NORMAL);
@@ -157,6 +157,7 @@ proc_fork(proc_t *p, proc_t **child)
     // tablica deskryptorów
     filetable_clone(cp->p_fd, p->p_fd);
     // CWD
+    if (p->p_cmd) cp->p_cmd = str_dup(cp->p_cmd);
     cp->p_rootdir = p->p_rootdir;
     vref(cp->p_rootdir);
     cp->p_curdir = p->p_curdir;
@@ -164,6 +165,7 @@ proc_fork(proc_t *p, proc_t **child)
     cp->p_session = p->p_session;
     cp->p_group = p->p_group;
     cp->p_ctty = p->p_ctty;
+    cp->p_brk_addr = p->p_brk_addr;
     // Kopia IPC SystemV MSG
     // Reset clock
 
@@ -256,7 +258,7 @@ proc_reset_vmspace(proc_t *p)
         p->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
     }
     vm_space_create(p->vm_space, VM_SPACE_USER);
-    p->p_brk_addr = p->vm_space->seg_data->end;
+//    p->p_brk_addr = p->vm_space->seg_data->end; <- to nie mo¿e tu byæ
     mutex_unlock(&p->p_mtx);
 }
 

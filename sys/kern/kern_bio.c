@@ -231,7 +231,7 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
     bp->resid = bsize;
     // rozmiar bufora siê zgadza, no to po robocie.
     if (bp->size == bsize) return;
-    UNSET(bp->flags, BIO_DONE);
+    UNSET(bp->flags, BIO_DONE|BIO_ERROR);
     void *a = kmem_alloc(bsize, KM_SLEEP);
     // zmieniamy bufor, zachowuj±c czê¶c danych.
     if (bp->addr && bp->size < bsize) {
@@ -312,6 +312,9 @@ bio_read(devd_t *d, blkno_t n, size_t bsize)
 void
 bio_write(iobuf_t *bp)
 {
+    bp->oper = BIO_WRITE;
+    devd_strategy(bp->dev, bp);
+    bio_wait(bp);
 }
 
 void

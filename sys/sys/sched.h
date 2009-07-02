@@ -51,8 +51,10 @@ void sched_unlock_and_wait(mutex_t *m);
 void sched_wait(const char *fl, const char *fn, int l, const char *d);
 void sched_wakeup(thread_t *n);
 
+#define IMSLEEP(ms, d) imsleep(ms, __FILE__, __func__, __LINE__, d)
 #define MSLEEP(t,d) msleep(t, __FILE__,__func__, __LINE__, d)
 #define SSLEEP(t,d) ssleep(t, __FILE__,__func__, __LINE__, d)
+void imsleep(uint mtime, const char *, const char *, int, const char *);
 void msleep(uint mtime, const char *fl, const char *fn, int l, const char *d);
 void ssleep(uint stime, const char *fl, const char *fn, int l, const char *d);
 

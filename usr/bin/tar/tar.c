@@ -81,7 +81,7 @@ struct tentry {
 
 
 static const char *tar = "tar";
-static const char *gzip = "/bin/gzip";
+static const char *gzip = "/bin/minigzip";
 
 #ifndef MIN
 #   define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -538,25 +538,9 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
  */
 
 int main(int argc, char **argv);
+static int operate(int, char **, int, const char *, const char *, int,
+        int, int);
 
-int operate(int, char **, int, const char *, const char *, int, int, int);
-
-#if __Impala__
-static char *xoptarg = "/mnt/fd0/impala/dist.tar.gz";
-static int xoptind = 4;
-
-static int
-xgetopt(int argc, char * const argv[], const char *optstring)
-{
-    static char res[] = { 'z', 'x','V', 'f', -1 };
-    static int i = 0;
-    return res[i++];
-}
-
-#define getopt xgetopt
-#define optind xoptind
-#define optarg xoptarg
-#endif
 
 int
 operate(int argc, char **argv, int oper, const char *file, const char *mode,
@@ -684,8 +668,8 @@ main(int argc, char **argv)
     argc -= optind;
     if (oper == USAGE) {
         printf("tar keys files..\n");
-        printf(" keys: c (create) r (add/replace) t (test) x (extract)\n");
-        printf(" supported are only tar archives in POSIX format (with GNU 'POSIX' signature)\n");
+        printf(" keys: c (create) r (add/replace) t (test) x (extract) z (user gzip)\n");
+        printf(" supported are only tar archives in USTAR format (with GNU 'USTAR' signature)\n");
         return 0;
     }
 

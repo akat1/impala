@@ -57,6 +57,17 @@ panic(const char *msg, ...)
     while(1);
 }
 
+void
+iprintf(const char *fmt, ...)
+{
+    int ipl = CIPL;
+    spl0();
+    va_list ap;
+    VA_START(ap, fmt);
+    vkprintf(fmt, ap);
+    VA_END(ap);
+    splx(ipl);
+}
 
 void
 kprintf(const char *fmt, ...)

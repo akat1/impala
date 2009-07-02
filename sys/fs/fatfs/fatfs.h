@@ -111,14 +111,15 @@ struct fatfs_lname {
 };
 
 
-#define FAT_GET_TABLESIZE(sblock) (*(uint16_t*)(&(sblock)->tablesize))
-#define FAT_GET_RESERVED(sblock) (*(uint16_t*)(&(sblock)->reserved))
-#define FAT_GET_MAXROOT(sblock) (*(uint16_t*)(&(sblock)->maxroot))
-#define FAT_D_GET_INDEX(dentry) (*(uint16_t*)(&(dentry)->index))
-#define FAT_D_GET_SIZE(dentry) (*(uint32_t*)(&(dentry)->size))
+#define FATFS_GET_TABLESIZE(sblock) (*(uint16_t*)(&(sblock)->tablesize))
+#define FATFS_GET_RESERVED(sblock) (*(uint16_t*)(&(sblock)->reserved))
+#define FATFS_GET_MAXROOT(sblock) (*(uint16_t*)(&(sblock)->maxroot))
+#define FATFS_D_GET_INDEX(dentry) (*(uint16_t*)(&(dentry)->index))
+#define FATFS_D_GET_SIZE(dentry) (*(uint32_t*)(&(dentry)->size))
+
 #ifdef __KERNEL
 
-enum FATFS_INODE_TYPE {
+enum FATFS_NODE_TYPE {
     FATFS_ROOT,
     FATFS_DIR,
     FATFS_REG
@@ -145,80 +146,89 @@ enum FATFS_ATTR {
     FATFS_LOGNNAME_DEL  = 0x80
 };
 
-enum FATFS_IFLAGS {
-    FATFS_DIR_LOADED    = 1 << 0,
-};
-
 typedef struct fatfs fatfs_t;
 typedef struct fatfs_fat fatfs_fat_t;
-typedef struct fatfs_inode fatfs_inode_t;
+typedef struct fatfs_node fatfs_node_t;
+typedef struct fatfs_dir fatfs_dir_t;
 typedef struct fatfs_dirent fatfs_dirent_t;
+typedef blkno_t fatfs_get_t(const uint8_t *, blkno_t);
+typedef void fatfs_set_t(uint8_t *, blkno_t, blkno_t);
 
+/// opis systemu plików FAT
 struct fatfs {
-    vfs_t          *vfs;
-    devd_t         *dev;
-    int             type;
-    int             tables;         // obs³ugujemy najwy¿ej 2
-    int             tablesize;
-    int             clusize;
-    int             clubsize;
-    int             secsize;
-    vnode_t        *root;
-    blkno_t         blkno_fat[2];
-    blkno_t         blkno_root;
-    blkno_t         blkno_data;
-    uint8_t        *fat[2];
+    vfs_t          *vfs;            ///< wirtualny system plików
+    devd_t         *dev;            ///< urz±dzenie pod jakim jeste¶my
+    int             type;           ///< typ
+    int             fats;           ///< ilo¶æ tablic FAT
+    int             fatbsize;       ///< rozmiar tablicy fat w sektorach
+    int             clusize;        ///< rozmiar klastra w bajtach
+    int             clubsize;       ///< rozmiar klastra w sektorach
+    int             maxroot;        ///< maksymalna ilo¶æ pozycji w /
+    vnode_t        *root;           ///< g³ówny katalog
+    blkno_t         blkno_fat;      ///< po³o¿enie pierwszej tablicy FAT
+    blkno_t         blkno_root;     ///< po³o¿enie g³ównego katalogu
+    blkno_t         blkno_data;     ///< po³o¿enie danych
+    uint8_t        *fat;            ///< wczytana tablica FAT
 
-    uint            clu_free;
-    uint            clu_used;
-    uint            clu_bad;
-    int             clu_last;
+    uint            clu_free;       ///< idnetyfikator wolnego klastra
+    uint            clu_used;       ///< identyfikator zajêtego klastra
+    uint            clu_bad;        ///< identyfikator z³ego klastra
+    int             clu_last;       ///< identyfikator ostatniego klastra
+
+    fatfs_get_t  *fat_get;          ///< procedura odczytu z tablicy FAT
+    fatfs_set_t  *fat_set;          ///< procedura zapisu do tablicy FAT
 };
 
-struct fatfs_inode {
-    char        name[256];
-    size_t      size;
-    int         type;
-    int         flags;
-    int         clustart;
-    fatfs_t     *fatfs;
-    vnode_t    *vn;
-    void       *clubuf;
-    int         clunum;
-    int         refcnt;
-    union {
-        struct {
-            int dents;
-            list_t dirents;
-        } dir;
-    } un;
+struct fatfs_node {
+    char             name[256];
+    int              type;
+    int              attr;
+    int              isroot;
+    int              refcnt;
+    size_t           size;
+    blkno_t          firstclu;
+    fatfs_dir_t     *dir;
+    fatfs_dirent_t  *dirent;
+    fatfs_t         *fatfs;
+    vnode_t         *vnode;
+};
+
+struct fatfs_dir {
+    list_t           dirents;
+    fatfs_node_t    *node;
 };
 
 struct fatfs_dirent {
     char            name[256];
-    size_t          size;
-    int             clustart;
     int             attr;
-    fatfs_inode_t   *inode;
+    int             type;
+    size_t          size;
+    blkno_t         firstclu;
+    fatfs_node_t   *node;
     list_node_t     L_dirents;
 };
 
-vnode_t *fatfs_getvnode(fatfs_inode_t *inode);
-void *fatfs_clu_alloc(fatfs_t *);
-int fatfs_clu_read(fatfs_t *, int clu, fatfs_inode_t *);
-void fatfs_clu_free(fatfs_t *, void *);
-uint fatfs_fat_next(fatfs_t *, uint i);
-int fatfs_dirent_lookup(fatfs_inode_t *, fatfs_inode_t **, const char *);
-void fatfs_inode_prepare(fatfs_t *fatfs, fatfs_inode_t *inode, int type);
-void fatfs_inode_create(fatfs_t *fatfs, fatfs_dirent_t *);
-int fatfs_dirent_read(fatfs_inode_t *i);
+blkno_t fatfs_space_alloc(size_t size);
+void fatfs_space_scan(fatfs_t *fatfs);
+blkno_t fatfs_bmap(fatfs_node_t *, off_t, ssize_t, size_t *cont);
+void fatfs_node_ref(fatfs_node_t *);
+void fatfs_node_rel(fatfs_node_t *);
+fatfs_node_t *fatfs_node_alloc(fatfs_t *, int type);
+void fatfs_node_free(fatfs_node_t *);
+int fatfs_node_getdir(fatfs_node_t *, fatfs_dir_t **);
+vnode_t * fatfs_node_getv(fatfs_node_t *node);
 
-void fatfs_inode_ref(fatfs_inode_t *);
-void fatfs_inode_rel(fatfs_inode_t *);
+int fatfs_dir_load(fatfs_node_t *);
+void fatfs_dir_free(fatfs_dir_t *);
+fatfs_node_t *fatfs_dir_lookup(fatfs_dir_t *, const char *name);
+fatfs_node_t *fatfs_dir_create(fatfs_dir_t *, const char *name, int type);
+void fatfs_dir_remove(fatfs_dir_t *, const char *path);
+void fatfs_dir_release(fatfs_dir_t *, fatfs_node_t *n);
+int fatfs_dir_getdents(fatfs_dir_t *, dirent_t *, int first, int n);
+/// pomocnicze makro rzutuj±ce v_private
+#define VTOFATFSN(v) ((fatfs_node_t*)(v)->v_private)
+#define VTOFATFS(v) ((fatfs_t*)(v)->vfs_private)
 
-#define FATFS_UNTIL_EOF(fatfs,clu)\
-    ((clu = fatfs_fat_next(fatfs,clu)) <= fatfs->clu_used)
 #endif
-
 #endif
 

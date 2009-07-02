@@ -9,9 +9,9 @@ AOUT_PATH=/usr/local/i386-aout/
 __INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
 _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\
-	-Wmissing-prototypes ${_INCDIR} -nostdlib -D__Impala__ 
+	-Wmissing-prototypes ${_INCDIR} -nostdlib -D__Impala__  
 _K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
-    -D__KERNEL -Werror -nostdinc -fno-inline -g
+    -D__KERNEL -Werror -nostdinc -fno-inline  -g
 _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include\
         -I${IMPALA_USR}/lib/libpthread/include\
         -I${IMPALA_USR}/lib/libz/

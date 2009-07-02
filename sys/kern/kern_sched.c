@@ -260,6 +260,16 @@ ssleep(uint stime, const char *fl, const char *fn, int l, const char *d)
     sched_wait(fl, fn, l, d);
 }
 
+
+void
+imsleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
+{
+    int ipl = CIPL;
+    spl0();
+    msleep(mtime, fl, fn, l, d);
+    splx(ipl);
+}
+
 /**
  * Usypia w±tek na podan± ilo¶æ milisekund
  * @param mtime Czas w milisekundach
@@ -307,9 +317,11 @@ thread_t *
 select_next_thread()
 {
     thread_t *p = curthread;
-
+//    int opl = CIPL;
+//    spl0();
     while ((p = list_next(&run_queue,p))) {
         if (p->thr_flags & THREAD_RUN) {
+//            splx(opl);
             return p;
         } else
         if( p->thr_flags & THREAD_SLEEP
@@ -318,6 +330,7 @@ select_next_thread()
             p->thr_flags |= THREAD_RUN;
             p->thr_flags &= ~THREAD_SLEEP;
             p->thr_wakeup_time = 0;
+//            splx(opl);
             return p;
         }
     }

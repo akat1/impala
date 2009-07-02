@@ -133,7 +133,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     if ( (err = copyin_params(p, &einfo)) ) goto fail;
     len = vnode_rdwr(UIO_READ, vp, header, len, 0);
     if (len < 0) {
-        TRACE_IN("bad length");
+        TRACE_IN("i/o errror");
         err = len;
         goto fail;
     } else
@@ -151,6 +151,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     einfo.header_size = len;
     if ( (err = image_exec(p, &einfo)) ) goto fail;
     if (p->p_cmd) kmem_free((void*)p->p_cmd);
+    
     p->p_cmd = str_dup(path);
     vrele(vp);
     return 0;
@@ -324,7 +325,6 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     thread_t *t = proc_create_thread(p, exec->a_entry);
     vm_space_create_stack(vm_space, &t->thr_stack, thread_stack_size);
     t->thr_stack_size = thread_stack_size;
-    p->p_brk_addr = vm_space->seg_data->end;
     p->p_brk_addr = vm_space->seg_data->end;
     copyout_params(t, einfo);
     thread_prepare(t, einfo->u_argv, einfo->u_envp, einfo->u_off);

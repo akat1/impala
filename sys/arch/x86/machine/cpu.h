@@ -163,10 +163,15 @@ enum CPU_ECX_FEATURE {
 };
 
 
-enum CPU_CPUID_OPTIONS {
-    CPUID_BASIC,
-    CPUID_FEATURE,
-    CPUID_CACHE_TLB
+enum CPU_CPUID_INDEX {
+    CPUID_BASIC         = 0x00,
+    CPUID_FEATURE       = 0x01,
+    CPUID_CACHE_TLB     = 0x02,
+    CPUID_EXT_MAX       = 0x80000000,
+    CPUID_EXT_FEATURE   = 0x80000001,
+    CPUID_EXT_BRAND1    = 0x80000002,
+    CPUID_EXT_BRAND2    = 0x80000003,
+    CPUID_EXT_BRAND3    = 0x80000004
 };
 
 
@@ -196,6 +201,7 @@ struct cpuid_result {
 
 struct cpu_info {
     char vendor_string[13];
+    char brand_string[54];
     unsigned int version_information;
     unsigned int feature_ecx;
     unsigned int feature_edx;

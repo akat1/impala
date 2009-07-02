@@ -194,11 +194,11 @@ fifofs_mkdir(vnode_t *vn, vnode_t **vpp, const char *path, vattr_t *attr)
 int
 fifofs_close(vnode_t *vn)
 {
-    fifofs_node_t *n = vn->v_private;
-    char *which = (n->i_readnode == vn) ? "read": "write";
-    kprintf("curthread: 0x%08x\n", curthread);
-    DEBUGF("closing pipe 0x%08x- %s end fd: in=%u out=%u\n", vn, which, n->stat_in,
-            n->stat_out);
+//    fifofs_node_t *n = vn->v_private;
+//    char *which = (n->i_readnode == vn) ? "read": "write";
+//    kprintf("curthread: 0x%08x\n", curthread);
+//    DEBUGF("closing pipe 0x%08x- %s end fd: in=%u out=%u\n", vn, which, n->stat_in,
+//            n->stat_out);
     return 0;
 }
 

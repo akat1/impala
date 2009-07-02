@@ -119,13 +119,34 @@ enum {
     DOR_MOTD        = 1 << 7    ///< w³±czenie silnika stacji D:
 };
 
+
+#define ST0_IC(st0) (st0>>6)
+/// bity IC z ST0
+enum {
+    ST0_OK      = 0x0,
+    ST0_ABNRM   = 0x1,
+    ST0_INVAL   = 0x2,
+    ST0_NREADY  = 0x3
+};
+
+/// bity rejestru ST1
+enum {
+    ST1_NID     = 1 << 0,
+    ST1_NW      = 1 << 1,
+    ST1_NDAT    = 1 << 2,
+    ST1_TO      = 1 << 4,
+    ST1_DE      = 1 << 5,
+    ST1_EN      = 1 << 7
+};
+
 /// Warto¶ci rejestru CCR
 enum {
     CCR_500KB       = 0
 };
 
 enum {
-    MAX_TRANSFER    = 512*36
+    MAX_TRANSFER    = 512,
+    MAX_RETRIES     = 8
 };
 
 /// Adres sektora na dyskietce.
@@ -144,8 +165,10 @@ struct fdctrl {
     spinlock_t      busy;   ///<
     bio_queue_t     bioq;   ///< kolejka operacji wej-wyj
     iobuf_t        *cbp;    ///< obecnie obs³ugiwany bufor
-    char*          *iobuf;  ///< bufor transferu
+    char           *iobuf;  ///< bufor transferu
     size_t          iosize; ///< rozmiar transferu
+    int             retry;  ///< 
+    blkno_t         blkno;  ///< aktualny blok
     bus_isa_dma_t  *dma;    ///< deskryptor ISA DMA
     fdsec_t         pos;    ///< pozycja g³owicy    
 };
@@ -195,15 +218,18 @@ inline void wrfifo(fdctrl_t *drv, uint8_t data );
 void fd_create(fddrive_t *fd);
 static spinlock_t ilock;
 static bool fdinterrupt(void);
-int wait_for_intrpt(fdctrl_t *ctrl, uint8_t *a, uint8_t *b);
-int blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds);
+static int wait_for_intrpt(fdctrl_t *ctrl, uint8_t *a, uint8_t *b);
+static int blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds);
 void fdc_init(void);
-void fdc_reset(fdctrl_t *ctrl);
-int fdc_calibrate(fddrive_t *drv);
-void fdc_io(fdctrl_t *ctrl);
-void fdc_motor_on(fddrive_t *drv);
+static void fdc_reset(fdctrl_t *ctrl);
+static int fdc_calibrate(fddrive_t *drv);
+static void fdc_io(fdctrl_t *ctrl);
+static void fdc_motor_on(fddrive_t *drv);
 void fdc_motor_off(fddrive_t *drv);
-void fdc_readsec(fddrive_t *drv, iobuf_t *b);
+static void fdc_work(fdctrl_t *ctrl);
+static void fdc_seek(fdctrl_t *ctrl);
+static void seek_done(fdctrl_t *ctrl, iobuf_t *bp);
+static void io_done(fdctrl_t *ctrl, iobuf_t *bp);
 
 static fdctrl_t fdctrl;
 static fddrive_t fddrive[2];
@@ -280,13 +306,7 @@ blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds)
  *
  */
 
-void fdc_work(fdctrl_t *ctrl);
-void fdc_seek(fddrive_t *drv, fdsec_t *sec);
-void seek_done(fdctrl_t *ctrl, iobuf_t *bp);
-void io_done(fdctrl_t *ctrl, iobuf_t *bp);
 /// Obs³uga przerwania.
-
-#include <sys/console.h>
 bool
 fdinterrupt()
 {
@@ -310,32 +330,8 @@ fdinterrupt()
 }
 
 void
-fdc_work(fdctrl_t *ctrl)
-{
-    if (ctrl->cbp) return;
-    iobuf_t *bp = bioq_dequeue(&ctrl->bioq);
-    if (!bp) {
-        spinlock_unlock(&ctrl->busy);
-        return;
-    }
-    fdsec_t sec;
-    fddrive_t *drv = bp->dev->priv;
-    fdc_motor_on(drv);
-    if (blkno_to_fdsec(drv, bp->blkno, &sec)) {
-        bio_error(bp, EINVAL);
-        return;
-    }
-    ctrl->cmd = FDC_SEEK;
-    ctrl->cbp = bp;
-    wrfifo(ctrl, ctrl->cmd);
-    wrfifo(ctrl, sec.head << 2);
-    wrfifo(ctrl, sec.track);
-}
-
-void
 io_done(fdctrl_t *ctrl, iobuf_t *bp)
 {
-    if (!bp) return;
     uint8_t st0, st1, st2, track, head, secn, secs;
 
     st0 = rdfifo(ctrl);
@@ -346,16 +342,38 @@ io_done(fdctrl_t *ctrl, iobuf_t *bp)
     secn = rdfifo(ctrl);
     secs = rdfifo(ctrl);
 
-    if (st0 >> 6) {
-        bio_error(bp, EIO);
-        ctrl->cmd = -1;
-        ctrl->cbp = 0;
+    if (ST0_IC(st0)) {
+        const char *msg;
+        int ee =  ST0_IC(st0);
+        msg = (ee==ST0_ABNRM)? "abnormal termination"
+                : (ee==ST0_INVAL)? "invalid command"
+                : (ee==ST0_NREADY)? "not ready"
+                : "#!?#";
+        if (ctrl->retry == MAX_RETRIES) {
+            IDEBUGF("I/O error st0=%b(%x) st1=%b(%x) st2=%b(%x)",
+                st0,st0,st1,st1,st2,st2);
+            IDEBUGF(" request: blkno=%p size=%p resid=%p", bp->blkno,
+                bp->size, bp->resid);
+            IDEBUGF("transfer: blkno=%p size=%p; after %u retries",
+                ctrl->blkno, ctrl->iosize, ctrl->retry);
+            bio_error(bp, EIO);
+            ctrl->cmd = -1;
+            ctrl->cbp = 0; 
+        } else {
+            ctrl->retry++;
+            fdc_seek(ctrl);
+        }
         return;
     }
+    bus_isa_dma_finish(ctrl->dma);
+    KASSERT(bp->resid > 0);
+    KASSERT((size_t)ctrl->iobuf < (size_t)bp->addr + bp->size);
+    KASSERT(ctrl->blkno < bp->blkno + bp->bcount);
     bp->resid -= ctrl->iosize;
     ctrl->iobuf += ctrl->iosize;
+    ctrl->blkno += ctrl->iosize/512;
+    ctrl->retry = 0;
     if (bp->resid == 0) {
-        bus_isa_dma_finish(ctrl->dma);
         bio_done(bp);
         ctrl->cmd = -1;
         ctrl->cbp = 0;
@@ -367,9 +385,8 @@ io_done(fdctrl_t *ctrl, iobuf_t *bp)
 void
 seek_done(fdctrl_t *ctrl, iobuf_t *bp)
 {
-    if (!bp) return;
-
     uint8_t st0, cyl;
+    if (!bp) return;
     wrfifo(ctrl, FDC_CHECKINTRPT);
     st0 = rdfifo(ctrl);
     cyl = rdfifo(ctrl);
@@ -379,7 +396,6 @@ seek_done(fdctrl_t *ctrl, iobuf_t *bp)
         return;
     }
 
-    ctrl->iobuf = bp->addr;
     fdc_io(ctrl);
 }
 
@@ -418,7 +434,8 @@ wait_for_intrpt(fdctrl_t *ctrl, uint8_t *_a, uint8_t *_b)
  * Sterownik kontrolera.
  *
  * Polecenia do sterownika id± przez rejestr IO_REG_FIFO. Za ka¿dym
- * poleceniem do rejestru nale¿y zapisaæ jego argumenty.
+ * poleceniem do rejestru nale¿y zapisaæ jego argumenty, inaczej nast±pi
+ * zwiecha FDC.
  */
 
 
@@ -436,38 +453,40 @@ fdc_reset(fdctrl_t *ctrl)
 
 }
 
-/**
- * Kalibruje stacjê dyskietek.
- * @param drv stacja dyskietek
- *
- * Kalibracja polega na przestawieniu g³owicy na sam pocz±tek.
- */
-int
-fdc_calibrate(fddrive_t *drv)
+void
+fdc_work(fdctrl_t *ctrl)
 {
-    fdctrl_t *ctrl = drv->ctrl;
-    DEBUGF("callibrating driver %c:", drv->name);
+    if (ctrl->cbp) return;
+    iobuf_t *bp = bioq_dequeue(&ctrl->bioq);
+    if (!bp) {
+        spinlock_unlock(&ctrl->busy);
+        return;
+    }
+    ctrl->retry = 0;
+    ctrl->cbp = bp;
+    ctrl->blkno = bp->blkno;
+    ctrl->iobuf = bp->addr;
+    fdc_seek(ctrl);
+}
+
+void
+fdc_seek(fdctrl_t *ctrl)
+{
+    iobuf_t *bp = ctrl->cbp;
+    fdsec_t sec;
+    fddrive_t *drv = bp->dev->priv;
+
     fdc_motor_on(drv);
-    wrfifo(ctrl, FDC_CALIBRATE);
-    wrfifo(ctrl, drv->unit);
-    if (wait_for_intrpt(ctrl, 0, 0))
-        return -ENXIO;
-    return 0;
+    if (blkno_to_fdsec(drv, ctrl->blkno, &sec)) {
+        bio_error(bp, EINVAL);
+        return;
+    }
+    ctrl->cmd = FDC_SEEK;
+    wrfifo(ctrl, ctrl->cmd);
+    wrfifo(ctrl, sec.head << 2);
+    wrfifo(ctrl, sec.track);
 }
 
-void
-fdc_motor_on(fddrive_t *drv)
-{
-    wrreg(drv->ctrl, IO_REG_DOR, DOR_DMA|DOR_REST|1<<(drv->unit+4));
-}
-
-void
-fdc_motor_off(fddrive_t *drv)
-{
-    uint8_t r = rdreg(drv->ctrl, IO_REG_DOR);
-    UNSET(r, 1 << (drv->unit+4) );
-    wrreg(drv->ctrl, IO_REG_DOR, r|DOR_DMA|DOR_REST);
-}
 
 void
 fdc_io(fdctrl_t *ctrl)
@@ -476,8 +495,7 @@ fdc_io(fdctrl_t *ctrl)
     iobuf_t *bp = ctrl->cbp;
     fddrive_t *drv = bp->dev->priv;
     fdsec_t sec;
-
-    if (blkno_to_fdsec(drv, bp->blkno, &sec)) {
+    if (blkno_to_fdsec(drv, ctrl->blkno, &sec)) {
         bio_error(bp, EINVAL);
         ctrl->cmd = -1;
         ctrl->cbp = 0;
@@ -500,7 +518,14 @@ fdc_io(fdctrl_t *ctrl)
             return;
     }
 
-    ctrl->iosize = MIN(MAX_TRANSFER, bp->resid);
+    blkno_t n;
+    if (ctrl->retry == 0) {
+        n = drv->spec->sectrack * drv->spec->heads;
+        n = n - ctrl->blkno%n;
+    } else {
+        n = 1;
+    }
+    ctrl->iosize = MIN(n*512, bp->resid);
     bus_isa_dma_prepare(ctrl->dma, dma_cmd, ctrl->iobuf, ctrl->iosize);
     wrfifo(ctrl, ctrl->cmd);
     wrfifo(ctrl, drv->unit | (sec.head << 2));
@@ -513,6 +538,40 @@ fdc_io(fdctrl_t *ctrl)
     wrfifo(ctrl, 0xff);
 
 }
+
+/**
+ * Kalibruje stacjê dyskietek.
+ * @param drv stacja dyskietek
+ *
+ * Kalibracja polega na przestawieniu g³owicy na sam pocz±tek.
+ */
+int
+fdc_calibrate(fddrive_t *drv)
+{
+    fdctrl_t *ctrl = drv->ctrl;
+    fdc_motor_on(drv);
+    wrfifo(ctrl, FDC_CALIBRATE);
+    wrfifo(ctrl, drv->unit);
+    if (wait_for_intrpt(ctrl, 0, 0))
+        return -ENXIO;
+    return 0;
+}
+
+
+void
+fdc_motor_on(fddrive_t *drv)
+{
+    wrreg(drv->ctrl, IO_REG_DOR, DOR_DMA|DOR_REST|1<<(drv->unit+4));
+}
+
+void
+fdc_motor_off(fddrive_t *drv)
+{
+    uint8_t r = rdreg(drv->ctrl, IO_REG_DOR);
+    UNSET(r, 1 << (drv->unit+4) );
+    wrreg(drv->ctrl, IO_REG_DOR, r|DOR_DMA|DOR_REST);
+}
+
 
 /*========================================================================
  * Inicjalizacja sterownika

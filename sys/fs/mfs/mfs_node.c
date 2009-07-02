@@ -215,6 +215,8 @@ mfs_getattr(vnode_t *vn, vattr_t *attr)
         attr->va_dev = NULL;
     if(attr->va_mask & VATTR_NLINK)
         attr->va_nlink = 1; //mfs nie wspiera hardlinków
+    if (attr->va_mask & VATTR_INO)
+        attr->va_ino = (ino_t) node;
     return 0;
 }
 

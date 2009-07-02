@@ -83,6 +83,7 @@ struct vattr {
     timespec_t va_mtime;   ///< czas ostatniej modyfikacji
     timespec_t va_ctime;   ///< czas utworzenia pliku
     int        va_type;    ///< typ vnode
+    ino_t      va_ino;     ///< numer pliku
 };
 typedef struct vattr vattr_t;
 
@@ -96,6 +97,7 @@ enum {
     VATTR_TIME = 1<<6, //atime, ctime, mtime
     VATTR_BLK  = 1<<7,    //blksize, blocks
     VATTR_NLINK = 1<<8,
+    VATTR_INO   = 1<<9,
     VATTR_ALL = ~0
 };
 

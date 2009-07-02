@@ -31,10 +31,10 @@
 
 #include <sys/types.h>
 #include <sys/kernel.h>
+#include <sys/bio.h>
 #include <sys/vfs.h>
 #include <fs/fatfs/fatfs.h>
 
-#define NEW_INODE() kmem_zalloc(sizeof(fatfs_inode_t), KM_SLEEP)
 
 static vnode_open_t      fatfs_open;
 static vnode_create_t    fatfs_create;
@@ -77,66 +77,6 @@ static vnode_ops_t fatfs_node_ops = {
     fatfs_inactive
 };
 
-vnode_t *
-fatfs_getvnode(fatfs_inode_t *inode)
-{
-    if (inode->vn == NULL) {
-        inode->vn = vnode_alloc();
-        inode->vn->v_ops = &fatfs_node_ops;
-        inode->vn->v_private = inode;
-        inode->vn->v_vfs = inode->fatfs->vfs;
-        if (inode->type == FATFS_REG) {
-            inode->vn->v_type = VNODE_TYPE_REG;
-        } else
-        if (inode->type == FATFS_DIR) {
-            inode->vn->v_type = VNODE_TYPE_DIR;
-        } else
-        if (inode->type == FATFS_ROOT) {
-            inode->vn->v_type = VNODE_TYPE_DIR;
-            inode->vn->v_flags = VNODE_FLAG_ROOT;
-        }
-    } else vref(inode->vn);
-    return inode->vn;
-}
-
-void
-fatfs_inode_prepare(fatfs_t *fatfs, fatfs_inode_t *inode, int type)
-{
-    inode->type = type;
-    inode->fatfs = fatfs;
-    inode->clubuf = fatfs_clu_alloc(fatfs);
-    inode->clunum = -1;
-    switch (type) {
-        case FATFS_REG:
-            break;
-        case FATFS_DIR:
-        case FATFS_ROOT:
-            LIST_CREATE(&inode->un.dir.dirents, fatfs_dirent_t, L_dirents,
-                FALSE);
-            break;
-    }
-}
-
-void
-fatfs_inode_create(fatfs_t *fatfs, fatfs_dirent_t *dirent)
-{
-    KASSERT( dirent->inode == NULL );
-    dirent->inode = NEW_INODE();
-    str_cpy(dirent->inode->name, dirent->name);
-    fatfs_inode_prepare(fatfs, dirent->inode, 0);
-    dirent->inode->clustart = dirent->clustart;
-    dirent->inode->size = dirent->size;
-    if (dirent->attr & FATFS_ARCHIVE) {
-        dirent->inode->type = FATFS_REG;
-    } else
-    if (dirent->attr & FATFS_SUBDIR) {
-        dirent->inode->type = FATFS_DIR;
-    } else panic("unknown type dirent %b", dirent->inode->type);
-    fatfs_getvnode(dirent->inode);
-    vref(dirent->inode->vn);
-}
-
-
 /*============================================================================
  * Operacje na v-wê¼le
  */
@@ -151,8 +91,22 @@ int
 fatfs_create(vnode_t *v, vnode_t **vpp, const char *name,
     vattr_t *attr)
 {
-    DEBUGF("create not supported");
-    return -ENOTSUP;
+    fatfs_node_t *node = v->v_private;
+    fatfs_node_t *newnode;
+    fatfs_dir_t *dir;
+    int e;
+
+    e = fatfs_node_getdir(node, &dir);
+    if (e) {
+        return e;
+    }
+    int t = (attr->va_type == VNODE_TYPE_DIR)? FATFS_DIR : FATFS_REG;
+    newnode = fatfs_dir_create(dir, name, t);
+    if (!newnode) {
+        return -EINVAL;
+    }
+    *vpp = fatfs_node_getv(newnode);
+    return 0;
 }
 
 int
@@ -164,26 +118,24 @@ fatfs_close(vnode_t *v)
 int
 fatfs_read(vnode_t *v, uio_t *u, int flags)
 {
-    fatfs_inode_t *inode = v->v_private;
-    fatfs_t *fatfs = inode->fatfs;
-    if (u->offset >= inode->size) return 0;
-    int clu = inode->clustart;
-    off_t window = 0;
-    size_t wsize = fatfs->clusize*fatfs->secsize;
-    size_t xfer = 0;
-    u->resid = u->size;
-    do {
-        if ( INRNG_COL(u->offset,window,wsize) ) {
-            off_t off = u->offset - window;
-            int min = MIN(wsize-off, u->resid);
-            if (fatfs_clu_read(fatfs, clu, inode)) return -EIO;
-            char *buf = inode->clubuf;
-            uio_move(buf+off, min , u);
-            xfer += min;
+    fatfs_node_t *node = VTOFATFSN(v);
+    iobuf_t *bp;
+    blkno_t blk;
+    off_t off = u->offset % node->fatfs->clusize;
+    size_t cont = 1;
+    while ((blk=fatfs_bmap(node,u->offset,u->resid,&cont)) != -1 && u->resid) {
+        size_t size = cont*node->fatfs->clusize;
+        bp = bio_read(node->fatfs->dev, blk, cont*node->fatfs->clusize);
+        if ( ISSET(bp->flags, BIO_ERROR) ) {
+            return -EIO;
+            bio_release(bp);
         }
-        window += wsize;
-    } while ( FATFS_UNTIL_EOF(fatfs, clu) && u->resid );
-    return xfer;
+        size -= off;
+        uio_move(bp->addr + off, MIN(size, u->resid), u);
+        off = 0;
+        bio_release(bp);
+    }
+    return u->size - u->resid; 
 }
 
 int
@@ -217,14 +169,26 @@ fatfs_seek(vnode_t *v, off_t off)
 int
 fatfs_getattr(vnode_t *v, vattr_t *attr)
 {
-    fatfs_inode_t *inode = v->v_private;
-    attr->va_uid = attr->va_gid = 0;
-    attr->va_mode = S_IRWXU|S_IRWXG|S_IRWXO;
-    attr->va_type = v->v_type;
-    attr->va_blksize = inode->fatfs->secsize;
-    attr->va_blocks = -1;
-    attr->va_nlink = 0;
-    attr->va_size = inode->size;
+    fatfs_node_t *node = VTOFATFSN(v);
+    fatfs_t *fatfs = node->fatfs;
+    if ( ISSET(attr->va_mask, VATTR_UID) )
+        attr->va_uid = 0;
+    if ( ISSET(attr->va_mask, VATTR_GID) )
+        attr->va_gid = 0;
+    if ( ISSET(attr->va_mask, VATTR_MODE) )
+        attr->va_mode = 0777; 
+    if ( ISSET(attr->va_mask, VATTR_SIZE) )
+        attr->va_size = node->size;
+    if ( ISSET(attr->va_mask, VATTR_TYPE) )
+        attr->va_type = v->v_type;
+    if ( ISSET(attr->va_mask, VATTR_NLINK) )
+        attr->va_nlink = 1;
+    if ( ISSET(attr->va_mask, VATTR_INO) )
+        attr->va_ino = node->firstclu;
+    if ( ISSET(attr->va_mask, VATTR_BLK) ) {
+        attr->va_blksize = fatfs->clusize;
+        attr->va_blocks = (node->size+fatfs->clusize-1)/fatfs->clusize;
+    }
     return 0;
 }
 
@@ -238,20 +202,23 @@ fatfs_setattr(vnode_t *v, vattr_t *attr)
 int
 fatfs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *state)
 {
-    if (v->v_type != VNODE_TYPE_DIR) return -EINVAL;
-    char name[256];
+    char bufname[256];
     int i;
-    for (i = 0; i < 255 && state->now[i] != 0 && state->now[i] != '/' ; i++) {
-        name[i] = state->now[i];
-    }
-    name[i] = 0;
-    fatfs_inode_t *ninode;
-    if (fatfs_dirent_lookup(v->v_private, &ninode, name)) {
-        return -ENOENT;
-    }
-    ninode->vn = fatfs_getvnode(ninode);
-    *vpp = ninode->vn;
-    state->now+=str_len(ninode->name);
+    int err;
+    fatfs_node_t *rnode = 0;
+    fatfs_dir_t *dir;
+
+    if (v->v_type != VNODE_TYPE_DIR) return -ENOTDIR;
+    for (i = 0; i < 256 && state->now[i] && state->now[i] != '/'; i++);
+    str_ncpy(bufname, state->now, i);
+    bufname[i] = 0;
+    err = fatfs_node_getdir(VTOFATFSN(v), &dir);
+    if (err) return err;
+    KASSERT(dir != NULL);
+    rnode = fatfs_dir_lookup(dir, bufname);
+    if (rnode == NULL) return -ENOENT;
+    state->now += i;
+    *vpp = fatfs_node_getv(rnode);
     return 0;
 }
 
@@ -266,8 +233,17 @@ fatfs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
 int
 fatfs_getdents(vnode_t *v, dirent_t *dents, int first, int count)
 {
-    DEBUGF("getdents not supported");
-    return -ENOTSUP;
+    int err;
+    fatfs_node_t *node = VTOFATFSN(v);
+    fatfs_dir_t *dir;
+    if (node->type != FATFS_ROOT && node->type != FATFS_DIR)
+        return -ENOTDIR;
+
+    err = fatfs_node_getdir(node, &dir);
+    if (err) return err;
+    KASSERT(dir != NULL);
+    count /= sizeof(dirent_t);
+    return fatfs_dir_getdents(node->dir, dents, first, count);
 }
 
 int
@@ -298,8 +274,96 @@ fatfs_sync(vnode_t *v)
 int
 fatfs_inactive(vnode_t *v)
 {
-    fatfs_inode_t *inode = v->v_private;
-    DEBUGF("inactive (%s)", inode->name);
+    fatfs_node_t *fatfs = VTOFATFSN(v);
+    fatfs->vnode = 0;
+#if 0 // wêz³y zostawiamy w katalogach
+    if (fatfs->dirent) {
+        // je¿eli w pamiêci jest katalog
+        fatfs->dirent->node = 0;
+        fatfs->dirent = 0;
+        fatfs_node_rel(fatfs);
+    }
+#endif
+    fatfs_node_rel(fatfs);
     return 0;
 }
 
+
+/*============================================================================
+ * 
+ */
+
+vnode_t *
+fatfs_node_getv(fatfs_node_t *node)
+{
+    if (node->vnode) {
+        vref(node->vnode);
+        return node->vnode;
+    }
+    node->vnode = vnode_alloc();
+    node->vnode->v_ops = &fatfs_node_ops;
+    node->vnode->v_private = node;
+    switch (node->type) {
+        case FATFS_ROOT:
+            node->vnode->v_flags |= VNODE_FLAG_ROOT;
+        case FATFS_DIR:
+            node->vnode->v_type = VNODE_TYPE_DIR;
+            break;
+        case FATFS_REG:
+            node->vnode->v_type = VNODE_TYPE_REG;
+            break;
+    }
+    return node->vnode;
+}
+
+void
+fatfs_node_ref(fatfs_node_t *node)
+{
+    KASSERT(node->refcnt > 0);
+    node->refcnt++;
+}
+
+void
+fatfs_node_rel(fatfs_node_t *node)
+{
+    KASSERT(node->refcnt > 0);
+    node->refcnt--;
+    if (node->refcnt == 0) {
+        fatfs_node_free(node);
+    }
+}
+
+fatfs_node_t *
+fatfs_node_alloc(fatfs_t *fatfs, int type)
+{
+    fatfs_node_t *node = kmem_zalloc(sizeof(*node), KM_SLEEP);
+    node->fatfs = fatfs;
+    node->refcnt = 1;
+    node->type = type;
+    return node;
+}
+
+void
+fatfs_node_free(fatfs_node_t *node)
+{
+    KASSERT(node->refcnt == 0);
+    KASSERT(node->dirent == NULL);
+    if ((node->type == FATFS_DIR || node->type == FATFS_ROOT) && node->dir) {
+        fatfs_dir_free(node->dir);
+    }
+    kmem_free(node);
+}
+
+int
+fatfs_node_getdir(fatfs_node_t *node, fatfs_dir_t **r)
+{
+    int err;
+    if (node->dir == NULL) {
+        err = fatfs_dir_load(node);
+        if (err) {
+            return err;
+        }
+    }
+    *r = node->dir;
+    return 0;
+}

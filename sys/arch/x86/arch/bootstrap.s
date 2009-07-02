@@ -38,7 +38,6 @@
 .global boot_ptable0
 .global boot_ptable1
 .global boot_pdir
-.global megaloop
 #
 # Sekcja .bootstrap jest sekcja rozruchowa jadra.
 # Jest ladowana pod adres KERNEL_BOOTSTRAP. Konsolidator
@@ -88,11 +87,12 @@ boot_ptable1: .space 4096,0
 
 .set STACKSIZE, 256
 .comm stack, STACKSIZE, 32
-
+.set EFLAGS_ID, 1 << 21
 kernel_entrypoint:
     movl $(stack + STACKSIZE-4), %esp
     movl 16(%ebx), %eax
     movl %eax, cmdline
+    call check_cpuid
     call set_vmspace
     pushl cmdline
     call kernel_startup
@@ -101,7 +101,39 @@ kernel_entrypoint:
     incw (%edx)
     jmp .L1
 
-# void set_vmspave()
+# void check_cpuid(void)
+check_cpuid:
+    pushfl
+    popl %eax
+    pushl %eax
+    andl $EFLAGS_ID, %eax
+    popl %eax
+    jnz ccp.1
+    or $EFLAGS_ID, %eax
+    pushl %eax
+    popfl
+    pushfl
+    popl %eax
+    andl $EFLAGS_ID, %eax
+    jz ccp.3
+    jmp ccp.2
+ccp.1:    # sprawdzenie mo¿liwo¶ci czyszczenia bitu
+    movl $EFLAGS_ID, %ebx
+    notl %ebx
+    andl %ebx, %eax
+    pushl %eax
+    popfl
+    pushfl
+    popl %eax
+    andl $EFLAGS_ID, %eax
+    jnz ccp.3
+ccp.2:    # mo¿na modyfikowaæ bit ID
+    ret
+ccp.3:    # nie mo¿na modyfikowaæ bitu ID, to nie jest i586 nawet, zawieszamy siê
+    jmp .
+
+
+# void set_vmspave(void)
 set_vmspace:
     movl $boot_ptable0, %ebx
     or $PTE_ATTR, %ebx
@@ -159,8 +191,5 @@ fill_ptable:
     leave
     ret
 
-megaloop:
-    jmp megaloop
 
-.asciz "|/-\\"
 

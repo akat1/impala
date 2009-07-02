@@ -63,6 +63,7 @@ static inline int max(int a, int b)
 #define INRNG_COL(x,a,l) _INRNG_L(x,a,l,<=,<)
 #define INRNG_CCL(x,a,l) _INRNG_L(x,a,l,<=,<=)
 
+void iprintf(const char *fmt, ...);
 void kprintf(const char *fmt, ...);
 void vkprintf(const char *fmt, va_list ap);
 
@@ -84,6 +85,11 @@ ssize_t copyoutstr(void *uaddr, const void *kaddr, size_t limit);
 #define DEBUGF(fmt, a...) do {\
     if (!SYSTEM_DEBUG) break;\
     kprintf("%s.%03u: " fmt "\n", __LS(__FILE__), __LINE__, ## a );\
+    } while (0)
+
+#define IDEBUGF(fmt, a...) do {\
+    if (!SYSTEM_DEBUG) break;\
+    iprintf("%s.%03u: " fmt "\n", __LS(__FILE__), __LINE__, ## a );\
     } while (0)
 
 #define TRACE_IN0() TRACE_IN("");

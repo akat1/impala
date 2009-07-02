@@ -37,10 +37,12 @@
 
 addr_t mem_move(addr_t dst, const addr_t src, size_t len);
 addr_t mem_cpy(addr_t dst, const addr_t src, size_t len);
+int mem_cmp(const addr_t a, const addr_t b, size_t len);
 addr_t mem_set(addr_t s, char c, size_t len);
 addr_t mem_set16(addr_t s, uint16_t c, size_t len);
 size_t str_len(const char *s);
 int str_cmp(const char *a, const char *b);
+bool str_eq(const char *a, const char *b);
 char * str_cat(char *str, const char *s);
 char * str_cpy(char *str, const char *s);
 char * str_ncpy(char *str, const char *s, size_t len);
@@ -55,7 +57,6 @@ enum {
 
 
 #define mem_zero(s, l) mem_set(s, 0, l)
-#define str_eq(a,b) (str_cmp(a,b) == 0)
 #endif
 
 #endif

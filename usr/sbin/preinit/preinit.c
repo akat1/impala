@@ -12,7 +12,7 @@
 #define dist_tar "/mnt/fd0/impala/dist.tar.gz"
 #define tar "/mnt/fd0/impala/tar"
 #define init "/sbin/init"
-#define gzip "/mnt/fd0/impala/gzip"
+#define gzip "/mnt/fd0/impala/minigzip"
 
 int
 main(int argc, char **v)
@@ -52,8 +52,29 @@ main(int argc, char **v)
             argv[1] = "zxVf";
         }
     }
-    printf("invoking %s %s %s\r", argv[0], argv[1], argv[2]);
+#if 0
+    printf("\033[2Kinvoking gzip\r");
     fflush(stdout);
+    p = fork();
+    if ( p == 0 ) {
+        char *gzipv[] = {
+            "gzip",
+            "-d",
+            NULL
+        };
+        chdir("/");
+        close(0);
+        close(1);
+        open(dist_tar, O_RDONLY);
+        open("/dist.tar", O_WRONLY|O_CREAT, 0755);
+        execve(gzip, gzipv, NULL);
+        fprintf(stderr, " * system cannot run gzip\n");
+    }
+    waitpid(p, &status, 0);
+#endif
+    printf("\033[2Kinvoking tar\r");
+    fflush(stdout);
+    
     if ( (p = fork()) == 0 ) {
         chdir("/");
         execve(tar, argv, envp);

@@ -74,6 +74,19 @@ mem_cpy(addr_t _dst, const addr_t _src, size_t len)
     return org;
 }
 
+int
+mem_cmp(const addr_t a, const addr_t b, size_t n)
+{
+    const uint8_t *ma = a;
+    const uint8_t *mb = b;
+    for (int i = 0; i < n; i++, a++, b++) {
+        if (*ma != *mb) {
+            return *ma - *mb;
+        }
+    }
+    return 0;
+}
+
 /*
  * mem_set()
  * ustawia len bajtow poczawszy od adresu s na c
@@ -125,6 +138,12 @@ str_cmp(const char *a, const char *b)
     }
     return *a - *b;
 
+}
+
+bool
+str_eq(const char *a, const char *b)
+{
+    return str_cmp(a,b)==0;
 }
 
 char *

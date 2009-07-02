@@ -54,6 +54,7 @@ vm_trap_pfault(vm_trap_frame_t *frame)
         (frame->in_kernel)? "kernel code" : "user code",
         frame->preempted_addr);
     kprintf(" curthread: %p 0x%x\n", curthread, curthread->thr_flags);
+    kprintf(" image:     %s\n", curthread->thr_proc->p_cmd);
 //     kprintf(" vm_space:  %p,%p,%p\n", curthread->vm_space,
 //         curthread->vm_space->pmap.physdir, cpu_get_cr3());
 
@@ -70,9 +71,8 @@ vm_user_pfault(vm_trap_frame_t *frame)
     // powinni¶my rzuciæ sygna³em tutaj!
     kprintf("Process PID=%u: access violation (killed)\n",
         curthread->thr_proc->p_pid);
-        panic("AAAA\n");
+    panic("user pfault");
     proc_exit(curthread->thr_proc, MAKE_STATUS_SIGNALED(SIGSEGV));
-    // zrobic proc_exit !
 }
 
 

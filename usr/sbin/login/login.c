@@ -17,8 +17,8 @@ _login(const char *autologin)
     char login[20];
     char password[20];
     struct termios tio,tio2;
-    printf("\n%s-%s/%s at %s\n\n", utsname.sysname, utsname.machine,
-        utsname.release, getenv("TTY"));
+    printf("\n%s-%s/%s at %s\n\n", utsname.sysname, utsname.release,
+        utsname.machine, getenv("TTY"));
     if (!autologin) {
         printf("login: ");
         fgets(login, sizeof(login)-1, stdin);

@@ -59,8 +59,6 @@ static void init_kernel(void);
 static void prepare_root(void);
 static void start_init_process(void);
 
-
-
 void
 kmain()
 {
@@ -140,7 +138,8 @@ print_welcome()
     kprintf("   http://www.ii.uni.wroc.pl/\n");
     kprintf("----\n");
     kprintf("Impala Operating System, build at %s %s\n", __TIME__, __DATE__);
-    kprintf("CPU: %s\n", cpu_i.vendor_string);
+    kprintf("CPU vendor: %s\n", cpu_i.vendor_string);
+    kprintf("CPU brand: %s\n", cpu_i.brand_string);
     kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
 }
@@ -172,6 +171,6 @@ init_kernel()
     kprintf("kernel initialized\n");
     SSLEEP(1, "kinit");
     kprintf("current time: %i\n", curtime.tv_sec);
-    kthread_create(&idle, idlefunc, NULL);
+    if (1) kthread_create(&idle, idlefunc, NULL);
 
 }

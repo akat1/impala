@@ -29,202 +29,257 @@
  * $Id$
  */
 
+/** @file 
+ * G³ówny plik obs³ugi systemu plików MS FAT.
+ */
+
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/bio.h>
 #include <sys/vfs.h>
 #include <fs/fatfs/fatfs.h>
 
-vfs_init_t  fatfs_init;
-
-
-static vfs_mount_t     fat_mount;
-static vfs_unmount_t   fat_unmount;
-static vfs_getroot_t   fat_getroot;
-static vfs_sync_t      fat_sync;
-
-static vfs_ops_t fatfs_ops = {
-    fat_mount,
-    fat_unmount,
-    fat_getroot,
-    fat_sync
+enum {
+    BSIZE   = 512
 };
 
-static fatfs_inode_t rootinode;
+vfs_init_t  fatfs_init;
+static vfs_mount_t     fatfs_mount;
+static vfs_unmount_t   fatfs_unmount;
+static vfs_getroot_t   fatfs_getroot;
+static vfs_sync_t      fatfs_sync;
+
+static vfs_ops_t fatfs_ops = {
+    fatfs_mount,
+    fatfs_unmount,
+    fatfs_getroot,
+    fatfs_sync
+};
+
+int fatfs_check_sblock(const fatfs_sblock_t *fs);
+fatfs_t *fatfs_createfs(const fatfs_sblock_t *fs);
+int fatfs_read_fat(fatfs_t *fatfs);
+
+blkno_t fat12_get(const uint8_t *, blkno_t);
+
+/*************************************************************************
+ * Procedury obs³ugi VFS.
+ */
 
 
+/// rejestruje FATFS
 void
 fatfs_init()
 {
     vfs_register("fatfs", &fatfs_ops);
 }
 
-int read_fat(fatfs_t *fatfs, int i);
-int read_root(fatfs_t *fatfs, int i);
-
+/// montuje FATFS
 int
-fat_mount(vfs_t *fs)
+fatfs_mount(vfs_t *vfs)
 {
+    
+    devd_t *dev = vfs->vfs_mdev;
+    iobuf_t *bp;
+    fatfs_t *fatfs = NULL;
+    fatfs_node_t *rootnode;
     int err;
-    DEBUGF("reading super block");
-    iobuf_t *bp = bio_read(fs->vfs_mdev, 0, 512);
-    if ( ISSET(bp->flags,BIO_ERROR) ) {
-        DEBUGF("cannot read superblock");
+    bp = bio_read(dev, 0, BSIZE);
+    if ( ISSET(bp->flags, BIO_ERROR) ) {
+        DEBUGF("read super block failed");
         bio_release(bp);
         return -bp->errno;
     }
-    fatfs_sblock_t *sblock = bp->addr;
-
-    if (sblock->media != 0xf0) {
-        DEBUGF("only FAT12 on 1440kB floppy is supported");
-        bio_release(bp);
-        return -ENOTSUP;
-    }
-    if (sblock->clusize != 1) {
-        DEBUGF("%u sectors per cluster not supported", sblock->clusize);
-        bio_release(bp);
-        return -ENOTSUP;
-    }
-
-    fatfs_t *fatfs = kmem_alloc(sizeof(fatfs_t), KM_SLEEP);
-    fs->vfs_private = fatfs;
-    fatfs->vfs = fs;
-    fatfs->tables = sblock->tables;
-    fatfs->tablesize = FAT_GET_TABLESIZE(sblock);
-    fatfs->secsize = 512;
-    fatfs->clusize  = sblock->clusize;
-    fatfs->blkno_fat[0] = FAT_GET_RESERVED(sblock);
-    fatfs->blkno_fat[1] = fatfs->tablesize + fatfs->blkno_fat[0];
-    fatfs->blkno_root = FAT_GET_RESERVED(sblock)
-            + fatfs->tablesize * fatfs->tables;
-    fatfs->blkno_data = fatfs->blkno_root + (FAT_GET_MAXROOT(sblock)*32)/512;
-
+    if (!fatfs_check_sblock(bp->addr))
+        fatfs = fatfs_createfs(bp->addr);
     bio_release(bp);
-    fatfs->clubsize = fatfs->secsize * fatfs->clusize;
-
-    DEBUGF("FAT: diskmap FAT1=%u FAT2=%u ROOT=%u DATA=%u CS=%u",
-        fatfs->blkno_fat[0], fatfs->blkno_fat[1], fatfs->blkno_root,
-        fatfs->blkno_data, fatfs->clubsize);
-
-    for (int i = 0; i < 2 && i < fatfs->tables; i++) {
-        if ( (err = read_fat(fatfs, i)) ) {
-            kmem_free(fatfs);
-            for (int j = 0; j < i; j++) {
-                kmem_free(fatfs->fat[j]);
-            }
-            return err;
-        }
+    if (fatfs == NULL) return -EINVAL;
+    fatfs->dev = vfs->vfs_mdev;
+    fatfs->vfs = vfs;
+    vfs->vfs_private = fatfs;
+    err = fatfs_read_fat(fatfs);
+    if (err) {
+        kmem_free(fatfs);
+        return err;
     }
+    fatfs_space_scan(fatfs);
 
-    fatfs->clu_free = FAT12_CLU_FREE;
-    fatfs->clu_used = FAT12_CLU_USED;
-    fatfs->clu_bad  = FAT12_CLU_BAD;
-    fatfs->clu_last = FAT12_CLU_LAST;
-    fatfs->dev = fs->vfs_mdev;
-    fatfs_inode_prepare(fatfs, &rootinode, FATFS_ROOT);
-    rootinode.clustart = fatfs->blkno_root;
-    fatfs->root = fatfs_getvnode(&rootinode);
-
+    rootnode = fatfs_node_alloc(fatfs, FATFS_ROOT);
+    fatfs->root = fatfs_node_getv(rootnode);
     return 0;
 }
 
 
 int
-fat_unmount(vfs_t *fs)
+fatfs_unmount(vfs_t *vfs)
 {
     return -ENOTSUP;
 }
 
+/// pobiera opis g³ównego katalogu systemu plików
 vnode_t *
-fat_getroot(vfs_t *fs)
+fatfs_getroot(vfs_t *vfs)
 {
-    fatfs_t *fatfs = fs->vfs_private;
+    fatfs_t *fatfs = vfs->vfs_private;
     vref(fatfs->root);
     return fatfs->root;
 }
 
+/// synchronizuje system plików z no¶nikiem
 void
-fat_sync(vfs_t *fs)
+fatfs_sync(vfs_t *vfs)
 {
 }
 
-int
-read_fat(fatfs_t *fatfs, int x)
+/*************************************************************************
+ * Procedury obs³ugi VFS.
+ */
+
+
+
+/// zdobywa informacje o wolnym miejscu
+void
+fatfs_space_scan(fatfs_t *fatfs)
 {
-    DEBUGF("Trying read FAT%u", x+1);
-    fatfs->fat[x] = kmem_alloc(fatfs->tablesize*512, KM_SLEEP);
-#if 0
-    for (int i = 0; i < fatfs->tablesize; i++) {
-        iobuf_t *bp = bio_read(fatfs->vfs->vfs_mdev, fatfs->blkno_fat[x] + i, 512);
-        if (ISSET(bp->flags,BIO_ERROR)) {
-            kmem_free(fatfs->fat[x]);
-            bio_release(bp);
-            return bp->errno;
+}
+
+/// przydziela wolne miejsce na no¶niku
+blkno_t
+fatfs_space_alloc(size_t size)
+{
+    return -1;
+}
+
+/**
+ * sprawdza pierwszy sektor no¶nika
+ * @param sblock odczytany pierwszy sektor
+ * @return 0 gdy opis pasuje do FAT12, -1 w przeci³nym wypadku
+ */
+int
+fatfs_check_sblock(const fatfs_sblock_t *sblock)
+{
+    // obecnie obs³ugujemy jedynie FAT12 na dyskietkach 1440kB
+    if (sblock->media != 0xf0) {
+        DEBUGF("media id (0x%x) is not 1440kB floppy (0xf0)",
+            sblock->media);
+        return -ENOTSUP;
+    }
+    return 0;
+}
+
+/**
+ * tworzy opis FATFS i zbiera informacje z pierwszego sektora
+ * @param sblock odczytany pierwszy sektor
+ * @return utworzony deskryptor FATFS 
+ */
+fatfs_t *
+fatfs_createfs(const fatfs_sblock_t *sblock)
+{
+    fatfs_t *fatfs = kmem_zalloc(sizeof(*fatfs), KM_SLEEP);
+    fatfs->fats = sblock->tables;
+    fatfs->fatbsize = FATFS_GET_TABLESIZE(sblock);
+    fatfs->clubsize = sblock->clusize;
+    fatfs->clusize = sblock->clusize * BSIZE;
+    fatfs->maxroot = FATFS_GET_MAXROOT(sblock);
+    fatfs->blkno_fat = FATFS_GET_RESERVED(sblock);
+    fatfs->blkno_root = fatfs->blkno_fat + fatfs->fatbsize * fatfs->fats;
+    fatfs->blkno_data = fatfs->blkno_root + (fatfs->maxroot*32)/BSIZE;
+    fatfs->clu_free = FAT12_CLU_FREE;
+    fatfs->clu_used = FAT12_CLU_USED;
+    fatfs->clu_bad = FAT12_CLU_BAD;
+    fatfs->clu_last = FAT12_CLU_LAST;
+    fatfs->fat_get = fat12_get;
+    fatfs->fat = kmem_alloc(BSIZE*fatfs->fatbsize, KM_SLEEP);
+    return fatfs;
+}
+
+/**
+ * odczytuje pierwsz± tablicê FAT z no¶nika
+ * @param fatfs deskryptor fatfs
+ * @return 0 przy powodzeniu, lub bl±d operacji wej-wyj
+ */
+int
+fatfs_read_fat(fatfs_t *fatfs)
+{
+    iobuf_t *bp;
+    bp = bio_read(fatfs->dev, fatfs->blkno_fat, fatfs->fatbsize*BSIZE);
+    if ( ISSET(bp->flags, BIO_ERROR) ) {
+        bio_release(bp);
+        return -bp->errno;
+    }
+    mem_cpy(fatfs->fat, bp->addr, fatfs->fatbsize*BSIZE);
+    bio_release(bp);
+    return 0;
+}
+
+/**
+ * odwzorowuje plik na sektor klastra na no¶niku
+ * @param node wêze³ którego fragment chcemy odwzorowaæ
+ * @param off pozycja w pliku
+ * @param size ograniczenie górne (w bajtach) na szukany ci±g klastrów
+ *             (0 oznacza bez ograniczenia)
+ * @param cont do uzupe³nienia ilo¶ci± ci±g³ych klastrów, NULL je¿eli ta
+ *             informacja jest nieistotna.
+ * @return zwraca numer sektora na no¶niku zawieraj±cego dany fragment pliku,
+ *         lub -1 je¿eli taki sektor nie istnieje.
+ *
+ * Procedura zwraca numer sektora na no¶niku, w którym rozpoczyna siê klaster
+ * przechowuj±cy dan± pozycjê w pliku. Mo¿liwe jest te¿ zdobycie informacji
+ * ile nastêpnych klastrów wystêpuje po sobie. W takim wypadku mo¿na je
+ * wszystkie odczytaæ za pomoc± jednego transferu danych z urz±dzenia,
+ * co jest istotne dla wydajno¶ci systemu.
+ */
+
+blkno_t
+fatfs_bmap(fatfs_node_t *node, off_t off, ssize_t s, size_t *cont)
+{
+#define has_content(clu) ((clu) < fatfs->clu_bad)
+    fatfs_t *fatfs = node->fatfs;
+    int clun = off/fatfs->clusize;
+    int i;
+    blkno_t clu = node->firstclu;
+    if (cont) *cont = 0;
+    for (i = 0; i != clun && has_content(clu); i++)
+        clu = fatfs->fat_get(fatfs->fat, clu);
+    if (i != clun || !has_content(clu)) {
+        return -1;
+    }
+    if (cont) {
+        int c = 1;
+        ssize_t xs = 0;
+        blkno_t nclu = fatfs->fat_get(fatfs->fat, clu);
+        blkno_t pclu = clu;
+        *cont = c;
+        s -= off%fatfs->clusize;
+        while ( has_content(nclu) && nclu == pclu+1 && (xs < s || s==0) ) {
+            xs += fatfs->clusize;
+            pclu = nclu;
+            nclu = fatfs->fat_get(fatfs->fat, pclu);
+            c++;
         }
-        mem_cpy(fatfs->fat[x] + i*512, bp->addr, 512);
-        bio_release(bp);
+         *cont = c;
     }
-#else
-    iobuf_t *bp = bio_read(fatfs->vfs->vfs_mdev, fatfs->blkno_fat[x],fatfs->tablesize*512);
-    if (ISSET(bp->flags, BIO_ERROR)) {
-        kmem_free(fatfs->fat[x]);
-        bio_release(bp);
-        return bp->errno;
-    }
-    mem_cpy(fatfs->fat[x], bp->addr, 512*fatfs->tablesize);
-    bio_release(bp);
-#endif
-    return 0;
+    return fatfs->blkno_data + (clu-2)*fatfs->clubsize;
+#undef has_content
 }
 
 
-#define SDEBUG(fmt, ap...) do { DEBUGF(fmt, ## ap); ssleep(1); } while(0)
+/*************************************************************************
+ * Procedury obs³ugi tablic FAT
+ */
 
-void *
-fatfs_clu_alloc(fatfs_t *fatfs)
-{
-    return kmem_alloc(fatfs->clubsize, KM_SLEEP);
-}
-
-int
-fatfs_clu_read(fatfs_t *fatfs, int clu, fatfs_inode_t *inode)
-{
-    int err = 0;
-    if (inode->clunum == clu) return 0;
-    clu-=2;
-    iobuf_t *bp = bio_read(fatfs->dev, fatfs->blkno_data + clu, 512);
-    if (ISSET(bp->flags,BIO_ERROR)) {
-        err = -bp->errno;
-    } else {
-        mem_cpy(inode->clubuf, bp->addr, 512);
-    }
-    bio_release(bp);
-    return 0;
-}
-
-void
-fatfs_clu_free(fatfs_t *fatfs, void *ptr)
-{
-    kmem_free(ptr);
-}
-
-
-// [AAABBB][CCCDDD]
-uint
-fatfs_fat_next(fatfs_t *fatfs, uint i)
+blkno_t
+fat12_get(const uint8_t *table, blkno_t i)
 {
     int n = (3*i) / 2;
-    uint16_t fat = *(uint16_t*)&((fatfs->fat[0])[n]);
+    uint16_t fat = *(uint16_t*)&(table[n]);
     uint16_t a,b;
 
     a = (fat & 0xfff);
     b = (fat & 0xfff0) >>4;
-//      DEBUGF("trying to get %u entry, n=%u %x=(%u,%u)",
-//          i, n, fat, a, b);
     if ( (3*i) & 1) {
         return b;
     } else {
         return a;
     }
 }
-

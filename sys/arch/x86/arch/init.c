@@ -80,24 +80,79 @@ _cpuid(int option, struct cpuid_result *r) {
     return;
 }
 
+static const char *cpu_old_brands[] = {
+    "Very old processor",
+    "Intel(R) Celeron(R)",
+    "Intel(R) Pentium(R)",
+    "Intel(R) Pentium(R) III Xeon(R)",
+    "Intel(R) Pentium(R) III",
+    "Intel(R) Pentium(R) III Mobile",
+    "Intel(R) Celeron(R) Mobile",
+    "Intel(R) Pentium(R) 4",
+    "Intel(R) Pentium(R) 4",
+    "Intel(R) Celeron(R)",
+    "Intel(R) Pentium(R) Xeon(R)",
+    "Intel(R) Pentium(R) Xeon MP",
+    "Intel(R) Pentium(R) Pentium(R) 4 Mobile",
+    "Intel(R) Celeron(R)",
+    "Genuine Intel(R) Mobile",
+    "Intel(R) Celeron(R) M",
+    "Intel(R) Celeron(R) Mobile",
+    "Intel(R) Celeron(R)",
+    "Genuine Intel(R) Mobile",
+    "Intel(R) Pentium(R) M",
+    "Intel(R) Celeron(R) Mobile",
+};
+
 void
 _cpu_info(void)
 {
+    unsigned int *istr;
+    int oldbrand;
     struct cpuid_result cpuid_r;
 
     mem_zero(&cpu_i, sizeof(struct cpu_info));
 
     _cpuid(CPUID_BASIC ,&cpuid_r);
 
-    ((unsigned int *)&(cpu_i.vendor_string))[0] = cpuid_r.r_ebx;
-    ((unsigned int *)&(cpu_i.vendor_string))[1] = cpuid_r.r_edx;
-    ((unsigned int *)&(cpu_i.vendor_string))[2] = cpuid_r.r_ecx;
+    istr = (unsigned int *) cpu_i.vendor_string;
+    istr[0] = cpuid_r.r_ebx;
+    istr[1] = cpuid_r.r_edx;
+    istr[2] = cpuid_r.r_ecx;
 
     _cpuid(CPUID_FEATURE ,&cpuid_r);
 
     cpu_i.version_information = cpuid_r.r_eax;
+    oldbrand = cpuid_r.r_ebx & 0x8;
     cpu_i.feature_ecx = cpuid_r.r_ecx;
     cpu_i.feature_edx = cpuid_r.r_edx;
+
+    _cpuid(CPUID_EXT_MAX, &cpuid_r);
+    if (cpuid_r.r_eax >= CPUID_EXT_BRAND3) {
+        int i = 0;
+        istr = (unsigned int *) cpu_i.brand_string;
+        _cpuid(CPUID_EXT_BRAND1, &cpuid_r);
+        istr[i++] = cpuid_r.r_eax;
+        istr[i++] = cpuid_r.r_ebx;
+        istr[i++] = cpuid_r.r_ecx;
+        istr[i++] = cpuid_r.r_edx;
+        _cpuid(CPUID_EXT_BRAND2, &cpuid_r);
+        istr[i++] = cpuid_r.r_eax;
+        istr[i++] = cpuid_r.r_ebx;
+        istr[i++] = cpuid_r.r_ecx;
+        istr[i++] = cpuid_r.r_edx;
+        _cpuid(CPUID_EXT_BRAND3, &cpuid_r);
+        istr[i++] = cpuid_r.r_eax;
+        istr[i++] = cpuid_r.r_ebx;
+        istr[i++] = cpuid_r.r_ecx;
+        istr[i++] = cpuid_r.r_edx;
+    } else {
+        if (oldbrand == 0 || oldbrand > 0x18) {
+            snprintf(cpu_i.brand_string, 54, "brand id %u", oldbrand);
+        } else {
+            str_ncpy(cpu_i.brand_string, cpu_old_brands[oldbrand], 54);
+        }
+    }
 }
 
 /**

@@ -18,6 +18,8 @@ run: build-image
 
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
+	rm -rf output
+	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala
 	cp COPYRIGHT ${DISTDIR}/
 	cp usr/sbin/init/init ${DISTDIR}/sbin/init
 	cp usr/sbin/ttyvrun/ttyvrun ${DISTDIR}/sbin/ttyvrun
@@ -28,15 +30,18 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
 	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
 	cp usr/bin/ps/ps ${DISTDIR}/bin/ps
+	cp usr/bin/tar/tar ${DISTDIR}/bin/tar
+	cp usr/bin/minigzip/minigzip ${DISTDIR}/bin/minigzip
 	cp usr/bin/uname/uname ${DISTDIR}/bin/uname
 	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/etc/profile ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
-	cp usr/bin/gzip/gzip ${SPECDIR}/gzip
+	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cd output/dist && tar -H ustar -zcvf ../impala/dist.tar.gz *
+	cd output/dist && tar -cvf ../impala/dist.tar *
+	gzip -9 output/impala/dist.tar
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
