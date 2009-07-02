@@ -26,7 +26,7 @@ end
 
 define gwatch
     set $tmp = $arg0
-    watch *(void*) $tmp
+    watch (void*) *(uintptr_t*) $tmp
 end
 
 define gwatch32
@@ -92,6 +92,6 @@ set can-use-hw-watchpoints 0
 #display curthread->thr_wdescr
 target remote 127.0.0.1:1234
 break panic
-layout split
+#layout split
 
 

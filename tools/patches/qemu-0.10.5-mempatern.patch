@@ -1,0 +1,12 @@
+diff -urB qemu-0.10.5.orig/vl.c qemu-0.10.5/vl.c
+--- qemu-0.10.5.orig/vl.c	2009-07-01 18:50:13.000000000 +0000
++++ qemu-0.10.5/vl.c	2009-07-01 18:51:58.000000000 +0000
+@@ -5499,7 +5499,7 @@
+         fprintf(stderr, "Could not allocate physical memory\n");
+         exit(1);
+     }
+-
++    memset(phys_ram_base, 0xe9, phys_ram_size);
+     bdrv_init();
+     dma_helper_init();
+ 

@@ -1,0 +1,15 @@
+diff -urB bochs-2.4.orig/memory/misc_mem.cc bochs-2.4/memory/misc_mem.cc
+--- bochs-2.4.orig/memory/misc_mem.cc	2009-06-28 00:35:56.000000000 +0000
++++ bochs-2.4/memory/misc_mem.cc	2009-06-28 00:36:08.000000000 +0000
+@@ -54,7 +54,10 @@
+ Bit8u* alloc_vector_aligned(Bit8u **actual_vector, Bit32u bytes, Bit32u alignment)
+ {
+   Bit64u test_mask = alignment - 1;
+-  *actual_vector = new Bit8u [(Bit32u)(bytes + test_mask)];
++  *actual_vector = new Bit8u [(Bit32u)(bytes + test_mask)]; 
++  for (int i = 0; i < bytes; i++) {
++        (*actual_vector)[i] = 0xe9;
++  }
+   // round address forward to nearest multiple of alignment.  Alignment
+   // MUST BE a power of two for this to work.
+   Bit64u masked = ((Bit64u)(*actual_vector + test_mask)) & ~test_mask;
