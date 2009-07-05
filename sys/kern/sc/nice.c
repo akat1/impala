@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,34 +26,39 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: nice.c 486 2009-06-25 07:51:47Z wieczyk $
  */
 
-#ifndef __SYS_CLOCK_H
-#define __SYS_CLOCK_H
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/thread.h>
+#include <sys/proc.h>
+#include <sys/sched.h>
+#include <sys/utils.h>
+#include <sys/syscall.h>
 
-#ifdef __KERNEL
-#include <sys/list.h>
+typedef struct nice_args nice_args;
 
-extern volatile uint clock_ticks;
-extern volatile timespec_t curtime;
-extern const int HZ; //mo¿e siê okazaæ, ¿e tutaj lepiej daæ #define
-extern const int TICK;
-
-void clock_init(void);
-void clock_softtick(void);
-void clock_hardtick(void);
-int clock_timeout(void (*fn)(void *), addr_t arg, uint delta);
-void clock_untimeout(int id);
-
-struct callout {
-    int id;
-    void (*fn)(void *);
-    addr_t arg;
-    int timeout;
-    list_node_t L_callouts;
+struct nice_args {
+    int inc;
 };
 
-#endif
-#endif
+errno_t sc_nice(thread_t *t, syscall_result_t *r, nice_args *args);
+
+errno_t
+sc_nice(thread_t *t, syscall_result_t *r, nice_args *args)
+{
+    int new_nice;
+
+    if ( args->inc < 0 && t->thr_proc->p_cred->p_uid )
+        return -EPERM;
+
+    new_nice = args->inc + t->thr_proc->p_nice;
+
+    if ( new_nice < 0 || new_nice >= 40 )
+        return -EINVAL;
+
+    t->thr_proc->p_nice = new_nice;
+    return -EOK;
+}
 

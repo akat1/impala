@@ -88,7 +88,8 @@ struct thread {
     mutex_t         thr_mtx;        ///< do synchronizacji
     bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
     sigset_t        thr_sigblock;   ///< blokowane sygna³y
-    list_node_t     L_run_queue;    ///< wêze³ kolejki planisty
+    list_node_t     L_run_queue;    ///< wêze³ kolejki procesów gotowych do uruchomienia
+    list_node_t     L_sched_queue;  ///< weze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
     list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych

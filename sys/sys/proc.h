@@ -52,6 +52,8 @@ enum {
 struct procinfo {
     pid_t   pid;        ///< PID
     pid_t   ppid;       ///< PPID
+    uchar   nice;       ///< priorytet procesu
+    uchar   pri;
     int     threads;    ///< ilo¶æ w±tków
     int     flags;      ///< znaczniki
     char    tty[10];    ///< terminal kontroluj±cy
@@ -91,10 +93,13 @@ struct proc {
     sigset_t        p_sig;       ///< maska sygna³ów dostarczonych do procesu
     sigset_t        p_sigignore; ///< maska sygna³ów ignorowanych
     sigaction_t     p_sigact[_NSIG]; ///< akcje sygna³ów
+    uchar           p_nice;      ///< poziom uprzejmo¶ci procesu
+    uchar           p_ucpu;      ///< zu¿ycie procesora
+    uchar           p_pri;       ///< priorytet procesu
     vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
-    ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci.
+    ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci
     vm_addr_t       p_brk_addr;  ///< adres koñca segmentu danych (*)
     mutex_t         p_mtx;       ///< zamek do synchronizacji
     mask_t          p_umask;     ///< maska tworzonych plików
@@ -104,6 +109,7 @@ struct proc {
     const char     *p_cmd;
 };
 
+#define PROC_NZERO  20
 
 extern list_t procs_list;
 extern proc_t * volatile curproc;

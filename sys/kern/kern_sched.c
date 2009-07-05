@@ -31,6 +31,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/proc.h>
 #include <sys/thread.h>
 #include <sys/sched.h>
 #include <sys/clock.h>
@@ -41,11 +42,17 @@
 
 /// Kwant czasu przydzialny programom, w tykniêciach zegara.
 int sched_quantum;
-bool wantSched;
 
-/// Kolejka programów dzia³aj±cych.
+
+/// Kolejka programów gotowych do uruchomienia
 static list_t run_queue;
-static int end_ticks;
+
+bool wantSched;
+bool rescheduled;
+
+static int end_ticks_roundrobin;
+static int end_ticks_reschedule;
+
 /// Zamek zabezpieczaj±cy sekcje krytyczne planisty.
 static spinlock_t sprq;
 
@@ -54,7 +61,67 @@ static inline thread_t * select_next_thread(void);
 static void __sched_yield(void);
 static inline void _sched_wakeup(thread_t *n);
 
+/*
+ * Planista oparty na koncepcji szeregowania procesów z systemów 4.3BSD oraz
+ * SVR3 - opis znajduje siê w ksi±¿ce J±dro Systemu UNIX, nowe horyzony - Uresh
+ * Vahalia - WNT
+ */
 
+list_t *__queue(int pri);
+void __resched(void);
+
+
+/// pierwsza niepsuta kolejka
+int first_not_empty;
+static list_t sched_queue[SCHED_NQ];
+
+/// Procedura zwraca kolejkê na podstawie priorytetu
+list_t *
+__queue(int pri)
+{
+    return &sched_queue[pri/SCHED_PQ];
+}
+
+/// Procedura rozrzuca procesy po odpowiednich kolejkach
+void
+__resched(void)
+{
+    thread_t *t;
+    int len = list_length(&run_queue);
+
+    first_not_empty = SCHED_NQ-1;
+ 
+    for ( int i = 0 ; i < SCHED_NQ ; ++i )
+        list_create(&sched_queue[i], offsetof(thread_t, L_sched_queue), TRUE);
+   
+    t = list_head(&run_queue);
+    for( int i = 0 ; i < len ; i++, t = list_next(&run_queue, t) ) {
+        if ( ISSET(t->thr_flags, THREAD_USER) ) {
+            /* Wyliczamy na nowo priorytet - oryginalnie wyliczano na podstawie
+             * wzoru PUSER + 2 * nice + decay(cpu) - w SVR4 decay(cpy) by³o
+             * równe dzieleniu przez 4 w BSD by³o to dzielenie przez
+             * ¶rednie obci±¿enie systemu */
+            t->thr_proc->p_pri = 2 * t->thr_proc->p_nice + 
+                (t->thr_proc->p_ucpu)/2;
+            list_insert_head(__queue(t->thr_proc->p_pri), t);
+            if ( first_not_empty > t->thr_proc->p_pri/SCHED_PQ )
+                first_not_empty = t->thr_proc->p_pri/SCHED_PQ;
+        }
+    }
+
+    t = list_head(&run_queue);
+    for(int i = 0 ; i < len ; i++, t = list_next(&run_queue, t) ) {
+        if ( !(ISSET(t->thr_flags, THREAD_USER)) )
+            list_insert_head(&sched_queue[first_not_empty], t);
+    }
+
+    end_ticks_reschedule = clock_ticks + 
+        SCHED_RESCHEDULE * sched_quantum;
+
+    rescheduled = TRUE;
+
+    return;
+}
 
 /// Procedura inicjuj±ca program planisty.
 void
@@ -62,10 +129,11 @@ sched_init()
 {
     sched_quantum = 5;
     karg_get_i("sched_quantum", &sched_quantum);
-    end_ticks = clock_ticks + sched_quantum;
+    end_ticks_reschedule = clock_ticks + sched_quantum;
     list_create(&run_queue, offsetof(thread_t, L_run_queue), TRUE);
     spinlock_init(&sprq);
     sched_insert(curthread);
+    __resched();
 }
 
 /**
@@ -78,7 +146,7 @@ sched_init()
 void
 sched_action()
 {
-    if (clock_ticks >= end_ticks && !wantSched) {
+    if (clock_ticks >= end_ticks_roundrobin && !wantSched) {
         wantSched=TRUE;
     }
 }
@@ -86,7 +154,7 @@ sched_action()
 /**
  * Pomocnicza procedura zmieniaj±ca kontekst.
  *
- * Powinna byæ uruchamian tylko wewn±trz sekcji krytycznych
+ * Powinna byæ uruchamina tylko wewn±trz sekcji krytycznych
  * chronionych przez wiruj±cy zamek sprq. Jej zadanie to wybranie
  * kolejnego w±tku, wyj¶cie z sekcji krytycznej i zmiana kontekstu.
  *
@@ -95,17 +163,17 @@ sched_action()
 void
 __sched_yield()
 {
-    thread_t *n = select_next_thread(); // wymaganie: przerwanie zegarowe = ON
-//     kprintf("sched_yield.switch (cur=%p) (n=%p)\n", curthread, n);
+    thread_t *n = select_next_thread();
     spinlock_unlock(&sprq); //nikt nam nie zablokuje, CIPL == IPL_SOFTCLOCK
     if (n == curthread) {
         return; // jednak nie zmieniamy
     }
-
-    end_ticks = clock_ticks + sched_quantum;
+    end_ticks_roundrobin = clock_ticks + sched_quantum;
     wantSched = FALSE;
     irq_disable();
     thread_switch(n, curthread);
+    if ( curthread->thr_proc )
+        curthread->thr_proc->p_ucpu = SCHED_UCPU_MAX;
     irq_enable();
 }
 
@@ -119,10 +187,14 @@ do_switch()
 {
     int old=splbio();
     KASSERT(old==0);
+
+    /* Reorganizacja kolejek w±tków */
+    if ( end_ticks_reschedule <= clock_ticks )
+        __resched();
+
     if(spinlock_trylock(&sprq)) //je¿eli odpalamy z w±tku to powinno byæ ok
         __sched_yield();
-    //else spoko, przy opuszczaniu zamka bêdziemy uwa¿aæ..
-    //else kprintf("Nie wysz³o..\n");
+
     spl0();
     signal_handle(curthread);
 }
@@ -134,8 +206,6 @@ sched_yield()
 {
     if (CIPL > 0) return;
     do_switch();
-//    spinlock_lock(&sprq);
-//    __sched_yield();
 }
 
 /// Dodaje w±tek do kolejki programów dzia³aj±cych.
@@ -143,11 +213,10 @@ void
 sched_insert(thread_t *thr)
 {
     spinlock_lock(&sprq);
-//    TRACE_IN("thr=%p", thr);
     thr->thr_flags |= THREAD_RUN|THREAD_INRUNQ;
     list_insert_tail(&run_queue, thr);
+    __resched();
     spinlock_unlock(&sprq);
-    ///@todo dodaæ prze³±czanie
 }
 
 static void _mutex_wakeup(mutex_t *m);
@@ -211,7 +280,6 @@ void
 sched_wait(const char *fl, const char *fn, int l, const char *d)
 {
     spinlock_lock(&sprq);
-//    kprintf("sched_wait(%p)\n", curthread);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     THREAD_SET_WDESCR(curthread, fl, fn, l, d);
@@ -224,10 +292,10 @@ sched_wait(const char *fl, const char *fn, int l, const char *d)
 static inline void
 _sched_wakeup(thread_t *n)
 {
-//    TRACE_IN("cur=%p n=%p", curthread, n);
     if (!(n->thr_flags & THREAD_INRUNQ)) {
         curthread->thr_flags |= THREAD_INRUNQ;
         list_insert_tail(&run_queue, n);
+        __resched();
     }
 
     n->thr_flags |= THREAD_RUN;
@@ -242,7 +310,6 @@ _sched_wakeup(thread_t *n)
 void
 sched_wakeup(thread_t *n)
 {
-//    TRACE_IN("wakeup=%p", n);
     spinlock_lock(&sprq);
     _sched_wakeup(n);
     spinlock_unlock(&sprq);
@@ -288,6 +355,7 @@ sched_exit(thread_t *t)
 {
     spinlock_lock(&sprq);
     list_remove(&run_queue, t);
+    __resched();
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
     if ( t == curthread ) {
         curthread = NULL;
@@ -316,12 +384,19 @@ sched_dump()
 thread_t *
 select_next_thread()
 {
-    thread_t *p = curthread;
-//    int opl = CIPL;
-//    spl0();
-    while ((p = list_next(&run_queue,p))) {
+  //  kprintf("%u %u %u\n", first_not_empty, list_length(&run_queue), list_length(&sched_queue[first_not_empty]));
+    
+    thread_t *p;
+    
+    if ( rescheduled == FALSE ) {
+        p = curthread;
+    } else {
+        rescheduled = FALSE;
+        p = list_head(&sched_queue[first_not_empty]);
+    }
+    
+    while ((p = list_next(&sched_queue[first_not_empty],p))) {
         if (p->thr_flags & THREAD_RUN) {
-//            splx(opl);
             return p;
         } else
         if( p->thr_flags & THREAD_SLEEP
@@ -330,12 +405,11 @@ select_next_thread()
             p->thr_flags |= THREAD_RUN;
             p->thr_flags &= ~THREAD_SLEEP;
             p->thr_wakeup_time = 0;
-//            splx(opl);
             return p;
         }
     }
     panic("Impossible to get here! runq=%u, curthr: %p, p: %p",
-        list_length(&run_queue), curthread, p);
+        list_length(&sched_queue[first_not_empty]), curthread, p);
     return 0;
 }
 

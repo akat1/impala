@@ -36,6 +36,7 @@
 #include <sys/utils.h>
 #include <sys/string.h>
 #include <sys/syscall.h>
+#include <sys/kernel.h>
 #include <machine/video.h>
 
 typedef struct sc_wait_args sc_wait_args;
@@ -59,8 +60,14 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
         p_iter = (proc_t *)list_head(&(p->p_children));
 
         /* proces nie ma dzieci - czekamy na sygnal */
-        if ( p_iter == NULL )
-            for(;;);
+        if ( p_iter == NULL ) {
+            for (;;) {
+                if ( ISSET(t->thr_proc->p_sig,~t->thr_sigblock) )
+                    return -EINTR;
+                else
+                    sched_yield();
+            }
+        }
 
         #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
         {
@@ -82,6 +89,8 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
             }
         } while ((p_iter = NEXTPROC()));
         #undef NEXTPROC
+
+        sched_yield();
     }
 
     // Nieosiagalny

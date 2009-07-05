@@ -66,7 +66,10 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                     ///libc musi to zapatchowaæ i je¶li jest NOHANG zwróciæ 0
                     return -ECHILD; 
                 }
-                for(;;);
+                if ( ISSET(t->thr_proc->p_sig,~t->thr_sigblock) )
+                    return -EINTR;
+                else
+                    sched_yield();
             }
             #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
             {
@@ -95,6 +98,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
             #undef NEXTPROC
             if(ISSET(args->options, WNOHANG))
                 return EOK; ///poprawne zachowanie?
+            sched_yield();
         }
     }
     proc_t *to_trace = proc_find(args->pid);
@@ -130,6 +134,8 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
         }
         if(args->options & WNOHANG)
             return EOK;
+
+        sched_yield();
     }
 
     return -EOK;
