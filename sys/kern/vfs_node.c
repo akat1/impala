@@ -349,7 +349,11 @@ vnode_stat(vnode_t *node, struct stat *buf)
         return res;
     buf->st_dev = 0;
     buf->st_ino = va.va_ino;
-    buf->st_mode = va.va_mode | VATYPE_TO_SMODE(va.va_type);
+    buf->st_mode = va.va_mode;
+    if(va.va_type == VNODE_TYPE_DEV)
+        buf->st_mode |= (node->v_dev->type == DEV_BDEV)?S_IFBLK : S_IFCHR;
+    else
+        buf->st_mode |= VATYPE_TO_SMODE(va.va_type);
     buf->st_nlink = va.va_nlink;
     buf->st_uid = va.va_uid;
     buf->st_gid = va.va_gid;

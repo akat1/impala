@@ -50,6 +50,7 @@
 #include <sys/kargs.h>
 #include <sys/bio.h>
 #include <dev/fdc/fdc.h>
+#include <fs/devfs/devfs.h>
 #include <machine/bus/isa.h>
 #include <machine/interrupt.h>
 #include <machine/io.h>
@@ -246,7 +247,6 @@ static devsw_t fd_devsw = {
     nowrite,
     fd_strategy,
     DEV_BDEV,
-    "fd"
 };
 
 /*========================================================================
@@ -628,7 +628,8 @@ fd_create(fddrive_t *fd)
     kprintf("fd%u: <%s> drive %c: geometry %u/%u/%u\n", fd->unit,
         fd->spec->name, fd->name, fd->spec->heads, fd->spec->tracks,
         fd->spec->sectrack);
-    fd->devd = devd_create(&fd_devsw, fd->unit, fd);
+    fd->devd = devd_create(&fd_devsw, "fd", fd->unit, fd);
+    devfs_register(fd->devd, 0, 0, 0666);
     fd->busy = FALSE;
 }
 

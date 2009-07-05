@@ -58,7 +58,6 @@ static devsw_t md_devsw = {
     mdwrite,
     mdstrategy,
     DEV_BDEV,
-    "md"
 };
 
 int
@@ -182,8 +181,8 @@ md_create(int unit, void *data, size_t size)
         _str_type = "foreign";
     }
     list_insert_in_order(&memdisks, md, (list_less_f*) md_less);
-    md->devd = devd_create(&md_devsw, md->unit, md);
-    devfs_register(md->devd->name, md->devd, 0, 0, 0777);
+    md->devd = devd_create(&md_devsw, "md", md->unit, md);
+    devfs_register(md->devd, 0, 0, 0777);
     md->owner = NULL;
     return 0;
 }

@@ -162,6 +162,9 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     //plik nie istnieje -> tworzymy
     devfs_node_t *pn = vn->v_private;
     devfs_node_t *n = kmem_zalloc(sizeof(devfs_node_t), KM_SLEEP);
+    if(!n)
+        return -ENOMEM;
+
     str_cpy(n->i_name, name);
     n->i_type = (attr->va_type == VNODE_TYPE_DEV)?
                             _INODE_TYPE_DEV:_INODE_TYPE_DIR;
@@ -412,7 +415,7 @@ devfs_rootvnode()
 }
 
 int
-devfs_register(const char *name, devd_t *device, uid_t def_uid, gid_t def_gid,
+devfs_register(devd_t *device, uid_t def_uid, gid_t def_gid,
                 mode_t def_mode)
 {
     //szybka ¶ciema..
@@ -423,7 +426,7 @@ devfs_register(const char *name, devd_t *device, uid_t def_uid, gid_t def_gid,
     attr.va_mode = def_mode;
     attr.va_type = VNODE_TYPE_DEV;
     vnode_t *tmp_node;
-    _create(devfs_rootvnode(), &tmp_node, name, &attr);
+    _create(devfs_rootvnode(), &tmp_node, device->name, &attr);
     return 0;
 }
 

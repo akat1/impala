@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/kernel.h>
 #include <sys/device.h>
+#include <fs/devfs/devfs.h>
 
 
 d_init_t null_init;
@@ -49,14 +50,15 @@ static devsw_t null_devsw = {
     null_write,
     nostrategy,
     DEV_CDEV,
-    "null"
 };
 
 
 void
 null_init(void)
 {
-    devd_create(&null_devsw, -1, NULL);
+    devd_t *dev = devd_create(&null_devsw, "null", -1, NULL);
+    devfs_register(dev, 0, 0, 0666);
+
 }
 
 

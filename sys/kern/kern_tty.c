@@ -66,7 +66,6 @@ static devsw_t ttysw = {
     tty_write,
     nostrategy,
     DEV_TTY,
-    "ttyv"
 };
 
 static void tty_conf_set_default(termios_t *tconf);
@@ -94,11 +93,6 @@ tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops)
     tty_t *tty = kmem_alloc(sizeof(tty_t), KM_SLEEP);
     if(!tty)
         return NULL;
-    char buf[128];
-    if(unit==-1)
-        snprintf(buf, 128, name);
-    else
-        snprintf(buf, 128, name, unit);
     tty->t_private = priv;
     tty->t_session = -1; ///@todo zrobiæ to porz±dnie
     tty->t_group = -1;
@@ -106,9 +100,8 @@ tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops)
     tty->t_inq = clist_create(MAX_INPUT);
     tty->t_clq = clist_create(MAX_INPUT);
     tty_conf_set_default(&(tty->t_conf));
-    devd_t *dev = devd_create(&ttysw, unit, tty);///@todo naprawiæ: unit mo¿e siê powtarzaæ
-    tty->t_dev = dev;
-    devfs_register(buf, dev, 0, 0, 0777);
+    tty->t_dev = devd_create(&ttysw, name, unit, tty);
+    devfs_register(tty->t_dev, 0, 0, 0666);
     return tty;
 }
 

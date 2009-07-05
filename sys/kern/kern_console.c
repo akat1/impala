@@ -191,7 +191,7 @@ cons_init()
     ctty_create(); //tworzymy /dev/tty
     for (int i = 0; i < VCONS_MAX; i++) {
         mutex_init(&vcons[i].mtx, MUTEX_NORMAL);
-        vcons[i].tty = tty_create("ttyv%i", i+1, &vcons[i], &vcons_lowop);
+        vcons[i].tty = tty_create("ttyv", i+1, &vcons[i], &vcons_lowop);
         vcons[i].sattr = COLOR_BRIGHTGRAY;
         vcons[i].escape = FALSE;
         vcons[i].mode = CONS_MODE_AWRAP;

@@ -34,6 +34,7 @@
 #include <sys/kernel.h>
 #include <sys/device.h>
 #include <sys/uio.h>
+#include <fs/devfs/devfs.h>
 
 
 d_init_t zero_init;
@@ -50,14 +51,14 @@ static devsw_t zero_devsw = {
     zero_write,
     nostrategy,
     DEV_CDEV,
-    "zero"
 };
 
 
 void
 zero_init(void)
 {
-    devd_create(&zero_devsw, -1, NULL);
+    devd_t *dev = devd_create(&zero_devsw, "zero", -1, NULL);
+    devfs_register(dev, 0, 0, 0666);
 }
 
 

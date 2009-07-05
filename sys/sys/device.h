@@ -63,7 +63,6 @@ struct devsw {
     d_write_t       *d_write;       ///< obs³uga wyj¶cia
     d_strategy_t    *d_strategy;    ///< obs³uga wej-wyj blokowego
     int              type;
-    const char      *name;          ///< ogólna nazwa plików urz.
 };
 
 int dnotsupported(devd_t *d);
@@ -93,7 +92,7 @@ enum {
 };
 
 
-devd_t *devd_create(devsw_t *dsw, int unit, void *pr);
+devd_t *devd_create(devsw_t *dsw, const char *name, int unit, void *pr);
 void devd_destroy(devd_t *dev);
 void dev_init(void);
 void dev_initdevs(void);

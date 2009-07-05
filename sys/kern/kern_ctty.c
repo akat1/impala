@@ -67,16 +67,15 @@ static devsw_t cttysw = {
     ctty_write,
     nostrategy,
     DEV_TTY,
-    "tty"
 };
 
 int
 ctty_create(void)
 {
-    devd_t *dev = devd_create(&cttysw, -1, NULL);
+    devd_t *dev = devd_create(&cttysw, "tty", -1, NULL);
     if(!dev)
         return -1;
-    devfs_register(dev->name, dev, 0, 0, 0777);
+    devfs_register(dev, 0, 0, 0666);
     return 0;
 }
 

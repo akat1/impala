@@ -67,24 +67,22 @@ dev_initdevs()
 }
 
 
-static bool find_this_dev(const devd_t *d, const char *name);
-
 #include <fs/devfs/devfs.h>
 
 devd_t *
-devd_create(devsw_t *dsw, int unit, void *priv)
+devd_create(devsw_t *dsw, const char *name, int unit, void *priv)
 {
     devd_t *dev = kmem_cache_alloc( devd_cache, KM_SLEEP );
     if (unit == -1) {
-        snprintf(dev->name, DEVD_MAXNAME, "%s", dsw->name);
+        snprintf(dev->name, DEVD_MAXNAME, "%s", name);
     } else {
-        snprintf(dev->name, DEVD_MAXNAME, "%s%u", dsw->name, unit);
+        snprintf(dev->name, DEVD_MAXNAME, "%s%u", name, unit);
     }
     dev->devsw = dsw;
     dev->priv = priv;
     dev->type = dsw->type;
     list_insert_tail(&devs, dev);
-    devfs_register(dev->name, dev, 0, 0, 0777);
+//    devfs_register(dev, 0, 0, 0777); // niech każdy sam sobie rejestruje
     return dev;
 }
 
@@ -96,15 +94,6 @@ devd_printf(devd_t *d, const char *fmt, ...)
     VA_START(ap, fmt);
     vsnprintf(buf, SPRINTF_BUFSIZE, fmt, ap);
     VA_END(ap);
-}
-
-
-devd_t *
-devd_find(const char *name)
-{
-    uintptr_t u = (uintptr_t)name;
-    devd_t *d = list_find(&devs, find_this_dev, u);
-    return d;
 }
 
 int
@@ -135,12 +124,6 @@ int
 devd_close(devd_t *d)
 {
     return d->devsw->d_close(d);
-}
-
-bool
-find_this_dev(const devd_t *d, const char *name)
-{
-    return (str_cmp(d->name, name)==0);
 }
 
 int
