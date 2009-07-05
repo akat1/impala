@@ -57,6 +57,7 @@ proc_ctor(void *obj)
     proc->p_cred = kmem_zalloc(sizeof(pcred_t), KM_SLEEP);
     proc->p_fd = filetable_alloc();
     proc->p_cmd = NULL;
+    proc->p_nice = PROC_NZERO;
     mutex_init(&proc->p_mtx, MUTEX_NORMAL);
     LIST_CREATE(&proc->p_umtxs, mutex_t, L_user, FALSE);
 }
@@ -84,6 +85,8 @@ proc_getinfos(int off, struct procinfo *tab, int n)
         for (i = 0; i < n && p; i++, p = list_next(&procs_list,p)) {
             tab[i].pid = p->p_pid;
             tab[i].ppid = p->p_ppid;
+            tab[i].nice = p->p_nice;
+            tab[i].pri = p->p_pri;
             tab[i].threads = list_length(&p->p_threads);
             if (p->p_ctty)
                 str_ncpy(tab[i].tty, p->p_ctty->t_dev->name, sizeof(tab[i].tty));
@@ -110,6 +113,7 @@ proc_init(void)
     proc0.p_pid = last_pid++;
     proc0.p_group = proc0.p_pid;
     proc0.p_ppid = 0;
+    proc0.p_nice = PROC_NZERO;
     proc0.p_cred = NULL;
     proc0.p_cmd = str_dup(karg_get_name());
     LIST_CREATE(&proc0.p_threads, thread_t, L_pthreads, FALSE);
