@@ -7,7 +7,9 @@ strsep(char **stringp, const char *delim)
         return NULL;
     char *res = *stringp;
     *stringp = strpbrk(*stringp, delim);
-    if(*stringp)
+    if(*stringp) {
         **stringp = '\0';
+        *stringp = (*stringp)+1;
+    }
     return res;
 }

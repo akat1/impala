@@ -1,30 +1,188 @@
 #include <sys/types.h>
 #include <string.h>
+#include <unistd.h>
+#include <ctype.h>
 #include <term.h>
+#include <sys/ascii.h>
+#include <sys/termios.h>
 
-#define ERR 1
+#define ERR 0
+#define TC_ITEMS_MAX 256
+
+static char *_termdesc[TC_ITEMS_MAX] = {NULL, };
+static void _tgetent(char *data);
+
+void
+_tgetent(char *data)
+{
+    // wyczyscic aktualne..
+    for(int i=0; i<TC_ITEMS_MAX; i++) {
+        char *X = _termdesc[i];
+        _termdesc[i] = NULL;
+        if(X)
+            free(X);
+    }
+    // i ladujemy nowe
+    char *c = data;
+    if(!*c || *c == '\n')
+        return;
+    char buf[128];
+    char *c2 = buf;
+    bool newLine = FALSE;
+    int nextCap = 0;
+    while(c && *c) {
+        while(isspace(*c))
+            c++;
+        if(*c == '.') {
+            c = strchr(c, ':');
+            if(!c)
+                return;
+            c++;
+        }
+        // to mamy nasze cosio
+        // moga byc tu jeszcze bledy odnosnie traktowania nowej linii
+        while(*c && *c!=':' && *c!='\n') {
+            switch(*c) {
+                case '#':
+                    if(newLine) {
+                        c = strchr(c, '\n');
+                        if(c)
+                            c++;
+                    } else
+                        *(c2++) = *(c++);
+                    break;
+                case '\\':
+                    c++;
+                    newLine = FALSE;
+                    switch(*c) {
+                        case '\\':
+                        case '^':
+                        case ':':   *(c2++) = *c;          break;
+                        case 'E':   *(c2++) = ESC;         break;
+                        case 'n':   *(c2++) = NL;          break;
+                        case 'r':   *(c2++) = CR;          break;
+                        case 't':   *(c2++) = HT;          break;
+                        case 'b':   *(c2++) = BS;          break;
+                        case 'f':   *(c2++) = FF;          break;
+                        case '\n':  newLine = TRUE;     break;
+                        default: {
+                            if(isdigit(*c)) { //octal
+                                unsigned char newc = 0;
+                                for(int i=0; i<3; i++)
+                                    newc = newc*8 + *(c++) - '0';
+                                *(c2++) = newc;
+                                c--;
+                            }
+                        }
+                    }
+                    c++;
+                    break;
+                case '^':
+                    newLine = FALSE;
+                    c++;
+                    *(c2++) = CTRL(*c);
+                    c++;
+                    break;
+                default:
+                    newLine = FALSE;
+                    *(c2++) = *(c++);
+            }
+        }
+        if(*c)
+            c++;
+        *c2 = '\0';
+        if(c2!=buf) {
+            _termdesc[nextCap++] = strdup(buf);
+            c2 = buf;
+        }
+    }
+}
 
 int
 tgetent(char *bp, const char *name)
 {
-    return ERR;
+    char *tinfo = strdup(getenv("TERMCAP"));
+    char *c = tinfo;
+    while(*c) {
+        //zjedzmy puste znaki
+        while(isspace(*c))
+            c++;
+        if(*c == '#') { //komentarz... wezmy kolejna linie
+            c = strchr(c, '\n');
+            if(!c) {
+                free(tinfo);
+                return 0;   //not found
+            }
+            c++;
+            continue;
+        }
+        //pierwsze pole - nazwy
+        char *header = strsep(&c, ":");
+        while(header!=NULL) {
+            char *tname = strsep(&header, "|");
+//            printf("Name in db: \'%s\', looking for \'%s\'\n", tname, name);
+            if(!strcmp(name, tname)) { //trafilismy
+                _tgetent(c);
+                free(tinfo);
+//                printf("Found!\n");
+                return 1;
+            }
+        }
+        //to nie ten rekord -> przewijamy
+        while(c!=NULL) {
+            char *newc = strchr(c, '\n');
+            if(!newc) {
+                free(tinfo);
+                return 0;
+            }
+            c = newc;
+            if(c>tinfo && c[-1] == '\\') //escaped \n
+                continue;
+            break;
+        }
+    }
+    free(tinfo);
+    return 0;
 }
 
 int
 tgetflag(char id[2])
 {
-    return ERR;
+    char **tc = _termdesc;
+    while(*tc) {
+        if((*tc)[0] == id[0] &&
+           (*tc)[1] == id[1])
+            return 1;
+        tc++;
+    }
+    return 0;
 }
 
 int
 tgetnum(char id[2])
 {
-    return ERR;
+    char **tc = _termdesc;
+    while(*tc) {
+        if((*tc)[0] == id[0] &&
+           (*tc)[1] == id[1] &&
+           (*tc)[2] == '#') 
+            return atoi(&(*tc)[3]);
+        tc++;
+    }
+    return -1;
 }
 
 char *
 tgetstr(char id[2], char **area)
 {
+    char **tc = _termdesc;
+    while(*tc) {
+        if((*tc)[0] == id[0] &&
+           (*tc)[1] == id[1] &&
+            (*tc)[2] == '=')
+            return &(*tc)[3];
+        tc++;
+    }
     return NULL;
 }
 
@@ -36,5 +194,7 @@ tgoto(char *cap, int col, int row)
 
 int tputs(const char *str, int affcnt, int (*putfunc)(int))
 {
+    for(int i=0; str[i]; i++)
+        putfunc(str[i]);
     return 0;
 }

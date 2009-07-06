@@ -237,7 +237,7 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
         case TCGETS: {
             termios_t *tconf = (termios_t*)param;
             int x = spltty();
-            if((err = copyout(tconf, &tty->t_conf, sizeof(termios_t)))) {
+            if((err = copyout(tconf, &tty->t_conf, sizeof(termios_t)))<0) {
                 splx(x);
                 return err;
             }
@@ -248,7 +248,7 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
             termios_t *tconf = (termios_t*)param;
             err=copyin(&tty->t_conf, tconf, sizeof(termios_t));
             splx(x);
-            if(err)
+            if(err < 0)
                 return err;
             break;
         }
@@ -256,7 +256,6 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
             ///@todo testy uprawnieñ
             if(curthread->thr_proc->p_ctty != tty)
                 return -ENOTTY;
-            
             tty->t_group = (pid_t) param;
             break;
         case TIOCGPGRP:

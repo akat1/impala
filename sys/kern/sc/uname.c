@@ -50,7 +50,10 @@ sc_uname(thread_t *t, syscall_result_t *r, uname_args_t *args)
     str_cpy(uname.release, IMPALA_RELEASE);
     str_cpy(uname.version, IMPALA_VERSION);
     str_cpy(uname.machine, IMPALA_MACHINE);
-    return copyout(args->name, &uname, sizeof(uname));
+    int err = copyout(args->name, &uname, sizeof(uname));
+    if(err < 0)
+        return err;
+    return 0;
 }
 
 

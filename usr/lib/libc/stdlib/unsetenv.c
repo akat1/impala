@@ -31,6 +31,7 @@ unsetenv(const char *name)
             *la = NULL;
             return 0;
         }
+        e++;
     }
     return 0;
 }

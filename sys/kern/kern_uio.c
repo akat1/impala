@@ -107,7 +107,7 @@ uio_move(void *_buf, size_t len, uio_t *uio)
             } else {
                 e = copyin(buf, iov->iov_base, xfer);
             }
-            if (e) return -1;
+            if (e < 0) return -1;
         }
         iov->iov_base += xfer;
         iov->iov_len -= xfer;
