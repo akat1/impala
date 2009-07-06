@@ -6,7 +6,8 @@ GDB?=gdb
 
 DISTDIR=output/dist
 SPECDIR=output/impala
-PROG_BIN=\
+PROG_BIN=cat ls ps sh mkdir
+PROG_BINX=\
     cat\
     ls\
     mkdir\
@@ -17,7 +18,7 @@ PROG_BIN=\
     test\
     truncate\
     uname\
-#    vttest
+    vttest
 
 PROG_SBIN=\
     init\
@@ -39,7 +40,7 @@ run: build-image
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
-	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala
+	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala output/dist/var/tmp
 	cp COPYRIGHT ${DISTDIR}/
 #	cp nvi ${DISTDIR}/bin/nvi
 	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
@@ -50,6 +51,8 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
+	cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
+	cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
 	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar
 

@@ -12,6 +12,7 @@ static int years[] = {
     365, 366
 };
 
+#define LEAP(y) (y)%4
 struct tm *
 localtime_r(const time_t *t, struct tm *buf)
 {

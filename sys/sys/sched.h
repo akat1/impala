@@ -47,7 +47,7 @@ void sched_insert(thread_t *thr);
 void sched_remove(thread_t *thr);
 
 void sched_unlock_and_wait(mutex_t *m);
-#define SCHEED_WAIT(d) sched_wait(__FILE__,__func__,__LINE__, (d))
+#define SCHED_WAIT(d) sched_wait(__FILE__,__func__,__LINE__, (d))
 void sched_wait(const char *fl, const char *fn, int l, const char *d);
 void sched_wakeup(thread_t *n);
 

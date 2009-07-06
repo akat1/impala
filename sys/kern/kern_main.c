@@ -133,8 +133,7 @@ start_init_process()
             panic("Cannot execute init process");
             break;
     }
-    while (1)
-        sched_yield();
+    SCHED_WAIT("kmain");
 
 }
 
