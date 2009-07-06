@@ -121,7 +121,8 @@ start_init_process()
             panic("Cannot execute init process");
             break;
     }
-    while (1);
+    while (1)
+        sched_yield();
 
 }
 
@@ -147,7 +148,8 @@ void idlefunc(void*);
 void
 idlefunc(void *a)
 {
-    while(1);
+    while(1)
+        sched_yield();
 }
 
 kthread_t idle;

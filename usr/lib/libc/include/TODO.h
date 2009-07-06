@@ -4,9 +4,5 @@
 
 // `_ctime'
 // `_gettimeofday'
-// `_mkstemp'
-// `_mmap'
-// `_munmap'
 // `_system'
 // `_time'
-// `_ttyname'

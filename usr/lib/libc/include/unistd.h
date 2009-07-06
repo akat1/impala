@@ -79,7 +79,7 @@ unsigned int   sleep(unsigned int);
 //long         sysconf(int);
 pid_t        tcgetpgrp(int);
 int          tcsetpgrp(int, pid_t);
-//char        *ttyname(int);
+char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
 int          eaccess(const char *pathname, int mode);    //chc±, to dajemy
 mode_t       getmode(const void *set, mode_t omode);

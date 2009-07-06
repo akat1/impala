@@ -62,6 +62,7 @@ SYS thr_destroy
 SYS thr_cancel
 SYS thr_getid
 SYS thr_getarg
+SYS ttyname
 SYS sched_yield
 SYS sbrk
 SYS signal

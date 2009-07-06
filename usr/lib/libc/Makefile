@@ -169,6 +169,7 @@ SRCS=\
     unistd/read.c\
     unistd/tcgetpgrp.c\
     unistd/tcsetpgrp.c\
+    unistd/ttyname.c\
     unistd/umask.c\
     unistd/unlink.c\
     unistd/vfork.c\
