@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio_private.h>
 
 int
 feof(FILE *f)

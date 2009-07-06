@@ -109,6 +109,7 @@ SRCS=\
     sys/getmountinfo.c\
     sys/uname.c\
     sys/mkdir.c\
+    sys/writev.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
     sysvipc/msgget.c\
@@ -125,12 +126,14 @@ SRCS=\
     thr/thr_getarg.c\
     thr/thr_getid.c\
     time/nanosleep.c\
+    unistd/access.c\
     unistd/chdir.c\
     unistd/chown.c\
     unistd/close.c\
     unistd/dup.c\
     unistd/dup2.c\
     unistd/eaccess.c\
+    unistd/execl.c\
     unistd/execve.c\
     unistd/fstat.c\
     unistd/getdents.c\
@@ -167,6 +170,7 @@ SRCS=\
     unistd/tcgetpgrp.c\
     unistd/tcsetpgrp.c\
     unistd/umask.c\
+    unistd/unlink.c\
     unistd/vfork.c\
     unistd/write.c\
     unistd/getopt.c\

@@ -71,3 +71,4 @@ SYS sigreturn
 SYS getprocinfo
 SYS getmountinfo
 SYS uname
+SYS writev

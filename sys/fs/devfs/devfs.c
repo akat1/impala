@@ -382,6 +382,7 @@ devfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
 }
 
 devfs_node_t *devfs_rootinode = NULL;
+vfs_t *devfs_vfs = NULL;
 
 //powiadomienie vfs o istnieniu tego fs
 void
@@ -410,7 +411,7 @@ devfs_rootvnode()
     if(!devfs_rootinode)
         return NULL;
     vnode_t *node;
-    _get_vnode(devfs_rootinode, &node, NULL); //nie pasuje mi to, NULL mo¿e byæ.
+    _get_vnode(devfs_rootinode, &node, devfs_vfs);
     return node;
 }
 
@@ -441,7 +442,11 @@ devfs_mount(vfs_t *fs)
 {
     devfs_data_t *devfs = kmem_zalloc(sizeof(devfs_data_t), KM_SLEEP);
     KASSERT(devfs!=NULL);
-    devfs->rootvnode = NULL;
+    devfs->rootvnode = devfs_rootvnode();
+    if(!devfs_vfs) {
+        devfs_vfs = fs;
+        devfs->rootvnode->v_vfs = fs;
+    }
     fs->vfs_private = devfs;
     return 0;
 }

@@ -7,5 +7,5 @@
 int
 access(const char *fname, int mode)
 {
-    return syscall(SYS_access, fname, (mode&15) | REAL);
+    return syscall(SYS_access, fname, (mode&15) | __REAL);
 }

@@ -301,6 +301,7 @@ fatfs_node_getv(fatfs_node_t *node)
         return node->vnode;
     }
     node->vnode = vnode_alloc();
+    node->vnode->v_vfs = node->fatfs->vfs;
     node->vnode->v_ops = &fatfs_node_ops;
     node->vnode->v_private = node;
     switch (node->type) {

@@ -27,54 +27,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: aout.h 509 2009-06-28 04:16:11Z wieczyk $
  */
-#ifndef __SYS_UIO_H
-#define __SYS_UIO_H
 
-#ifdef __KERNEL
+#ifndef __SYS_LIMITS_H
+#define __SYS_LIMITS_H
 
-/*
- * Poniewa¿ iovec jest standardowym typem na UNIXach to istnieje
- * prawdobieñstwo, ¿e jaka¶ aplikacja sama sobie zdefiniuje iovec_t.
- * Zatem nie umieszczamy tego typu w sys/types.h
- *      -- wieczyk
- */
-typedef struct iovec iovec_t;
-enum UIO_SPACE {
-    UIO_USERSPACE,
-    UIO_SYSSPACE
-};
-
-enum UIO_OPER {
-    UIO_READ,
-    UIO_WRITE
-};
-
-/// wej¶cie-wyj¶cie
-struct uio {
-    iovec_t    *iovs;       ///< tablica buforów
-    size_t      iovcnt;     ///< ilo¶c buforów w tablicy
-    int         space;      ///< przestrzeñ UIO_SPACE
-    int         oper;       ///< operacja UIO_OPER
-    size_t      size;       ///< rozmiar
-    size_t      resid;      ///< ilo¶æ pozosta³ych danych
-    off_t       offset;     ///< przesuniêcie
-};
-
-int uio_move(void *dstbuf, size_t len, uio_t *uio);
+#define FILENAME_MAX 4096
+#define PATH_MAX     4096
+#define CHAR_BIT        8
+#define IOV_MAX      1024
 
 #endif
-
-struct iovec {
-    void    *iov_base;
-    size_t  iov_len;
-};
-
-ssize_t readv(int, const struct iovec *, int);
-ssize_t writev(int, const struct iovec *, int);
-
-
-#endif
-
 

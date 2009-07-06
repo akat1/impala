@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <stdio.h>
+#include <stdio_private.h>
 #include <errno.h>
 
 long

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio_private.h>
 
 int
 setvbuf(FILE *f, char *b, int mode, size_t size)

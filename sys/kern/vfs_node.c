@@ -199,11 +199,12 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             (path->now)++;
             if(*(path->now) == '.') {
                 (path->now)++;
-                if(*(path->now) == '/') {
+                if(*(path->now) == '/' || *(path->now) == '\0') {
                     //idziemy w górê..
                     if(cur->v_flags & VNODE_FLAG_ROOT) {
                         tmp = cur->v_vfs->vfs_mpoint;
                         if(tmp!=NULL) {// to nie jest korzeñ
+                            vref(tmp);
                             vrele(last);
                             last = cur;
                             cur = tmp;

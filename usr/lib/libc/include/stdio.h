@@ -2,7 +2,6 @@
 #define __STDIO_H
 
 #include <sys/types.h>
-#include <sys/list.h>
 
 typedef int fpos_t;
 
@@ -16,20 +15,7 @@ typedef int fpos_t;
 #define NULL (void*)0
 #define EOF (-1)
 
-struct FILE {
-    int      fd;
-    void    *cookie;
-    int    (*readfn)(void *, char *, int);
-    int    (*writefn)(void*, const char *, int);
-    fpos_t (*seekfn)(void *, fpos_t, int);
-    int    (*closefn)(void *);
-    int      status;
-    int      err;
-    char    *buf;
-    size_t   buf_size;
-    size_t   inbuf;
-    list_node_t L_open_files;
-};
+struct FILE;
 typedef struct FILE FILE;
 
 
