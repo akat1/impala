@@ -42,7 +42,6 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
 	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala output/dist/var/tmp
 	cp COPYRIGHT ${DISTDIR}/
-#	cp nvi ${DISTDIR}/bin/nvi
 	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
 	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
 	cp usr/etc/rc.* ${DISTDIR}/etc/
@@ -52,7 +51,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
 	cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
-#	cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
+	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
 	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar
 

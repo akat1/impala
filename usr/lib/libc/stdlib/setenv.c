@@ -32,6 +32,7 @@ setenv(const char *name, const char *value, int overwrite)
             *e = new_entry; //co ze star± informacj±?
             return 0;
         }
+        e++;
     }
     //ok, pusto..
     char *new_entry = get_espace(dlen);
