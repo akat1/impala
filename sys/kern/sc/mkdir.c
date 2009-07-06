@@ -47,16 +47,43 @@ sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
 {
     vnode_t *vp;
     int err = 0;
+    char path[PATH_MAX];
+    if((err = copyinstr(path, args->name, PATH_MAX)))
+        return err;
     proc_t *p = t->thr_proc;
+    vnode_t *parent;
+    if((err = vfs_lookup_parent(p->p_curdir, &parent, path, t))) {
+        kprintf("No parent.\n");
+        return err;
+    }
+    if((err = VOP_ACCESS(parent, W_OK, p->p_cred))) {
+        kprintf("No access\n");
+        vrele(parent);
+        return err;
+    }
+    char *bname = path;
+    for(int i=str_len(path)-1; i>=0; i--) {
+        if(path[i]!='/')
+            break;
+        else
+            path[i]='\0';
+    }
+    for(int i=0; i<PATH_MAX; i++) {
+        if(!path[i])
+            break;
+        if(path[i] == '/')
+            bname = &path[i+1];
+    }
     vattr_t a;
     mem_zero(&a, sizeof(a));
     a.va_type = VNODE_TYPE_DIR;
     a.va_mode = args->m & ~(p->p_umask) & 0777;
     a.va_uid = p->p_cred->p_uid;
     a.va_gid = p->p_cred->p_gid;
-    if((err = VOP_MKDIR(p->p_curdir, &vp, args->name, &a)))
+    if((err = VOP_MKDIR(parent, &vp, bname, &a)))
         return err;
     vrele(vp);
+    vrele(parent);
     return 0;
 }
 

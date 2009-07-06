@@ -134,8 +134,13 @@ _last_component(lkp_state_t *st)
 {
     const char *cur = st->now;
     while(*cur) {
-        if(*(cur++) == '/')
-            return FALSE;
+        if(*(cur++) == '/') {
+            while(*cur) {
+                if(*(cur++) != '/')
+                    return FALSE;
+            }
+            return TRUE;
+        }
     }
     return TRUE;
 }
