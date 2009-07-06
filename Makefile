@@ -3,8 +3,29 @@ IMAGE_FILE=image/floppy.img
 IMAGE_FILE_=image/_floppy.img
 FLOPPY_DEV?=/dev/fd0
 GDB?=gdb
+
 DISTDIR=output/dist
 SPECDIR=output/impala
+PROG_BIN=cat mkdir sh truncate ls
+PROG_BINX=\
+    cat\
+    ls\
+    mkdir\
+    minigzip\
+    ps\
+    sh\
+    tar\
+    test\
+    truncate\
+    uname\
+    vttest
+
+PROG_SBIN=\
+    init\
+    login\
+    mount\
+    ttyvrun
+
 .PHONY: all build build-image run init
 
 all: build
@@ -21,27 +42,16 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
 	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala
 	cp COPYRIGHT ${DISTDIR}/
-	cp usr/sbin/init/init ${DISTDIR}/sbin/init
-	cp usr/sbin/ttyvrun/ttyvrun ${DISTDIR}/sbin/ttyvrun
-	cp usr/sbin/mount/mount ${DISTDIR}/sbin/mount
-	cp usr/sbin/login/login ${DISTDIR}/sbin/login
-	cp usr/bin/test/test ${DISTDIR}/bin/test
-	cp usr/bin/vttest/vttest ${DISTDIR}/bin/vttest
-	cp usr/bin/sh/sh ${DISTDIR}/bin/sh
-	cp usr/bin/ls/ls ${DISTDIR}/bin/ls
-	cp usr/bin/ps/ps ${DISTDIR}/bin/ps
-	cp usr/bin/tar/tar ${DISTDIR}/bin/tar
-	cp usr/bin/minigzip/minigzip ${DISTDIR}/bin/minigzip
-	cp usr/bin/uname/uname ${DISTDIR}/bin/uname
-	cp usr/bin/cat/cat ${DISTDIR}/bin/cat
+	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
+	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/etc/profile ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cd output/dist && tar -cvf ../impala/dist.tar *
-	gzip -9 output/impala/dist.tar
+	cd output/dist && ${TAR} -cvf ../impala/syspack.tar *
+	gzip -9 output/impala/syspack.tar
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}

@@ -359,7 +359,7 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
  */
 
 enum {
-    MAX_READ_SIZE   = 10,
+    MAX_READ_SIZE   = 50,
 };
 
 struct extract_ctl {
@@ -522,7 +522,8 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
             if (ex.file) {
                 if (everb) {
                     int pr = (tsize-ex.size)*100/tsize;
-                    progressbar(pr, "%s: %s [%u%%]", aname, ex.path, pr);
+                    progressbar(pr, "%s: %s [%u%%] %u/%u", aname, ex.path, pr,
+                        (tsize-ex.size), tsize);
                 }
                 fwrite(buf, local_size , 1, ex.file);
             }
