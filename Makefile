@@ -17,7 +17,7 @@ PROG_BIN=\
     test\
     truncate\
     uname\
-    vttest
+#    vttest
 
 PROG_SBIN=\
     init\
@@ -41,6 +41,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
 	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala
 	cp COPYRIGHT ${DISTDIR}/
+#	cp nvi ${DISTDIR}/bin/nvi
 	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
 	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
 	cp usr/etc/rc.* ${DISTDIR}/etc/
@@ -49,7 +50,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cd output/dist && ${TAR} -cvf ../impala/syspack.tar *
+	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}

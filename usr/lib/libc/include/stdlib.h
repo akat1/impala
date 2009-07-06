@@ -49,6 +49,7 @@ void   *realloc(void *ptr, size_t size);
 int     setenv(const char *name, const char *value, int overwrite);
 int     unsetenv(const char *name);
 long int strtol(const char *nptr, char **endptr, int base);
+int     system(const char *command);
 void    qsort(void *base, size_t nmemb, size_t size,
                 int(*compar)(const void *, const void *));
 void   *bseach(void *key, void *base, size_t nmemb, size_t size,

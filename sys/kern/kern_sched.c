@@ -96,12 +96,13 @@ __resched(void)
    
     t = list_head(&run_queue);
     for( int i = 0 ; i < len ; i++, t = list_next(&run_queue, t) ) {
-        if ( ISSET(t->thr_flags, THREAD_USER) ) {
+        if ( ISSET(t->thr_flags, THREAD_USER)
+            && ISSET(t->thr_flags, THREAD_RUN) ) {
             /* Wyliczamy na nowo priorytet - oryginalnie wyliczano na podstawie
              * wzoru PUSER + 2 * nice + decay(cpu) - w SVR4 decay(cpy) by³o
              * równe dzieleniu przez 4 w BSD by³o to dzielenie przez
              * ¶rednie obci±¿enie systemu */
-            t->thr_proc->p_pri = 2 * t->thr_proc->p_nice + 
+            t->thr_proc->p_pri = 2 * t->thr_proc->p_nice +
                 (t->thr_proc->p_ucpu)/2;
             list_insert_head(__queue(t->thr_proc->p_pri), t);
             if ( first_not_empty > t->thr_proc->p_pri/SCHED_PQ )
@@ -111,7 +112,8 @@ __resched(void)
 
     t = list_head(&run_queue);
     for(int i = 0 ; i < len ; i++, t = list_next(&run_queue, t) ) {
-        if ( !(ISSET(t->thr_flags, THREAD_USER)) )
+        if ( !(ISSET(t->thr_flags, THREAD_USER))
+            || ISUNSET(t->thr_flags, THREAD_RUN) )
             list_insert_head(&sched_queue[first_not_empty], t);
     }
 
@@ -140,7 +142,7 @@ sched_init()
  * Podprogram planisty.
  *
  * Procedura jest uruchamiana przez program obs³ugi przerwania
- * zegara. Odlicza odpowiedni kwant czasu i zmienia kontekst.
+ * zegara. Odlicza odpowiedni kwant czasu i wyzwala zmiane kontekstu.
  */
 
 void

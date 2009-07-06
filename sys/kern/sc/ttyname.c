@@ -66,7 +66,8 @@ sc_ttyname(thread_t *t, syscall_result_t *r, ttyname_args_t *args)
         frele(file);
         return -ERANGE;
     }
-    str_ncpy(buf, name, len);
+//    str_ncpy(buf, name, len);
+    snprintf(buf, len, "/dev/%s", name);
     frele(file);
     return 0;
 }

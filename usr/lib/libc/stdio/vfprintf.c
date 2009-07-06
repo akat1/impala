@@ -48,6 +48,14 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                         pad_to_right = FALSE;
                         fmt++;
                         break;
+                    case '*':
+                        field_width = va_arg(ap, int);
+                        fmt++;
+                        if(field_width<0) {
+                            field_width=-field_width;
+                            pad_to_right = FALSE;
+                        }
+                        break;
                     case '.':
                     case '0':
                         if(field_width == 0)

@@ -1,0 +1,715 @@
+cscope 15 $HOME/Desktop/nvi-1.79/build               0000004003
+	@acconfig.h
+
+4 #unde‡
+ssize_t
+
+
+7 #unde‡
+DEBUG
+
+
+10 #unde‡
+HAVE_BROKEN_GETTIMEOFDAY
+
+
+13 #unde‡
+HAVE_BROKEN_VDISABLE
+
+
+16 #unde‡
+HAVE_BSD_CURSES
+
+
+19 #unde‡
+HAVE_CURSES_ADDNSTR
+
+
+22 #unde‡
+HAVE_CURSES_BEEP
+
+
+25 #unde‡
+HAVE_CURSES_FLASH
+
+
+28 #unde‡
+HAVE_CURSES_IDLOK
+
+
+31 #unde‡
+HAVE_CURSES_KEYPAD
+
+
+34 #unde‡
+HAVE_CURSES_NEWTERM
+
+
+37 #unde‡
+HAVE_CURSES_SETUPTERM
+
+
+40 #unde‡
+HAVE_CURSES_TIGETSTR
+
+
+43 #unde‡
+HAVE_DB_HASH_OPEN
+
+
+46 #unde‡
+HAVE_FTRUNCATE_CHSIZE
+
+
+49 #unde‡
+HAVE_FTRUNCATE_FTRUNCATE
+
+
+52 #unde‡
+HAVE_LOCK_FCNTL
+
+
+55 #unde‡
+HAVE_LOCK_FLOCK
+
+
+58 #unde‡
+HAVE_PERL_INTERP
+
+
+61 #unde‡
+HAVE_PERL_5_003_01
+
+
+64 #unde‡
+HAVE_REVOKE
+
+
+67 #unde‡
+HAVE_STRSEP
+
+
+70 #unde‡
+HAVE_SYS_MMAN_H
+
+
+73 #unde‡
+HAVE_SYS_SELECT_H
+
+
+76 #unde‡
+HAVE_SYS5_PTY
+
+
+79 #unde‡
+HAVE_TCL_INTERP
+
+
+82 #unde‡
+SPRINTF_RET_CHARPNT
+
+
+	@config.h
+
+11 
+	#HAVE_ST_BLKSIZE
+ 1
+
+	)
+
+29 
+	#STDC_HEADERS
+ 1
+
+	)
+
+57 
+	#HAVE_CURSES_ADDNSTR
+ 1
+
+	)
+
+66 
+	#HAVE_CURSES_IDLOK
+ 1
+
+	)
+
+84 
+	#HAVE_FTRUNCATE_FTRUNCATE
+ 1
+
+	)
+
+120 
+	#HAVE_GETHOSTNAME
+ 1
+
+	)
+
+123 
+	#HAVE_GETOPT
+ 1
+
+	)
+
+126 
+	#HAVE_GETPAGESIZE
+ 1
+
+	)
+
+129 
+	#HAVE_MEMCHR
+ 1
+
+	)
+
+132 
+	#HAVE_MEMCPY
+ 1
+
+	)
+
+135 
+	#HAVE_MEMMOVE
+ 1
+
+	)
+
+138 
+	#HAVE_MEMSET
+ 1
+
+	)
+
+150 
+	#HAVE_SETENV
+ 1
+
+	)
+
+153 
+	#HAVE_SNPRINTF
+ 1
+
+	)
+
+156 
+	#HAVE_STRDUP
+ 1
+
+	)
+
+159 
+	#HAVE_STRERROR
+ 1
+
+	)
+
+162 
+	#HAVE_STRPBRK
+ 1
+
+	)
+
+165 
+	#HAVE_STRSEP
+ 1
+
+	)
+
+168 
+	#HAVE_STRTOL
+ 1
+
+	)
+
+171 
+	#HAVE_STRTOUL
+ 1
+
+	)
+
+174 
+	#HAVE_UNSETENV
+ 1
+
+	)
+
+177 
+	#HAVE_VALLOC
+ 1
+
+	)
+
+180 
+	#HAVE_VSNPRINTF
+ 1
+
+	)
+
+	@pathnames.h
+
+3 #i‚def 
+_PATH_BSHELL
+
+
+4 
+	#_PATH_BSHELL
+ "/bö/sh"
+
+	)
+
+7 #i‚def 
+_PATH_EXRC
+
+
+8 
+	#_PATH_EXRC
+ ".exrc"
+
+	)
+
+11 #i‚def 
+_PATH_MSGCAT
+
+
+12 
+	#_PATH_MSGCAT
+ "./"
+
+	)
+
+15 #i‚def 
+_PATH_NEXRC
+
+
+16 
+	#_PATH_NEXRC
+ ".√xrc"
+
+	)
+
+19 #i‚def 
+_PATH_PRESERVE
+
+
+20 
+	#_PATH_PRESERVE
+ "/v¨/tmp/vi.ªcovî"
+
+	)
+
+23 #i‚de‡
+_PATH_SYSV_PTY
+
+
+24 
+	#_PATH_SYSV_PTY
+ "/dev/±mx"
+
+	)
+
+27 #i‚def 
+_PATH_SENDMAIL
+
+
+28 
+	#_PATH_SENDMAIL
+ "/u§/bö/£ndmaû"
+
+	)
+
+31 #i‚def 
+_PATH_SYSEXRC
+
+
+32 
+	#_PATH_SYSEXRC
+ "/ëc/vi.exrc"
+
+	)
+
+35 #i‚def 
+_PATH_TAGS
+
+
+36 
+	#_PATH_TAGS
+ "ègs"
+
+	)
+
+39 #i‚def 
+_PATH_TMP
+
+
+40 
+	#_PATH_TMP
+ "/tmp"
+
+	)
+
+43 #i‚def 
+_PATH_TTY
+
+
+44 
+	#_PATH_TTY
+ "/dev/ây"
+
+	)
+
+	@port.h
+
+7 #i‚de‡
+__BIT_TYPES_DEFINED__
+
+
+8 
+	#__BIT_TYPES_DEFINED__
+
+
+	)
+
+26 #unde‡
+__P
+
+
+27 #i‡
+deföed
+(
+__STDC__
+Ë|| deföed(
+__˝lu•lus
+)
+
+28 
+	#__P
+(
+¥Ÿos
+Ë¥Ÿo†
+
+	)
+
+30 
+	#__P
+(
+¥Ÿos
+Ë(Ë
+
+	)
+
+38 #ifde‡
+HAVE_BROKEN_GETTIMEOFDAY
+
+
+39 
+	#gëtimeofday
+(
+tv
+, 
+tz
+Ë
+	`gëtimeofday
+—v)
+
+	)
+
+47 #i‚de‡
+HAVE_SYS_MMAN_H
+
+
+48 
+	#MAP_SHARED
+ 1
+
+	)
+
+49 
+	#MAP_PRIVATE
+ 2
+
+	)
+
+50 
+	#PROT_READ
+ 0x1
+
+	)
+
+51 
+	#PROT_WRITE
+ 0x2
+
+	)
+
+52 
+	#PROT_EXEC
+ 0x4
+
+	)
+
+59 #i‚de‡
+STDERR_FILENO
+
+
+60 
+	#STDIN_FILENO
+ 0
+
+	)
+
+61 
+	#STDOUT_FILENO
+ 1
+
+	)
+
+62 
+	#STDERR_FILENO
+ 2
+
+	)
+
+69 #i‚de‡
+SEEK_END
+
+
+70 
+	#SEEK_SET
+ 0
+
+	)
+
+71 
+	#SEEK_CUR
+ 1
+
+	)
+
+72 
+	#SEEK_END
+ 2
+
+	)
+
+80 #ifde‡
+HAVE_BROKEN_VDISABLE
+
+
+81 #unde‡
+_POSIX_VDISABLE
+
+
+82 
+	#_POSIX_VDISABLE
+ (()'\377')
+
+	)
+
+89 #i‚de‡
+_POSIX_VDISABLE
+
+
+90 
+	#_POSIX_VDISABLE
+ 0
+
+	)
+
+97 #i‚def 
+TCSASOFT
+
+
+98 
+	#TCSASOFT
+ 0
+
+	)
+
+105 #i‚de‡
+MAXPATHLEN
+
+
+106 #ifde‡
+PATH_MAX
+
+
+107 
+	#MAXPATHLEN
+ 
+PATH_MAX
+
+
+	)
+
+109 
+	#MAXPATHLEN
+ 1024
+
+	)
+
+117 #i‚def 
+MAX
+
+
+118 
+	#MAX
+(
+_a
+,
+_b
+Ë((_a)<(_b)?(_b):(_a))
+
+	)
+
+120 #i‚def 
+MIN
+
+
+121 
+	#MIN
+(
+_a
+,
+_b
+Ë((_a)<(_b)?(_a):(_b))
+
+	)
+
+128 
+	#DB
+ 
+L__DB
+
+
+	)
+
+129 #unde‡
+pgno_t
+
+
+130 
+	#pgno_t
+ 
+L__db_pgno_t
+
+
+	)
+
+136 #i‚de‡
+O_EXLOCK
+
+
+137 
+	#O_EXLOCK
+ 0
+
+	)
+
+140 #i‚de‡
+O_SHLOCK
+
+
+141 
+	#O_SHLOCK
+ 0
+
+	)
+
+148 #i‚de‡
+EFTYPE
+
+
+149 
+	#EFTYPE
+ 
+EINVAL
+
+
+	)
+
+156 #i‚def 
+_POSIX2_RE_DUP_MAX
+
+
+157 
+	#_POSIX2_RE_DUP_MAX
+ 255
+
+	)
+
+165 #i‚def 
+WCOREDUMP
+
+
+166 
+	#WCOREDUMP
+(
+a
+Ë0
+
+	)
+
+173 #i‡!
+deföed
+(
+LITTLE_ENDIAN
+)
+
+174 
+	#LITTLE_ENDIAN
+ 1234
+
+	)
+
+176 #i‡!
+deföed
+(
+BIG_ENDIAN
+)
+
+177 
+	#BIG_ENDIAN
+ 4321
+
+	)
+
+179 #i‡!
+deföed
+(
+BYTE_ORDER
+)
+
+180 #i‡
+WORDS_BIGENDIAN
+ == 1
+
+181 
+	#BYTE_ORDER
+ 
+BIG_ENDIAN
+
+
+	)
+
+183 
+	#BYTE_ORDER
+ 
+LITTLE_ENDIAN
+
+
+	)
+
+	@
+1
+.
+0
+4
+39
+acconfig.h
+config.h
+pathnames.h
+port.h

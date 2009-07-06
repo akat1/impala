@@ -58,6 +58,7 @@ SRCS=\
     stdlib/setenv.c\
     stdlib/strtol.c\
     stdlib/strtoul.c\
+    stdlib/system.c\
     stdlib/unsetenv.c\
     string/index.c\
     string/rindex.c\

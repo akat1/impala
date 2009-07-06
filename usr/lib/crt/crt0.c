@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sys/list.h>
 #include <string.h>
+#include <stdio_private.h>
 
 int syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
