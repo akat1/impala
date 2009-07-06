@@ -58,6 +58,18 @@ static void print_welcome(void);
 static void init_kernel(void);
 static void prepare_root(void);
 static void start_init_process(void);
+static void idlefunc(void*);
+
+void
+idlefunc(void *a)
+{
+    while(1)
+        sched_yield();
+}
+
+static kthread_t idle;
+
+
 
 void
 kmain()
@@ -144,15 +156,6 @@ print_welcome()
     kprintf("kernel loaded at: %p+%u kB\n", &kernel_start,
         ((uintptr_t)&kernel_end - (uintptr_t)&kernel_start)/1024);
 }
-void idlefunc(void*);
-void
-idlefunc(void *a)
-{
-    while(1)
-        sched_yield();
-}
-
-kthread_t idle;
 
 void
 init_kernel()

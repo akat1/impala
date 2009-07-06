@@ -92,6 +92,7 @@ typedef struct ipcmsq ipcmsq_t;
 typedef struct biohash biohash_t;
 typedef struct sigaction sigaction_t;
 typedef struct callout callout_t;
+typedef struct timeval timeval_t;
 #include <sys/vm/vm_types.h>
 #endif
 

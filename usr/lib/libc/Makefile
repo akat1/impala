@@ -107,6 +107,7 @@ SRCS=\
     sys/sys_siglist.c\
     sys/getprocinfo.c\
     sys/getmountinfo.c\
+    sys/gettimeofday.c\
     sys/uname.c\
     sys/mkdir.c\
     sys/writev.c\
@@ -125,7 +126,11 @@ SRCS=\
     thr/thr_destroy.c\
     thr/thr_getarg.c\
     thr/thr_getid.c\
+    time/ctime.c\
+    time/localtime.c\
+    time/localtime_r.c\
     time/nanosleep.c\
+    time/time.c\
     unistd/access.c\
     unistd/chdir.c\
     unistd/chown.c\

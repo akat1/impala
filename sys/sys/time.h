@@ -46,7 +46,14 @@ struct timeval
     time_t tv_sec;
     int tv_usec;
 };
-typedef struct timeval timeval_t;
 
+struct timezone {
+    int     tz_minuteswest;
+    int     tz_dsttime; 
+};
+
+#ifndef __KERNEL
+int gettimeofday(struct timeval *, struct timezone *);
+#endif
 
 #endif

@@ -39,7 +39,7 @@ struct XXX_args {
     int fd;
 };
 
-int sc_XXX(thread_t *p, syscall_result_t *r, XXX_args_t *args);
+int sc_XXX(thread_t *, syscall_result_t *, XXX_args_t *);
 
 int
 sc_XXX(thread_t *t, syscall_result_t *r, XXX_args_t *args)

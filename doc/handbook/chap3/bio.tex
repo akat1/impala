@@ -29,7 +29,7 @@
 %
 % $Id$
 
-\section{Buforowane wej¶cie-wyj¶cie (BIO).} \label{bio}
+\section{Buforowane wej¶cie-wyj¶cie.} \label{bio}
 
 Poniewa¿ urz±dzenia dyskowe s± o~wiele wolniejsze ni¿ procesor komputera
 to~op³aca siê zapamiêtywaæ w~pamiêci komputera czê¶c danych z~urz±dzenia.
@@ -38,12 +38,7 @@ je¿eli oka¿e siê, ¿e porz±dane dane z~urz±dzenia s± ju¿ w~pamiêci.
 Za~takie buforowanie operacji na~urz±dzeniach blokowych
 (dyskowych) odpowiedzialny jest mechanizm buforowanego wej¶cia-wyj¶cia.
 
-System pos³uguje siê nag³ówkami buforów (\texttt{iobuf\_t}).
-System przy rozruchu przydziela ustalon± liczbê takich nag³ówków
-(parametr \texttt{iobufs}), a ka¿dy z~nich mo¿e byæ przypisany do~urz±dzenia
-oraz numeru bloku(sektoru). Ustalona ilo¶c nag³ówków jest przydzialana przez
-system podczas rozruchu (parametr j±dra \texttt{iobufs}) systemu. W celu
-przyspieszenia bufory s± trzymane w tablicy haszuj±cej.
+
 
 \subsection{Tablica haszuj±ca.}
 
@@ -99,8 +94,7 @@ jest nieprawid³owy. W tym przypadku równie¿ blokuje obecny w±tek na~czas
 wykonania operacji przez sterownik.
 
 Otrzymany nag³ówek nale¿y zwróciæ do mechanizmu za~pomoc± procedury
-\texttt{bio\_release} lub \texttt{bio\_write}, gdzie druga, jak wskazuje
-nazwa, wysy³a dane z~buforu do~urz±dzenia.
+\texttt{bio\_release}.
 
 Procedura \texttt{bio\_wait} s³u¿y do~oczekiwania zakoñczenia operacji
 wej¶cia-wyj¶cia wykorzystuj±cej dany bufor, jest wewnêtrznie wykorzystywana

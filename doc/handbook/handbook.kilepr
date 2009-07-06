@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0
-lastDocument=chap2/run.tex
+lastDocument=chap3/dev.tex
 masterDocument=index.tex
 name=Impala Handbook
 pkg_extIsRegExp=false
@@ -26,10 +26,10 @@ order=6
 
 [item:chap1/chap1.tex]
 archive=true
-column=22
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=31
+line=41
 open=true
 order=9
 
@@ -47,16 +47,16 @@ archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=69
+line=60
 open=true
 order=13
 
 [item:chap2/shell.tex]
 archive=true
-column=0
+column=3
 encoding=ISO 8859-2
 highlight=LaTeX
-line=42
+line=41
 open=true
 order=12
 
@@ -65,25 +65,34 @@ archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=94
+line=40
 open=true
 order=2
 
 [item:chap3/chap3.tex]
 archive=true
-column=0
+column=16
 encoding=ISO 8859-2
 highlight=LaTeX
-line=33
+line=35
 open=true
 order=8
 
-[item:chap3/int.tex]
+[item:chap3/dev.tex]
 archive=true
-column=0
+column=23
 encoding=ISO 8859-2
 highlight=LaTeX
-line=0
+line=31
+open=true
+order=14
+
+[item:chap3/int.tex]
+archive=true
+column=21
+encoding=ISO 8859-2
+highlight=LaTeX
+line=31
 open=true
 order=3
 
