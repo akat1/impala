@@ -40,7 +40,7 @@ run: build-image
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
-	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala output/dist/var/tmp
+	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala output/dist/var/tmp output/dist/tmp
 	cp COPYRIGHT ${DISTDIR}/
 	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
 	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
