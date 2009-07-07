@@ -48,7 +48,7 @@ urz±dzenie, widziane jako strumieñ bajtów.
 
 Ka¿dy sterownik dostarcza systemowi tak zwan± deskê rozdzielcz±
 (\texttt{devsw\_t} - \emph{device switch}), która zawiera implementacjê
-procedur obs³ugi pliku urz±dzenia. Deska rozdz. zawiera nastêpuj±ce pola:
+procedur obs³ugi pliku urz±dzenia. Deska rozdzielcza. zawiera nastêpuj±ce pola:
 \begin{itemize}
  \item \texttt{d\_open} -
 obs³uga otwarcie pliku urz±dzenia.
@@ -57,7 +57,7 @@ obs³uga otwarcie pliku urz±dzenia.
 obs³uga zamkniêcia pliku urz±dzenia.
 
  \item \texttt{d\_ioctl} -
-bs³uga poleceñ kontrolnych dla~sterownika.
+obs³uga poleceñ kontrolnych dla~sterownika.
 
  \item \texttt{d\_write} -
 obs³uga zlecenia wyj¶cie ze strumienia znakowego. mo¿e blokowaæ klienta
@@ -81,7 +81,7 @@ informacja o kategorii, do jakiej urz±dzenie nale¿y
 \end{itemize}
 
 Podzia³ na urz±dzenia znakowego i~blokowe oraz rozró¿nienie procedur
-obsluguj±cych zlecenia wej¶cia-wyj¶cia jest koniecznie ze wzglêdu na~wydajno¶æ
+obs³uguj±cych zlecenia wej¶cia-wyj¶cia jest koniecznie ze wzglêdu na~wydajno¶æ
 oraz obs³ugê tych urz±dzeñ. Na~urz±dzeniach znakowych u¿ytkownik mo¿e
 wykonywaæ te same operacje jak na plikach, poniewa¿ pliki s± równie¿ widziane
 jako strumienie znakowe. Dozwolone s± takie operacje jak przeczytanie jednego
@@ -92,7 +92,7 @@ s± one podzielone na bloki danych (sektory). St±d wszelkie transfery danych
 miêdzy pamiêci± RAM a~urz±dzeniem nie s± tak elastyczne pod~wzglêdem wielko¶ci
 jak strumienie znaków.
 
-Z~powodu tych rózniæ jednolita obs³uga wej¶cia-wyj¶cia dla~tych dwóch rodzajów
+Z~powodu tych ró¿nic jednolita obs³uga wej¶cia-wyj¶cia dla~tych dwóch rodzajów
 urz±dzeñ musia³aby emulowaæ urz±dzenia blokowe jako znakowe, co nie by³oby
 wydajne. Dziêki wyodrêbnienie oddzielnej procedury sterownik zawsze dostaje
 zlecenia, których d³ugo¶æ jest wielokrotno¶ci± d³ugo¶ci sektoru oraz mo¿e sam
@@ -103,8 +103,8 @@ urz±dzeñ, jest on emulowany za~pomoc± procedury \texttt{physio}, która
 wykorzystuje \texttt{d\_strategy}. Nale¿y zwróciæ uwagê, ¿e jest to~jedynie
 dodatkowa metoda dostêpu, przydatna zwykle programom chc±cym bezpo¶rednio
 modyfikowaæ dane na~urz±dzeniu lub ingerowaæ w~zapisany tam system plików
-(jak np programy sorawdzaj±ce powierzchniê dysku czy spójno¶c systemu plików).
-Zagadnienie wej¶cja-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
+(jak np programy sprawdzaj±ce powierzchniê dysku czy spójno¶æ systemu plików).
+Zagadnienie wej¶cia-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
 \ref{BIO}.
 
 Operacje wej¶cia-wyj¶cia na~terminalach dzia³aj± na~tej samej zasadzie
@@ -125,10 +125,10 @@ który zawiera w~sobie takie informacje jak nazwa urz±dzenia, wska¼nik
 na~prywatne dane sterownika oraz jego deskê rozdzielcz±. Jeden sterownik mo¿e
 stworzyæ wiele deskryptorów urz±dzeñ, w zale¿no¶ci od~tego ile wykryje urz±dzeñ
 które mo¿e obs³ugiwaæ. Przyk³adowo, zaimplementowany kontroler stacji dyskietek,
-je¿eli wykryje dwie stacje dyskietek w~komputrze, to tworzy odpowiednio dwa
+je¿eli wykryje dwie stacje dyskietek w~komputerze, to tworzy odpowiednio dwa
 pliki urz±dzeñ: \texttt{/dev/fd0} dla stacji \texttt{A:} oraz \texttt{/dev/fd1}
 dla stacji \texttt{B:}. System tak± stacjê dyskietek widzi jako dwa ró¿ne
-deskryptory, które wspóldziela ze sob± deskê rozdzielcz±.
+deskryptory, które wspó³dziel± ze sob± deskê rozdzielcz±.
 
 Nie wszystkie urz±dzenia w~sprzêcie komputerowym s± obs³ugiwane za~pomoc±
 tego modelu sterowników. Sterowniki niektórych urz±dzeñ mog± byæ programowane,
@@ -136,10 +136,10 @@ jako modu³y dostarczaj±ce pewn± funkcjonalno¶æ, ni¿ jako ogólnie dostêpne
 pliki urz±dzeñ. Ta uwaga dotyczy niskopoziomowych urz±dzeñ, które s±
 wykorzystywane przez j±dro do dostarczania pewnych us³ug lub do~implementacji
 innych sterowników. Udostêpnienie ich jako pliki widziane dla u¿ytkownika
-nie wnosi³oby ¿andych korzy¶ci, a doda³o trudno¶ci implementacyjnych.
+nie wnosi³oby ¿adnych korzy¶ci, a doda³o trudno¶ci implementacyjnych.
 Na przyk³ad, sterownik szyny ISA udostêpnia zbiór procedur
 \texttt{bus\_isa\_dma\_} wykorzystywanych w~ sterowniku kontrolera stacji
-dyskietek. Sterownik zegara systemowgo instaluje podprogram przerwania,
+dyskietek. Sterownik zegara systemowego instaluje podprogram przerwania,
 który przy ka¿dym tykniêciu uruchamia ogóln± obs³ugê zegara w~systemie.
 Obs³uga przerwañ sprzêtowych jest omówiona w~rozdziale \ref{INT}.
 
@@ -147,7 +147,7 @@ Obs³uga przerwañ sprzêtowych jest omówiona w~rozdziale \ref{INT}.
 \subsection{Szyna ISA.}
 
 Sterownik szyny ISA jest dostarczany przez obs³ugê architektury sprzêtu,
-jest on potrzeny w~naszym systemie poniewa¿ kontroler stacji dyskietek
+jest on potrzebny w~naszym systemie poniewa¿ kontroler stacji dyskietek
 znajduje siê na~niej. Zadaniem sterownika jest dostarczyæ procedury
 obs³uguj±ce transfery DMA.
 
@@ -160,9 +160,9 @@ Deskryptor kana³u musi zostaæ przydzielony
 za~pomoc± procedury \texttt{bus\_isa\_dma\_alloc}, a programowanie kana³ów
 odbywa siê przez \texttt{bus\_isa\_dma\_prepare}.
 Poniewa¿ te kontrolery s± star± technologi± to obs³uguj± jedynie transfery
-do~fragmentów pamiêci RAM których adres miêsci siê w~24 bitach.
+do~fragmentów pamiêci RAM których adres mie¶ci siê w~24 bitach.
 Tak± pamiêæ nie zawsze mo¿na przydzieliæ, w~szczególno¶ci po~d³u¿szej pracy
-systemu, ten probelm jest rozwi±zany przez przydzielanie sta³ych buforów
+systemu, ten problem jest rozwi±zany przez przydzielanie sta³ych buforów
 kana³om przy starcie systemu w~adresach poni¿ej 1MB
 (zobacz rysunek \ref{vm:mmap}). Po wykonaniu transferu nale¿y wykonaæ procedurê
 \texttt{bus\_isa\_dma\_finish}.
@@ -172,9 +172,62 @@ dane pomiêdzy sta³ym buforem kana³u, a~buforem danym przez klienta.
 
 \subsection{Sterownik stacji dyskietek.}
 
-Omówienie sterownika stacji dyskieteke wymaga uprzedzenia kilku wiadomo¶ci
-z~rozdzia³u \ref{BIO}.
+Omówienie sterownika stacji dyskietek wymaga uprzedzenia kilku wiadomo¶ci
+z~rozdzia³u \ref{BIO}. Jak wspomniano wcze¶niej procedura \texttt{d\_strategy}.
+s³u¿±ca do~zlecenia operacji wej¶cia-wyj¶cia, pos³uguje siê nag³ówkami buforów.
+Nag³ówki (\texttt{iobuf\_t}), zawieraj± w~sobie bufor operacji, logiczny
+numer bloku na~urz±dzeniu,d³ugo¶æ transferu oraz informacjê o kierunku
+transferu \texttt{BIO\_READ} lub \texttt{BIO\_WRITE}\footnote{wszystkie kierunku
+odnosz± siê do~podmiotu, a nie pamiêci. St±d ,,czytanie'' wszêdzie oznacza
+czytanie z~podmiotu (np urz±dzenia, pliku) do~pamiêci, a~nie czytanie z~pamiêci
+do~podmiotu.}. Sterownik informuje klientów o~zakoñczeniu operacji za~pomoc±
+procedur \texttt{bio\_done} oraz, w przypadku b³êdu, \texttt{bio\_error}.
 
+Procedura inicjalizuj±ca sterownik \texttt{fdc\_init} sprawdza w~pamiêci
+CMOS jakie s± zainstalowane stacje dyskietek i odpowiednio
+na~podstawie tych informacji tworzy pliki urz±dzeñ \texttt{fd0} i \texttt{fd1}.
+Pliki urz±dzeñ nie s± oddzielnymi instanacjami sterownika, poniewa¿ zale¿±
+od~tego samego kontrolera stacji dyskietek. Zatem procedury obs³ugi
+pliku urz±dzeñ s± pomostem do~ogólniejszego sterownika FDC (\emph{floppy disk
+controller}). W obecnej implementacji kolejka zleceñ wej¶cia-wyj¶cia jest
+wspólna dla~wszystkich stacji na~danym kontrolerze.
+
+¯adna z~procedur sterownika kontrolera nie czeka na~zakoñczenie zleconej
+przez siebie operacji. Kontroler po wykonaniu zadania informuje o~jego
+zakoñczeniu zg³aszaj±c przerwanie sprzêtowe, a podprogram jego obs³ugi
+uruchamia dalej odpowiednie procedury. Dziêki temu podej¶ciu sterownik
+dzia³a w~pe³ni asynchronicznie w~stosunku do~swoich klientów (dziêki czemu
+nie blokuje ¿adnego z nich).
+
+Implementacja procedury \texttt{d\_strategy} kolejkuje nag³ówek buforu
+w~kolejce zadañ oraz je¿eli kolejka by³a pusta to rozpoczyna obs³ugê zlecenia.
+Je¿eli kolejka nie jest pusta to kontroler wykonuje jedno ze zleceñ, po
+wykonaniu którego sam zacznie obs³ugiwaæ nastêpne.
+
+Obs³uga zlecenia jest implementowana przez procedurê \texttt{fdc\_work}, która
+w~zale¿no¶ci od~obecnego po³o¿enia g³owicy zleca sterownikowi przesuniêcie
+g³owicy lub wykonanie transferu.
+
+Zmiana po³o¿enia g³owicy jest wykonywana przez procedurê \texttt{fdc\_seek},
+która zleca to~zadanie bezpo¶rednio kontrolerowi. Po wykonaniu
+zadania jest zg³aszane przerwanie, którego obs³uga zleca wykonanie transferu.
+
+Transfer jest wykonywany przez procedurê \texttt{fdc\_io}, która
+przeprogramowuje kana³ DMA i zleca rozpoczêcie transferu kontrolerowi.
+Stacja dyskietek 1440kB mo¿e obs³u¿yæ wszystkie sektory do koñca ¶cie¿ki
+w~jednym transferze. Je¿eli jednak zlecony transfer sterownika przekracza
+granicê ¶cie¿ki to~musi zostaæ podzielony na~ mniejsze transfery czê¶ciowe.
+Obs³uga zg³oszonego przerwania, informuj±cego o zakoñczeniu operacji,
+informuje klienta sterownika o~zakoñczeniu operacji u¿ywaj±c \texttt{bio\_done}
+lub wykonuje kolejny transfer czê¶ciowy za pomoc± wy¿ej wymienionej procedury.
+
+Transfery stacji dyskietek czêsto koñcz± siê b³êdami, które przy ponownej
+próbie nie wystêpuj±. Sterownik obs³uguje to~nadaj±c ka¿demu transferowi
+czê¶ciowemu licznik prób, który je¿eli zostanie przekroczony to~operacja
+jest zakoñczona procedur± \texttt{bio\_error} z~numerem b³êdu \texttt{EIO}.
+Przy konieczno¶ci powtórzenia transferu czê¶ciowego jego d³ugo¶æ jest
+obcinana do~jednego sektora, obciête sektory bêd± rozpatrywane w~kolejnym
+transferze czê¶ciowym.
 
 \subsection{Sztuczne urz±dzenia.}
 
