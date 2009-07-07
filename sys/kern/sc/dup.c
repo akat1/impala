@@ -55,7 +55,7 @@ sc_dup(thread_t *t, syscall_result_t *r, dup_args *args)
     if ( f == NULL )
         return -EBADF;
 
-    r->result = f_fcntl(t->thr_proc->p_fd, f, F_DUPFD, 0);
+    r->result = f_fcntl(t->thr_proc->p_fd, args->fd, f, F_DUPFD, 0);
     frele(f);   // to jest nasza w³asna kopia f'a - musimy j± zwolniæ
     return -EOK;
 }

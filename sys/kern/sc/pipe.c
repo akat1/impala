@@ -64,7 +64,7 @@ sc_pipe(thread_t *t, syscall_result_t *r, pipe_args_t *args)
 
 end_err2:
     kprintf("Pipe Err. 2\n");
-    f_set(proc->p_fd, NULL, fd1);
+    f_set(proc->p_fd, NULL, fd1, FALSE);
     p_read = NULL;
 end_err:
     kprintf("Pipe Err.\n");

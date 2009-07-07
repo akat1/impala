@@ -51,7 +51,8 @@
 #define O_NONBLOCK    (1 << 8)
 #define O_NOCTTY      (1 << 9)
 #define O_CLOEXEC     (1 << 10)
-#define FD_CLOEXEC    (1 << 10)
+
+#define FD_CLOEXEC    (1)
 
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 
@@ -80,6 +81,7 @@ struct filetable {
 
 struct filetable_chunk {
     file_t      *files[FILES_PER_CHUNK];
+    bool         close_flag[FILES_PER_CHUNK];
     list_node_t L_chunks;
 };
 
@@ -103,7 +105,7 @@ int     f_alloc(proc_t *p, vnode_t  *vn, int flags, int *result);
 ssize_t f_write(file_t *fd, uio_t *u);
 ssize_t f_read(file_t *fd, uio_t *u);
 int     f_ioctl(file_t *fd, int cmd, uintptr_t param);
-int     f_fcntl(filetable_t *ft, file_t *fp, int cmd, uintptr_t param);
+int     f_fcntl(filetable_t *ft, int fd, file_t *fp, int cmd, uintptr_t param);
 int     f_truncate(file_t *f, off_t len);
 void    f_close(file_t *fd);
 off_t   f_seek(file_t *fd, off_t o, int whence);
@@ -117,7 +119,7 @@ bool frele(file_t *);
 // nie ma sensu ich dostêpniaæ moim zdaniem. // s± wykorzystywane np. w close
 // chyba, ¿e f_close by usuwa³o file z filetable...
 file_t *f_get(filetable_t *ft, int index);
-void f_set(filetable_t *ft, file_t *fd, int index);
+void f_set(filetable_t *ft, file_t *fd, int index, bool cloexec);
 
 #else /* ifdef __KERNEL */
 

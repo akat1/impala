@@ -6,10 +6,8 @@
 #include <stdarg.h>
 
 
-static char *convert_int32(char *b, int32_t arg_u32);
-static char *convert_uint32(char *b, uint32_t arg_u32);
-static char *convert_hexuint32(char *b, uint32_t arg_u32);
-static char *convert_binuint32(char *b, uint32_t arg_u32);
+static char *convert_int32(char *b, int32_t arg_u32, int base);
+static char *convert_uint32(char *b, uint32_t arg_u32, int base);
 static int from_string(FILE *str, char *b, char sep, int fw, bool to_right);
 
 enum {
@@ -92,24 +90,28 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                         break;
                     case 'u':
                         arg_u32 = va_arg(ap, uint32_t);
-                        pbuf = convert_uint32(buf, arg_u32);
+                        pbuf = convert_uint32(buf, arg_u32, 10);
                         break;
                     case 'd':
                     case 'i':
                         arg_u32 = va_arg(ap, int32_t);
-                        pbuf = convert_int32(buf, (int32_t)arg_u32);
+                        pbuf = convert_int32(buf, (int32_t)arg_u32, 10);
                         break;
                     case 'x':
                         arg_u32 = va_arg(ap, uint32_t);
-                        pbuf = convert_hexuint32(buf, arg_u32);
+                        pbuf = convert_uint32(buf, arg_u32, 16);
+                        break;
+                    case 'o':
+                        arg_u32 = va_arg(ap, uint32_t);
+                        pbuf = convert_uint32(buf, arg_u32, 8);
                         break;
                     case 'b':
                         arg_u32 = va_arg(ap, uint32_t);
-                        pbuf = convert_binuint32(buf, arg_u32);
+                        pbuf = convert_uint32(buf, arg_u32, 2);
                         break;
                     case 'p':
                         arg_u32 = va_arg(ap, uintptr_t);
-                        pbuf = convert_hexuint32(buf, arg_u32);
+                        pbuf = convert_uint32(buf, arg_u32, 16);
                         *(--pbuf) = 'x';
                         *(--pbuf) = '0';
                         break;
@@ -158,8 +160,9 @@ from_string(FILE *str, char *b, char sep, int fw,
 }
 
 char *
-convert_int32(char *buf, int32_t arg)
+convert_int32(char *buf, int32_t arg, int base)
 {
+    char digits[] = "0123456789abcdef";
     bool min = FALSE;
     buf += INTERNAL_BUF -1;
     *buf = 0;
@@ -174,8 +177,8 @@ convert_int32(char *buf, int32_t arg)
 
     while (arg>0) {
         buf--;
-        *buf = '0' + arg % 10;
-        arg /= 10;
+        *buf = digits[arg % base];
+        arg /= base;
     }
     if(min) {
         *(--buf) = '-';
@@ -184,27 +187,9 @@ convert_int32(char *buf, int32_t arg)
 }
 
 
-char *
-convert_uint32(char *buf, uint32_t arg)
-{
-    buf += INTERNAL_BUF -1;
-    *buf = 0;
-    buf[-1] = '0';
-
-    /* jezeli argument jest zerem to wychodzimy */
-    if ( arg == 0 )
-        return buf-1;
-
-    while (arg>0) {
-        buf--;
-        *buf = '0' + arg % 10;
-        arg /= 10;
-    }
-    return buf;
-}
 
 char *
-convert_hexuint32(char *buf, uint32_t arg)
+convert_uint32(char *buf, uint32_t arg, int base)
 {
     char digits[] = "0123456789abcdef";
     buf += INTERNAL_BUF -1;
@@ -217,26 +202,8 @@ convert_hexuint32(char *buf, uint32_t arg)
 
     while (arg>0) {
         buf--;
-        *buf = digits[arg % 0x10];
-        arg /= 0x10;
-    }
-    return buf;
-}
-
-char *
-convert_binuint32(char *buf, uint32_t arg)
-{
-    buf += INTERNAL_BUF -1;
-    *buf = 0;
-    buf[-1] = '0';
-    /* jezeli argument jest zerem to wychodzimy */
-    if ( arg == 0 )
-        return buf-1;
-
-    while (arg>0) {
-        buf--;
-        *buf = '0' + (arg % 2);
-        arg /= 2;
+        *buf = digits[arg % base];
+        arg /= base;
     }
     return buf;
 }

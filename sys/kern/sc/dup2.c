@@ -64,11 +64,12 @@ sc_dup2(thread_t *t, syscall_result_t *r, dup2_args *args)
     f = f_get(t->thr_proc->p_fd, args->newfd);
 
     if ( f != NULL ) {
-        f_set(t->thr_proc->p_fd, NULL, args->newfd);
+        f_set(t->thr_proc->p_fd, NULL, args->newfd, FALSE);
         f_close(f);
     }
     ///@bug tutaj kto¶ nam mo¿e ukra¶æ wolne miejsce
-    r->result = f_fcntl(t->thr_proc->p_fd, f_orig, F_DUPFD, args->newfd);
+    r->result = f_fcntl(t->thr_proc->p_fd, args->oldfd, f_orig, F_DUPFD,
+                         args->newfd);
     frele(f_orig);
     return -EOK;
 }

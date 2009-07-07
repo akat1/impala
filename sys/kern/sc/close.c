@@ -55,7 +55,7 @@ sc_close(thread_t *t, syscall_result_t *r, close_args *args)
         return -EBADF;
 
     r->result = 0;
-    f_set(t->thr_proc->p_fd, NULL, args->fd);
+    f_set(t->thr_proc->p_fd, NULL, args->fd, FALSE);
     f_close(f); //close pozbywa siê referencji -> dalsze odwo³ywanie siê do niej
                 // jest b³êdem
     return 0;

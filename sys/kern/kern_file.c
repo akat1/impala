@@ -42,9 +42,11 @@
 #include <sys/errno.h>
 
 bool _chunk_is_empty(filetable_chunk_t *fd);
-void _filetable_expand(filetable_t *ft, int hm);
-filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
+static void _filetable_expand(filetable_t *ft, int hm);
+static filetable_chunk_t *_get_chunk_by_index(filetable_t *ft, int index);
 static file_t *file_alloc(vnode_t *vn, int flags);
+static void f_set_cl(filetable_t *ft, int index, bool cloexec);
+static bool f_get_cl(filetable_t *ft, int index);
 
 file_t*
 file_alloc(vnode_t *vn, int flags)
@@ -161,7 +163,7 @@ f_read(file_t *f, uio_t *u)
 }
 
 int
-f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
+f_fcntl(filetable_t *ft, int argfd, file_t *f, int cmd, uintptr_t param)
 {
     int fd;
     filetable_chunk_t *fc;
@@ -181,6 +183,7 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                     MUTEX_LOCK(&ft->mtx, "f_fcntl");
                     if ( fc->files[i] == NULL ) {
                         fc->files[i] = f;
+                        fc->close_flag[i] = FALSE;
                         fref(f);
                         mutex_unlock(&ft->mtx);
                         return fd;
@@ -193,20 +196,20 @@ f_fcntl(filetable_t *ft, file_t *f, int cmd, uintptr_t param)
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
             //shm: todo: a co je¶li nie by³o miejsca?
+            panic("FCNTL not impl opt?\n");
             break;
         case F_GETFL:
             return f->f_flags;
         case F_SETFL: {
-            ///@todo O_APPEND, O_NONBLOCK
             int possible = O_APPEND | O_NONBLOCK;
             f->f_flags = (f->f_flags & ~possible) | (param & possible);
-            return 0; /// XXX: co chcemy mieæ?
+            return 0;
         }
         case F_SETFD:
-            f->f_flags = (f->f_flags&~FD_CLOEXEC) | (param & FD_CLOEXEC);
+            f_set_cl(ft, argfd, param);
             return 0;
         case F_GETFD:
-            return (f->f_flags & FD_CLOEXEC)>0;
+            return f_get_cl(ft, argfd);
             break;
     }
     return -1;
@@ -242,7 +245,7 @@ f_get(filetable_t *ft, int index)
  */
 
 void 
-f_set(filetable_t *ft, file_t *fd, int index)
+f_set(filetable_t *ft, file_t *fd, int index, bool cloexec)
 {
     KASSERT(index>=0);
     MUTEX_LOCK(&ft->mtx, "f_set");
@@ -259,10 +262,30 @@ f_set(filetable_t *ft, file_t *fd, int index)
     // wywo³uj±cy przekaza³ nam prawo w³asno¶ci do tej referencji
     file_t *old = fc->files[index % FILES_PER_CHUNK];
     fc->files[index % FILES_PER_CHUNK] = fd;
+    fc->close_flag[index % FILES_PER_CHUNK] = cloexec;
     mutex_unlock(&ft->mtx);
     if(old)
         frele(old); //pozbywamy siê naszej w³asno¶ci
-    return;
+}
+
+void
+f_set_cl(filetable_t *ft, int index, bool cloexec)
+{
+    KASSERT(index>=0);
+    MUTEX_LOCK(&ft->mtx, "f_set_cl");
+    filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
+    KASSERT(fc!=NULL);
+    fc->close_flag[index % FILES_PER_CHUNK] = cloexec;
+    mutex_unlock(&ft->mtx);
+}
+
+bool
+f_get_cl(filetable_t *ft, int index)
+{
+    KASSERT(index>=0);
+    filetable_chunk_t *fc = _get_chunk_by_index(ft, index);
+    KASSERT(fc!=NULL);
+    return fc->close_flag[index % FILES_PER_CHUNK];
 }
 
 filetable_chunk_t *
@@ -332,6 +355,7 @@ f_alloc(proc_t *p, vnode_t  *vn, int flags, int *result)
             if ( fc->files[i] == NULL ) {
                 fp = file_alloc(vn, flags);
                 fc->files[i] = fp;
+                fc->close_flag[i] = (flags & O_CLOEXEC)>0;
                 *result = fdp;
 
                 mutex_unlock(&p->p_fd->mtx);
@@ -351,7 +375,7 @@ f_alloc(proc_t *p, vnode_t  *vn, int flags, int *result)
     _filetable_expand(p->p_fd, 1);
     fp = file_alloc(vn,flags);
     *result = fdp;
-    f_set(p->p_fd, fp, fdp);
+    f_set(p->p_fd, fp, fdp, (flags & O_CLOEXEC)>0);
     mutex_unlock(&p->p_fd->mtx);
     return 0;
 }
@@ -391,6 +415,7 @@ filetable_clone(filetable_t *dst, filetable_t *src)
 //                KASSERT(t->files[i]->f_vnode);
             }
             nc->files[i] = t->files[i];
+            nc->close_flag[i] = t->close_flag[i];
         }
         list_insert_tail(&(dst->chunks), nc);
     }
@@ -423,8 +448,7 @@ void filetable_prepare_exec(filetable_t *fd)
     MUTEX_LOCK(&fd->mtx, "filetable_prepare_exec");
     while((t = (filetable_chunk_t *)list_next(&(fd->chunks), t))) {
         for ( int i = 0 ; i < FILES_PER_CHUNK ; i++ ) {
-            ///@todo CLOEXEC powinno chyba byæ per deskryptor a nie per plik
-            if(t->files[i] != NULL && ISSET(t->files[i]->f_flags, FD_CLOEXEC)) {
+            if(t->files[i] != NULL && t->close_flag[i]) {
                 f_close(t->files[i]);
                 t->files[i] = NULL;
             }

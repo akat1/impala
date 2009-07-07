@@ -45,11 +45,12 @@ int sc_fcntl(thread_t *p, syscall_result_t *r, fcntl_args_t *args);
 int
 sc_fcntl(thread_t *t, syscall_result_t *r, fcntl_args_t *args)
 {
-    file_t *file = f_get(t->thr_proc->p_fd, args->fd);
+    int fd = args->fd;
+    file_t *file = f_get(t->thr_proc->p_fd, fd);
     if (file == NULL) {
         return -EBADF;
     }
-    int res = f_fcntl(t->thr_proc->p_fd, file, args->cmd, args->arg);
+    int res = f_fcntl(t->thr_proc->p_fd, fd, file, args->cmd, args->arg);
     frele(file);
     if(res < 0)
         return res; //??? check this

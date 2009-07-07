@@ -43,10 +43,11 @@
 #define iscntrl(c) ((c) == 0177 || __iir((c), 0, ' '-1))
 #define isdigit(c) __iir((c), '0', '9')
 ///@todo do punct sporo ró¿nych nale¿y... mo¿e warto by by³o u¿ywaæ locale?
-#define ispunct(c) (__iir((c), '!', '/') || __iir((c), ',', '@'))
+#define ispunct(c) (__iir((c), '!', '/') || __iir((c), ':', '@') \
+                  || __iir((c), '[', '`') || __iir((c), '{', '~'))
 #define isgraph(c) (isalnum(c) || ispunct(c))
 #define islower(c) __iir((c), 'a', 'z')
-#define isprint(c) (isgraph(c) || (c)==' ')
+#define isprint(c) (__iir((c), ' ', 126))
 
 #define isspace(c) ((c)==' ' || (c)=='\f' || (c)=='\n' || (c)=='\r' \
                     || (c)=='\t' || (c)=='\v')

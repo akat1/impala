@@ -96,6 +96,9 @@ _tgetent(char *data)
             c2 = buf;
         }
     }
+
+    //PC, UP, BC
+    
 }
 
 int
@@ -179,8 +182,12 @@ tgetstr(char id[2], char **area)
     while(*tc) {
         if((*tc)[0] == id[0] &&
            (*tc)[1] == id[1] &&
-            (*tc)[2] == '=')
-            return &(*tc)[3];
+            (*tc)[2] == '=') {
+            char *res = &(*tc)[3];
+            strcpy(*area, res);
+            *area += strlen(res)+1;
+            return res;
+        }
         tc++;
     }
     return NULL;
@@ -189,12 +196,60 @@ tgetstr(char id[2], char **area)
 char *
 tgoto(char *cap, int col, int row)
 {
-    return NULL;
+    static char res_buf[128];
+    int args[2] = {col, row};
+    char *c2 = res_buf;
+    char *c = cap;
+    int argNum = 0;
+    while(*c) {
+        switch(*c) {
+            case '%':
+                c++;
+                switch(*c) {
+                    case 'r': argNum++;         break;
+                    case '%': *(c2++) = '%';    break;
+                    case 'd':
+                    case '3':
+                    case '2': {
+                        int len = 1;
+                        if(isdigit(*c))
+                            len = *c - '0';
+                        char buf[16];
+                        int x = 15;
+                        buf[x--] = '\0';
+                        buf[x-1] = '0';
+                        int arg = args[argNum++];
+                        argNum %= 2;
+                        while(arg>0) {
+                            buf[x--] = arg % 10;
+                            arg /= 10;
+                        }
+                        while(15-x < len)
+                            buf[x--] = '0';
+                        x++;
+                        while(x<16)
+                            *(c2++) = buf[x++];
+                        break;
+                    }
+                    case '.': {
+                        int arg = args[argNum++];
+                        argNum %= 2;
+                        *(c2++) = arg;
+                    }
+                };
+                c++;
+                break;
+            default:
+                *(c2++) = *(c++);
+        }
+    }
+    *c2 = '\0';
+    return res_buf;
 }
 
 int tputs(const char *str, int affcnt, int (*putfunc)(int))
 {
     for(int i=0; str[i]; i++)
-        putfunc(str[i]);
+        putfunc(str[i]&0x7f);
     return 0;
 }

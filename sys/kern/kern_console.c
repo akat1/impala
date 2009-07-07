@@ -416,10 +416,12 @@ vcons_put(vconsole_t *vc, char c)
         textscreen_move_cursor(&vc->screen, -1, 0);
     } else if (c == ENQ) {
         //todo
+    } else if (c == BEL) {
+        //...
     } else if (c == SO || c == SI) {
         //sth...
     } else {
-        char hex[16]="0123456789abcdef";
+        char hex[16]="0123456789ABCDEF";
         textscreen_put(&vc->screen, '0', vc->sattr);
         textscreen_put(&vc->screen, 'x', vc->sattr);
         textscreen_put(&vc->screen, hex[((c&0xf0)>>4)], vc->sattr);
