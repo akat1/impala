@@ -101,6 +101,7 @@ struct proc {
     vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
     ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci
     vm_addr_t       p_brk_addr;  ///< adres koñca segmentu danych (*)
+    sleepq_t        p_waitq;     ///< oczekiwanie na dzieci lub sygna³y.
     mutex_t         p_mtx;       ///< zamek do synchronizacji
     mask_t          p_umask;     ///< maska tworzonych plików
     list_t          p_umtxs;     ///< lista zamków u¿ytkownika

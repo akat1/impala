@@ -7,6 +7,7 @@
 #include <sys/list.h>
 #include <string.h>
 #include <stdio_private.h>
+#include <stdlib_private.h>
 
 int syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
@@ -18,6 +19,7 @@ FILE *_stdF[3]={NULL, NULL, NULL};
 list_t __open_files;
 sighandler_t __sig_handlers[NSIG+1];
 list_t __open_files;
+list_t __mem_chunks;
 
 char **environ = NULL;
 #define MAX_ENV 256
@@ -56,6 +58,7 @@ _start()
     for (int i = 0; argv[i]; i++) c++;
     //_pthread_rt();
     LIST_CREATE(&__open_files, FILE, L_open_files, FALSE);
+    LIST_CREATE(&__mem_chunks, mem_chunk_t, L_mem_chunks, FALSE);
     _stdF[0] = fdopen(0, "r");
     _stdF[1] = fdopen(1, "w");
     _stdF[2] = fdopen(2, "w");

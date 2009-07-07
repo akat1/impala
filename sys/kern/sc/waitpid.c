@@ -54,6 +54,7 @@ errno_t
 sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
 {
     proc_t *p = t->thr_proc;
+    
     if(args->pid == -1) {
         proc_t *p_iter;
         /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
@@ -69,36 +70,39 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
                 if ( ISSET(t->thr_proc->p_sig,~t->thr_sigblock) )
                     return -EINTR;
                 else
-                    sched_yield();
+                    SLEEPQ_WAIT(&(t->thr_proc->p_waitq), "waitpid");
             }
-            #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
-            {
-                if ( proc_is_zombie(p_iter) )
+
+            if ( p_iter != NULL ) {
+                #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
                 {
-                    // odlaczamy dziecko
-                    list_remove(&(p->p_children), p_iter);
-                    // zwracamy jego pid jako wynik
-                    r->result = p_iter->p_pid;
-                    // zwracamy status procesu
-                    if ( args->status != NULL ) 
-                        *(args->status) = p_iter->p_status;
-                    // niszczymy dziecko
-                    proc_delete(p_iter);
-                    return -EOK;
-                }
-                if(ISSET(args->options, WUNTRACED) &&
-                   ISSET(p_iter->p_flags, PROC_STOP)) {
-                    r->result = p_iter->p_pid;
-                    // zwracamy status procesu
-                    if ( args->status != NULL ) 
-                        *(args->status) = p_iter->p_status;
-                    return -EOK;
-                }
-            } while ((p_iter = NEXTPROC()));
-            #undef NEXTPROC
+                    if ( proc_is_zombie(p_iter) )
+                    {
+                        // odlaczamy dziecko
+                        list_remove(&(p->p_children), p_iter);
+                        // zwracamy jego pid jako wynik
+                        r->result = p_iter->p_pid;
+                        // zwracamy status procesu
+                        if ( args->status != NULL ) 
+                            *(args->status) = p_iter->p_status;
+                        // niszczymy dziecko
+                        proc_delete(p_iter);
+                        return -EOK;
+                    }
+                    if(ISSET(args->options, WUNTRACED) &&
+                       ISSET(p_iter->p_flags, PROC_STOP)) {
+                        r->result = p_iter->p_pid;
+                        // zwracamy status procesu
+                        if ( args->status != NULL ) 
+                            *(args->status) = p_iter->p_status;
+                        return -EOK;
+                    }
+                } while ((p_iter = NEXTPROC()));
+                #undef NEXTPROC
+            }
             if(ISSET(args->options, WNOHANG))
                 return EOK; ///poprawne zachowanie?
-            sched_yield();
+            SLEEPQ_WAIT(&(t->thr_proc->p_waitq), "waitpid");
         }
     }
     proc_t *to_trace = proc_find(args->pid);
@@ -135,7 +139,7 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
         if(args->options & WNOHANG)
             return EOK;
 
-        sched_yield();
+        SLEEPQ_WAIT(&(t->thr_proc->p_waitq), "waitpid");
     }
 
     return -EOK;

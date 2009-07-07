@@ -51,7 +51,7 @@ na~podziale pamiêci fizycznej na~bloczki o~ustalonym rozmiarze, zwane ramkami
 Pamiêæ wirtualna jest równie¿ podzielona na~takie bloczki, zwane stronami
 \footnote{strona - page}.
 Stronicowanie to przypisywanie stronom odpowiednich ramek, co mo¿na
-zinterpretowaæ jako ustalaniem jaka ramka pamiêci fizycznej kryje siê za~dan±
+zinterpretowaæ jako ustalanie jaka ramka pamiêci fizycznej kryje siê za~dan±
 stron± pamiêci wirtualnej. Adresy wirtualne z~instrukcji procesora s±
 t³umaczone sprzêtowo na~adresy fizyczne.
 
@@ -157,24 +157,24 @@ z~adresem instrukcji\footnote{Popularne systemy takie jak FreeBSD, Linux,
 Solaris równie¿ nie korzystaj± z tej w³a¶ciwo¶ci w~ogólnym zarz±dzaniu
 pamiêci±, jedynie przy implementacji prywatnych segmentów dla w±tków
 u¿ytkownika. Prawdopodobnie jest to~spowodowane tym, ¿e~jêzyk C nie wspiera
-wykorzystania tego mechanizmu. Przesuniêcia spowodowa³oby ¿e~u¿ycie adresów
+wykorzystania tego mechanizmu. Przesuniêcie spowodowa³oby ¿e~u¿ycie adresów
 z~segmentu stosu na~kodzie operuj±cym na~segmencie danych by³oby nieprawid³owe.
-St±d nie mo¿na by³oby u¿ywaæ np procedury \texttt{strlen} i~do~tablic bêd±cych
+St±d nie mo¿na by³oby u¿ywaæ np procedury \texttt{strlen} do~tablic bêd±cych
 zmiennymi lokalnymi jak i~do~tablic bêd±cymi zmiennymi globalnymi. Wsparcie
-wymaga³oby wprowadzenie nowego typu wska¼ników, w~których oprócz samego adresu
+wymaga³oby wprowadzenia nowego typu wska¼ników, w~których oprócz samego adresu
 by³by zapisany deskryptor segmentu - stare kompilatory jêzyka C na~system DOS
 w~tym celu rozszerza³y jêzyk  o~s³ówko kluczowe \texttt{far}.}.
 
 Drugim etapem jest przet³umaczenie adresu na~adres fizyczny z~u¿yciem katalogu
 stron. Sam katalog stron nie opisuje z~powodów technicznych wszystkich stron
-w~pamiêci, poniewa¿ stron mo¿e byæ a¿ $2^{24}$ to~taki katalog zajmowa³by zbyt
+w~pamiêci, poniewa¿ stron mo¿e byæ a¿ $2^{24}$, to~taki katalog zajmowa³by zbyt
 du¿± ilo¶æ pamiêci (bior±c pod uwagê ¿e ka¿da przestrzeñ adresowa ma swój
 katalog stron). Katalog zajmuje jedn± stronê pamiêci i~jest tablic± o~1024
 elementach. Ka¿da pozycja w~katalogu zawiera adres fizyczny tablicy stron
 opisuj±cej 4MB pamiêci. Poniewa¿ $1024*4MB=4GB$ to~katalog stron~opisujê ca³±
 pamiêæ jak± mog± adresowaæ instrukcje procesora. Tablica stron ma tak± sam±
-budowê jak katalog, z tym ¿e jej pozycje opisuj± fizyczne adresy
-(zatem ka¿da pozycja tablicy stron opisuje 4kB pamiêci) ramek.
+budowê jak katalog, z tym ¿e jej pozycje opisuj± fizyczne adresy ramek
+(zatem ka¿da pozycja tablicy stron opisuje 4kB pamiêci).
 
 Procesor posiada rejestr kontrolny (CR3), w którym trzyma fizyczny adres
 katalogu
@@ -190,7 +190,7 @@ Odwzorowanie stron jest opisane przez typ
 \texttt{vm\_pmap\_t}. Przed programist± systemu dwu stopniowa konstrukcja
 katalogu jest ukryta, poniewa¿ nie jest to~istotne w~ogólnym zarz±dzaniu
 pamiêci± oraz zrobi³oby modu³ mniej przeno¶nym\footnote{
-Rozszerzenie procesora pozwalaj±ce u¿ywaæ 48bitowych adresów pamiêci
+Rozszerzenie procesora pozwalaj±ce u¿ywaæ 48 bitowych adresów pamiêci
 (zwiêkszaj±c ograniczenie pamiêci powy¿ej 4GB) wprowadza trój stopniow±
 strukturê katalogu - dziêki ukryciu budowy zaprogramowanie obs³ugi
 takiego rozszerzenia wi±za³oby siê z~mniejsza ilo¶ci± zmian w~kodzie.}.
@@ -218,7 +218,7 @@ wszystkich katalogów.
 
 Pierwsza trudno¶æ zosta³a rozwi±zana sprzêtowo przez firmê Intel w~procesorach
 Pentium Pro (i686) przez wprowadzenie specjalnego atrybutu GP\footnote{
-Global Page - strona globalna.} informuj±cego procesor. ¿e dany wpis znajduje
+Global Page - strona globalna.} informuj±cego procesor, ¿e dany wpis znajduje
 siê we~wszystkich tablicach stron opisuj±cych te~same 4MB pamiêci.
 Druga trudno¶æ zosta³a rozwi±zana przez przydzielenie wszystkich tablic stron
 mog±cych opisywaæ przestrzeñ j±dra podczas rozruchu systemu. Dziêki temu
@@ -265,7 +265,7 @@ w~module pamiêci wirtualnej.
 Stert± j±dra zarz±dza algorytm opracowany przez Jeffa Bonwicka dla~Sun
 Microsystems, przedstawiony na~konferencji USENIX\cite{bonwick}. Ten algorytm,
 zwany alokatorem p³ytowym\footnote{alokator p³ytowy - slab allocator},
-przenikn±³ równie¿ do innych systemów operacyjnych jak FreeBSD, Linux, NetBSD.
+przenikn±³ równie¿ do innych systemów operacyjnych tj. FreeBSD, Linux, NetBSD.
 
 Algorytm jest nadbudow± na obs³ugê segmentu realizowan± przez
 pamiêæ wirtualn±. Idea opiera siê o~pojêciê schowka (\texttt{kmem\_cache\_t}),

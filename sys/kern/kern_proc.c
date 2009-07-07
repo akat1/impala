@@ -58,6 +58,7 @@ proc_ctor(void *obj)
     proc->p_fd = filetable_alloc();
     proc->p_cmd = NULL;
     proc->p_nice = PROC_NZERO;
+    sleepq_init(&proc->p_waitq);
     mutex_init(&proc->p_mtx, MUTEX_NORMAL);
     LIST_CREATE(&proc->p_umtxs, mutex_t, L_user, FALSE);
 }
@@ -140,6 +141,7 @@ proc_exit(proc_t *p, int exit)
     }
     p->p_flags = PROC_ZOMBIE;
     p->p_status = exit;
+    /* powiadom rodzica */
     proc_destroy(p);
     if(alive)
         sched_exit(curthread);
@@ -217,6 +219,7 @@ proc_destroy(proc_t *proc)
 
     list_remove(&procs_list, proc);
     signal_send(proc_find(proc->p_ppid), SIGCHLD);
+    sleepq_wakeup(&(proc_find(proc->p_ppid)->p_waitq));
 
     proc_destroy_threads(proc);
     if (proc->vm_space) {

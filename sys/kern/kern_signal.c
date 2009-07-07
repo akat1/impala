@@ -181,6 +181,7 @@ signal_send(proc_t *p, int sig)
         return FALSE;
 
     p->p_sig |= sigmask(sig) & (~p->p_sigignore);
+    sleepq_wakeup(&(p->p_waitq));
     return TRUE;
 }
 
@@ -205,6 +206,7 @@ signal_send_group(pid_t pgid, int sig)
         if(p->p_group != pgid)
             continue;
         p->p_sig |= sigmask(sig) & (~p->p_sigignore);
+        sleepq_wakeup(&(p->p_waitq));
     }
     return TRUE;
 }

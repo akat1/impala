@@ -57,40 +57,37 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
     /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
     while(1)
     {
+        kprintf("ELOO\n");
         p_iter = (proc_t *)list_head(&(p->p_children));
 
-        /* proces nie ma dzieci - czekamy na sygnal */
-        if ( p_iter == NULL ) {
-            for (;;) {
-                if ( ISSET(t->thr_proc->p_sig,~t->thr_sigblock) )
-                    return -EINTR;
-                else
-                    sched_yield();
-            }
+        if ( p_iter != NULL ) {
+            #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
+            {
+                if ( proc_is_zombie(p_iter) )
+                {
+                    // odlaczamy dziecko
+                    list_remove(&(p->p_children), p_iter);
+                    // zwracamy jego pid jako wynik
+                    r->result = p_iter->p_pid;
+
+                    // zwracamy status procesu
+                    if ( args->status != NULL ) 
+                        *(args->status) = p_iter->p_status;
+
+                    // niszczymy dziecko
+                    proc_delete(p_iter);
+                    
+                    return -EOK;
+                }
+            } while ((p_iter = NEXTPROC()));
+            #undef NEXTPROC
         }
 
-        #define NEXTPROC() (proc_t *)list_next(&p->p_children, p_iter)
-        {
-            if ( proc_is_zombie(p_iter) )
-            {
-                // odlaczamy dziecko
-                list_remove(&(p->p_children), p_iter);
-                // zwracamy jego pid jako wynik
-                r->result = p_iter->p_pid;
+        // Zasypiamy
+        kprintf("zasypiam\n");
+        SLEEPQ_WAIT(&t->thr_proc->p_waitq, "wait");
+        kprintf("obudzili mnie\n");
 
-                // zwracamy status procesu
-                if ( args->status != NULL ) 
-                    *(args->status) = p_iter->p_status;
-
-                // niszczymy dziecko
-                proc_delete(p_iter);
-                
-                return -EOK;
-            }
-        } while ((p_iter = NEXTPROC()));
-        #undef NEXTPROC
-
-        sched_yield();
     }
 
     // Nieosiagalny

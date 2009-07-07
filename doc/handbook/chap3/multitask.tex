@@ -31,3 +31,34 @@
 
 \section{Wielozadaniowo¶æ.}
 
+\subsection{Szeregowanie zadañ}
+
+Zaimplementowany w systemie algorytm szeregowania zadañ zosta³ oparty na
+algorytmach planistów zastosowanych w systemach 4.3BSD oraz SVR4. Dok³adny opis tych
+algorytmów znajduje siê w \cite{unixjadro}. 
+
+Omówimy tutaj jedynie ogólny zarys planisty oraz ró¿nice w stosunku do pierwowzoru. 
+Planista przydziela procesom priorytet na podstawie ich ostatniego zachowania w systemie 
+(tzn. zu¿ycia czasu procesora oraz innych statystyk.) oraz poziomu uprzejmo¶ci (nice).
+Priorytet jest liczb± z zakresu od $0$ do $127$, procesy o mniejszej warto¶ci
+priorytetu s± traktowane jako wa¿niejsze, mo¿na wiêc rozumieæ tê warto¶æ jako
+karê nak³adan± na proces. Wszystkie w±tki w ramach procesu traktowane s±
+jednakowo i wszystkie posiadaj± priorytet równy priorytetowi procesu. Przestrzeñ
+priorytetów podzielona jest na $32$ grupy po $4$ warto¶ci w ka¿dej grupie,
+kolejka $Q_i$ odpowiada za zbiór priorytetów $i,i+1,i+2,i+3$.
+Procesy przynale¿± do odpowiednich kolejek, za rozswiewanie ich odpowiada
+okresowo (co \texttt{SCHED\_RESCHEDULE} kwantów czasu) uruchamiana funkcja 
+\texttt{\_\_resched}, po wykonaniu tej funkcji nastêpuje wybranie niepustej
+kolejki zawieraj±cej najni¿sze priorytety i w ramach tej kolejki planista
+realizuje podej¶cie zwane algorytmem karuzelowym, ka¿dy z w±tków w kolejce
+otrzymuje jednakowy kwant czasu. Procesy znajduj±ce siê poza kolejk± nie s±
+brane pod uwagê a¿ do nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
+realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru: $priorytet =
+poziom\_uprzejmosci*2 + wykorzystanie\_procesora/2$. Algorytm umo¿liwia
+preferowanie pewnych zadañ przez u¿ytkownika systemu za pomoc± poziomu uprzejmo¶ci, oraz
+uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
+wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
+(tj. kompilatory). Na uwagê zas³uguje fakt, ¿e podobny algorytm z powodzeniem
+wykorzystywany jest do dzi¶ w systemach rodziny BSD.
+
+
