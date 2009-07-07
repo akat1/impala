@@ -29,7 +29,7 @@
 %
 % $Id$
 
-\section{Sterowniki.}
+\section{Sterowniki urz±dzeñ.}
 \label{DEV}
 
 Sterowniki urz±dzeñ w~systemach UNIXowych s± widoczne jako pliki. W naszym
@@ -115,5 +115,66 @@ TTY.
 W kodzie systemu wiêkszo¶æ, poza specjalnymi, sterowników jest wydzielona
 do~oddzielnej biblioteki \texttt{libdev.a} (lokalizacja: \texttt{sys/dev/}).
 System operacyjny nie zna bezpo¶rednio wszystkich
-zaimplementowanych w~niej sterowników, pobiera zato nastomiast
-tablicê \texttt{devtab} zawieraj±c± procedury inicjuj±ce.
+zaimplementowanych w~niej sterowników, pobiera natomiast
+tablicê \texttt{devtab} zawieraj±c± procedury inicjuj±ce sterowniki.
+Specjalnymi sterownikami nie wydzielonymi do~wymienionej biblioteki s±
+wirtualne terminale emulowane przez konsolê, która jest czê¶ci± j±dra.
+
+System z~plikami urz±dzeñ wi±¿e deskryptor urz±dzenia {\texttt{devd\_t}},
+który zawiera w~sobie takie informacje jak nazwa urz±dzenia, wska¼nik
+na~prywatne dane sterownika oraz jego deskê rozdzielcz±. Jeden sterownik mo¿e
+stworzyæ wiele deskryptorów urz±dzeñ, w zale¿no¶ci od~tego ile wykryje urz±dzeñ
+które mo¿e obs³ugiwaæ. Przyk³adowo, zaimplementowany kontroler stacji dyskietek,
+je¿eli wykryje dwie stacje dyskietek w~komputrze, to tworzy odpowiednio dwa
+pliki urz±dzeñ: \texttt{/dev/fd0} dla stacji \texttt{A:} oraz \texttt{/dev/fd1}
+dla stacji \texttt{B:}. System tak± stacjê dyskietek widzi jako dwa ró¿ne
+deskryptory, które wspóldziela ze sob± deskê rozdzielcz±.
+
+Nie wszystkie urz±dzenia w~sprzêcie komputerowym s± obs³ugiwane za~pomoc±
+tego modelu sterowników. Sterowniki niektórych urz±dzeñ mog± byæ programowane,
+jako modu³y dostarczaj±ce pewn± funkcjonalno¶æ, ni¿ jako ogólnie dostêpne
+pliki urz±dzeñ. Ta uwaga dotyczy niskopoziomowych urz±dzeñ, które s±
+wykorzystywane przez j±dro do dostarczania pewnych us³ug lub do~implementacji
+innych sterowników. Udostêpnienie ich jako pliki widziane dla u¿ytkownika
+nie wnosi³oby ¿andych korzy¶ci, a doda³o trudno¶ci implementacyjnych.
+Na przyk³ad, sterownik szyny ISA udostêpnia zbiór procedur
+\texttt{bus\_isa\_dma\_} wykorzystywanych w~ sterowniku kontrolera stacji
+dyskietek. Sterownik zegara systemowgo instaluje podprogram przerwania,
+który przy ka¿dym tykniêciu uruchamia ogóln± obs³ugê zegara w~systemie.
+Obs³uga przerwañ sprzêtowych jest omówiona w~rozdziale \ref{INT}.
+
+
+\subsection{Szyna ISA.}
+
+Sterownik szyny ISA jest dostarczany przez obs³ugê architektury sprzêtu,
+jest on potrzeny w~naszym systemie poniewa¿ kontroler stacji dyskietek
+znajduje siê na~niej. Zadaniem sterownika jest dostarczyæ procedury
+obs³uguj±ce transfery DMA.
+
+Za obs³ugê transferów DMA w komputerach domowych s± odpowiedzialne dwa
+kontrolery Intel 8237A. Ka¿dy z~nich obs³uguje cztery kana³y, s³u¿±ce
+do wykonywania transferów. Ka¿de urz±dzenia ma przypisany swój kana³, a
+przed rozpoczêciem transferu nale¿y go odpowiednio zaprogramowaæ.
+
+Deskryptor kana³u musi zostaæ przydzielony
+za~pomoc± procedury \texttt{bus\_isa\_dma\_alloc}, a programowanie kana³ów
+odbywa siê przez \texttt{bus\_isa\_dma\_prepare}.
+Poniewa¿ te kontrolery s± star± technologi± to obs³uguj± jedynie transfery
+do~fragmentów pamiêci RAM których adres miêsci siê w~24 bitach.
+Tak± pamiêæ nie zawsze mo¿na przydzieliæ, w~szczególno¶ci po~d³u¿szej pracy
+systemu, ten probelm jest rozwi±zany przez przydzielanie sta³ych buforów
+kana³om przy starcie systemu w~adresach poni¿ej 1MB
+(zobacz rysunek \ref{vm:mmap}). Po wykonaniu transferu nale¿y wykonaæ procedurê
+\texttt{bus\_isa\_dma\_finish}.
+
+Para procedur \texttt{\_prepare} i \texttt{\_finish} kopiuj± odpowiednio
+dane pomiêdzy sta³ym buforem kana³u, a~buforem danym przez klienta.
+
+\subsection{Sterownik stacji dyskietek.}
+
+Omówienie sterownika stacji dyskieteke wymaga uprzedzenia kilku wiadomo¶ci
+z~rozdzia³u \ref{BIO}.
+
+
+\subsection{Sztuczne urz±dzenia.}
+
