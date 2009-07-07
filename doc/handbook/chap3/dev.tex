@@ -29,5 +29,91 @@
 %
 % $Id$
 
-\section{Pliki urz±dzeñ}
+\section{Sterowniki.}
+\label{DEV}
 
+Sterowniki urz±dzeñ w~systemach UNIXowych s± widoczne jako pliki. W naszym
+systemie zarz±dzaniem takimi plikami zajmuje siê specjalny system plików
+\texttt{devfs}, zamontowany w~katalogu \texttt{/dev}. Sterowniki urz±dzeñ
+dziel± siê na~trzy kategorie:
+
+\begin{itemize}
+ \item urz±dzenia blokowe - sterowniki obs³uguj±ce takie
+urz±dzenia jak
+stacje dyskietek, dyski twarde itp.
+ \item urz±dzenia znakowe - sterowniki obs³uguj±ce
+urz±dzenie, widziane jako strumieñ bajtów.
+ \item terminale - specjalny rodzaj urz±dzeñ znakowych.
+\end{itemize}
+
+Ka¿dy sterownik dostarcza systemowi tak zwan± deskê rozdzielcz±
+(\texttt{devsw\_t} - \emph{device switch}), która zawiera implementacjê
+procedur obs³ugi pliku urz±dzenia. Deska rozdz. zawiera nastêpuj±ce pola:
+\begin{itemize}
+ \item \texttt{d\_open} -
+obs³uga otwarcie pliku urz±dzenia.
+
+ \item \texttt{d\_close} -
+obs³uga zamkniêcia pliku urz±dzenia.
+
+ \item \texttt{d\_ioctl} -
+bs³uga poleceñ kontrolnych dla~sterownika.
+
+ \item \texttt{d\_write} -
+obs³uga zlecenia wyj¶cie ze strumienia znakowego. mo¿e blokowaæ klienta
+na~czas wykonywania operacji.
+
+ \item \texttt{d\_read} -
+obs³uga zlecenia wej¶cie ze strumienia znakowego, mo¿e blokowaæ klienta
+na~czas wykonywania operacji.
+
+ \item \texttt{d\_strategy} -
+obs³uga zleceñ operacji wej¶cia-wyj¶cia na~urz±dzeniach blokowych, dzia³a
+asynchronicznie, tzn nie blokuje klienta na~czas wykonywania operacji.
+
+ \item \texttt{type} -
+informacja o kategorii, do jakiej urz±dzenie nale¿y
+\begin{itemize}
+ \item \texttt{DEV\_BDEV} - dla urz±dzeñ blokowych.
+ \item \texttt{DEV\_CDEV} - dla urz±dzeñ znakowych.
+ \item \texttt{DEV\_TTY} - dla terminali.
+\end{itemize}
+\end{itemize}
+
+Podzia³ na urz±dzenia znakowego i~blokowe oraz rozró¿nienie procedur
+obsluguj±cych zlecenia wej¶cia-wyj¶cia jest koniecznie ze wzglêdu na~wydajno¶æ
+oraz obs³ugê tych urz±dzeñ. Na~urz±dzeniach znakowych u¿ytkownik mo¿e
+wykonywaæ te same operacje jak na plikach, poniewa¿ pliki s± równie¿ widziane
+jako strumienie znakowe. Dozwolone s± takie operacje jak przeczytanie jednego
+bajtu, dwóch kilobajtów czy piêciu megabajtów.
+
+Urz±dzenia blokowe jak dyski twarde cechuje inna metod± dostêpu, fizycznie
+s± one podzielone na bloki danych (sektory). St±d wszelkie transfery danych
+miêdzy pamiêci± RAM a~urz±dzeniem nie s± tak elastyczne pod~wzglêdem wielko¶ci
+jak strumienie znaków.
+
+Z~powodu tych rózniæ jednolita obs³uga wej¶cia-wyj¶cia dla~tych dwóch rodzajów
+urz±dzeñ musia³aby emulowaæ urz±dzenia blokowe jako znakowe, co nie by³oby
+wydajne. Dziêki wyodrêbnienie oddzielnej procedury sterownik zawsze dostaje
+zlecenia, których d³ugo¶æ jest wielokrotno¶ci± d³ugo¶ci sektoru oraz mo¿e sam
+zadecydowaæ w~jakiej kolejno¶ci najlepiej je wykonaæ (co t³umaczy nazwê
+procedury - \emph{strategia}). Mo¿liwy jest równie¿ dostêp strumieniowy
+do~takich
+urz±dzeñ, jest on emulowany za~pomoc± procedury \texttt{physio}, która
+wykorzystuje \texttt{d\_strategy}. Nale¿y zwróciæ uwagê, ¿e jest to~jedynie
+dodatkowa metoda dostêpu, przydatna zwykle programom chc±cym bezpo¶rednio
+modyfikowaæ dane na~urz±dzeniu lub ingerowaæ w~zapisany tam system plików
+(jak np programy sorawdzaj±ce powierzchniê dysku czy spójno¶c systemu plików).
+Zagadnienie wej¶cja-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
+\ref{BIO}.
+
+Operacje wej¶cia-wyj¶cia na~terminalach dzia³aj± na~tej samej zasadzie
+co urz±dzeñ blokowych, z~t± ró¿ni± ¿e te~operacje przechodz± dodatkow±
+warstwê zwan± re¿imem linii. Te zagadnienia s± szerzej omówione w~rozdziale
+TTY.
+
+W kodzie systemu wiêkszo¶æ, poza specjalnymi, sterowników jest wydzielona
+do~oddzielnej biblioteki \texttt{libdev.a} (lokalizacja: \texttt{sys/dev/}).
+System operacyjny nie zna bezpo¶rednio wszystkich
+zaimplementowanych w~niej sterowników, pobiera zato nastomiast
+tablicê \texttt{devtab} zawieraj±c± procedury inicjuj±ce.
