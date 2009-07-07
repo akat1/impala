@@ -53,8 +53,10 @@ kolejki zawieraj±cej najni¿sze priorytety i w ramach tej kolejki planista
 realizuje podej¶cie zwane algorytmem karuzelowym, ka¿dy z w±tków w kolejce
 otrzymuje jednakowy kwant czasu. Procesy znajduj±ce siê poza kolejk± nie s±
 brane pod uwagê a¿ do nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
-realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru: $priorytet =
-poziom\_uprzejmosci*2 + wykorzystanie\_procesora/2$. Algorytm umo¿liwia
+realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru:
+\[ \mbox{priorytet} = 2\cdot\mbox{poziom\_uprzejmosci} 
+    + \mbox{wykorzystanie\_procesora}/2 \]
+ Algorytm umo¿liwia
 preferowanie pewnych zadañ przez u¿ytkownika systemu za pomoc± poziomu uprzejmo¶ci, oraz
 uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
 wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
