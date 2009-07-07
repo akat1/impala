@@ -53,11 +53,9 @@ sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
     proc_t *p = t->thr_proc;
     vnode_t *parent;
     if((err = vfs_lookup_parent(p->p_curdir, &parent, path, t))) {
-        kprintf("No parent.\n");
         return err;
     }
     if((err = VOP_ACCESS(parent, W_OK, p->p_cred))) {
-        kprintf("No access\n");
         vrele(parent);
         return err;
     }

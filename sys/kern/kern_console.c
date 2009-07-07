@@ -102,6 +102,9 @@ struct vconsole {
 #define CONS_MODE_ORIGIN  2
 #define CONS_MODE_SCREEN  4
 #define CONS_MODE_NEWLINE 8
+#define CONS_MODE_KPAPP   16    //keypad application mode
+#define CONS_MODE_CURS    32
+#define CONS_MODE_VT52    64
 
 static void vcons_switch(vconsole_t *vc);
 static void vcons_input_char(vconsole_t *vc, int ch);
@@ -278,6 +281,8 @@ enum {
     ESC_RESET,      // c (@)
     ESC_G0,         // ( (#)
     ESC_G1,         // ) (#)
+    ESC_KPAPP,      // =
+    ESC_KPNUM,      // >
     ESC_CURHOME,    // [{ROW=0};{COL=0}H (@)
     ESC_CURUP,      // [{COUNT=1}A (@)
     ESC_CURDOWN,    // [{COUNT=1}B (@)
@@ -420,6 +425,8 @@ vcons_put(vconsole_t *vc, char c)
         //...
     } else if (c == SO || c == SI) {
         //sth...
+    } else if(c < 7) {
+        //ignore
     } else {
         char hex[16]="0123456789ABCDEF";
         textscreen_put(&vc->screen, '0', vc->sattr);
@@ -433,6 +440,12 @@ void
 set_mode(vconsole_t *vc, int m)
 {
     switch(m) {
+        case 1:
+            SET(vc->mode, CONS_MODE_CURS);
+            break;
+        case 2:
+            UNSET(vc->mode, CONS_MODE_VT52);
+            break;
         case 3: //column mode
             textscreen_clear(&vc->screen);
 //            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
@@ -457,6 +470,12 @@ void
 reset_mode(vconsole_t *vc, int m)
 {
     switch(m) {
+        case 1:
+            UNSET(vc->mode, CONS_MODE_CURS);
+            break;
+        case 2:
+            SET(vc->mode, CONS_MODE_VT52);
+            break;
         case 3:
             textscreen_clear(&vc->screen);
 //            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
@@ -484,6 +503,12 @@ vcons_code(vconsole_t *vc, int c)
     int attr0 =  vc->parser.attr[0];
     textscreen_get_cursor(&vc->screen, &cx, &cy);
     switch (c) {
+        case ESC_KPAPP:
+            SET(vc->mode, CONS_MODE_KPAPP);
+            break;
+        case ESC_KPNUM:
+            UNSET(vc->mode, CONS_MODE_KPAPP);
+            break;
         case ESC_SCROLL: {
             int attr1 = vc->parser.attr[1] - 1;
             attr0--;
@@ -677,6 +702,12 @@ vc_parser_put(vc_parser_t *vcprs, char c)
         switch (c) {
             case 'c':
                 ret = ESC_RESET;
+                break;
+            case '=':
+                ret = ESC_KPAPP;
+                break;
+            case '>':
+                ret = ESC_KPNUM;
                 break;
             case '(':
                 nexts = P_SET_G0;

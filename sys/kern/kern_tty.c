@@ -430,7 +430,7 @@ clist_create(size_t size)
     if(!l->buf) {
         kmem_free(l);
         return NULL;
-    }        
+    }
     l->buf_size = size;
     l->end = l->beg = l->size = 0;
     l->slpq = kmem_alloc(sizeof(sleepq_t), KM_SLEEP);

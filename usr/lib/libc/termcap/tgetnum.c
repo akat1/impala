@@ -98,6 +98,7 @@ _tgetent(char *data)
     }
 
     //PC, UP, BC
+    BC = "\b";
     
 }
 
@@ -185,6 +186,7 @@ tgetstr(char id[2], char **area)
             (*tc)[2] == '=') {
             char *res = &(*tc)[3];
             strcpy(*area, res);
+            res = *area;
             *area += strlen(res)+1;
             return res;
         }
@@ -200,14 +202,28 @@ tgoto(char *cap, int col, int row)
     int args[2] = {col, row};
     char *c2 = res_buf;
     char *c = cap;
-    int argNum = 0;
+    int argNum = 1;
     while(*c) {
         switch(*c) {
             case '%':
                 c++;
                 switch(*c) {
-                    case 'r': argNum++;         break;
-                    case '%': *(c2++) = '%';    break;
+                    case 'r': argNum++; argNum%=2;  break;
+                    case '%': *(c2++) = '%';        break;
+                    case 'i': args[0]++; args[1]++; break; //napewno oba?
+                    case '+': {
+                        char cc = *(++c);
+                        args[0]+=cc; args[1]+=cc;
+                        ///@todo jeszcze % robimy?
+                    } break;
+                    case '>': {
+                        char cc = *(++c);
+                        char dd = *(++c);
+                        if(args[0] > cc)
+                            args[0] += dd;
+                        if(args[1] > cc)
+                            args[1] += dd;
+                    } break;
                     case 'd':
                     case '3':
                     case '2': {
@@ -221,13 +237,13 @@ tgoto(char *cap, int col, int row)
                         int arg = args[argNum++];
                         argNum %= 2;
                         while(arg>0) {
-                            buf[x--] = arg % 10;
+                            buf[x--] = '0' + arg % 10;
                             arg /= 10;
                         }
                         while(15-x < len)
                             buf[x--] = '0';
                         x++;
-                        while(x<16)
+                        while(x<15)
                             *(c2++) = buf[x++];
                         break;
                     }
@@ -235,7 +251,7 @@ tgoto(char *cap, int col, int row)
                         int arg = args[argNum++];
                         argNum %= 2;
                         *(c2++) = arg;
-                    }
+                    } break;
                 };
                 c++;
                 break;
@@ -249,7 +265,23 @@ tgoto(char *cap, int col, int row)
 
 int tputs(const char *str, int affcnt, int (*putfunc)(int))
 {
+    int delay = 0;
+    while(isdigit(*str)) {
+        delay = 10*delay + *(str++) - '0';
+    }
+    if(*str == '.') { //zawsze moze byc czy tylko z *?
+        str++;
+        delay = 10*delay + *(str++) - '0';
+    } else
+        delay *= 10;
+    //delay w 0.1ms
+    bool delay_per_line = FALSE;
+    if(*str == '*') {
+        str++;
+        delay_per_line = TRUE;
+    }
     for(int i=0; str[i]; i++)
         putfunc(str[i]&0x7f);
+    ///@todo waitns(100*delay* (delay_per_line)?affcnt:1);
     return 0;
 }

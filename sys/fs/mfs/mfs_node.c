@@ -64,6 +64,8 @@ static vnode_getdents_t mfs_getdents;
 static vnode_readlink_t mfs_readlink;
 static vnode_symlink_t mfs_symlink;
 static vnode_access_t mfs_access;
+static vnode_sync_t mfs_node_sync;
+static vnode_unlink_t mfs_unlink;
 static vnode_inactive_t mfs_inactive;
 static int pc_cmp(lkp_state_t *path, const char *fname);
 
@@ -85,7 +87,9 @@ vnode_ops_t mfs_vnode_ops = {
     .vop_readlink = mfs_readlink,
     .vop_access = mfs_access,
     .vop_symlink = mfs_symlink,
+    .vop_sync = mfs_node_sync,
     .vop_inactive = mfs_inactive,
+    .vop_unlink = mfs_unlink,
     .vop_lock = vfs_gen_lock,
     .vop_unlock = vfs_gen_unlock
 };
@@ -288,11 +292,39 @@ mfs_access(vnode_t *vn, int mode, pcred_t *cred)
 }
 
 int
+mfs_node_sync(vnode_t *vn)
+{
+    return 0;
+}
+
+int
 mfs_inactive(vnode_t *vn)
 {
     mfs_node_t *n = vn->v_private;
     n->vnode = NULL;
     return 0;
+}
+
+int
+mfs_unlink(vnode_t *vn, char *name)
+{
+    mfs_node_t *p = vn->v_private;
+    if(vn->v_type != VNODE_TYPE_DIR)
+        return -ENOTDIR;
+    mfs_node_t *node = p->child;
+    mfs_node_t *prev = NULL;
+    while(node) {
+        if(!str_cmp(name, node->name)) {
+            if(prev)
+                prev->next = node->next;
+            else
+                p->child = node->next;
+            return 0;
+        }
+        prev = node;
+        node = node->next;
+    }
+    return -ENOENT;
 }
 
 int

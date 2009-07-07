@@ -146,6 +146,7 @@ enum {
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
 #define VOP_LOCK(v) //(v)->v_ops->vop_lock(v)
 #define VOP_UNLOCK(v) //(v)->v_ops->vop_unlock(v)
+#define VOP_UNLINK(v, n) (v)->v_ops->vop_unlink((v), (n))
 
 ///@todo chyba wypada dodaæ proces otwieraj±cy
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
@@ -169,8 +170,10 @@ typedef int vnode_access_t(vnode_t *v, int mode, pcred_t *cred);
 //typedef int vnode_rmdir_t(vnode_t *v);
 typedef int vnode_sync_t(vnode_t *v);
 typedef int vnode_inactive_t(vnode_t *v);
+typedef int vnode_unlink_t(vnode_t *v, char *name);
 typedef void vnode_lock_t(vnode_t *v);
 typedef void vnode_unlock_t(vnode_t *v);
+
 
 struct vnode_ops {
     vnode_open_t      *vop_open;
@@ -194,8 +197,8 @@ struct vnode_ops {
     vnode_lock_t      *vop_lock;
     vnode_unlock_t    *vop_unlock;
 //    vnode_rmdir_t     *vop_rmdir;
-/*    vnode_link_t      *vop_link;
-     */
+//    vnode_link_t      *vop_link;
+    vnode_unlink_t    *vop_unlink;
 };
 
 #define MAX_NAME 128

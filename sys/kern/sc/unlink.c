@@ -37,6 +37,7 @@
 #include <sys/syscall.h>
 #include <sys/file.h>
 #include <sys/proc.h>
+#include <sys/string.h>
 
 typedef struct unlink_args unlink_args;
 
@@ -44,12 +45,38 @@ struct unlink_args {
     char *pathname;
 };
 
-errno_t sc_unlink(thread_t *p, syscall_result_t *r, unlink_args *args);
+errno_t sc_unlink(thread_t *t, syscall_result_t *r, unlink_args *args);
 
 errno_t
-sc_unlink(thread_t *p, syscall_result_t *r, unlink_args *args)
+sc_unlink(thread_t *t, syscall_result_t *r, unlink_args *args)
 {
-    r->result = 0;
-    return -ENOSTR;
+    int err = 0;
+    char path[PATH_MAX];
+    if((err = copyinstr(path, args->pathname, PATH_MAX)))
+        return err;
+    proc_t *p = t->thr_proc;
+    vnode_t *parent;
+    if((err = vfs_lookup_parent(p->p_curdir, &parent, path, t))) {
+        return err;
+    }
+    char *bname = path;
+    for(int i=str_len(path)-1; i>=0; i--) {
+        if(path[i]!='/')
+            break;
+        else
+            path[i]='\0';
+    }
+    for(int i=0; i<PATH_MAX; i++) {
+        if(!path[i])
+            break;
+        if(path[i] == '/')
+            bname = &path[i+1];
+    }
+    int res = VOP_UNLINK(parent, bname);
+    vrele(parent);
+    if(res < 0)
+        return res;
+    r->result = res;
+    return 0;
 }
 
