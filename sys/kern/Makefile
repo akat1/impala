@@ -30,6 +30,7 @@ SRCS=\
 	kern_uio.c\
 	kern_utils.c\
 	vfs.c\
+	vfs_gen.c\
 	vfs_node.c\
 	vm.c\
 	vm_lpool.c\

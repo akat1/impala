@@ -61,6 +61,7 @@ struct vfs {
 
 int vfs_create(vfs_t **vsp, const char *type);
 int vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev);
+
 int vfs_destroy(vfs_t *vp);
 void vfs_init(void);
 void vfs_mountroot(void);

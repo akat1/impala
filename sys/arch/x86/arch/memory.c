@@ -111,6 +111,26 @@ vm_enable_paging()
     cpu_set_cr0(cpu_get_cr0() | CR0_PG);
 }
 
+void
+vm_enable_cache()
+{
+    uint32_t cr0 = cpu_get_cr0();
+    uint32_t cr4 = cpu_get_cr4();
+    UNSET(cr0, CR0_CD|CR0_NW);
+    SET(cr4, CR4_PGE);
+    cpu_set_cr0(cr0);
+    cpu_set_cr4(cr4);
+
+}
+
+void
+vm_disable_cache()
+{
+    uint32_t cr0 = cpu_get_cr0();
+    SET(cr0, CR0_CD|CR0_NW);
+    cpu_set_cr0(cr0);
+}
+
 /// Wy³±cza stronicowanie.
 void
 vm_disable_paging()
@@ -145,8 +165,8 @@ vm_low_init()
     _collect_pages();
     create_kernel_space();
     initialize_internal();
-    // Ok, mo¿emy w³±czyæ globalne stronki PentiumPro(i686)
-    cpu_set_cr4(cpu_get_cr4() | CR4_PGE);
+    vm_enable_cache();
+    
 }
 
 vm_page_t *page;

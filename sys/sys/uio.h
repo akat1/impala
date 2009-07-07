@@ -59,6 +59,7 @@ struct uio {
     int         oper;       ///< operacja UIO_OPER
     size_t      size;       ///< rozmiar
     size_t      resid;      ///< ilo¶æ pozosta³ych danych
+    size_t      completed;  ///< ilo¶æ przes³anych danych
     off_t       offset;     ///< przesuniêcie
 };
 

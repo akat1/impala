@@ -47,7 +47,7 @@ vfs_init_t  fatfs_init;
 static vfs_mount_t     fatfs_mount;
 static vfs_unmount_t   fatfs_unmount;
 static vfs_getroot_t   fatfs_getroot;
-static vfs_sync_t      fatfs_sync;
+vfs_sync_t      fatfs_sync;
 
 static vfs_ops_t fatfs_ops = {
     fatfs_mount,
@@ -60,7 +60,8 @@ int fatfs_check_sblock(const fatfs_sblock_t *fs);
 fatfs_t *fatfs_createfs(const fatfs_sblock_t *fs);
 int fatfs_read_fat(fatfs_t *fatfs);
 
-blkno_t fat12_get(const uint8_t *, blkno_t);
+blkno_t fat12_get(const uint8_t *, int);
+void fat12_set(uint8_t *, int, blkno_t);
 
 /*************************************************************************
  * Procedury obs³ugi VFS.
@@ -129,26 +130,116 @@ fatfs_getroot(vfs_t *vfs)
 void
 fatfs_sync(vfs_t *vfs)
 {
+    fatfs_t *fatfs = vfs->vfs_private;
+    iobuf_t *bp;
+
+    fatfs_space_repair(fatfs);
+
+    bp = bio_getblk(fatfs->dev, fatfs->blkno_fat, fatfs->fatbsize*BSIZE);
+    mem_cpy(bp->addr, fatfs->fat, fatfs->fatbsize*BSIZE);
+    bio_write(bp);
+    bio_wait(bp);
+    if ( ISSET(bp->flags, BIO_ERROR) ) {
+        bio_release(bp);
+        return;
+    }
+    bio_release(bp);
+    fatfs_space_scan(fatfs);
+
 }
 
 /*************************************************************************
- * Procedury obs³ugi VFS.
+ * Procedury zarz±dzaj±ce miejscem na no¶niku.
  */
 
-
-
-/// zdobywa informacje o wolnym miejscu
+/**
+ *
+ */
 void
 fatfs_space_scan(fatfs_t *fatfs)
 {
+    blkno_t ffree = 0;
+    blkno_t flast = 0;
+    size_t elems = (fatfs->blkno_last-fatfs->blkno_data);
+    int c = 0;
+    for (int i = 0; i < elems; i++) {
+        blkno_t clu = fatfs_fatget(fatfs, i);
+        if (clu == 0) {
+            c++;
+            if (ffree==0) {
+                ffree = i;
+            } else {
+                fatfs->fat_set(fatfs->fat, flast, i);
+            }
+            flast = i;
+        }
+    }
+    fatfs->free_first = ffree;
+    fatfs->free_count = c;
+    DEBUGF("detected %u free clusters (%u bytes)", c, c*fatfs->clusize);
 }
+
+void
+fatfs_space_repair(fatfs_t *fatfs)
+{
+    if (fatfs->free_count == 0) return;
+
+    blkno_t clu = fatfs->free_first;
+    blkno_t nextclu;
+    for (int i = 0; i < fatfs->free_count; i++) {
+        nextclu = fatfs->fat_get(fatfs->fat, clu);
+        fatfs->fat_set(fatfs->fat, clu, 0);
+        clu = nextclu;
+    }
+}
+
 
 /// przydziela wolne miejsce na no¶niku
 blkno_t
-fatfs_space_alloc(size_t size)
+fatfs_space_alloc(fatfs_t *fatfs, size_t size)
 {
-    return -1;
+    DEBUGF("trying to allocate %u/%u clusters", size, fatfs->free_count);
+    if (fatfs->free_count < size)
+        size = fatfs->free_count;
+    if (size == 0) return -1;
+    blkno_t clu = fatfs->free_first;
+    blkno_t xclu = -1;
+    blkno_t xxclu;
+    xclu = clu;
+    for (int i = 0; i < size; i++) {
+        xxclu = xclu;
+        xclu = fatfs_fatget(fatfs, xxclu);
+        DEBUGF(" FAT12(%i) = %i", xxclu, xclu);
+        if (xclu > fatfs->clu_used) break;
+    }
+    fatfs_fatset(fatfs, xxclu, 0xfff);
+    fatfs->free_first = xclu;
+    fatfs->free_count -= size;
+    DEBUGF("allocated %u -> %u", clu, xclu);
+    return clu;
 }
+
+void
+fatfs_space_free(fatfs_t *fatfs, blkno_t blk)
+{
+    blkno_t clu;
+    blkno_t nclu = blk;
+
+    do {
+        clu = nclu;
+        nclu = fatfs_fatget(fatfs, clu);
+        kprintf("%u<%u>[%u] ", clu, nclu, fatfs->clu_used);
+        fatfs_fatset(fatfs, clu, fatfs->free_first);
+        fatfs->free_first = clu;
+        fatfs->free_count++;
+    } while ( nclu <= fatfs->clu_used );
+    kprintf("\n");
+}
+
+/*************************************************************************
+ *
+ */
+
 
 /**
  * sprawdza pierwszy sektor no¶nika
@@ -189,6 +280,8 @@ fatfs_createfs(const fatfs_sblock_t *sblock)
     fatfs->clu_bad = FAT12_CLU_BAD;
     fatfs->clu_last = FAT12_CLU_LAST;
     fatfs->fat_get = fat12_get;
+    fatfs->fat_set = fat12_set;
+    fatfs->blkno_last = 2880-1;
     fatfs->fat = kmem_alloc(BSIZE*fatfs->fatbsize, KM_SLEEP);
     return fatfs;
 }
@@ -233,14 +326,14 @@ fatfs_read_fat(fatfs_t *fatfs)
 blkno_t
 fatfs_bmap(fatfs_node_t *node, off_t off, ssize_t s, size_t *cont)
 {
-#define has_content(clu) ((clu) < fatfs->clu_bad)
+#define has_content(clu) ((clu) <= fatfs->clu_used)
     fatfs_t *fatfs = node->fatfs;
     int clun = off/fatfs->clusize;
     int i;
     blkno_t clu = node->firstclu;
     if (cont) *cont = 0;
     for (i = 0; i != clun && has_content(clu); i++)
-        clu = fatfs->fat_get(fatfs->fat, clu);
+        clu = fatfs_fatget(fatfs, clu);
     if (i != clun || !has_content(clu)) {
         return -1;
     }
@@ -254,32 +347,68 @@ fatfs_bmap(fatfs_node_t *node, off_t off, ssize_t s, size_t *cont)
         while ( has_content(nclu) && nclu == pclu+1 && (xs < s || s==0) ) {
             xs += fatfs->clusize;
             pclu = nclu;
-            nclu = fatfs->fat_get(fatfs->fat, pclu);
+            nclu = fatfs_fatget(fatfs, pclu);
             c++;
         }
-         *cont = c;
+         *cont = c * fatfs->clubsize;
     }
-    return fatfs->blkno_data + (clu-2)*fatfs->clubsize;
+     return fatfs_cmap(fatfs, clu);
 #undef has_content
 }
 
+
+
+blkno_t
+fatfs_cmap(fatfs_t *fatfs, blkno_t clu)
+{
+    return fatfs->blkno_data + (clu-2)*fatfs->clubsize;
+}
 
 /*************************************************************************
  * Procedury obs³ugi tablic FAT
  */
 
 blkno_t
-fat12_get(const uint8_t *table, blkno_t i)
+fatfs_fatget(fatfs_t *fatfs, blkno_t i)
+{
+    return fatfs->fat_get(fatfs->fat, i);
+}
+
+void
+fatfs_fatset(fatfs_t *fatfs, blkno_t i, blkno_t n)
+{
+    fatfs->fat_set(fatfs->fat, i, n);
+}
+
+
+blkno_t
+fat12_get(const uint8_t *table, int i)
+{
+    int n = (3*i) / 2;
+    uint16_t fat = *(uint16_t*)&(table[n]);
+    if ( i & 1) {
+        return (fat & 0xfff0) >>4;
+    } else {
+        return (fat & 0xfff);
+    }
+}
+
+void
+fat12_set(uint8_t *table, int i, blkno_t blk)
 {
     int n = (3*i) / 2;
     uint16_t fat = *(uint16_t*)&(table[n]);
     uint16_t a,b;
-
     a = (fat & 0xfff);
     b = (fat & 0xfff0) >>4;
-    if ( (3*i) & 1) {
-        return b;
-    } else {
-        return a;
-    }
+        if ( i & 1) {
+            a &= 0x00f;
+            b = blk;
+        } else {
+            a = blk;
+            b &= 0xf00;
+        }
+    fat = (a&0xfff) | ((b << 4) & 0xfff0);
+    *(uint16_t*)&(table[n]) = fat;
 }
+

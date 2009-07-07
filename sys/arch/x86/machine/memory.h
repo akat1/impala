@@ -198,7 +198,9 @@ extern size_t vm_physmem_free;
 
 void vm_low_init(void);
 void vm_enable_paging(void);
+void vm_enable_cache(void);
 void vm_disable_paging(void);
+void vm_disable_cache(void);
 bool vm_is_paging(void);
 
 

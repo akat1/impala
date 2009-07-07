@@ -275,7 +275,6 @@ bio_getblk(devd_t *d, blkno_t n, size_t bsize)
             bufhash_lock();
             continue;
         }
-        SET(bp->flags, BIO_BUSY);
         bufhash_remove(bp);
         bufhash_remfree(bp);
         break;
@@ -284,9 +283,11 @@ bio_getblk(devd_t *d, blkno_t n, size_t bsize)
     if (!bp) {
         bp = bufhash_getfree();
     }
+    SET(bp->flags, BIO_BUSY);
     buf_alloc(bp, d, n, bsize);
     bufhash_insert(bp);
     bufhash_unlock();
+    UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
     splx(s);
     return bp;
 }
@@ -296,14 +297,9 @@ bio_read(devd_t *d, blkno_t n, size_t bsize)
 {
     iobuf_t *bp = bio_getblk(d, n, bsize);
     if ( ISUNSET(bp->flags,BIO_VALID) ) {
-//         DEBUGF("read blk %u on %s buffer data is invalid, starting I/O",
-//             n, d->name);
-//        DEBUGF("bp=%p", bp);
         bp->oper = BIO_READ;
-        UNSET(bp->flags, BIO_DONE);
-//        DEBUGF("strategy %p",d);
+        bp->resid = bp->size;
         devd_strategy(d, bp);
-//        DEBUGF("wait");
         bio_wait(bp);
     }
     return bp;
@@ -313,6 +309,9 @@ void
 bio_write(iobuf_t *bp)
 {
     bp->oper = BIO_WRITE;
+    bp->resid = bp->size;
+    DEBUGF("starting BIO_WRITE xfer %u", bp->size);
+    UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
     devd_strategy(bp->dev, bp);
     bio_wait(bp);
 }
@@ -333,7 +332,7 @@ void
 bio_done(iobuf_t *bp)
 {
     int s = splbio();
-    SET(bp->flags,BIO_DONE);
+    SET(bp->flags,BIO_DONE|BIO_VALID);
     sleepq_wakeup(&bp->sleepq);
     splx(s);
 }
@@ -344,6 +343,7 @@ bio_error(iobuf_t *bp, int error)
     int s = splbio();
     bp->errno = error;
     SET(bp->flags,BIO_DONE|BIO_ERROR);
+    UNSET(bp->flags,BIO_VALID);
     sleepq_wakeup(&bp->sleepq);
     splx(s);
 }

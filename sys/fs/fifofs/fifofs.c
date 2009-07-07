@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/utils.h>
 #include <sys/vfs.h>
+#include <sys/vfs/vfs_gen.h>
 #include <fs/fifofs/fifofs.h>
 #include <fs/fifofs/fifofs_internal.h>
 #include <sys/kmem.h>
@@ -91,6 +92,8 @@ static vnode_ops_t fifofs_vnode_ops = {
     .vop_symlink = fifofs_symlink,
     .vop_sync    = fifofs_node_sync,
     .vop_inactive = fifofs_inactive,
+    .vop_lock   = vfs_gen_lock,
+    .vop_unlock = vfs_gen_unlock
 };
 
 static int _get_read_vnode(fifofs_node_t *node, vnode_t **vpp);

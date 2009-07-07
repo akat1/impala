@@ -67,7 +67,9 @@ main(int argc, char **argv)
     for (int i = 0; i < argc; i++) {
         int fd;
         fd = open(argv[i], progopt.openflags, 0750);
-        ftruncate(fd, progopt.size);
+        if (ftruncate(fd, progopt.size)) {
+            perror("truncate");
+        }
         close(fd);
     }
 

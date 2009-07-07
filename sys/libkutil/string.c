@@ -79,7 +79,7 @@ mem_cmp(const addr_t a, const addr_t b, size_t n)
 {
     const uint8_t *ma = a;
     const uint8_t *mb = b;
-    for (int i = 0; i < n; i++, a++, b++) {
+    for (int i = 0; i < n; i++, ma++, mb++) {
         if (*ma != *mb) {
             return *ma - *mb;
         }

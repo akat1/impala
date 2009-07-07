@@ -112,6 +112,7 @@ uio_move(void *_buf, size_t len, uio_t *uio)
         iov->iov_base += xfer;
         iov->iov_len -= xfer;
         uio->resid -= xfer;
+        uio->completed += xfer;
         uio->offset += xfer;
         len -= xfer;
     }

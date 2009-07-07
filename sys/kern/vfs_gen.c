@@ -1,5 +1,4 @@
-/* Impala Operating System
- *
+/*
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -27,43 +26,23 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id $
  */
 
-#ifndef __MACHINE_BUS_ISA_H
-#define __MACHINE_BUS_ISA_H
-#ifdef __KERNEL
+#include <sys/types.h>
+#include <sys/kernel.h>
+#include <sys/vfs.h>
+#include <sys/vfs/vfs_gen.h>
 
-typedef struct bus_isa_dma bus_isa_dma_t;
-typedef struct bus_isa_pnp bus_isa_pnp_t;
 
-enum {
-    ISA_DMA_FDC = 0x2
-};
+void
+vfs_gen_lock(vnode_t *vn)
+{
+    MUTEX_LOCK(&vn->v_mtx, "vfsgenlock");
+}
 
-enum {
-    ISA_DMA_WRITE = 0x08, 
-    ISA_DMA_SINGLE = 0x40,
-    ISA_DMA_AUTO = 0x10,
-    ISA_DMA_READ = 0x04
-};
-
-void bus_isa_init(void);
-
-bus_isa_dma_t *bus_isa_dma_alloc(int chan);
-void bus_isa_dma_free(bus_isa_dma_t *ch);
-int bus_isa_dma_prepare(bus_isa_dma_t *d, int cmd, void *buf, size_t size);
-void bus_isa_dma_finish(bus_isa_dma_t *d);
-
-struct bus_isa_pnp {
-    uint32_t    name;
-    uint32_t    rev;
-    uint32_t    serial;
-    int irq;
-    int io;
-};
-
-int bus_isa_probe(bus_isa_pnp_t *);
-
-#endif
-#endif
+void
+vfs_gen_unlock(vnode_t *vn)
+{
+    mutex_unlock(&vn->v_mtx);
+}

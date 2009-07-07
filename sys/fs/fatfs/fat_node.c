@@ -33,6 +33,7 @@
 #include <sys/kernel.h>
 #include <sys/bio.h>
 #include <sys/vfs.h>
+#include <sys/vfs/vfs_gen.h>
 #include <fs/fatfs/fatfs.h>
 
 
@@ -74,7 +75,9 @@ static vnode_ops_t fatfs_node_ops = {
     fatfs_symlink,
     fatfs_access,
     fatfs_sync,
-    fatfs_inactive
+    fatfs_inactive,
+    vfs_gen_lock,
+    vfs_gen_unlock
 };
 
 /*============================================================================
@@ -101,7 +104,7 @@ fatfs_create(vnode_t *v, vnode_t **vpp, const char *name,
         return e;
     }
     int t = (attr->va_type == VNODE_TYPE_DIR)? FATFS_DIR : FATFS_REG;
-    newnode = fatfs_dir_create(dir, name, t);
+    newnode = fatfs_dir_create(dir, name, t, 0);
     if (!newnode) {
         return -EINVAL;
     }
@@ -118,45 +121,59 @@ fatfs_close(vnode_t *v)
 int
 fatfs_read(vnode_t *v, uio_t *u, int flags)
 {
+    ssize_t r;
     fatfs_node_t *node = VTOFATFSN(v);
-    iobuf_t *bp;
-    blkno_t blk;
-    off_t off = u->offset % node->fatfs->clusize;
-    size_t cont = 1;
-    while ((blk=fatfs_bmap(node,u->offset,u->resid,&cont)) != -1 && u->resid) {
-        size_t size = cont*node->fatfs->clusize;
-        bp = bio_read(node->fatfs->dev, blk, cont*node->fatfs->clusize);
-        if ( ISSET(bp->flags, BIO_ERROR) ) {
-            return -EIO;
-            bio_release(bp);
-        }
-        size -= off;
-        uio_move(bp->addr + off, MIN(size, u->resid), u);
-        off = 0;
-        bio_release(bp);
-    }
-    return u->size - u->resid; 
+    r = fatfs_node_read(node, u, flags);
+    return r;
 }
 
 int
 fatfs_write(vnode_t *v, uio_t *u, int flags)
 {
-    DEBUGF("write not supported");
-    return -ENOTSUP;
+    ssize_t r;
+    fatfs_node_t *node = VTOFATFSN(v);
+    if (node->size < u->offset + u->size) {
+        r = fatfs_node_truncate(node, u->offset + u->size);
+        if (r) return r;
+    }
+    r = fatfs_node_write(node, u, flags);
+    return r;
 }
 
 int
 fatfs_ioctl(vnode_t *v, int cmd, uintptr_t arg)
 {
-    DEBUGF("ioctl not supported");
-    return -ENOTSUP;
+    return -EINVAL;
 }
 
 int
 fatfs_truncate(vnode_t *v, off_t len)
 {
-    DEBUGF("truncate not supported");
-    return -ENOTSUP;
+    int err = 0;
+    fatfs_node_t *node = v->v_private;
+    size_t oldsize = node->size;
+    if (node->type != FATFS_REG || v->v_type != VNODE_TYPE_REG)
+        return -EISDIR;
+    fatfs_node_truncate(node, len);
+    if (node->dirent) {
+        fatfs_dir_sync(node->dirent->dirnode->dir);
+    }
+    if (oldsize < node->size) {
+        uio_t u;
+        iovec_t iov;
+        u.iovs = &iov;
+        u.iovcnt = 1;
+        u.space = UIO_SYSSPACE;
+        u.size = node->size - oldsize;
+        u.resid = u.size;
+        u.completed = 0;
+        iov.iov_len = u.resid;
+        iov.iov_base = kmem_zalloc(u.resid, KM_SLEEP);
+        err = fatfs_node_write(node, &u, 0);
+        err = (err < 0)? err : 0;
+    }
+    VFS_SYNC(node->fatfs->vfs);
+    return err;
 }
 
 int
@@ -183,8 +200,9 @@ fatfs_getattr(vnode_t *v, vattr_t *attr)
         attr->va_type = v->v_type;
     if ( ISSET(attr->va_mask, VATTR_NLINK) )
         attr->va_nlink = 1;
-    if ( ISSET(attr->va_mask, VATTR_INO) )
+    if ( ISSET(attr->va_mask, VATTR_INO) ) {
         attr->va_ino = node->firstclu;
+    }
     if ( ISSET(attr->va_mask, VATTR_BLK) ) {
         attr->va_blksize = fatfs->clusize;
         attr->va_blocks = (node->size+fatfs->clusize-1)/fatfs->clusize;
@@ -226,8 +244,43 @@ int
 fatfs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
                            vattr_t *attr)
 {
-    DEBUGF("mkdir not supported");
-    return -ENOTSUP;
+    DEBUGF("mkdir(%s)", path);
+    int err;
+    blkno_t clu;
+    fatfs_node_t *node = v->v_private;
+    fatfs_t *fatfs = node->fatfs;
+    fatfs_node_t *newnode;
+    fatfs_dir_t *dir;
+    iobuf_t *bp;
+
+    if ((node->type != FATFS_DIR && node->type != FATFS_ROOT) ||
+            v->v_type != VNODE_TYPE_DIR)
+        return -ENOTDIR;
+
+    err = fatfs_node_getdir(node, &dir);
+    if (err) return err;
+
+    clu = fatfs_space_alloc(fatfs, 1);
+    if (clu == -1) {
+        return -ENOSPC;
+    }
+
+    bp = bio_getblk(fatfs->dev, fatfs_cmap(fatfs,clu), fatfs->clusize);
+    mem_zero(bp->addr, bp->size);
+    bio_write(bp);
+    bio_wait(bp);
+    if ( ISSET(bp->flags, BIO_ERROR) ) {
+        err = -bp->errno;
+        bio_release(bp);
+        fatfs_space_free(fatfs, clu);
+        return err;
+    }
+    bio_release(bp);
+    newnode = fatfs_dir_create(dir, path, FATFS_DIR, clu);
+
+    *vpp = fatfs_node_getv(newnode);
+    VFS_SYNC(fatfs->vfs);
+    return 0;
 }
 
 int
@@ -293,6 +346,59 @@ fatfs_inactive(vnode_t *v)
  * 
  */
 
+
+int
+fatfs_node_read(fatfs_node_t *node, uio_t *u, int flags)
+{
+    iobuf_t *bp;
+    blkno_t blk;
+    off_t off = u->offset % node->fatfs->clusize;
+    size_t cont = 1;
+    u->resid = MIN(u->resid, MAX(0, node->size - u->offset));
+    u->completed = 0;
+    while ((blk=fatfs_bmap(node,u->offset,u->resid,&cont)) != -1 && u->resid) {
+        size_t size = cont*node->fatfs->clusize;
+        bp = bio_read(node->fatfs->dev, blk, cont*node->fatfs->clusize);
+        if ( ISSET(bp->flags, BIO_ERROR) ) {
+            return -EIO;
+            bio_release(bp);
+        }
+        size -= off;
+        uio_move(bp->addr + off, MIN(size, u->resid), u);
+        off = 0;
+        bio_release(bp);
+    }
+    return u->completed;
+}
+
+int
+fatfs_node_write(fatfs_node_t *node, uio_t *u, int flags)
+{
+    iobuf_t *bp;
+    blkno_t blk;
+    off_t off = u->offset % node->fatfs->clusize;
+    size_t cont = 1;
+    u->resid = MIN(u->resid, MAX(0, node->size - u->offset));
+    u->completed = 0;
+    while ((blk=fatfs_bmap(node,u->offset,u->resid,&cont)) != -1 && u->resid) {
+        size_t size = cont*node->fatfs->clusize;
+        bp = bio_getblk(node->fatfs->dev, blk, cont*node->fatfs->clusize);
+        size -= off;
+        uio_move(bp->addr + off, MIN(size, u->resid), u);
+        off = 0;
+        bio_write(bp);
+        bio_wait(bp);
+        if ( ISSET(bp->flags, BIO_ERROR) ) {
+            int err = bp->errno;
+            bio_release(bp);
+            return -err;
+        }
+        bio_release(bp);
+    }
+    return u->completed;
+}
+
+
 vnode_t *
 fatfs_node_getv(fatfs_node_t *node)
 {
@@ -334,6 +440,15 @@ fatfs_node_rel(fatfs_node_t *node)
     }
 }
 
+void
+fatfs_dirent_sync(fatfs_node_t *node)
+{
+    if (!node->dirent) return;
+    node->dirent->size = node->size;
+    node->dirent->firstclu = node->firstclu;
+
+}
+
 fatfs_node_t *
 fatfs_node_alloc(fatfs_t *fatfs, int type)
 {
@@ -368,3 +483,53 @@ fatfs_node_getdir(fatfs_node_t *node, fatfs_dir_t **r)
     *r = node->dir;
     return 0;
 }
+
+int
+fatfs_node_truncate(fatfs_node_t *node, off_t off)
+{
+    fatfs_t *fatfs = node->fatfs;
+    size_t need = (off+fatfs->clusize-1) / fatfs->clusize;
+    size_t have = node->csize;
+    blkno_t clu = node->firstclu;
+    blkno_t xclu = node->firstclu;
+    node->size = off;
+    node->csize = need;
+
+    if (need == have) {
+        DEBUGF("no cluster-chain changes");
+        fatfs_dirent_sync(node);
+
+        return 0;
+    } else
+    if (need == 0) {
+        DEBUGF("zero");
+        if (node->firstclu) {
+            DEBUGF("freeing chain");
+            fatfs_space_free(fatfs, node->firstclu);
+            node->firstclu = 0;
+        }
+        fatfs_dirent_sync(node);
+        return 0;
+    } else
+    if (have == 0) {
+        node->firstclu = fatfs_space_alloc(fatfs, need);
+        fatfs_dirent_sync(node);
+        return 0;
+    }
+
+    // jedziemy na koniec mniejszego ³añcucha
+    for (int i = 0; i < need && i < have; i++) {
+        xclu = clu;
+        clu = fatfs_fatget(fatfs, clu);
+    }
+    if (need < have) {
+        fatfs_space_free(fatfs, clu);
+        fatfs_fatset(fatfs, xclu, fatfs->clu_last);
+    } else {
+        blkno_t blk = fatfs_space_alloc(fatfs, need-have);
+        fatfs_fatset(fatfs, xclu, blk);
+    }
+    fatfs_dirent_sync(node);
+    return 0;
+}
+

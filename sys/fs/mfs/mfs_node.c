@@ -36,6 +36,7 @@
 #include <sys/utils.h>
 #include <sys/bio.h>
 #include <sys/vfs.h>
+#include <sys/vfs/vfs_gen.h>
 #include <fs/mfs/mfs.h>
 #include <sys/kmem.h>
 #include <sys/errno.h>
@@ -85,6 +86,8 @@ vnode_ops_t mfs_vnode_ops = {
     .vop_access = mfs_access,
     .vop_symlink = mfs_symlink,
     .vop_inactive = mfs_inactive,
+    .vop_lock = vfs_gen_lock,
+    .vop_unlock = vfs_gen_unlock
 };
 
 int

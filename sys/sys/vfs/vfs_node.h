@@ -51,6 +51,7 @@ struct vnode {
     vnode_ops_t    *v_ops;         ///< wska¼nik do vnode_ops z tego fs
     devd_t         *v_dev;         ///< urz±dzenie, je¶li to vnode urz±dzenia
     void           *v_private;     ///< prywatne dane fs-a... np. inode
+    mutex_t         v_mtx;         ///< blokada do synchronizacji
 };
 
 
@@ -140,10 +141,11 @@ enum {
 #define VOP_GETDENTS(v, d, f, c) (v)->v_ops->vop_getdents((v), (d), (f), (c))
 #define VOP_READLINK(v, b, s) (v)->v_ops->vop_readlink((v), (b), (s))
 #define VOP_SYMLINK(v, n, d) (v)->v_ops->vop_symlink((v), (n), (d))
-//#define VOP_RMDIR(v) (v)->v_ops->vop_rmdir((v))
 #define VOP_ACCESS(v, m, c) (v)->v_ops->vop_access((v), (m), (c))
 #define VOP_SYNC(v) (v)->v_ops->vop_sync((v))
 #define VOP_INACTIVE(v) (v)->v_ops->vop_inactive((v))
+#define VOP_LOCK(v) //(v)->v_ops->vop_lock(v)
+#define VOP_UNLOCK(v) //(v)->v_ops->vop_unlock(v)
 
 ///@todo chyba wypada dodaæ proces otwieraj±cy
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
@@ -167,8 +169,8 @@ typedef int vnode_access_t(vnode_t *v, int mode, pcred_t *cred);
 //typedef int vnode_rmdir_t(vnode_t *v);
 typedef int vnode_sync_t(vnode_t *v);
 typedef int vnode_inactive_t(vnode_t *v);
-
-
+typedef void vnode_lock_t(vnode_t *v);
+typedef void vnode_unlock_t(vnode_t *v);
 
 struct vnode_ops {
     vnode_open_t      *vop_open;
@@ -189,6 +191,8 @@ struct vnode_ops {
     vnode_access_t    *vop_access;
     vnode_sync_t      *vop_sync;
     vnode_inactive_t  *vop_inactive;
+    vnode_lock_t      *vop_lock;
+    vnode_unlock_t    *vop_unlock;
 //    vnode_rmdir_t     *vop_rmdir;
 /*    vnode_link_t      *vop_link;
      */

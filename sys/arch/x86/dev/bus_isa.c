@@ -190,22 +190,20 @@ int
 bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
 {
     enum {
-        mode = ISA_DMA_SINGLE|ISA_DMA_AUTO
+        mode = ISA_DMA_SINGLE
     };
     union {
         uchar bytes[4];
         vm_paddr_t buf;
     } addr;
+    uint8_t command;
     ch->mode = cmd;
     ch->req_addr = reqbuf;
     ch->req_size = size;
-    cmd |= mode;
-    cmd = 0x46;
+    command = cmd|mode|_IDX(ch);
     if (size > ch->bufsize) return -1;
     size--;
-//     DEBUGF("channel %u prepared", ch->idx);
     addr.buf = ch->bufpaddr;
-
     int s = splhigh();
     io_out8(IO_CHMASK(ch),  _IDX(ch) | STCL);
     io_out8(IO_WORD(ch),    0xff);
@@ -215,20 +213,13 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     io_out8(IO_WORD(ch),    0xff);
     io_out8(IO_COUNT(ch),   size & 0xff);
     io_out8(IO_COUNT(ch),   (size >> 8) & 0xff);
-    io_out8(IO_CHMODE(ch),  mode);
+    io_out8(IO_CHMODE(ch),  command);
     io_out8(IO_CHMASK(ch),  _IDX(ch));
 
-    io_out8(0x0a, 0x06);   // mask chan 2
+    if (ch->mode & ISA_DMA_WRITE) {
+        mem_cpy(ch->bufaddr, ch->req_addr, ch->req_size);
+    }
 
-    io_out8(0x0c, 0xff);   // reset flip-flop
-    io_out8(IO_PADDR(ch),   (ch->bufpaddr >>  0) & 0xff);
-    io_out8(IO_PADDR(ch),   (ch->bufpaddr >>  8) & 0xff);
-    io_out8(IO_EXTRN(ch),   (ch->bufpaddr >> 16) & 0xff);
-    io_out8(0x0c, 0xff);   // reset flip-flop
-    io_out8(IO_COUNT(ch),   size & 0xff);
-    io_out8(IO_COUNT(ch),   (size >> 8) & 0xff);
-    io_out8(0x0b, 0x46);   // set mode (see above)
-    io_out8(0x0a, 0x02);   // unmask chan 2
     splx(s);
     return 0;
 }
@@ -236,12 +227,8 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
 void
 bus_isa_dma_finish(bus_isa_dma_t *ch)
 {
-    if (ch->mode == ISA_DMA_READ) {
-//         DEBUGF("Finished INPUT transfer at channel %u", ch->idx);
+    if (ch->mode & ISA_DMA_READ) {
         mem_cpy(ch->req_addr, ch->bufaddr, ch->req_size);
-    } else {
-//         DEBUGF("Finished OUTPUT transfer at channel %u", ch->idx);
-        mem_cpy(ch->bufaddr, ch->req_addr, ch->req_size);
     }
     ch->mode = 0;
 }

@@ -75,10 +75,9 @@ enum CPU_CR0 {
     CR0_NE = 1 << 5,
     CR0_WP = 1 << 16,
     CR0_AM = 1 << 18,
-    CR0_NW = 1 << 29,
-    CR0_CD = 1 << 30,
-    /// stronicowanie (paging)
-    CR0_PG = 1 << 31
+    CR0_NW = 1 << 29,   ///< Not Write Through
+    CR0_CD = 1 << 30,   ///< Cache Disable
+    CR0_PG = 1 << 31    ///< Paging
 };
 
 /// Opis bitów rejestru CR3
@@ -93,12 +92,10 @@ enum CPU_CR4 {
     CR4_PVI = 1 << 1,
     CR4_TSD = 1 << 2,
     CR4_DE  = 1 << 3,
-    /// Page Size Extension
     CR4_PSE = 1 << 4,
-    /// Physical Address Extension
     CR4_PAE = 1 << 5,
     CR4_MCE = 1 << 6,
-    CR4_PGE = 1 << 7,
+    CR4_PGE = 1 << 7,   ///< Page Global Enable
     CR4_PCE = 1 << 8,
     CR4_VMXE= 1 << 13,
     CR4_SMXE= 1 << 14

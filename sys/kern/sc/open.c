@@ -97,8 +97,10 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         attr.va_size = 0;
         attr.va_dev = NULL;
         error = VOP_CREATE(parent, &node, _get_last_cmpt(fname), &attr);
+        VOP_UNLOCK(parent);
         if(error)
             return error;
+        VOP_LOCK(node);
     } else {
         //plik istnieje
         if((flags & O_CREAT) && (flags & O_EXCL)) {
@@ -123,11 +125,13 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
     if(ISSET(flags, O_RDWR | O_WRONLY) && ISSET(flags, O_TRUNC)
        && node->v_type == VNODE_TYPE_REG)
         VOP_TRUNCATE(node, 0);
+
     if((error = f_alloc(proc, node, flags, &fd))) {
+        vrele(node); // <- powinno to tutaj byæ, dopisa³em bo nie by³o.
         return error;
     }
-
+    VOP_UNLOCK(node);
     r->result = fd;
-    return -EOK;
+    return 0;
 }
 

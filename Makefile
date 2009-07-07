@@ -6,7 +6,7 @@ GDB?=gdb
 
 DISTDIR=output/dist
 SPECDIR=output/impala
-PROG_BIN=cat ls ps sh mkdir
+PROG_BIN=cat ls ps sh mkdir truncate
 PROG_BINX=\
     cat\
     ls\
