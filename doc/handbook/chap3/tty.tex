@@ -57,7 +57,7 @@ Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana ustawieñ termin
 Najwa¿niejsze ustawienia terminala przechowywane s± w strukturze \texttt{termios}.
 Zawiera ona nastêpuj±ce pola:
 \begin{center}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|l|l|}
 \hline
 tcflag\_t c\_iflag & Flagi konfiguruj±ce zachowanie wej¶cia\\
 tcflag\_t c\_oflag & Flagi konfiguruj±ce zachowanie wyj¶cia\\
@@ -71,8 +71,21 @@ Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminal
 - s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}.
 \subsubsection{Otwieranie terminala, uprawnienia procesów}
 Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
-\texttt{open}. Aby umo¿liwiæ wielu programom korzystanie z jednego terminala,
-oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash}, 
+\texttt{open}. Aby umo¿liwiæ wielu programom jednoczesne korzystanie z jednego
+terminala, oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash},
+procesy zosta³y podzielone na sesje, oraz w ramach sesji na grupy. Ogólnie rzecz
+bior±c, proces mo¿e korzystaæ tylko z terminala bêd±cego jego terminalem kontroluj±cym.
+Wszystkie procesy w ramach sesji, które maj± ustawiony terminal kontroluj±cy,
+maj± ustawiony ten sam terminal. Tak wiêc terminal jest powi±zany z sesj±.
+W ramach sesji procesy tworz± roz³±czne grupy, z których jedna mo¿e byæ
+wyszczególniona jako grupa procesów pierwszoplanowych terminala. Procesy z tej
+grupy jako jedyne maj± dostêp do wej¶cia z terminala. Co do zapisu na terminal,
+mo¿liwy jest on tak¿e spoza grupy procesów pierwszoplanowych, jednak to wymaga
+dodatkowych ¶rodków (w postaci blokowania / obs³ugi sygna³u \texttt{TTOUT}).
+Proces który utworzy³ sesjê zwany jest liderem sesji, podobnie jest z liderem
+grupy. Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
+otwierania go, o ile proces otwieraj±cy nie posiada ju¿ terminala kontroluj±cego,
+jest liderem sesji, oraz terminal ten nie jest jeszcze zwi±zany z ¿adn± sesj±.
 \subsubsection{Zapisywanie do terminala}
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
 zazwyczaj z rodziny \texttt{printf}.
