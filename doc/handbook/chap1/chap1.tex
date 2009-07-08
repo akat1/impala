@@ -124,3 +124,61 @@ z~u¿yciem emulatorów, domy¶lnie zeruj±cych pamiêæ RAM.
 
 \subsection{Podzia³ pracy.}
 
+
+\subsection{Opis drzewa z~kodem ¼rod³owym.}
+
+Drzewo z~kodem ¼ród³owym ma ustalon± strukturê, w~poni¿szym opisie
+katalog \texttt{.} oznacza korzeñ drzewa.
+
+\begin{itemize}
+\item \texttt{./doc/doxygen/} - 
+katalog z~dokumentacj± kodu automatycznie
+generowan± przez program DoxyGen (po~wykonaniu polecenia
+\texttt{make doc} w~katalogu wy¿szym).
+
+\item \texttt{./doc/handbook/} -
+¼ród³a tego dokumentu.
+
+\item \texttt{./sys/} -
+drzewo z~kodem j±dra systemu.
+
+\item \texttt{./sys/arch/} -
+drzewo z~wydziel± obs³ug± platform
+
+\item \texttt{./sys/arch/x86/} -
+kod obs³ugi platformy PC z~procesorem PentiumPro.
+
+\item \texttt{./sys/dev/} -
+biblioteka \texttt{libdev.a} zawieraj±ca sterowniki urz±dzeñ.
+
+\item \texttt{./sys/fs/} -
+biblioteka \texttt{libfs.a} zawieraj±ca obs³ugê systemu plików.
+
+\item \texttt{./sys/kern/} -
+kod w³a¶ciwy j±dra.
+
+\item \texttt{./sys/sys/}
+nag³ówki jêzyka C
+
+\item \texttt{./usr/} -
+drzewo z~kodem programów i~bibliotek.
+
+\item \texttt{./usr/bin/} -
+¼ród³a standardowych programów
+
+\item \texttt{./usr/sbin/} -
+¼ród³a systemowych programów
+
+\item \texttt{./usr/lib/} -
+poddrzewo zawieraj±ce kody bibliotek.
+
+\item \texttt{./usr/etc/} -
+katalog ze skryptami startowymi systemu.
+
+\item \texttt{./mk/} -
+skrypty dla programów Makefile tworz±ce nasz system budowania.
+
+\item \texttt{./image/} -
+skrypty buduj±ce obraz dyskietki
+
+\end{itemize}

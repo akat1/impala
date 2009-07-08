@@ -1,0 +1,74 @@
+% Impala Operating System
+%
+% Copyright (C) 2009 University of Wroclaw. Department of Computer Science
+%    http://www.ii.uni.wroc.pl/
+% Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
+%    http://trzask.codepainters.com/impala/trac/
+% All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%  notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%  notice, this list of conditions and the following disclaimer in the
+%  documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+%
+% $Id: vfs.tex 577 2009-07-08 04:50:22Z wieczyk $
+
+\section{Pomniejsze us³ugi j±dra.} \label{SERV}
+
+\subsection{Sygna³y}
+
+Sygna³y s± podstawowym mechanizmem systemów UNIXowych s³u¿±cym do powiadamiania 
+procesów o zaj¶ciu zdarzeñ systemowych czy komunikacji miêdzy w±tkami. Istnieje
+wiele niekompatyblilnych ze sob± implementacji sygna³ów w systemach UNIXowych,
+ze wzglêdu na spory chaos na tej p³aszczy¼nie zdecydowali¶my siê na
+implementacjê zgodn± ze standardem POSIX wzorowan± na systemach rodziny BSD.
+
+System sygna³ów jest bardzo prostym i intuicyjnym mechanizmem, dzia³a on na
+zasadzie poinformowania procesu o nadej¶ciu jednego z 32 sygna³ów i podjêciu
+przez ten proces odpowiedniej akcji. Procesy mog± same decydowaæ co zrobiæ z
+sygna³em, który zosta³ do nich dostarczony, mo¿liwe jest podjêcie akcji
+domy¶lnej, zignorowanie sygna³u oraz w³asna obs³uga sygna³u. Wyj±tkiem s±
+sygna³y SIGSTOP i SIGKILL, które nie mog± zostaæ zignorowane lub zamienione
+w³asn± obs³ug± sygna³u. Wielokrotne dostarczenie jednego sygna³u do procesu
+zanim proces zd±¿y sygna³ obs³u¿yæ jest równoznaczne z jednokrotnym wys³aniem
+sygna³u. Sygna³y w systemie dostarczane s± do procesu do bloku kontrolnego
+procesu, sygna³ mo¿e obs³u¿yæ dowolny jego w±tek, ustawiaj±c w bloku kontrolnym
+jego obs³u¿enie i nastêpnie podejmuj±c akcje odpowiedni± dla niego. Obs³ugê
+sygna³u mo¿na rozumieæ jako przerwanie dzia³ania programu, wykonanie procedury
+obs³ugi a nastêpnie powrót do miejsca, w którym nast±pi³o przerwanie.
+Sprawdzanie czy nadszed³ nowy sygna³ realizowane jest przy zmianie kontekstu
+oraz powrocie z wywo³añ systemowych. Poniewa¿ mo¿liwe jest przerywanie
+dzia³ania procedur
+obs³ugi sygna³ów, to j±dro udostêpnia specjalny interfejs obs³ugi sygna³ów przez
+procedury \texttt{sigenter} i \texttt{sigreturn}, które organizuj± procedury
+obs³ugi sygna³ów w stos.
+
+
+\subsection{Kolejki wiadomo¶ci System V.}
+
+Kolejki wiadomo¶ci s± jednym z~trzech mechanizmów komunikacji miêdzy
+procesami wywodz±cej siê z~Systemu V. Obok nich istniej± równie¿ mechanizmy
+pamiêci dzielonej oraz semaforów, nie zosta³y one jednak zaimplementowane.
+
+U¿ytkownik identyfikuje zasoby komunikacji miêdzy procesami za~pomoc±
+kluczy, które mo¿na porównaæ z~plikami. Charakteryzuja je takie same
+prawa dostêpu oraz operacje tworzenia i~usuwania.
+
+Znaj±c klucz u¿ytkownik mo¿e pobraæ identyfikator kolejki wiadomo¶ci za~pomoc±
+której mo¿e siê wymieniaæ wiadomo¶ciami z~innymi procesami.

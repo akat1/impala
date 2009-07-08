@@ -31,3 +31,65 @@
 
 \section{Przerwania.} \label{INT}
 
+Przerwaniem (\emph{interrupt}) jest wyw³aszczenie pracy procesora
+przez zdarzenie, które powoduje wykonanie kodu jego obs³ugi.
+Przerwania mog± byæ generowane przez
+\begin{itemize}
+ \item sprzêt komputerowy - nazywamy je wtedy przerwaniami sprzêtowymi
+ \item kod programu - nazywamy je wtedy przerwaniami programowymi
+ \item procesor - nazywamy je wtedy pu³apkami lub wyj±tami procesora
+\end{itemize}
+
+Obs³ugê przerwañ opisuje tablica deskryptorów dostarczona procesorowi
+na~pocz±tku inicjalizacji systemu. W niej s± zapisane takie informacje
+jak adres podprogramu obs³ugi oraz poziom uprzywilejowania pracy procesora.
+Po zakoñczeniu obs³ugi przerwania procesor wraca do~wykonywania wyw³aszczonego
+zadania.
+
+Przerwanie mo¿e nadej¶æ w~ka¿dym momencie pracy, pomiêdzy dowolnymi
+instrukcjami procesora. W systemie z~podzia³em czasu stwarza stwarza
+to~ryzyko uszkodzenia struktur danych, które sa jednoczesnie modyfikowane
+przez wyw³aszczony program oraz obs³ugê danego przerwania. Np. sterownik
+stacji dyskietek obs³uguj±c przerwanie mo¿e pobraæ zlecenie wej¶cia-wyj¶cia
+z~kolejki, która w³a¶nie by³a modyfikowana przez wyw³aszczony program, chc±cy
+zakolejkowaæ kolejne zlecenie.
+
+Problem jest rozwi±zywany przez wprowadzenia poziomów uprzywilejowania dla
+przerwañ. Przerwania z~ni¿szym priorytetem ni¿ obecny s± odwlekane.
+Do zwiêkszania priorytetu s³u¿± procedury \texttt{splXXX}, gdzie \texttt{XXX}
+jest nazw± poziomu, zwracaj± one obecny poziom uprzywilejowania.
+Procedury nigdy nie zmniejszaj± poziomu uprzywilejowania, co zapobiega
+sytuacj± gdzie priorytet zostanie pocichu zmiejszony przez jedn±
+z~wykorzystanych procedur w~kodzie maj±cym dzia³ajaæ z wiêkszym.
+Priorytet jest przywracany za~pomoc± procedury \texttt{splx}.
+
+Przerwania sprzêtowe s± obs³ugiwane przez chipset Intel 8259A\footnote{
+Tak naprawdê ten chipset nie jest ju¿ produkowany, jest obecnie emulowany
+przez mostek na p³ycie g³ównej. W nowoczesnych procesorach jest zast±piony
+nowym kontrolerem wbudowanym w~procesor.}, za pomoc± niego jest równie¿
+wykonane manipulowanie poziomami uprzywilejowania i~odwlekania
+obs³ugi przerwañ.
+
+Obecnie wyszczególnionymi poziomami uprzywilejowania s±:
+\begin{itemize}
+ \item \texttt{TTY} - poziom odwleka wszystkie przerwania zwi±zane z~obs³ug±
+    terminali, klawiatur.
+
+ \item \texttt{BIO} - poziom odwleka wszystkie przerwania zwi±zane z~obs³ug±
+    urz±dzeñ blokowych.
+
+ \item \texttt{SOFTCLOCK} - poziom odwleka wszystkie przerwania zwi±zane
+    z obs³ug± czasomierzy, w~tym zegar systemowy.
+
+ \item \texttt{HIGH} - poziom odwleka wszystkie przerwania w systemie.
+\end{itemize}
+
+Manipiluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê, na~to
+¿e mo¿e to~opó¼niaæ obs³ugê urz±dzeñ przez sterowniki, co mo¿e wp³yn±æ
+na~wydajno¶æ systemu. Mieszanie tych manipulacji 
+
+
+Sterowniki urz±dzeñ mog± instalowaæ swoje podprogramy obs³ugi za~pomoc±
+procedury \texttt{irq\_install\_handler}, przypisuj±c od~razu odpowiedni
+poziom uprzywilejowania.
+
