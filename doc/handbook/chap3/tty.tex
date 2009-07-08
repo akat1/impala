@@ -29,7 +29,7 @@
 %
 % $Id: vfs.tex 486 2009-06-25 07:51:47Z wieczyk $
 
-\section{Interfejs terminali}
+\section{Interfejs terminali.}
 \label{TTY}
 Programy u¿ytkownika wymagaj± od systemu ujednoliconego dostêpu do urz±dzeñ
 umo¿liwiaj±cych im komunikacjê z u¿ytkownikiem. Urz±dzenia s³u¿±ce do takiej
@@ -49,12 +49,12 @@ nazwê nowego urz±dzenia, dowoln± strukturê z prywatnymi danymi urz±dzenia, oraz
 wska¼nik do funkcji obs³uguj±cej zapis na tym urz±dzeniu. W ten sposób, system
 terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
 funkcjonalno¶ci w zunifikowany sposób.
-\subsection{Re¿im linii}
+\subsection{Re¿im linii.}
 Aby zapewniæ zgodno¶æ programów UNIX'owych z oferowanym przez nas interfejsem
 terminali, zosta³ on zaprojektowany zgodnie ze standardem POSIX dotycz±cym tej
 kwestii. Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana
 ustawieñ terminala.
-\subsubsection{Zmiana ustawieñ}
+\subsubsection{Zmiana ustawieñ.}
 Najwa¿niejsze ustawienia terminala przechowywane s± w strukturze \texttt{termios}.
 Zawiera ona nastêpuj±ce pola:
 
@@ -74,7 +74,7 @@ Przeznaczenie poszczególnych pól zostanie przybli¿one w kolejnych podrozdzia³ach
 Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminala
 - s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}. Funkcje to zosta³y
 zaimplementowane w oparciu o wywo³anie systemowe \texttt{ioctl}.
-\subsubsection{Otwieranie terminala, uprawnienia procesów}
+\subsubsection{Otwieranie terminala, uprawnienia procesów.}
 Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
 \texttt{open}. Aby umo¿liwiæ wielu programom jednoczesne korzystanie z jednego
 terminala, oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash},
@@ -107,7 +107,7 @@ Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid}
 i \texttt{setpgid}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
 poprzez wywo³anie \texttt{ioctl} na deskryptorze pliku terminala, z poleceniem
 \texttt{TIOCSPGRP} (zobacz tak¿e \texttt{tcsetpgrp} i \texttt{tcgetpgrp}).
-\subsubsection{Zapisywanie do terminala}
+\subsubsection{Zapisywanie do terminala.}
 % Mo¿na wywaliæ / skróciæ, w zwi±zku z powielaniem tre¶ci ju¿ opisanych
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
 zazwyczaj z rodziny \texttt{printf}.
@@ -123,7 +123,7 @@ od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
 \texttt{CR} (powrót karetki) na znaki \texttt{NL} (nowej linii) i zamiana znaków
 \texttt{NL} na parê \texttt{CR-NL}.
 
-\subsubsection{Odczyt z terminala}
+\subsubsection{Odczyt z terminala.}
 Urz±dzenie wej¶ciowe otrzymawszy dane, przekazuje je do bufora powi±zanego terminala
 poprzez funkcjê \texttt{tty\_input}. U¿ytkownik uzyskuje dostêp do tych danych
 przy pomocy funkcji bibliotecznych takich jak \texttt{scanf}, korzystaj±cych z wywo³ania
@@ -141,7 +141,7 @@ nowej lini, tak wiêc i ta sytuacja musi byæ obs³ugiwana. Pierwszy tryb wed³ug
 POSIX zwiemy trybem kanoniczym, drugi surowym. Tryb pracy terminala uzale¿niony jest od
 obecno¶ci flagi \texttt{ICANON} w polu \texttt{c\_lflag} struktury opisuj±cej
 konfiguracjê terminala.
-\subsubsection{Tryb kanoniczny}
+\subsubsection{Tryb kanoniczny.}
 Domy¶lnie terminal znajduje siê w trybie kanonicznym.
 W trybie tym rozpoznawane s± znaki specjalne, ustalone w polach tabeli
 \texttt{c\_cc}. Nale¿± do nich EOF, EOL, ERASE, INTR, KILL, QUIT, START, STOP,
@@ -159,19 +159,19 @@ Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia.
 W trybie kanonicznym na wej¶ciu wykonywane jest wstêpne przetwarzanie,
 wed³ug warto¶æi \texttt{c\_iflag}. Mo¿liwe operacje to m.in. ignorowanie znaków
 \texttt{CR}, zamiana znaku \texttt{CR} na znak \texttt{NL} i na odwrót.
-\subsubsection{Tryb surowy}
+\subsubsection{Tryb surowy.}
 W trybie surowym znaki nie s± dodatkowo przetwarzane. Poprzez ustawienie pól
 \texttt{c\_cc[VMIN]} i \texttt{c\_cc[VTIME]} u¿ytkownik mo¿e kontrolowaæ
 minimaln± ilo¶æ znaków, jaka zostanie zwrócona przez \texttt{read}, oraz czas,
 jaki procedura ma czekaæ na kolejny znak (b±d¼ ca³o¶æ wej¶cia - przy \texttt{MIN}$=0$).
-\subsection{Konsola}
+\subsection{Konsola.}
 Jedynym w tej chwili zaimplementowanym w Impali terminalem jest konsola - zestaw
 z³o¿ony z klawiatury i wy¶wietlacza pod³±czonego do karty graficznej.
 Urz±dzenia te s± widoczne w systemie jako kilka osobnych wirtualnych konsoli,
 o plikach \texttt{/dev/ttyvX}, gdzie \texttt{X} jest numerem urz±dzenia.
 Prze³±czanie pomiêdzy tymi konsolami nastêpuje po naci¶niêciu odpowiedniego
 klawisza funkcyjnego \texttt{Fx}.
-\subsubsection{Obs³uga klawiatury}
+\subsubsection{Obs³uga klawiatury.}
 Niskopoziomowa obs³uga klawiatury przebiega nastêpuj±co:
 \begin{itemize}
 \item Ka¿de wci¶niêcie i zwolnienie klawisza powoduje wygenerowanie przerwania
@@ -189,11 +189,11 @@ u¿ytkownik.
 konsoli oraz powi±zanego z ni± terminala poprzez procedurê
 \texttt{vcons\_input\_[char/string]}.
 \end{itemize}
-\subsubsection{Obs³uga karty graficznej}
+\subsubsection{Obs³uga karty graficznej.}
 Niskopoziomowa komunikacja z kart± graficzn± w Impali polega na:
 \begin{itemize}
 \item Pocz±tkowym zainicjalizowaniu karty graficznej, realizowanym poprzez
-wymianê odpowiedni± sekwencjê zapisów i odczytów z portów karty. W kroku tym
+odpowiedni± sekwencjê zapisów i odczytów z portów karty. W kroku tym
 ustawiany jest m.in. kursor sprzêtowy. Poniewa¿ nie ma mo¿liwo¶ci wy³±czenia
 migania kursora sprzêtowego, zostaje on ukryty. Kursor widoczny na ekranie jest
 emulowany programowo.
@@ -204,7 +204,7 @@ Wy¶wietlenie znaku w pewnym miejscu ekranu polega na
 zapisaniu go w odpowiednim miejscu pamiêci. Atrybuty znaków takie jak ich kolor
 dla znaku z komórki pamiêci $x$ ustawiane s± w komórce $x+1$.
 \end{itemize}
-\subsection{Emulacja terminala}
+\subsection{Emulacja terminala.}
 Aby umo¿liwiæ programom u¿ytkownika bardziej zaawansowan± kontrolê nad
 zawarto¶ci± ekranu, wirtualne konsole udaj±, ¿e s± fizycznym terminalem.
 Konsola w Impali emuluje VT100 - tekstowy terminal komputerowy stworzony przez
@@ -217,7 +217,7 @@ Dziêki takim dzia³aniom progamy maj± mo¿liwo¶æ m.in. ustawiaæ pozycjê kursora
 na ekranie, przewijaæ ekran, kasowaæ jego zawarto¶æ, pobieraæ informacje
 o po³o¿eniu kursora i o wspieranych funkcjonalno¶ciach, zmieniaæ tryb pracy
 terminala i atrybuty wypisywanych znaków.
-\subsection{Termcap}
+\subsection{Termcap.}
 Jako, ¿e istnieje wiele terminali, ró¿ni±cych siê sekwencjami
 steruj±cymi, rozmiarem ekranu i innymi szczegó³ami ich dzia³ania, wynik³a
 potrzeba udostêpniania procesowi informacji o terminalu na jakim aktualnie

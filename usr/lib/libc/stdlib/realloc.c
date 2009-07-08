@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdlib_private.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -6,19 +7,21 @@
 void*
 realloc(void *ptr, size_t size)
 {
-    ///@todo impl
+    ///@todo poprawiæ realloc
     if(!ptr)
         return malloc(size);
     if(!size) {
         free(ptr);
         return NULL;
     }
-    size_t oldsize = ((int*)ptr)[-1];
+    mem_chunk_t *mc = ptr - sizeof(mem_chunk_t);
+    size_t oldsize = mc->size;
     if(size<oldsize)
     {
-        ((int*)ptr)[-1] = size;//mo¿na by zwolniæ to wy¿ej ;)
+        //mo¿na zwalniaæ nadmiarow± pam..
         return ptr;
     }
+    //naiwna implementacja
     void* naddr = malloc(size);
     if(!naddr) {
         errno = ENOMEM;

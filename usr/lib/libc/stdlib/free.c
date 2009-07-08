@@ -3,28 +3,14 @@
 #include <stdlib.h>
 #include <stdlib_private.h>
 
-bool __find_chunk(const void *chunk, addr_t arg);
-
-bool
-__find_chunk(const void *chunk, addr_t arg)
-{
-    if ( ((mem_chunk_t *)chunk)->size+((mem_chunk_t *)chunk)->addr >= arg && 
-         ((mem_chunk_t *)chunk)->addr <= arg )
-        return TRUE;
-    else
-        return FALSE;
-}  
-
 void
 free(void *ptr)
 {
+    if ( ptr == NULL )
+        return;
     mem_chunk_t *mc;
     mem_chunk_t *nc;
-
-    mc = list_find(&__mem_chunks, __find_chunk, ptr);
-    
-    if ( mc == NULL )
-        return;
+    mc = ptr - sizeof(mem_chunk_t);
 
     if ( mc->avail )
         return;
@@ -33,7 +19,7 @@ free(void *ptr)
 
     /* z³±czamy s±siednie chunki */
     nc = list_next(&__mem_chunks, mc);
-    
+
     if ( nc && nc->avail ) {
         mc->size = mc->size+nc->size+sizeof(mem_chunk_t);
         list_remove(&__mem_chunks, nc);
