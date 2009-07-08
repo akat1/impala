@@ -31,5 +31,32 @@
 
 \section{Wirtualny system plików (VFS).}
 \label{VFS}
+% no wiêc najpierw przyda³ by siê jaki¶ wstêp, info o tym, czym s± pliki, jak
+% wygl±da ich obs³uga od strony u¿ytkownika
+% potem o 
+\subsection{Pliki od strony u¿ytkownika.}
+Interfejs plików jest jednym z najwa¿niejszych interfejsów jakie programy
+maj± do dyspozycji. W systemach UNIX'owych pliki reprezentuj± ca³± gamê bytów:
+\begin{itemize}
+\item Pliki w standardowym rozumieniu, jako pewnej d³ugo¶ci ci±g bajtów. Jest
+to rodzaj pliku, z jakim u¿ytkownik najczê¶ciej ma kontakt, korzystaj±c
+z~sytemów plików takich FAT, NTFS, UFS, ext3 itd.
+\item Urz±dzenia - zarówno fizycznie istniej±ce w komputerze, jak i wirtualne.
+\item Potoki FIFO
+\item Pliki jako wirtualne byty s³u¿±ce do przekazywania ró¿nych informacji 
+z~j±dra systemu.
+\end{itemize}
+Niezale¿nie od tego, co kryje siê pod plikiem, od strony u¿ytkownika posiada
+on jednolity interfejs. Najwa¿niejszymi funkcjami wchodz±cymi w jego sk³ad s±:
+\texttt{open}, \texttt{close}, \texttt{read}, \texttt{write}, \texttt{ioctl}
+\texttt{fcntl}, \texttt{fseek} i \texttt{fstat}. Otwarty plik w programie jest
+identyfikowany przy pomocy deskryptora pliku - zazwyczaj ma³ej liczby nieujemnej.
+J±dro systemu posiada zwi±zan± z ka¿dym procesem tabelê, s³u¿±c± do t³umaczenia
+deskryptora pliku na strukturê \texttt{file_t}. Wiele deskryptorów plików mo¿e
+wskazywaæ na t± sam± strukturê. Oto, jak wygl±da \texttt{file_t}:
 
-Wirtualny system plików jes
+
+
+\subsection{Pliki od strony j±dra.}
+
+

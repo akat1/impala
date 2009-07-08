@@ -77,7 +77,6 @@ vfs_getinfos(int off, struct mountinfo *tab, int n)
             if (v->vfs_mdev)
                 str_cpy(tab[i].dev, v->vfs_mdev->name);
                 else str_cpy(tab[i].dev, "null");
-        
         }
         r = i;
     }
@@ -88,7 +87,6 @@ vfs_getinfos(int off, struct mountinfo *tab, int n)
 void
 register_fss()
 {
-
     extern vfs_init_t *fstab[];
     for (int i = 0; fstab[i] != NULL; i++) {
         (fstab[i])();

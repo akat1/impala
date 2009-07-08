@@ -271,8 +271,8 @@ sched_unlock_and_wait(mutex_t *m)
     spinlock_lock(&sprq);
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
+    __resched();
     __mutex_unlock(m);
-
     int old=splsoftclock();
     __sched_yield();
     splx(old);
@@ -286,6 +286,7 @@ sched_wait(const char *fl, const char *fn, int l, const char *d)
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     THREAD_SET_WDESCR(curthread, fl, fn, l, d);
+    __resched();
     int s = splsoftclock();
     __sched_yield();
     splx(s);
@@ -397,10 +398,10 @@ select_next_thread()
         p = curthread;
     } else {
         rescheduled = FALSE;
-        p = list_head(&sched_queue[first_not_empty]);
+        p = NULL;
     }
     
-    while ((p = list_next(/*&sched_queue[first_not_empty]*/&run_queue,p))) {
+    while ((p = list_next(&sched_queue[first_not_empty],p))) {
         if (p->thr_flags & THREAD_RUN) {
             return p;
         } else
