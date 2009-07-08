@@ -31,7 +31,30 @@
 
 \section{Pomniejsze us³ugi j±dra.} \label{SERV}
 
-\subsection{Sygna³y}
+\subsection{Wywo³ania systemowe} \label{SYSCALL}
+
+Proces u¿ytkownika nie posiada ¿adnych efektywnych praw pozwalaj±cych mu
+na~samodzielnie modyfikowanie zawarto¶ci plików i katalogów, rozmiaru
+u¿ywanej przez siebie pamiêci czy uruchamianie innych programów - nie posiada
+nawet praw pozwlaj±cych mu samodzielnie zakoñczyæ swoje dzia³anie.
+Wykonanie operacji jest zlecane przez u¿ytkownika za~pomoc± wywo³añ
+systemowych.
+
+U¿ytkownik przekazuje parametry systemowi k³ad±c je na~stos, tak jak by
+mia³ wywo³aæ procedurê w~jêzyku C, lecz zamiast instrukcji wywo³uj±cej
+ustawia numer rz±danej operacje w~rejestrze procesora \texttt{eax}
+i~uruchamia instrukcje generuj±c± odpowiednie przerwanie
+programowe\footnote{W nowoczesnych procesorach s± dostarczone specjalne
+instruckje do~obs³ugi wywo³añ systemowych, zmniejszaj±ce narzut zwi±zany
+z~obs³ug± przerwañ. 
+}. Sterowanie zostaje przekazane przez procesor do~procedury
+\emph{ISR\_syscall}, która przekazuje odpowiednio sterowanie dalej
+do~procedury \emph{syscall}, nie zale¿nej ju¿ od~platformy sprzêtowej.
+
+Po przywróceniu sterowania do~programu w~rejestrze \texttt{eax} znajduje siê
+wynik operacji, a w~rejestrze \texttt{ecx} numer b³êdu.
+
+\subsection{Sygna³y} \label{SIGNAL}
 
 Sygna³y s± podstawowym mechanizmem systemów UNIXowych s³u¿±cym do powiadamiania 
 procesów o zaj¶ciu zdarzeñ systemowych czy komunikacji miêdzy w±tkami. Istnieje
@@ -60,7 +83,7 @@ procedury \texttt{sigenter} i \texttt{sigreturn}, które organizuj± procedury
 obs³ugi sygna³ów w stos.
 
 
-\subsection{Kolejki wiadomo¶ci System V.}
+\subsection{Kolejki wiadomo¶ci.} \label{SYSVMSG}
 
 Kolejki wiadomo¶ci s± jednym z~trzech mechanizmów komunikacji miêdzy
 procesami wywodz±cej siê z~Systemu V. Obok nich istniej± równie¿ mechanizmy

@@ -86,10 +86,30 @@ Obecnie wyszczególnionymi poziomami uprzywilejowania s±:
 
 Manipiluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê, na~to
 ¿e mo¿e to~opó¼niaæ obs³ugê urz±dzeñ przez sterowniki, co mo¿e wp³yn±æ
-na~wydajno¶æ systemu. Mieszanie tych manipulacji 
+na~wydajno¶æ systemu.
 
+Poziom uprzywilejowania mo¿na interpretowaæ równie¿ jako element tworzenia
+sekcji krytycznych blokuj±cych sterowniki lub zegar systemowy uruchamiaj±cy
+program planisty.
+
+Nieuwa¿ne mieszanie zmian poziomu uprzywilejowania
+z~mechanizmami synchronizacji na~w±tkach mo¿e spowodowaæ zakleszczenie ca³ego
+systemu, poniewa¿ mechanizmy synchronizacji w±tków bêd± czekaæ a¿ inny proces
+opu¶ci sekcjê krytyczn±, a zmiana poziomu uprzewilejowania wy³±czy program
+planisty, który odpowiada za~zmianê aktualnie wykonywanego w±tku.
 
 Sterowniki urz±dzeñ mog± instalowaæ swoje podprogramy obs³ugi za~pomoc±
 procedury \texttt{irq\_install\_handler}, przypisuj±c od~razu odpowiedni
 poziom uprzywilejowania.
+
+Przerwania bêd±ce wyj±tkami procesora s± przez niego~rzucane w~szczególnych
+przypadkach jak nieprawid³owy dostêp do~pamiêci czy wykonanie nieprawid³owej
+instrukcji. System Impala zostaje zatrzymany przy ka¿dej pu³apce procesora,
+oprócz pu³apki zwi±zanej z~nieodpowiednim dostêpem pamiêci. W takim wypadku,
+w zale¿no¶ci od tego kto wykona³ nieprawid³owy dostêp s± podejmowane ró¿ne
+akcje. Je¿eli wykona³ go proces u¿ytkownika to~jest do~niego dostarczany
+sygna³ \texttt{SIGSEGV}, je¿eli j±dro to system jest zatrzymywany.
+
+Przerwania programowe s± wykorzystywane do~komunikacji u¿ytkownika z~systemem,
+mechanizm jest omówiony szerzej w~\ref{SYSCALL}.
 
