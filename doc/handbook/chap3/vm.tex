@@ -63,13 +63,17 @@ programu to~ka¿dy wydrukuje ten sam adres, mimo ¿e~ka¿dy ma~swoj± w³asn±
 pamiêæ.
 
 
-Modu³ pamiêci wirtualnej jest podzielony na kilka warstw.
-Najni¿sz± warstw± jest
-\texttt{vm\_pmap} (\emph{page map}) odpowiedzialna za~obs³ugê odwzorowania stron
-na~ramki; 
-\texttt{vm\_seg} odpowiedzialna za~zarz±dzanie wirtualnymi segmentami;
-\texttt{vm\_space} odpowiedzialna za~zarz±dzanie wirtualnymi przestrzeniami
-adresowymi.
+Modu³ pamiêci wirtualnej jest podzielony na kilka warstw:
+\begin{itemize}
+ \item \texttt{vm\_pmap} (\emph{page map}) -
+obs³uga odwzorowania stron
+na~ramki.
+ \item \texttt{vm\_seg} -
+zarz±dzanie wirtualnymi segmentami.
+ \item \texttt{vm\_space} -
+zarz±dzanie wirtualnymi przestrzeniami adresowymi.
+
+\end{itemize}
 
 Obs³uga pamiêci wirtualnej powsta³a pod wp³ywem materia³ów 
 omawiaj±cych zarz±dzanie pamiêci± wirtualn± w~systemach SVR4\footnote{
@@ -259,6 +263,7 @@ w~sobie listê ci±g³ych obszarów, opisywanych przez typ \texttt{vm\_region\_t}.
 
 Rysunek \ref{vm:space} przedstawia opis przestrzeni adresowej u¿ywany
 w~module pamiêci wirtualnej.
+
 
 \subsection{Sterta j±dra.}
 

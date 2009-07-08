@@ -34,23 +34,22 @@
 \section{Wstêp.}
 
 System operacyjny Impala zosta³ zrealizowany w~ramach licencjackiego
-projektu programistycznego na~Uniwersytecie Wroc³awskim. W sk³ad
+projektu programistycznego na~Uniwersytecie Wroc³awskim. W~sk³ad
 systemu wchodzi j±dro, biblioteka systemowa (jêzyka C), biblioteka w±tków
 oraz oprogramowanie. System jest wzorowany na~systemach wywodz±cych siê
-z~systemu UNIX i przeznaczony jest dla komputerów klasy PC.
+z~systemu UNIX i~przeznaczony jest dla~komputerów klasy PC. 
 
 \subsection{Cele i motywacje projektu}
 
-G³ównym celem i motywacj± do postawnia projektu by³a chêæ stworzenia systemu
-operacyjnego, który stanowi³by pomoc w nauce ich budowy i zasad dzia³ania oraz
+G³ównym celem i~motywacj± do~postawnia projektu by³a chêæ stworzenia systemu
+operacyjnego, który stanowi³by pomoc w~nauce ich budowy i~zasad dzia³ania oraz
 mechanizmów niskopoziomowych komputera. Projekt mia³ byæ wzorowany na systemach
-UNIXopodobnych i implementowaæ mo¿liwie najwiêcej zgodnie ze standardem POSIX.
-Jako wyznacznik dojrza³o¶ci projektu oraz funkcjonalno¶ci kodu przyjête zosta³o
-przeniesienie pow³oki systemowej ash oraz edytora tekstu vi. Projektowany
-sytem pomimo, ¿e tworzony wy³±cznie na komputerach klasy PC mia³ byæ mo¿liwie
-najbardziej przeno¶ny. Dodatkow± motywacj± by³a chêæ zg³êbienia kodu i
-mechanizmów dzia³ania popularnych systemów operacyjnych takich jak FreeBSD,
-Solaris czy Linux.
+wywodz±cych siê z~systemu UNIX i~implementowaæ mo¿liwie najwiêcej zgodnie
+ze~standardem POSIX. Jako wyznacznik dojrza³o¶ci projektu oraz funkcjonalno¶ci
+kodu przyjête zosta³o przeniesienie pow³oki systemowej ash oraz edytora tekstu
+vi. Projektowany sytem pomimo, ¿e tworzony wy³±cznie na komputerach klasy PC
+mia³ byæ mo¿liwie najbardziej przeno¶ny. Dodatkow± motywacj± by³a chêæ
+zg³êbienia kodu i mechanizmów dzia³ania popularnych nastêpców systemu UNIX.
 
 \subsection{Co uda³o siê osi±gn±æ}
 
@@ -61,10 +60,23 @@ Za³o¿enie o przeno¶no¶ci systemu zosta³o zrealizowane poprzez oddzielenie kodu
 dzia³aj±cego na poziomie sprzêtu i operuj±cego bezpo¶rednio na nim od kodu
 dzia³aj±cego niezaleznie od platformy. Podej¶cie to umo¿liwia studiowanie
 mechanizmów niskopoziomowych niezale¿nie od reszty systemu. Uda³o siê
-zrealizowaæ za³o¿enie zgodno¶ci ze standardem POSIX i upodobnieniu do UNIXa,
+zrealizowaæ za³o¿enie podobieñstwa do~systemu UNIX,
 czego konsekwencj± jest przeniesienie z powodzeniem pow³oki systemowej ash,
 nie zosta³ jednak zrealizowany cel przeniesienia edytora tekstowego, który
 wymaga dalszego dostosowania.
+
+Pow³oka ash zosta³± zaprogramowana w~1992 roku przez Kennetha Almquista
+dla~systemu BSD UNIX\footnote{Pow³oka do~dzi¶ jest stosowana w~systemie
+FreeBSD jako g³ówna pow³oka systemowa. Niektóre dystrybucje systemu Linux
+u¿ywaj± tej pow³oki jako wyznacznik zgodno¶ci skryptów ze standardem,
+w~dystrybuowanych paczkach jest dostêpna pod nazw± \texttt{dash}.
+}
+jako zastêpnik oryginalnej pow³oki Bourna. Nie posiada
+wielu wygodnych funkcji, jak historia poleceñ i dope³nianie komend,
+ dostêpnych w~popularnych pow³okach \texttt{bash}, \texttt{tcsh}, \texttt{zsh},
+lecz posiada obs³ugê zarz±dzania zadaniami, st±d mo¿na j±
+¶mia³o uznaæ za~wyznacznik podobieñstwa do~systemu UNIX.
+
 
 \section{Organizacja.}
 
@@ -75,7 +87,9 @@ znajduje siê zwiêz³y opis tych z nich, które odegra³y kluczow± rolê podczas
 pracy.
 
 Zarz±dzania prac± grupow± i podzia³u zadañ na poszczególnych programistów
-zosta³o wspomagane przez system TRAC, kolejne etapy projektu zosta³y podzielone na mniejsze
+zosta³o wspomagane przez system EdgeWall
+Trac\footnote{http://trac.edgewall.org/},
+kolejne etapy projektu zosta³y podzielone na mniejsze
 zadania i wprowadzone jako bilety, dziêki wykorzystaniu tego mechanizmu mo¿liwa
 by³a na bie¿±co kontrola efektów pracy i planowanie kolejnych etapów rozwoju.
 Wykorzystane zosta³y równie¿ mechanizmy zarz±dzania tre¶ci± do budowania
@@ -96,7 +110,35 @@ oczekiwany skutek. Zosta³o jednak uznane za sprawê wa¿n±, aby system dzia³a³
 tak¿e na prawdziwych komputerach klasy PC, po dodaniu isotnych czê¶ci systemu
 by³ wiêc testowany i dostosowywany tak, aby dzia³a³ na prawdziwym sprzêcie.
 Emulator Qemu dodatkowo pos³u¿y³ do wpiêcia debuggera gdb, co umo¿liwia³o
-prostsze wy³apywanie b³êdów oraz ¶ledzenie przebiegu programu.
+prostsze wy³apywanie b³êdów oraz ¶ledzenie przebiegu programu. Do obydwu
+emulatorów wraz z~projektem dostarczone s± proste ³aty wype³niaj±ce bajty
+pamiêci komputera wzorcem \texttt{0xe9}, które pozwalaj± wykryæ wiêcej b³êdów
+z~u¿yciem emulatorów.
+
+
+\subsection{Pomoce.}
+
+Przy tworzeniu systemu bardzo pomocne by³y upublicznione ¼ród³a systemów
+wywodz±cych siê z~systemu UNIX. 
+\begin{itemize}
+ \item systemy wywodz±ce siê z~BSD
+\begin{itemize}
+ \item \texttt{http://www.freebsd.org/}
+ \item \texttt{http://www.netbsd.org/}
+ \item \texttt{http://www.openbsd.org/}
+\end{itemize}
+ \item system OpenSolaris
+\begin{itemize}
+ \item \texttt{http://www.opensolaris.org/}
+\end{itemize}
+
+\item system ULTRIX
+\begin{itemize}
+ \item \texttt{ftp://ifctfvax.harhan.org/pub/UNIX/thirdparty/Ultrix-32/sources/}
+\end{itemize}
+\end{itemize}
+
+
 
 \subsection{Podzia³ pracy.}
 

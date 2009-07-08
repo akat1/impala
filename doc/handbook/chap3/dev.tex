@@ -32,10 +32,12 @@
 \section{Sterowniki urz±dzeñ.}
 \label{DEV}
 
-Sterowniki urz±dzeñ w~systemach UNIXowych s± widoczne jako pliki. W naszym
+Wiêkszo¶æ sterowników urz±dzeñ w~systemach UNIXowych tworzy tak zwane
+pliki urz±dzeñ, przez które mo¿na obs³ugiwaæ dane urz±dzenie.
+W naszym
 systemie zarz±dzaniem takimi plikami zajmuje siê specjalny system plików
-\texttt{devfs}, zamontowany w~katalogu \texttt{/dev}. Sterowniki urz±dzeñ
-dziel± siê na~trzy kategorie:
+\texttt{devfs}, zamontowany w~katalogu \texttt{/dev}. Sterowniki plików
+urz±dzeñ dziel± siê na~trzy kategorie:
 
 \begin{itemize}
  \item urz±dzenia blokowe - sterowniki obs³uguj±ce takie
@@ -97,13 +99,14 @@ urz±dzeñ musia³aby emulowaæ urz±dzenia blokowe jako znakowe, co nie by³oby
 wydajne. Dziêki wyodrêbnienie oddzielnej procedury sterownik zawsze dostaje
 zlecenia, których d³ugo¶æ jest wielokrotno¶ci± d³ugo¶ci sektoru oraz mo¿e sam
 zadecydowaæ w~jakiej kolejno¶ci najlepiej je wykonaæ (co t³umaczy nazwê
-procedury - \emph{strategia}). Mo¿liwy jest równie¿ dostêp strumieniowy
-do~takich
-urz±dzeñ, jest on emulowany za~pomoc± procedury \texttt{physio}, która
-wykorzystuje \texttt{d\_strategy}. Nale¿y zwróciæ uwagê, ¿e jest to~jedynie
-dodatkowa metoda dostêpu, przydatna zwykle programom chc±cym bezpo¶rednio
-modyfikowaæ dane na~urz±dzeniu lub ingerowaæ w~zapisany tam system plików
-(jak np programy sprawdzaj±ce powierzchniê dysku czy spójno¶æ systemu plików).
+procedury - \emph{strategia}). 
+% -- nie chce mi siê na jutro physio, nie wyrobie siê. -- wieczyk
+%Mo¿liwy jest równie¿ dostêp strumieniowy do~takich
+%urz±dzeñ, jest on emulowany za~pomoc± procedury \texttt{physio}, która
+%wykorzystuje \texttt{d\_strategy}. Nale¿y zwróciæ uwagê, ¿e jest to~jedynie
+%dodatkowa metoda dostêpu, przydatna zwykle programom chc±cym bezpo¶rednio
+%modyfikowaæ dane na~urz±dzeniu lub ingerowaæ w~zapisany tam system plików
+%(jak np programy sprawdzaj±ce powierzchniê dysku czy spójno¶æ systemu plików).
 Zagadnienie wej¶cia-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
 \ref{BIO}.
 
@@ -231,3 +234,11 @@ transferze czê¶ciowym.
 
 \subsection{Sztuczne urz±dzenia.}
 
+W~naszym systemie istniej± trzy sztuczne urz±dzenia:
+\begin{itemize}
+ \item \texttt{null} - puste urz±dzenie znakowe
+ \item \texttt{zero} - nieskoñczony strumieñ zer
+ \item \texttt{md} (\emph{memory disk}) - urz±dzenie blokowe dzia³aj±ce
+         w~pamiêci RAM. By³o przez nas u¿ywane we wczesnych pracach
+         nad wirtualnym systemem plików.
+\end{itemize}
