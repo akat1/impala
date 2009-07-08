@@ -31,33 +31,106 @@
 
 \section{Wielozadaniowo¶æ.}
 
-\subsection{Szeregowanie zadañ}
+Zadania procesora s± reprezentowane przez w±tki (\texttt{thread\_t}). Ka¿dy
+z~w±tków dostaje kwant czasu na~wykorzystanie procesora, dziêki czemu
+u¿ytkownik mo¿e odnie¶c wra¿enie, ¿e uruchomione przez niego zadania dzia³aj±
+jednocze¶nie. Za przydzia³ czasu procesora jest odpowiedzialny program
+planisty omówiony w \ref{SCHEDULER}.
+
+W±tek posiada w~sobie miêdzy innymi nastêpuj±ce informacje
+\begin{itemize}
+ \item kontekst, s³u¿±cy do~zachowywania jego stanu
+ \item proces do którego przynale¿y w±tek
+ \item adres procedury wej¶ciowej, od~której rozpoczyna siê dzia³anie zadania
+ \item adres stosu u¿ytkownika i jego rozmiar
+ \item adres stosu alternatywnego i jego rozmiar
+ \item przestrzeñ adresowa w której dzia³a to~zadanie (wspólna dla wszystkich
+    w±tków w obrêbie tego samego procesu)
+\end{itemize}
+
+W±tki procesora wykonuj±ce kod u¿ytkownika potrzebuj± dwóch stosów,
+pierwszy stos jest przeznaczony do~standardowego u¿ytku. Natomiast stos
+alternatywny jest wykorzystywany wtedy, kiedy procesor wyw³aszcza zadanie
+obs³uguj±c przerwanie. W±tki wykonuj±ce kod systemu uto¿samiaj± ze~sob±
+te~dwa stosy.
+
+Stosy u¿ytkownika s± jego prywatnymi stosami, tzn istniej±cymi jedynie
+w~jego przestrzeni adresowej, natomiast stosy alternatywne znajduj± siê
+w~przestrzeni j±dra, dziêki czemu s± dostêpne zawsze dla systemu.
+
+Adres procedury wej¶ciowej jest wykorzystywany je¿eli dany w±tek nie mia³
+dot±d ani razu przydzielonego czasu procesora - np. zosta³ dopiero utworzony.
+Wtedy jego dzia³anie rozpoczyna siê od~adresu procedury wej¶ciowej,
+w~przeciwnym od~adresu zapisanego w~kontek¶cie.
+
+Kontekst procesora zawiera w~sobie takie informacje jak ramka przerwania,
+któr± zapisuje procesor na~stos alternatywny przy wyw³aszczeniu przez
+przerwanie oraz pomocniczy schowek na~rejestry procesora.
+
+\subsection{Zmienianie kontekstu procesora.}
+
+Mechanizm zmiany kontekstu procesora jest oparty o~mechanizm obs³ugi przerwañ
+przez procesor. Przed rozpoczêciem omawiania mechanizmu zmian kontekstu
+wyszczególnijmy kilka faktów, zwi±zanych z~prac± procesora.
+\begin{itemize}
+ \item procesor podczas wywo³ywania procedury k³adzie na~stos adres
+       aktualnie wykonywanej instrukcji, tak aby po zakoñczeniu procedury
+       móg³ wróciæ do~kodu j± wywo³uj±cego.
+ \item stos w procesorze jest definiowany przez adres w~rejestrze
+       \texttt{esp}, a operacje na~stosie pobieraj± i zapisuj± dane
+       z~pod tego
+\end{itemize}
+
+
+Pod obs³ugê zegara systemowego, którego przerwanie jest generowane~z
+czê¶tliwo¶ci± 100Hz, jest podpiêty program planisty, który je¿eli zdecyduje
+siê zmieniæ kontekst procesora, tzn wykonywany przez procesor w±tek
+to~przekazuje sterownie do~procedury \texttt{thread\_switch} przekazuj±c jej
+deskryptor aktualnie wykonywanego w±tku (\texttt{curthread}) oraz w±tku
+na~jaki ma~nast±piæ zmiana.
+
+Wspomniana procedura zapisuje aktualne rejestry procesora do~pomocniczego
+schowka w~kontek¶cie w~deskryptorze aktualnie wykonywanego w±tku, a~nastêpnie 
+wczytuje zachowane wcze¶niej rejestry ze schowka drugiego w±tku.
+
+Poniewa¿ w~rejestrach procesora s± zapisane adresy lokalizuj±ce stos
+to powy¿sza operacja powoduje ,,podmianê'' aktualnie wykonywanego stosu
+procesora na ten, jaki by³ w momeñcie zapisywania rejestrów drugiego w±tku
+(to znaczy dok³adni wtedy, kiedy planista uruchomi³ \texttt{thread\_switch}
+podczas pracy drugiego w±tku). 
+
+
+\subsection{Rozwidlanie procesów.}
+
+\subsection{Szeregowanie zadañ} \label{SCHEDULER}
 
 Zaimplementowany w systemie algorytm szeregowania zadañ zosta³ oparty na
-algorytmach planistów zastosowanych w systemach 4.3BSD oraz SVR4. Dok³adny opis tych
-algorytmów znajduje siê w \cite{unixjadro}. 
+algorytmach planistów zastosowanych w systemach 4.3BSD oraz SVR4. Dok³adny 
+opis tych
+algorytmów znajduje siê w~\cite{unixjadro}. 
 
 Omówimy tutaj jedynie ogólny zarys planisty oraz ró¿nice w stosunku do pierwowzoru. 
 Planista przydziela procesom priorytet na podstawie ich ostatniego zachowania w systemie 
 (tzn. zu¿ycia czasu procesora oraz innych statystyk.) oraz poziomu uprzejmo¶ci (nice).
-Priorytet jest liczb± z zakresu od $0$ do $127$, procesy o mniejszej warto¶ci
+Priorytet jest liczb± z~zakresu od~$0$ do~$127$, procesy o~mniejszej warto¶ci
 priorytetu s± traktowane jako wa¿niejsze, mo¿na wiêc rozumieæ tê warto¶æ jako
-karê nak³adan± na proces. Wszystkie w±tki w ramach procesu traktowane s±
-jednakowo i wszystkie posiadaj± priorytet równy priorytetowi procesu. Przestrzeñ
-priorytetów podzielona jest na $32$ grupy po $4$ warto¶ci w ka¿dej grupie,
-kolejka $Q_i$ odpowiada za zbiór priorytetów $i,i+1,i+2,i+3$.
+karê nak³adan± na~proces. Wszystkie w±tki w ramach procesu traktowane s±
+jednakowo i~wszystkie posiadaj± priorytet równy priorytetowi procesu. Przestrzeñ
+priorytetów podzielona jest na~$32$ grupy po~$4$ warto¶ci w ka¿dej grupie,
+kolejka $Q_i$ odpowiada za~zbiór priorytetów $i,i+1,i+2,i+3$.
 Procesy przynale¿± do odpowiednich kolejek, za rozswiewanie ich odpowiada
 okresowo (co \texttt{SCHED\_RESCHEDULE} kwantów czasu) uruchamiana funkcja 
-\texttt{\_\_resched}, po wykonaniu tej funkcji nastêpuje wybranie niepustej
-kolejki zawieraj±cej najni¿sze priorytety i w ramach tej kolejki planista
+\texttt{\_\_resched}, po~wykonaniu tej funkcji nastêpuje wybranie niepustej
+kolejki zawieraj±cej najni¿sze priorytety i~w ramach tej kolejki planista
 realizuje podej¶cie zwane algorytmem karuzelowym, ka¿dy z w±tków w kolejce
 otrzymuje jednakowy kwant czasu. Procesy znajduj±ce siê poza kolejk± nie s±
-brane pod uwagê a¿ do nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
+brane pod uwagê a¿ do~nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
 realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru:
 \[ \mbox{priorytet} = 2\cdot\mbox{poziom\_uprzejmosci} 
     + \mbox{wykorzystanie\_procesora}/2 \]
  Algorytm umo¿liwia
-preferowanie pewnych zadañ przez u¿ytkownika systemu za pomoc± poziomu uprzejmo¶ci, oraz
+preferowanie pewnych zadañ przez u¿ytkownika systemu za~pomoc± poziomu
+uprzejmo¶ci, oraz
 uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
 wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
 (tj. kompilatory). Na uwagê zas³uguje fakt, ¿e podobny algorytm z powodzeniem
