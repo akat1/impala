@@ -44,7 +44,7 @@ dzielon± pamiêæ. (Klawiatura, monitor)
 Wszystkie te urz±dzenia widoczne s± dla u¿ytkownika w ujednoliconej formie - jako
 urz±dzenia terminalowe. W systemie Impala z terminalami zwi±zana jest struktura
 \texttt{tty\_t}. Rejestrowanie nowego urz±dzenia terminalowego w systemie
-nastêpuje poprzez funkcjê \texttt{tty\_create()}. Jako argumenty przyjmuje ona
+nastêpuje poprzez funkcjê \texttt{tty\_create}. Jako argumenty przyjmuje ona
 nazwê nowego urz±dzenia, dowoln± strukturê z prywatnymi danymi urz±dzenia, oraz
 wska¼nik do funkcji obs³uguj±cej zapis na tym urz±dzeniu. W ten sposób, system
 terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
@@ -69,8 +69,8 @@ cc\_t c\_cc[NCCS] & Znaki specjalne \\
 \end{center}
 Przeznaczenie poszczególnych pól zostanie przybli¿one w kolejnych podrozdzia³ach.
 Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminala
-- s± to odpowiednio \texttt{tcsetattr()} i \texttt{tcgetattr()}. Funkcje to zosta³y
-zaimplementowane w oparciu o wywo³anie systemowe \texttt{ioctl()}.
+- s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}. Funkcje to zosta³y
+zaimplementowane w oparciu o wywo³anie systemowe \texttt{ioctl}.
 \subsubsection{Otwieranie terminala, uprawnienia procesów}
 Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
 \texttt{open}. Aby umo¿liwiæ wielu programom jednoczesne korzystanie z jednego
@@ -93,25 +93,27 @@ dodatkowych ¶rodków (w postaci blokowania lub ignorowania sygna³u \texttt{SIGTTO
 Sesja oraz grupa procesów posiadaj± swój identyfikator, równy identyfikatorowi
 procesu, który jako pierwszy do danego bytu nale¿a³.
 Proces taki zwany jest odpowiedni liderem sesji i liderem grupy.
-Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid()}.
+Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid}.
 Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
 otwierania go, o ile proces otwieraj±cy nie posiada ju¿ terminala kontroluj±cego,
 jest liderem sesji, oraz terminal ten nie jest jeszcze zwi±zany z ¿adn± sesj±.
+Terminal kontroluj±cy, sesjê, oraz grupê proces dziedziczy po ojcu w wywo³aniu
+\texttt{fork}.
 
-Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid()}
-i \texttt{setpgid()}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
+Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid}
+i \texttt{setpgid}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
 poprzez wywo³anie \texttt{ioctl} na deskryptorze pliku terminala, z poleceniem
-\texttt{TIOCSPGRP} (zobacz tak¿e \texttt{tcsetpgrp()} i \texttt{tcgetpgrp()}).
+\texttt{TIOCSPGRP} (zobacz tak¿e \texttt{tcsetpgrp} i \texttt{tcgetpgrp}).
 \subsubsection{Zapisywanie do terminala}
 % Mo¿na wywaliæ / skróciæ, w zwi±zku z powielaniem tre¶ci ju¿ opisanych
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
-zazwyczaj z rodziny \texttt{printf()}.
-Funkcja \texttt{printf()} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write()}.
+zazwyczaj z rodziny \texttt{printf}.
+Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write}.
 Ta z koleji, poprzez vnode zwi±zany z deskyptorem pliku przekazuje bufor z danymi
-u¿ytkownika do funkcji obs³ugi \texttt{tty\_write()} urz±dzenia znakowego zwi±zanego z terminalem.
+u¿ytkownika do funkcji obs³ugi \texttt{tty\_write} urz±dzenia znakowego zwi±zanego z terminalem.
 
 Zanim bêdzie móg³ nast±piæ faktyczny zapis danych przy pomocy funkcji zarejestrowanej
-w procedurze \texttt{tty\_create()}, funkcja \texttt{tty\_write()} weryfikuje, czy
+w procedurze \texttt{tty\_create}, funkcja \texttt{tty\_write} weryfikuje, czy
 pisz±cy proces ma do tego prawo, oraz w zale¿no¶ci od ustawieñ wykonuje koñcowe
 przekszta³cenia na danych u¿ytkownika. Wykonywane przekszta³cenia uzale¿nione s±
 od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
@@ -120,9 +122,9 @@ od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
 
 \subsubsection{Odczyt z terminala}
 Urz±dzenie wej¶ciowe otrzymawszy dane, przekazuje je do bufora powi±zanego terminala
-poprzez funkcjê \texttt{tty\_input()}. U¿ytkownik uzyskuje dostêp do tych danych
-przy pomocy funkcji bibliotecznych takich jak \texttt{scanf()}, korzystaj±cych z wywo³ania
-systemowego \texttt{read()}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
+poprzez funkcjê \texttt{tty\_input}. U¿ytkownik uzyskuje dostêp do tych danych
+przy pomocy funkcji bibliotecznych takich jak \texttt{scanf}, korzystaj±cych z wywo³ania
+systemowego \texttt{read}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
 
 Wyobra¼my sobie nastêpuj±c± sytuacjê: program pyta u¿ytkownika, o podanie imienia,
 ten jednak, w po³owie wpisywanego tekstu pope³ni³ b³±d i skorygowa³ go przy u¿yciu
@@ -133,7 +135,7 @@ dba o obs³ugê zmian w ramach jednej lini wej¶cia zosta³ uwzglêdniony w standardz
 POSIX jako element interfejsu terminali. Oczywi¶cie niektóre programy chc±
 znaæ kody wszystkich naciskanych klawiszy, bez konieczno¶ci czekania na znak
 nowej lini, tak wiêc i ta sytuacja musi byæ obs³ugiwana. Pierwszy tryb wed³ug
-POSIX zwiemy trybem kanoniczym. Tryb pracy terminala uzale¿niony jest od
+POSIX zwiemy trybem kanoniczym, drugi surowym. Tryb pracy terminala uzale¿niony jest od
 obecno¶ci flagi \texttt{ICANON} w polu \texttt{c\_lflag} struktury opisuj±cej
 konfiguracjê terminala.
 \subsubsection{Tryb kanoniczny}
@@ -146,10 +148,82 @@ SUSP i TIME. Sterownik dokonuje edycji linii w przypadku rozpoznania znaku ERASE
 oraz SUSP powoduje wys³anie do grupy procesów pierwszoplanowych odpowiednio
 sygna³u \texttt{SIGINT}, \texttt{SIGQUIT}, \texttt{SIGTSTP}.
 
-Procedura \texttt{read()} zwraca wynik, tylko w przypadku gdy
+Procedura \texttt{read} zwraca wynik, tylko w przypadku gdy
 w buforze wej¶ciowym terminala istnieje linia zakoñczona znakiem NL, EOF b±d¼ EOL.
-Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia. 
+Je¿eli linia nie jest jeszcze gotowa, proces zasypia w oczekiwaniu na ni±.
+Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia.
 
-Aby umo¿liwiæ programom u¿ytkownika dostêp do klawiatury i monitora, 
+W trybie kanonicznym na wej¶ciu wykonywane jest wstêpne przetwarzanie,
+wed³ug warto¶æi \texttt{c\_iflag}. Mo¿liwe operacje to m.in. ignorowanie znaków
+\texttt{CR}, zamiana znaku \texttt{CR} na znak \texttt{NL} i na odwrót.
+\subsubsection{Tryb surowy}
+W trybie surowym znaki nie s± dodatkowo przetwarzane. Poprzez ustawienie pól
+\texttt{c\_cc[VMIN]} i \texttt{c\_cc[VTIME]} u¿ytkownik mo¿e kontrolowaæ
+minimaln± ilo¶æ znaków, jaka zostanie zwrócona przez \texttt{read}, oraz czas,
+jaki procedura ma czekaæ na kolejny znak (b±d¼ ca³o¶æ wej¶cia - przy \texttt{MIN}$=0$).
 \subsection{Konsola}
+Jedynym w tej chwili zaimplementowanym w Impali terminalem jest konsola - zestaw
+z³o¿ony z klawiatury i wy¶wietlacza pod³±czonego do karty graficznej.
+Urz±dzenia te s± widoczne w systemie jako kilka osobnych wirtualnych konsoli,
+o plikach \texttt{/dev/ttyvX}, gdzie \texttt{X} jest numerem urz±dzenia.
+Prze³±czanie pomiêdzy tymi konsolami nastêpuje po naci¶niêciu odpowiedniego
+klawisza funkcyjnego \texttt{Fx}.
+\subsubsection{Obs³uga klawiatury}
+Niskopoziomowa obs³uga klawiatury przebiega nastêpuj±co:
+\begin{itemize}
+\item Ka¿de wci¶niêcie i zwolnienie klawisza powoduje wygenerowanie przerwania
+klawiatury.
+\item Procedura obs³ugi tego przerwania rozpoznaje rodzaj zdarzenia,
+odczytuj±c jego kod - "scancode" - z odpowiedniego portu uk³adu kontrolera
+klawiatury (i8042).
+\item Na podstawie scancode wyznaczany jest unikalny kod klawisza - "keycode".
+\item Na podstawie kodu klawisza, przechowywanych w sterowniku informacji
+o naci¶niêtych klawiszach specjalnych takich jak shift, alt i ctrl
+oraz "keymapy" odwzorowuj±cej te informacje w znak (ewentualnie ci±g znaków)
+ASCII, wyznaczany jest wynik naci¶niêcia klawisza w postaci, jakiej oczekuje
+u¿ytkownik.
+\item Wynik z poprzedniego kroku przekazywany jest do aktywnej wirtualnej
+konsoli oraz powi±zanego z ni± terminala poprzez procedurê
+\texttt{vcons\_input\_[char/string]}.
+\end{itemize}
+\subsubsection{Obs³uga karty graficznej}
+Niskopoziomowa komunikacja z kart± graficzn± w Impali polega na:
+\begin{itemize}
+\item Pocz±tkowym zainicjalizowaniu karty graficznej, realizowanym poprzez
+wymianê odpowiedni± sekwencjê zapisów i odczytów z portów karty. W kroku tym
+ustawiany jest m.in. kursor sprzêtowy. Poniewa¿ nie ma mo¿liwo¶ci wy³±czenia
+migania kursora sprzêtowego, zostaje on ukryty. Kursor widoczny na ekranie jest
+emulowany programowo.
+\item Bufor ramki karty graficznej jest wmapowany w pamiêæ pod adresem fizycznym\\
+\texttt{0xb8000}. Wy¶wietlenie znaku w pewnym miejscu ekranu polega na
+zapisaniu go w odpowiednim miejscu pamiêci. Atrybuty znaków takie jak ich kolor
+dla znaku z komórki pamiêci $x$ ustawiane s± w komórce $x+1$.
+\end{itemize}
+\subsection{Emulacja terminala}
+Aby umo¿liwiæ programom u¿ytkownika bardziej zaawansowan± kontrolê nad
+zawarto¶ci± ekranu, wirtualne konsole udaj±, ¿e s± fizycznym terminalem.
+Konsola w Impali emuluje terminal VT100. Emulacja ta polega na rozpoznawaniu
+sekwencji steruj±cych tego terminala oraz odpowiednim reagowaniu na nie.
+Podobnie, wej¶cie z klawiatury przedstawiane jest u¿ytkownikowi w postaci, jak±
+by otrzyma³ pracuj±c na terminalu VT100 i korzystaj±c z jego klawiatury.
 
+Dziêki takim dzia³aniom progamy maj± mo¿liwo¶æ m.in. ustawiaæ pozycjê kursora
+na ekranie, przewijaæ ekran, kasowaæ jego zawarto¶æ, pobieraæ informacje
+o po³o¿eniu kursora i o wspieranych funkcjonalno¶ciach, zmieniaæ tryb pracy
+terminala i atrybuty wypisywanych znaków.
+\subsection{Termcap}
+Jako, ¿e istnieje wiele terminali, ró¿ni±cych siê sekwencjami
+steruj±cymi, rozmiarem ekranu i innymi szczegó³ami ich dzia³ania, wynik³a
+potrzeba udostêpniania procesowi informacji o terminalu na jakim aktualnie
+dzia³a. Identyfikator tego terminala przechowywany jest w zmiennej ¶rodowiskowej
+\texttt{TERM}. Dostêp do informacji o konkretnych sekwencjach steruj±cych
+mo¿liwy jest poprzez nastêpuj±ce funkcje biblioteki C: \texttt{tgetstr},
+\texttt{tgetnum}, \texttt{tgetflag}. Zanim jednak bêdziemy mogli skorzystaæ
+z tych funkcji, konieczne jest za³adowanie informacje o wybranym terminalu
+za pomoc± funkcji \texttt{tgetent}. Informacje uzyskane z wymienionych funkcji
+mog± s³u¿yæ jako wej¶cie do procedury \texttt{tgoto}, wype³niaj±cej sekwencjê
+steruj±c± o wymagane argumenty, oraz procedury \texttt{tputs} wysy³aj±cej
+sekwencjê do terminala.
+
+Baza danych dla termcap typowo przechowywana w pliku, jest u nas dostêpna
+jako warto¶æ zmiennej ¶rodowiskowej \texttt{TERMCAP}.

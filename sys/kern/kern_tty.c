@@ -149,7 +149,7 @@ tty_read(devd_t *d, uio_t *u, int flags)
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)
                 return -EAGAIN;
-            clist_wait(tty->t_inq);
+            clist_wait(tty->t_inq); ///@todo wy¶cig... dodaæ jakie¶ blokowanie
         }
         size_t to_go = MIN(need, clist_size(tty->t_inq));
         int i=0;
@@ -370,7 +370,7 @@ tty_erase(tty_t *tty)
 {
     if(clist_size(tty->t_clq)==0)
         return;
-    char c = clist_unpush(tty->t_clq);    
+    char c = clist_unpush(tty->t_clq);
     if(tty->t_conf.c_lflag & ECHOE) {
         int todel = 0;
         if(c == '\t') {
