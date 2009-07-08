@@ -36,18 +36,67 @@
 System operacyjny Impala zosta³ zrealizowany w~ramach licencjackiego
 projektu programistycznego na~Uniwersytecie Wroc³awskim. W sk³ad
 systemu wchodzi j±dro, biblioteka systemowa (jêzyka C), biblioteka w±tków
-oraz oprogramowanie. Sam system jest wzorowany na~systemach wywodz±cych siê
-z~systemu UNIX.
+oraz oprogramowanie. System jest wzorowany na~systemach wywodz±cych siê
+z~systemu UNIX i przeznaczony jest dla komputerów klasy PC.
 
-% * jak powsta³
-% * sk±d pomys³
-% * jakie cele sobie postawili¶my, jakie uda³o siê zrealizowaæ.
+\subsection{Cele i motywacje projektu}
+
+G³ównym celem i motywacj± do postawnia projektu by³a chêæ stworzenia systemu
+operacyjnego, który stanowi³by pomoc w nauce ich budowy i zasad dzia³ania oraz
+mechanizmów niskopoziomowych komputera. Projekt mia³ byæ wzorowany na systemach
+UNIXopodobnych i implementowaæ mo¿liwie najwiêcej zgodnie ze standardem POSIX.
+Jako wyznacznik dojrza³o¶ci projektu oraz funkcjonalno¶ci kodu przyjête zosta³o
+przeniesienie pow³oki systemowej ash oraz edytora tekstu vi. Projektowany
+sytem pomimo, ¿e tworzony wy³±cznie na komputerach klasy PC mia³ byæ mo¿liwie
+najbardziej przeno¶ny. Dodatkow± motywacj± by³a chêæ zg³êbienia kodu i
+mechanizmów dzia³ania popularnych systemów operacyjnych takich jak FreeBSD,
+Solaris czy Linux.
+
+\subsection{Co uda³o siê osi±gn±æ}
+
+Zrealizowany projekt z pewno¶ci± stwarza mo¿liwo¶æ zg³êbienia tajników
+budowy i zasad dzia³ania systemu operacyjnego, wszystkie wa¿ne mechanizmy
+zosta³y zaprojektowane, zaimplementowane i omówione w tej dokumentacji.
+Za³o¿enie o przeno¶no¶ci systemu zosta³o zrealizowane poprzez oddzielenie kodu
+dzia³aj±cego na poziomie sprzêtu i operuj±cego bezpo¶rednio na nim od kodu
+dzia³aj±cego niezaleznie od platformy. Podej¶cie to umo¿liwia studiowanie
+mechanizmów niskopoziomowych niezale¿nie od reszty systemu. Uda³o siê
+zrealizowaæ za³o¿enie zgodno¶ci ze standardem POSIX i upodobnieniu do UNIXa,
+czego konsekwencj± jest przeniesienie z powodzeniem pow³oki systemowej ash,
+nie zosta³ jednak zrealizowany cel przeniesienia edytora tekstowego, który
+wymaga dalszego dostosowania.
 
 \section{Organizacja.}
 
-% * jaki by³ podzia³ pracy
-
 \subsection{U¿yte narzêdzia.}
-% * jakich narzêdzi u¿yli¶my: GDB, SVN, Trac
 
+Realizacja projektu wymaga³a u¿ycia wielu narzêdzi dostarczonych z zewn±trz, poni¿ej
+znajduje siê zwiêz³y opis tych z nich, które odegra³y kluczow± rolê podczas
+pracy.
+
+Zarz±dzania prac± grupow± i podzia³u zadañ na poszczególnych programistów
+zosta³o wspomagane przez system TRAC, kolejne etapy projektu zosta³y podzielone na mniejsze
+zadania i wprowadzone jako bilety, dziêki wykorzystaniu tego mechanizmu mo¿liwa
+by³a na bie¿±co kontrola efektów pracy i planowanie kolejnych etapów rozwoju.
+Wykorzystane zosta³y równie¿ mechanizmy zarz±dzania tre¶ci± do budowania
+zal±¿ków dokumentacji oraz wymiany naistotniejszych informacji o projekcie.
+Interfejs dodatkowo stanowi³ graficzn± nak³adkê na system kontroli wersji pozwalaj±c 
+wygodnie przegl±daæ kolejne rewizje kodu.
+
+System kontroli wersji SVN zosta³ wykorzystany do synchronizacji kodu, umo¿liwi³
+on niezale¿n± i wygodn± pracê nad projektem ka¿demu z uczestników. Wykorzysane
+zosta³y mechnizmy ga³êzi do rozwijania wiêkszych mechanizmów, które nastêpnie
+by³y scalane do g³ównego drzewa. System pozwoli³ na bie¿±co ¶ledziæ zmiany w
+kodzie wprowadzane przy kolejnych rewizjach.
+
+Emulatory komputerów PC, Qemu oraz BOCHS, pozwoli³y na wygodne testowanie
+pisanego kodu, dziêki tym programom nie istnia³a potrzeba ci±g³ych restartów
+komputera w celu sprawdzenia czy wprowadzane do systemu zmiany przynios³y
+oczekiwany skutek. Zosta³o jednak uznane za sprawê wa¿n±, aby system dzia³a³
+tak¿e na prawdziwych komputerach klasy PC, po dodaniu isotnych czê¶ci systemu
+by³ wiêc testowany i dostosowywany tak, aby dzia³a³ na prawdziwym sprzêcie.
+Emulator Qemu dodatkowo pos³u¿y³ do wpiêcia debuggera gdb, co umo¿liwia³o
+prostsze wy³apywanie b³êdów oraz ¶ledzenie przebiegu programu.
+
+\subsection{Podzia³ pracy.}
 

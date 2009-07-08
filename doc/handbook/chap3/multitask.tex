@@ -63,4 +63,30 @@ wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
 (tj. kompilatory). Na uwagê zas³uguje fakt, ¿e podobny algorytm z powodzeniem
 wykorzystywany jest do dzi¶ w systemach rodziny BSD.
 
+\subsection{Sygna³y}
+
+Sygna³y s± podstawowym mechanizmem systemów UNIXowych s³u¿±cym do powiadamiania 
+procesów o zaj¶ciu zdarzeñ systemowych czy komunikacji miêdzy w±tkami. Istnieje
+wiele niekompatyblilnych ze sob± implementacji sygna³ów w systemach UNIXowych,
+ze wzglêdu na spory chaos na tej p³aszczy¼nie zdecydowali¶my siê na
+implementacjê zgodn± ze standardem POSIX wzorowan± na systemach rodziny BSD.
+
+System sygna³ów jest bardzo prostym i intuicyjnym mechanizmem, dzia³a on na
+zasadzie poinformowania procesu o nadej¶ciu jednego z 32 sygna³ów i podjêciu
+przez ten proces odpowiedniej akcji. Procesy mog± same decydowaæ co zrobiæ z
+sygna³em, który zosta³ do nich dostarczony, mo¿liwe jest podjêcie akcji
+domy¶lnej, zignorowanie sygna³u oraz w³asna obs³uga sygna³u. Wyj±tkiem s±
+sygna³y SIGSTOP i SIGKILL, które nie mog± zostaæ zignorowane lub zamienione
+w³asn± obs³ug± sygna³u. Wielokrotne dostarczenie jednego sygna³u do procesu
+zanim proces zd±¿y sygna³ obs³u¿yæ jest równoznaczne z jednokrotnym wys³aniem
+sygna³u. Sygna³y w systemie dostarczane s± do procesu do bloku kontrolnego
+procesu, sygna³ mo¿e obs³u¿yæ dowolny jego w±tek, ustawiaj±c w bloku kontrolnym
+jego obs³u¿enie i nastêpnie podejmuj±c akcje odpowiedni± dla niego. Obs³ugê
+sygna³u mo¿na rozumieæ jako przerwanie dzia³ania programu, wykonanie procedury
+obs³ugi a nastêpnie powrót do miejsca, w którym nast±pi³o przerwanie.
+Sprawdzanie czy nadszed³ nowy sygna³ realizowane jest przy zmianie kontekstu
+oraz powrocie z wywo³añ systemowych. Poniewa¿ mo¿liwe jest przerywanie dzia³ania procedur
+obs³ugi sygna³ów, to j±dro udostêpnia specjalny interfejs obs³ugi sygna³ów przez
+procedury \texttt{sigenter} i \texttt{sigreturn}, które organizuj± procedury
+obs³ugi sygna³ów w stos.
 
