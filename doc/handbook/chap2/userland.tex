@@ -1,0 +1,83 @@
+% Impala Operating System
+%
+% Copyright (C) 2009 University of Wroclaw. Department of Computer Science
+%    http://www.ii.uni.wroc.pl/
+% Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
+%    http://trzask.codepainters.com/impala/trac/
+% All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%  notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%  notice, this list of conditions and the following disclaimer in the
+%  documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+%
+% $Id$
+
+\section{Przestrzeñ u¿ytkownika.}
+
+Z punktu widzenia u¿ytkownika opisane poni¿ej programy mo¿na traktowaæ jako
+komendy wydawane pow³oce systemowej, nale¿y mieæ jednak ¶wiadomo¶æ, ¿e s±
+zewnêtrznymi programami i nie stanowi± jej integralnej czê¶ci. W projekcie uda³o
+siê zawrzeæ minimalny podzbiór podstawowych komend systemów UNIXowych, poni¿ej
+znajduje siê krótki opis programów, które dostêpne s± dla u¿ytkownika systemu.
+
+\subsection{Drzewo katalogów}
+
+Drzewo katalogów systemu jest zgodne ze standardem
+przyjêtym w systemach UNIXowych.
+
+\begin{itemize}
+\item \texttt{./bin} - programy standardowe.
+\item \texttt{./etc} - skrypty oraz pliki konfiguracyjne.
+\item \texttt{./tmp} - pliki tymczasowe.
+\item \texttt{./sbin} - programy specjalne.
+\item \texttt{./var} - katalog systemowy.
+\end{itemize}
+
+\subsection{Polecenia standardowe}
+
+W systemie zaimplementowano czê¶æ podstawowych komend systemów UNIXowych, na
+uwagê zas³uguj± programy sh oraz vttest, które zosta³y przeniesione do projektu
+bez istotnych modyfikacji w ich kodzie.
+
+\begin{itemize}
+\item \texttt{cat} - wypisywanie zawarto¶ci pliku na standardowe
+wyj¶cie.
+\item \texttt{ls} - listowanie zawarto¶ci katalogów.
+\item \texttt{minigzip} - kompresja i dekompresja plików.
+\item \texttt{mkdir} - tworzenie katalogów.
+\item \texttt{ps} - listowanie procesów.
+\item \texttt{sh} - pow³oka systemowa.
+\item \texttt{tar} - program archiwizuj±cy.
+\item \texttt{truncate} - ustawienie d³ugo¶ci pliku.
+\item \texttt{uname} - wy¶wietlenie informacji o systemie.
+\item \texttt{vttest} - testowanie zgodno¶ci z terminalem VT100.
+\end{itemize}
+
+\subsection{Polecenia specjalne}
+
+Polecenia specjalne s³u¿± do wykonywania prac administracyjnych, systemowych
+oraz ewentualnego uzyskiwania informacji na temat systemu.
+
+\begin{itemize}
+\item \texttt{init} - rozruch systemu.
+\item \texttt{login} - rozpoczêcie sesji.
+\item \texttt{mount} - wy¶wietlenie informacji o zamontowanych systemach plików.
+\item \texttt{preinit} - wstêpny rozruch systemu.
+\end{itemize}

@@ -54,7 +54,26 @@ title System operacyjny Impala-LPP
 Pierwszy wpis uruchamia program ³aduj±cy z~dyskietki, tak jak by to~zrobi³
 BIOS, a~drugi wpis bezpo¶rednio uruchamia j±dro naszego systemu.
 
-Po za³adowaniu j±dra nast±pi proces inicjalizacji systemu, w~sk³ad którego
+Po za³adowaniu j±dra nastêpuje proces inicjalizacji systemu, w~sk³ad którego
 wchodzi rozpakowanie danych systemu z~dyskietki oraz uruchomienie
 skryptów startowych. Po wykonaniu tej fazy zostan± udostêpnione trzy
 wirtualne terminale, na których bêdzie uruchomiona pow³oka.
+
+\subsection{Parametry j±dra}
+
+U¿yty w procesie startu progam ³aduj±cy GRUB daje mo¿liwo¶æ przekazania
+parametrów do ³adowanego j±dra. Parametry przekazuje siê poprzez klauzulê kernel
+programu GRUB jako ci±g parametrów oddzielonych znakiem spacji.
+
+\begin{itemize}
+\item \texttt{debug} - wy¶wietlanie komunikatów diagnostycznych.
+\item \texttt{init} - ¶cie¿ka do programu init.
+\item \texttt{iobufs} - ilo¶æ buforów w pamiêci podrêcznej BIO.
+\item \texttt{stacksize} - domy¶lny rozmiar stosu dla w±tków u¿ytkownika.
+\item \texttt{kstacksize} - domy¶lny rozmiar stosu alternatywnego i w±tków
+j±dra.
+\item \texttt{sched\_quantum} - kwant czasu przyznawany programom przez planiste
+systemowego.
+\item \texttt{vm\_knptbl} - ilo¶æ tablic stron przeznaczonych dla j±dra
+\end{itemize}
+
