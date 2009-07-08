@@ -75,6 +75,7 @@ Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
 terminala, oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash},
 procesy zosta³y podzielone na sesje, oraz w ramach sesji na grupy. Ogólnie rzecz
 bior±c, proces mo¿e korzystaæ tylko z terminala bêd±cego jego terminalem kontroluj±cym.
+
 Wszystkie procesy w ramach sesji, które maj± ustawiony terminal kontroluj±cy,
 maj± ustawiony ten sam terminal. Tak wiêc terminal jest powi±zany z sesj±.
 W ramach sesji procesy tworz± roz³±czne grupy, z których jedna mo¿e byæ
@@ -82,16 +83,24 @@ wyszczególniona jako grupa procesów pierwszoplanowych terminala. Procesy z tej
 grupy jako jedyne maj± dostêp do wej¶cia z terminala. Co do zapisu na terminal,
 mo¿liwy jest on tak¿e spoza grupy procesów pierwszoplanowych, jednak to wymaga
 dodatkowych ¶rodków (w postaci blokowania / obs³ugi sygna³u \texttt{TTOUT}).
+
 Proces który utworzy³ sesjê zwany jest liderem sesji, podobnie jest z liderem
 grupy. Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
 otwierania go, o ile proces otwieraj±cy nie posiada ju¿ terminala kontroluj±cego,
 jest liderem sesji, oraz terminal ten nie jest jeszcze zwi±zany z ¿adn± sesj±.
+Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid}.
+Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid}
+i \texttt{setpgid}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
+poprzez wywo³anie \texttt{ioctl} na deskryptorze pliku terminala, z poleceniem
+\texttt{TIOCSPGRP}.
 \subsubsection{Zapisywanie do terminala}
+% Mo¿na wywaliæ / skróciæ, w zwi±zku z powielaniem tre¶ci ju¿ opisanych
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
 zazwyczaj z rodziny \texttt{printf}.
 Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write}.
 Ta z koleji, poprzez vnode zwi±zany z deskyptorem pliku przekazuje bufor z danymi
 u¿ytkownika do funkcji obs³ugi \texttt{tty\_write} urz±dzenia znakowego zwi±zanego z terminalem.
+
 Zanim bêdzie móg³ nast±piæ faktyczny zapis danych przy pomocy funkcji zarejestrowanej
 w procedurze \texttt{tty\_create}, funkcja \texttt{tty\_write} weryfikuje, czy
 pisz±cy proces ma do tego prawo, oraz w zale¿no¶ci od ustawieñ wykonuje koñcowe
@@ -105,6 +114,7 @@ Urz±dzenie wej¶ciowe otrzymawszy dane, przekazuje je do bufora powi±zanego termi
 poprzez funkcjê \texttt{tty\_input}. U¿ytkownik uzyskuje dostêp do tych danych
 przy pomocy funkcji bibliotecznych takich jak \texttt{scanf}, korzystaj±cych z wywo³ania
 systemowego \texttt{read}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
+
 Wyobra¼my sobie nastêpuj±c± sytuacjê: program pyta u¿ytkownika, o podanie imienia,
 ten jednak, w po³owie wpisywanego tekstu pope³ni³ b³±d i skorygowa³ go przy u¿yciu
 klawisza backspace. Program jest zainteresowany jedynie poprawionym wpisem, a nie
@@ -117,7 +127,19 @@ nowej lini, tak wiêc i ta sytuacja musi byæ obs³ugiwana. Pierwszy tryb wed³ug
 POSIX zwiemy trybem kanoniczym. Tryb pracy terminala uzale¿niony jest od
 obecno¶ci flagi \texttt{ICANON} w polu \texttt{c\_lflag} struktury opisuj±cej
 konfiguracjê terminala.
+\subsubsection{Tryb kanoniczny}
+Domy¶lnie terminal znajduje siê w trybie kanonicznym.
+W trybie tym rozpoznawane s± znaki specjalne, ustalone w polach tabeli
+\texttt{c\_cc}. Nale¿± do nich EOF, EOL, ERASE, INTR, KILL, QUIT, START, STOP,
+SUSP i TIME. Sterownik dokonuje edycji linii w przypadku rozpoznania znaku ERASE
+(usuniêcie ostatniego znaku) b±d¼ KILL (usuniêcie ca³ej lini). Je¿eli pole
+\texttt{c\_lflag} zawiera flagê \texttt{ISIG}, wyst±pienie znaków INTR, QUIT
+oraz SUSP powoduje wys³anie do grupy procesów pierwszoplanowych odpowiednio
+sygna³u SIGINT, SIGQUIT, SIGTSTP.
 
+Procedura \texttt{read} zwraca wynik, tylko w przypadku gdy
+w buforze wej¶ciowym terminala istnieje linia zakoñczona znakiem NL, EOF b±d¼ EOL.
+Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia. 
 
 Aby umo¿liwiæ programom u¿ytkownika dostêp do klawiatury i monitora, 
 \subsection{Konsola}
