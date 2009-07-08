@@ -37,6 +37,7 @@
 #include <sys/clock.h>
 #include <sys/utils.h>
 #include <sys/kargs.h>
+#include <sys/string.h>
 #include <sys/signal.h>
 #include <machine/interrupt.h>
 
@@ -187,7 +188,7 @@ __sched_yield()
 void
 do_switch()
 {
-    int old=splbio();
+    int old=splsoftclock();
     KASSERT(old==0);
 
     /* Reorganizacja kolejek w±tków */
@@ -272,7 +273,7 @@ sched_unlock_and_wait(mutex_t *m)
     curthread->thr_flags |= THREAD_SLEEP;
     __mutex_unlock(m);
 
-    int old=splbio();
+    int old=splsoftclock();
     __sched_yield();
     splx(old);
 }
@@ -285,7 +286,7 @@ sched_wait(const char *fl, const char *fn, int l, const char *d)
     curthread->thr_flags &= ~THREAD_RUN;
     curthread->thr_flags |= THREAD_SLEEP;
     THREAD_SET_WDESCR(curthread, fl, fn, l, d);
-    int s = splbio();
+    int s = splsoftclock();
     __sched_yield();
     splx(s);
     curthread->thr_wdescr.descr = "running";
@@ -351,7 +352,7 @@ msleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
     sched_wait(fl, fn, l, d);
 }
 
-/// Niszczy aktualny w±tek.
+/// Niszczy w±tek.
 void
 sched_exit(thread_t *t)
 {
@@ -361,10 +362,12 @@ sched_exit(thread_t *t)
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
     if ( t == curthread ) {
         curthread = NULL;
-        int old = splbio();
+        int old = splsoftclock();
         KASSERT(old <= IPL_SOFTCLOCK);
         __sched_yield();
         spl0();
+    } else {
+        spinlock_unlock(&sprq);
     }
 }
 
@@ -386,7 +389,7 @@ sched_dump()
 thread_t *
 select_next_thread()
 {
-  //  kprintf("%u %u %u\n", first_not_empty, list_length(&run_queue), list_length(&sched_queue[first_not_empty]));
+    //kprintf("%u %u %u\n", first_not_empty, list_length(&run_queue), list_length(&sched_queue[first_not_empty]));
     
     thread_t *p;
     
@@ -397,7 +400,7 @@ select_next_thread()
         p = list_head(&sched_queue[first_not_empty]);
     }
     
-    while ((p = list_next(&sched_queue[first_not_empty],p))) {
+    while ((p = list_next(/*&sched_queue[first_not_empty]*/&run_queue,p))) {
         if (p->thr_flags & THREAD_RUN) {
             return p;
         } else
@@ -424,8 +427,8 @@ select_next_thread()
 void
 sleepq_init(sleepq_t *q)
 {
+    mem_zero(q, sizeof(*q));
     LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
-//    mutex_init(&q->sq_mtx, MUTEX_NORMAL);
 }
 
 void
@@ -438,7 +441,7 @@ sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d)
     SET(curthread->thr_flags, THREAD_SLEEPQ);
     spinlock_lock(&sprq);
     splx(s);
-    s = splbio();
+    s = splsoftclock();
     spinlock_unlock(&sprq);
     UNSET(curthread->thr_flags,THREAD_RUN);
     SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
@@ -454,6 +457,7 @@ sleepq_wakeup(sleepq_t *q)
     while ( (t = list_extract_first(&q->sq_waiting)) ) {
         UNSET(t->thr_flags,THREAD_SLEEPQ);
         _sched_wakeup(t);
+        t->thr_sleepq = 0;
     }
     splx(s);
 }
@@ -461,12 +465,18 @@ sleepq_wakeup(sleepq_t *q)
 void
 sleepq_intrpt(thread_t *t)
 {
+    int s = splhigh();
+    sleepq_t *q = t->thr_sleepq;
+    UNSET(t->thr_flags,THREAD_SLEEPQ);
+    _sched_wakeup(t);
+    list_remove(&q->sq_waiting, t);
+    t->thr_sleepq = 0;
+    splx(s);
 }
 
 void
 sleepq_destroy(sleepq_t *q)
 {
     sleepq_wakeup(q);
-//    mutex_destroy(&q->sq_mtx);
 }
 
