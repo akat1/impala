@@ -73,6 +73,7 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
     }
     if(target->p_session != dstleader->p_session)
         return -EPERM;
+    ///@todo dodaæ test: je¿eli to nowa grupa, to pgid == pid
     target->p_group = pgid;
     r->result = 0;
     return -EOK;

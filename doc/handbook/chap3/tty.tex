@@ -44,7 +44,7 @@ dzielon± pamiêæ. (Klawiatura, monitor)
 Wszystkie te urz±dzenia widoczne s± dla u¿ytkownika w ujednoliconej formie - jako
 urz±dzenia terminalowe. W systemie Impala z terminalami zwi±zana jest struktura
 \texttt{tty\_t}. Rejestrowanie nowego urz±dzenia terminalowego w systemie
-nastêpuje poprzez funkcjê \texttt{tty\_create}. Jako argumenty przyjmuje ona
+nastêpuje poprzez funkcjê \texttt{tty\_create()}. Jako argumenty przyjmuje ona
 nazwê nowego urz±dzenia, dowoln± strukturê z prywatnymi danymi urz±dzenia, oraz
 wska¼nik do funkcji obs³uguj±cej zapis na tym urz±dzeniu. W ten sposób, system
 terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
@@ -67,42 +67,51 @@ cc\_t c\_cc[NCCS] & Znaki specjalne \\
 \hline
 \end{tabular}
 \end{center}
+Przeznaczenie poszczególnych pól zostanie przybli¿one w kolejnych podrozdzia³ach.
 Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminala
-- s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}.
+- s± to odpowiednio \texttt{tcsetattr()} i \texttt{tcgetattr()}. Funkcje to zosta³y
+zaimplementowane w oparciu o wywo³anie systemowe \texttt{ioctl()}.
 \subsubsection{Otwieranie terminala, uprawnienia procesów}
 Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
 \texttt{open}. Aby umo¿liwiæ wielu programom jednoczesne korzystanie z jednego
 terminala, oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash},
-procesy zosta³y podzielone na sesje, oraz w ramach sesji na grupy. Ogólnie rzecz
-bior±c, proces mo¿e korzystaæ tylko z terminala bêd±cego jego terminalem kontroluj±cym.
+wprowadzona zosta³a dodatkowa organizacja procesów.
 
+Ka¿dy proces mo¿e posiadaæ swój powi±zany terminal kontroluj±cy. Ogólnie rzecz
+bior±c, mo¿e on korzystaæ tylko z tego terminala.
+Procesy zosta³y podzielone na sesje, oraz w ramach sesji na grupy.
 Wszystkie procesy w ramach sesji, które maj± ustawiony terminal kontroluj±cy,
 maj± ustawiony ten sam terminal. Tak wiêc terminal jest powi±zany z sesj±.
+Terminal mo¿e byæ zwi±zany z tylko jedn± sesj± i vice versa.
+
 W ramach sesji procesy tworz± roz³±czne grupy, z których jedna mo¿e byæ
 wyszczególniona jako grupa procesów pierwszoplanowych terminala. Procesy z tej
 grupy jako jedyne maj± dostêp do wej¶cia z terminala. Co do zapisu na terminal,
 mo¿liwy jest on tak¿e spoza grupy procesów pierwszoplanowych, jednak to wymaga
-dodatkowych ¶rodków (w postaci blokowania / obs³ugi sygna³u \texttt{TTOUT}).
+dodatkowych ¶rodków (w postaci blokowania lub ignorowania sygna³u \texttt{SIGTTOU}).
 
-Proces który utworzy³ sesjê zwany jest liderem sesji, podobnie jest z liderem
-grupy. Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
+Sesja oraz grupa procesów posiadaj± swój identyfikator, równy identyfikatorowi
+procesu, który jako pierwszy do danego bytu nale¿a³.
+Proces taki zwany jest odpowiedni liderem sesji i liderem grupy.
+Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid()}.
+Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
 otwierania go, o ile proces otwieraj±cy nie posiada ju¿ terminala kontroluj±cego,
 jest liderem sesji, oraz terminal ten nie jest jeszcze zwi±zany z ¿adn± sesj±.
-Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid}.
-Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid}
-i \texttt{setpgid}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
+
+Pobieranie i modyfikacja grupy procesu realizowane s± poprzez \texttt{getpgid()}
+i \texttt{setpgid()}. Wybór grupy procesów pierwszoplanowych terminalu nastêpuje
 poprzez wywo³anie \texttt{ioctl} na deskryptorze pliku terminala, z poleceniem
-\texttt{TIOCSPGRP}.
+\texttt{TIOCSPGRP} (zobacz tak¿e \texttt{tcsetpgrp()} i \texttt{tcgetpgrp()}).
 \subsubsection{Zapisywanie do terminala}
 % Mo¿na wywaliæ / skróciæ, w zwi±zku z powielaniem tre¶ci ju¿ opisanych
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
-zazwyczaj z rodziny \texttt{printf}.
-Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write}.
+zazwyczaj z rodziny \texttt{printf()}.
+Funkcja \texttt{printf()} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write()}.
 Ta z koleji, poprzez vnode zwi±zany z deskyptorem pliku przekazuje bufor z danymi
-u¿ytkownika do funkcji obs³ugi \texttt{tty\_write} urz±dzenia znakowego zwi±zanego z terminalem.
+u¿ytkownika do funkcji obs³ugi \texttt{tty\_write()} urz±dzenia znakowego zwi±zanego z terminalem.
 
 Zanim bêdzie móg³ nast±piæ faktyczny zapis danych przy pomocy funkcji zarejestrowanej
-w procedurze \texttt{tty\_create}, funkcja \texttt{tty\_write} weryfikuje, czy
+w procedurze \texttt{tty\_create()}, funkcja \texttt{tty\_write()} weryfikuje, czy
 pisz±cy proces ma do tego prawo, oraz w zale¿no¶ci od ustawieñ wykonuje koñcowe
 przekszta³cenia na danych u¿ytkownika. Wykonywane przekszta³cenia uzale¿nione s±
 od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
@@ -111,9 +120,9 @@ od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
 
 \subsubsection{Odczyt z terminala}
 Urz±dzenie wej¶ciowe otrzymawszy dane, przekazuje je do bufora powi±zanego terminala
-poprzez funkcjê \texttt{tty\_input}. U¿ytkownik uzyskuje dostêp do tych danych
-przy pomocy funkcji bibliotecznych takich jak \texttt{scanf}, korzystaj±cych z wywo³ania
-systemowego \texttt{read}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
+poprzez funkcjê \texttt{tty\_input()}. U¿ytkownik uzyskuje dostêp do tych danych
+przy pomocy funkcji bibliotecznych takich jak \texttt{scanf()}, korzystaj±cych z wywo³ania
+systemowego \texttt{read()}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
 
 Wyobra¼my sobie nastêpuj±c± sytuacjê: program pyta u¿ytkownika, o podanie imienia,
 ten jednak, w po³owie wpisywanego tekstu pope³ni³ b³±d i skorygowa³ go przy u¿yciu
@@ -135,9 +144,9 @@ SUSP i TIME. Sterownik dokonuje edycji linii w przypadku rozpoznania znaku ERASE
 (usuniêcie ostatniego znaku) b±d¼ KILL (usuniêcie ca³ej lini). Je¿eli pole
 \texttt{c\_lflag} zawiera flagê \texttt{ISIG}, wyst±pienie znaków INTR, QUIT
 oraz SUSP powoduje wys³anie do grupy procesów pierwszoplanowych odpowiednio
-sygna³u SIGINT, SIGQUIT, SIGTSTP.
+sygna³u \texttt{SIGINT}, \texttt{SIGQUIT}, \texttt{SIGTSTP}.
 
-Procedura \texttt{read} zwraca wynik, tylko w przypadku gdy
+Procedura \texttt{read()} zwraca wynik, tylko w przypadku gdy
 w buforze wej¶ciowym terminala istnieje linia zakoñczona znakiem NL, EOF b±d¼ EOL.
 Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia. 
 
