@@ -51,11 +51,13 @@ terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
 funkcjonalno¶ci w zunifikowany sposób.
 \subsection{Re¿im linii}
 Aby zapewniæ zgodno¶æ programów UNIX'owych z oferowanym przez nas interfejsem
-terminali, zosta³ on zaprojektowany zgodnie z standardem POSIX dotycz±cym tej kwestii.
-Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana ustawieñ terminala.
+terminali, zosta³ on zaprojektowany zgodnie ze standardem POSIX dotycz±cym tej
+kwestii. Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana
+ustawieñ terminala.
 \subsubsection{Zmiana ustawieñ}
 Najwa¿niejsze ustawienia terminala przechowywane s± w strukturze \texttt{termios}.
 Zawiera ona nastêpuj±ce pola:
+
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -67,6 +69,7 @@ cc\_t c\_cc[NCCS] & Znaki specjalne \\
 \hline
 \end{tabular}
 \end{center}
+
 Przeznaczenie poszczególnych pól zostanie przybli¿one w kolejnych podrozdzia³ach.
 Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminala
 - s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}. Funkcje to zosta³y
@@ -92,7 +95,7 @@ dodatkowych ¶rodków (w postaci blokowania lub ignorowania sygna³u \texttt{SIGTTO
 
 Sesja oraz grupa procesów posiadaj± swój identyfikator, równy identyfikatorowi
 procesu, który jako pierwszy do danego bytu nale¿a³.
-Proces taki zwany jest odpowiedni liderem sesji i liderem grupy.
+Proces taki zwany jest odpowiednio liderem sesji i liderem grupy.
 Do tworzenia nowej sesji wykorzystuje siê funkcjê \texttt{setsid}.
 Terminal kontroluj±cy procesu ustawiany jest automatycznie, w momencie
 otwierania go, o ile proces otwieraj±cy nie posiada ju¿ terminala kontroluj±cego,
@@ -194,15 +197,18 @@ wymianê odpowiedni± sekwencjê zapisów i odczytów z portów karty. W kroku tym
 ustawiany jest m.in. kursor sprzêtowy. Poniewa¿ nie ma mo¿liwo¶ci wy³±czenia
 migania kursora sprzêtowego, zostaje on ukryty. Kursor widoczny na ekranie jest
 emulowany programowo.
-\item Bufor ramki karty graficznej jest wmapowany w pamiêæ pod adresem fizycznym\\
-\texttt{0xb8000}. Wy¶wietlenie znaku w pewnym miejscu ekranu polega na
+\item Bufor ramki karty graficznej jest odwzorowany w pamiêæ pod adresem fizycznym\\
+\texttt{0xb8000}. Jako, ¿e w Impali niskie adresy s± zarezerwowane na przestrzeñ
+u¿ytkownika, ten adres fizyczny jest z koleji odwzorowywany w stercie j±dra.
+Wy¶wietlenie znaku w pewnym miejscu ekranu polega na
 zapisaniu go w odpowiednim miejscu pamiêci. Atrybuty znaków takie jak ich kolor
 dla znaku z komórki pamiêci $x$ ustawiane s± w komórce $x+1$.
 \end{itemize}
 \subsection{Emulacja terminala}
 Aby umo¿liwiæ programom u¿ytkownika bardziej zaawansowan± kontrolê nad
 zawarto¶ci± ekranu, wirtualne konsole udaj±, ¿e s± fizycznym terminalem.
-Konsola w Impali emuluje terminal VT100. Emulacja ta polega na rozpoznawaniu
+Konsola w Impali emuluje VT100 - tekstowy terminal komputerowy stworzony przez
+firmê Digital Equipment Corporation (DEC). Emulacja ta polega na rozpoznawaniu
 sekwencji steruj±cych tego terminala oraz odpowiednim reagowaniu na nie.
 Podobnie, wej¶cie z klawiatury przedstawiane jest u¿ytkownikowi w postaci, jak±
 by otrzyma³ pracuj±c na terminalu VT100 i korzystaj±c z jego klawiatury.
