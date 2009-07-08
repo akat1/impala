@@ -106,6 +106,9 @@ int
 tgetent(char *bp, const char *name)
 {
     char *tinfo = strdup(getenv("TERMCAP"));
+    //if(!tinfo) tinfo = inne ¼ród³o tinfo
+    if(!tinfo)
+        return -1;
     char *c = tinfo;
     while(*c) {
         //zjedzmy puste znaki
@@ -124,11 +127,9 @@ tgetent(char *bp, const char *name)
         char *header = strsep(&c, ":");
         while(header!=NULL) {
             char *tname = strsep(&header, "|");
-//            printf("Name in db: \'%s\', looking for \'%s\'\n", tname, name);
             if(!strcmp(name, tname)) { //trafilismy
                 _tgetent(c);
                 free(tinfo);
-//                printf("Found!\n");
                 return 1;
             }
         }
@@ -202,7 +203,7 @@ tgoto(char *cap, int col, int row)
     int args[2] = {col, row};
     char *c2 = res_buf;
     char *c = cap;
-    int argNum = 1;
+    int argNum = 1; //tak - choæ to dziwne :)
     while(*c) {
         switch(*c) {
             case '%':
@@ -210,19 +211,13 @@ tgoto(char *cap, int col, int row)
                 switch(*c) {
                     case 'r': argNum++; argNum%=2;  break;
                     case '%': *(c2++) = '%';        break;
-                    case 'i': args[0]++; args[1]++; break; //napewno oba?
-                    case '+': {
-                        char cc = *(++c);
-                        args[0]+=cc; args[1]+=cc;
-                        ///@todo jeszcze % robimy?
-                    } break;
+                    case 'i': args[0]++; args[1]++; break;
+                    case '+': args[argNum]+=*(++c); break;
                     case '>': {
                         char cc = *(++c);
                         char dd = *(++c);
-                        if(args[0] > cc)
-                            args[0] += dd;
-                        if(args[1] > cc)
-                            args[1] += dd;
+                        if(args[argNum] > cc)
+                            args[argNum] += dd;
                     } break;
                     case 'd':
                     case '3':

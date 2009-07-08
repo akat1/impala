@@ -1,0 +1,111 @@
+% Impala Operating System
+%
+% Copyright (C) 2009 University of Wroclaw. Department of Computer Science
+%    http://www.ii.uni.wroc.pl/
+% Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
+%    http://trzask.codepainters.com/impala/trac/
+% All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%  notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%  notice, this list of conditions and the following disclaimer in the
+%  documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+%
+% $Id: vfs.tex 486 2009-06-25 07:51:47Z wieczyk $
+
+\section{Interfejs terminali}
+\label{TTY}
+Programy u¿ytkownika wymagaj± od systemu ujednoliconego dostêpu do urz±dzeñ
+umo¿liwiaj±cych im komunikacjê z u¿ytkownikiem. Urz±dzenia s³u¿±ce do takiej
+komunikacji nazywamy terminalami. Terminale mo¿na podzieliæ na nastêpuj±ce grupy:
+\begin{enumerate}
+\item Terminal zewnêtrzny, komunikuj±cy siê z komputerem poprzez port szeregowy
+b±d¼ modem
+\item Terminal zintegrowany z komputerem, komunikacja nastêpuje np. poprzez
+dzielon± pamiêæ. (Klawiatura, monitor)
+\item Terminal sieciowy - komunikacja np. poprzez Ethernet
+\end{enumerate}
+Wszystkie te urz±dzenia widoczne s± dla u¿ytkownika w ujednoliconej formie - jako
+urz±dzenia terminalowe. W systemie Impala z terminalami zwi±zana jest struktura
+\texttt{tty\_t}. Rejestrowanie nowego urz±dzenia terminalowego w systemie
+nastêpuje poprzez funkcjê \texttt{tty\_create}. Jako argumenty przyjmuje ona
+nazwê nowego urz±dzenia, dowoln± strukturê z prywatnymi danymi urz±dzenia, oraz
+wska¼nik do funkcji obs³uguj±cej zapis na tym urz±dzeniu. W ten sposób, system
+terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
+funkcjonalno¶ci w zunifikowany sposób.
+\subsection{Re¿im linii}
+Aby zapewniæ zgodno¶æ programów UNIX'owych z oferowanym przez nas interfejsem
+terminali, zosta³ on zaprojektowany zgodnie z standardem POSIX dotycz±cym tej kwestii.
+Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana ustawieñ terminala.
+\subsubsection{Zmiana ustawieñ}
+Najwa¿niejsze ustawienia terminala przechowywane s± w strukturze \texttt{termios}.
+Zawiera ona nastêpuj±ce pola:
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+tcflag\_t c\_iflag & Flagi konfiguruj±ce zachowanie wej¶cia\\
+tcflag\_t c\_oflag & Flagi konfiguruj±ce zachowanie wyj¶cia\\
+tcflag\_t c\_lflag & Ogólne flagi ustawiaj±ce tryb pracy terminala\\
+tcflag\_t c\_cflag & Flagi zwi±zane z obs³ug± po³±czenia\\
+cc\_t c\_cc[NCCS] & Znaki specjalne \\
+\hline
+\end{tabular}
+\end{center}
+Biblioteka C udostêpnia funkcje do zapisu i odczytu aktualnych ustawieñ terminala
+- s± to odpowiednio \texttt{tcsetattr} i \texttt{tcgetattr}.
+\subsubsection{Otwieranie terminala, uprawnienia procesów}
+Terminal otwierany jest jak zwyk³y plik, przy pomocy wywo³ania systemowego
+\texttt{open}. Aby umo¿liwiæ wielu programom korzystanie z jednego terminala,
+oraz umo¿liwiæ kontrolê zadañ w pow³okach takich jak \texttt{ash}, 
+\subsubsection{Zapisywanie do terminala}
+Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
+zazwyczaj z rodziny \texttt{printf}.
+Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write}.
+Ta z koleji, poprzez vnode zwi±zany z deskyptorem pliku przekazuje bufor z danymi
+u¿ytkownika do funkcji obs³ugi \texttt{tty\_write} urz±dzenia znakowego zwi±zanego z terminalem.
+Zanim bêdzie móg³ nast±piæ faktyczny zapis danych przy pomocy funkcji zarejestrowanej
+w procedurze \texttt{tty\_create}, funkcja \texttt{tty\_write} weryfikuje, czy
+pisz±cy proces ma do tego prawo, oraz w zale¿no¶ci od ustawieñ wykonuje koñcowe
+przekszta³cenia na danych u¿ytkownika. Wykonywane przekszta³cenia uzale¿nione s±
+od warto¶ci \texttt{c\_oflag}. Mo¿liwe operacje to miedzy innymi zamiana znaków
+\texttt{CR} (powrót karetki) na znaki \texttt{NL} (nowej linii) i zamiana znaków
+\texttt{NL} na parê \texttt{CR-NL}.
+
+\subsubsection{Odczyt z terminala}
+Urz±dzenie wej¶ciowe otrzymawszy dane, przekazuje je do bufora powi±zanego terminala
+poprzez funkcjê \texttt{tty\_input}. U¿ytkownik uzyskuje dostêp do tych danych
+przy pomocy funkcji bibliotecznych takich jak \texttt{scanf}, korzystaj±cych z wywo³ania
+systemowego \texttt{read}. Dane uzyskane w ten sposób to ci±g znaków ASCII.
+Wyobra¼my sobie nastêpuj±c± sytuacjê: program pyta u¿ytkownika, o podanie imienia,
+ten jednak, w po³owie wpisywanego tekstu pope³ni³ b³±d i skorygowa³ go przy u¿yciu
+klawisza backspace. Program jest zainteresowany jedynie poprawionym wpisem, a nie
+ci±giem znaków zawieraj±cych b³êdne dane oraz kod ASCII klawisza backspace.
+Jest to na tyle czêsta sytuacja, ¿e schemat obs³ugi wej¶cia, w którym sterownik
+dba o obs³ugê zmian w ramach jednej lini wej¶cia zosta³ uwzglêdniony w standardzie
+POSIX jako element interfejsu terminali. Oczywi¶cie niektóre programy chc±
+znaæ kody wszystkich naciskanych klawiszy, bez konieczno¶ci czekania na znak
+nowej lini, tak wiêc i ta sytuacja musi byæ obs³ugiwana. Pierwszy tryb wed³ug
+POSIX zwiemy trybem kanoniczym. Tryb pracy terminala uzale¿niony jest od
+obecno¶ci flagi \texttt{ICANON} w polu \texttt{c\_lflag} struktury opisuj±cej
+konfiguracjê terminala.
+
+
+Aby umo¿liwiæ programom u¿ytkownika dostêp do klawiatury i monitora, 
+\subsection{Konsola}
+
