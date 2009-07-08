@@ -50,7 +50,7 @@
 /** @file
  * Ten plik zawiera implementacjê procedur odpowiedzialnych za wej¶cie-wyj¶cie
  * na urz±dzeniach blokowych. Ten mechanizm (jak wiele innych) jest wzorowany
- * na UNIXie (BSD: kern/vfs_bio.c, Solaris: os/bio.c).
+ * na UNIXie (BSD: kern/vfs_bio.c, Solaris: os/bio.c, ULTRIX: fs/gfs/gfs_bio.c).
  *
  * System przechowuje w pamiêci dane z urz±dzenia blokowego w celu
  * minimalizacji wolnych operacji wej¶cia-wyj¶cia. Pamiêc podrêczna jest
@@ -287,6 +287,8 @@ bio_getblk(devd_t *d, blkno_t n, size_t bsize)
     buf_alloc(bp, d, n, bsize);
     bufhash_insert(bp);
     bufhash_unlock();
+    // tymczasowo dorzucam ~BIO_VALID tutaj
+    // z powodu jednego b³êdu w obs³udze FATFS :)
     UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
     splx(s);
     return bp;

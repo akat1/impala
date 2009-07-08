@@ -132,10 +132,25 @@ restartowana, poniewa¿ dany nag³ówek buforu móg³ zmieniæ buforowan± operacjê.
 
 Je¿eli odpowiedni bufor nie zostanie znaleziony w~tablicy haszuj±cej
 to~nag³ówek jest przydzielany z~listy wolnych buforów, je¿eli wziêty nag³ówek
-znajduje siê równie¿ w tablicy haszuj±cej (to znaczy buforuje inn± operacjê
+znajduje siê równie¿ w tablicy haszuj±cej (to~znaczy buforuje inn± operacjê
 ni¿ my szukamy) to nale¿y go z niej usun±æ.
 
+Zdobyty nag³ówek buforu jest organizowany przez procedurê \texttt{buf\_alloc},
+która sprawdza czy nie nale¿y przydzieliæ buforu lub zmnieniæ rozmiar
+obecnie przydzielonego. Nastêpnie jest naznaczany flag± \texttt{BIO\_BUSY}
+i~zwracany klientowi.
 
+Procedura \texttt{bio\_read} jest nak³adk± na~wy¿ej omówion±, je¿eli bufor
+nie jest naznaczony flag± \texttt{BIO\_VALID} to~nag³ówek jest przekazywany
+jako zlecenie do~sterownika urz±dzenia. W~takim wypadku klient jest blokowany
+na~czas wykonania zlecenia.
 
+Operacja zapisu mo¿e zostaæ wykonana za pomoc± operacji \texttt{bio\_write},
+po wykonaniu dzia³ania klient musi zwróciæ bufor mechanizmowi u¿ywaj±c
+procedury \texttt{bio\_release}.
 
-\subsection{Surowe wej¶cie-wyj¶cie}
+Dla~sterowników urz±dzeñ s± dostarczone procedury \texttt{bio\_done}
+i \texttt{bio\_error} informuj±ce klientów o~zakoñczeniu operacji zleconej
+przed dany nag³ówek. Obydwie procedury budz± klienta oczekuj±cego na~bufor
+za~pomoc± \texttt{bio\_wait}.
+
