@@ -48,7 +48,7 @@ urz±dzenie, widziane jako strumieñ bajtów.
 
 Ka¿dy sterownik dostarcza systemowi tak zwan± deskê rozdzielcz±
 (\texttt{devsw\_t} - \emph{device switch}), która zawiera implementacjê
-procedur obs³ugi pliku urz±dzenia. Deska rozdzielcza. zawiera nastêpuj±ce pola:
+procedur obs³ugi pliku urz±dzenia. Deska rozdzielcza zawiera nastêpuj±ce pola:
 \begin{itemize}
  \item \texttt{d\_open} -
 obs³uga otwarcie pliku urz±dzenia.
@@ -60,7 +60,7 @@ obs³uga zamkniêcia pliku urz±dzenia.
 obs³uga poleceñ kontrolnych dla~sterownika.
 
  \item \texttt{d\_write} -
-obs³uga zlecenia wyj¶cie ze strumienia znakowego. mo¿e blokowaæ klienta
+obs³uga zlecenia wyj¶cie ze strumienia znakowego, mo¿e blokowaæ klienta
 na~czas wykonywania operacji.
 
  \item \texttt{d\_read} -
