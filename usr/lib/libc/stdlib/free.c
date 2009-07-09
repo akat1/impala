@@ -6,15 +6,16 @@
 void
 free(void *ptr)
 {
-    return;
     if ( ptr == NULL )
         return;
     mem_chunk_t *mc;
     mem_chunk_t *nc;
     mc = ptr - sizeof(mem_chunk_t);
 
-    if ( mc->avail )
+    if ( mc->avail ) {
+        fprintf(stderr, "freeing bad addr %p\n", ptr);
         return;
+    }
 
     mc->avail = TRUE;
 

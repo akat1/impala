@@ -25,6 +25,7 @@ main(int argc, char **v)
     };
     char * const envp[] = {
         "GZIP=" gzip,
+        "MALLOC_DEBUG=yes",
         NULL
     };
     pid_t p;
