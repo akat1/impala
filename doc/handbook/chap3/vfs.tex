@@ -56,11 +56,11 @@ deskryptora pliku na strukturê \texttt{file\_t}. Wiele deskryptorów plików mo¿e
 wskazywaæ na t± sam± strukturê. Oto, jak wygl±da \texttt{file\_t}:
 
 \begin{center}
-\begin{tabular}{|l l| l|}
+\begin{tabular}{|ll|l|}
 \hline
-vnode\_t   & *f\_vnode &	Wska¼nik na v-wêze³ zwi±zany z plikiem\\
-off\_t     &  f\_offset &	Aktualna pozycja kursora w pliku\\
-int       &  f\_refcnt &	Licznik referencji dla tej struktury\\
+vnode\_t   & *f\_vnode & Wska¼nik na v-wêze³ zwi±zany z plikiem\\
+off\_t     &  f\_offset & Aktualna pozycja kursora w pliku\\
+int       &  f\_refcnt & Licznik referencji dla tej struktury\\
 int       &  f\_flags & Flagi, pocz±tkowo ustawione przez open\\
 \hline
 \end{tabular}
@@ -69,7 +69,91 @@ int       &  f\_flags & Flagi, pocz±tkowo ustawione przez open\\
 Tak wiêc wszystkie deskryptory wskazuj±ce na ten sam plik dziel± informacje
 takie jak aktualna pozycja kursora oraz flagi pliku.
 
-
 \subsection{Pliki od strony j±dra.}
 
+Wa¿nym zadaniem j±dra systemu operacyjnego jest stworzenie takich warunków,
+w których pliki pochodz±ce z ró¿nych systemów plików mog± byæ obs³ugiwane
+przez pojedynczy, uniwersalny interfejs. Takie w³a¶nie zadanie spe³nia
+VFS - wirtualny system plików. Zarówno pojêcie pliku jak i systemu plików
+zosta³o ujête w ramy ¶ci¶le zdefiniowanych struktur j±dra, ukrywaj±cych
+prawdziw± implementacjê powi±zanych z nimi operacji. Pliki s± reprezentowane
+przez strukturê \texttt{vnode\_t}, natomiast systemy plików poprzez 
+\texttt{vfs\_t}. Implementacja zawarta w Impali bazowana by³a na tej z SVR4.
+\subsubsection{V-wêz³y}
+Aby móc zrozumieæ funkcjonowanie wirtualnego systemu plików, wa¿n± znajomo¶æ
+struktury, do której odnosi siê wiêkszo¶æ operacji. Oto jak wygl±da v-wêze³:
 
+\begin{center}
+\begin{tabular}{|l l| l|}
+\hline
+int            &~v\_type        & typ v-wêz³a\\
+int            &~v\_flags       & flagi v-wêz³a\\
+int            &~v\_refcnt      & licznik referencji\\
+vfs\_t         &*v\_vfs\_mounted\_here & system plików tutaj zamontowany\\
+vfs\_t         &*v\_vfs         & system plików tego vnode\\
+vnode\_ops\_t  &*v\_ops         & wska¼nik do \texttt{vnode\_ops} z tego fs\\
+devd\_t        &*v\_dev         & urz±dzenie, je¶li to v-wêze³ urz±dzenia\\
+void           &*v\_private     & prywatne dane systemu plików, np. i-wêze³\\
+mutex\_t       &~v\_mtx         & blokada do synchronizacji\\
+\hline
+\end{tabular}
+\end{center}
+
+Impala posiada nastêpuj±ce typy v-wêz³ów:
+\begin{center}
+\begin{tabular}{lcl}
+VNODE\_TYPE\_REG & - &zwyk³y plik \\
+VNODE\_TYPE\_DIR & - &plik reprezentuj±cy katalog \\
+VNODE\_TYPE\_DEV & - &plik reprezentuj±cy urz±dzenie \\
+VNODE\_TYPE\_LNK & - &plik bêd±cy dowi±zaniem symbolicznym \\
+VNODE\_TYPE\_FIF & - &plik reprezentuj±cy potok \\
+\end{tabular}
+\end{center}
+
+Operacje mo¿liwe do wykonania na v-wê¼le ukryte s± w strukturze
+\texttt{vnode\_ops\_t} dostarczanej dla ka¿dego v-wêz³a przez zwi±zany z nim
+system plików. Struktura ta zawiera wska¼niki do funkcji wykonuj±cych wszystkie
+przewidzane przez nas operacje, jakie s± mo¿liwe do wykonania na pliku.
+Szczegó³owo zosta³a ona przedstawiona w tabeli \ref{vnodeops}.
+
+Dla wygody korzystania z v-wêz³ów dla ka¿dej z operacji wprowadzono
+odpowiednie makro \texttt{VOP\_XXX(v, ...)} wykonuj±ce operacjê \texttt{XXX}
+na v-wê¼le \texttt{v}.
+\begin{table}
+\begin{tabular}{|l l|p{9cm}|}
+\hline
+vnode\_open\_t      &*vop\_open&Otwieranie pliku \\
+vnode\_create\_t    &*vop\_create&Tworzenie nowego pliku \\
+vnode\_close\_t     &*vop\_close&Zamykanie pliku \\
+vnode\_read\_t      &*vop\_read&Odczytywanie z pliku \\
+vnode\_write\_t     &*vop\_write&Zapisywanie do pliku \\
+vnode\_ioctl\_t     &*vop\_ioctl&Wykonywanie dodatkowych operacji \\
+vnode\_seek\_t      &*vop\_seek&Sprawdzanie, czy dana pozycja jest prawid³owa\\
+vnode\_truncate\_t  &*vop\_truncate&Zmiana rozmiaru pliku\\
+vnode\_getattr\_t   &*vop\_getattr&Pobieranie ró¿nych atrybutów pliku\\
+vnode\_setattr\_t   &*vop\_setattr&Ustawianie atrybutów pliku\\
+vnode\_lookup\_t    &*vop\_lookup&Poszukiwanie v-wêz³a o podanej nazwie, pocz±wszy
+    od danego v-wêz³a katalogu\\
+vnode\_mkdir\_t     &*vop\_mkdir&Tworzenie nowego katalogu\\
+vnode\_getdents\_t  &*vop\_getdents&Pobieranie zawarto¶ci katalogu\\
+vnode\_readlink\_t  &*vop\_readlink&Odczytywanie nazwy pliku na który wskazuje
+    dowi±zanie symboliczne\\
+vnode\_symlink\_t   &*vop\_symlink&Tworzenie dowi±zania symbolicznego\\
+vnode\_access\_t    &*vop\_access&Sprawdzanie praw dostêpu do pliku\\
+vnode\_sync\_t      &*vop\_sync&Synchronizowanie stanu pliku w pamiêci ze stanem
+    na trwa³ym no¶niku\\
+vnode\_inactive\_t  &*vop\_inactive&Informowanie pliku, ¿e ostatnia referencja
+do tego v-wêz³a jest w³a¶nie usuwana\\
+vnode\_lock\_t      &*vop\_lock&Blokowanie pliku\\
+vnode\_unlock\_t    &*vop\_unlock&Odblokowywanie pliku\\
+vnode\_rmdir\_t     &*vop\_rmdir&Usuwanie katalogu\\
+vnode\_link\_t      &*vop\_link&Podwi±zywanie istniej±cego pliku pod now± nazw±\\
+vnode\_unlink\_t    &*vop\_unlink&Usuwanie wpisu z katalogu\\
+\hline
+\end{tabular}
+\caption{Struktura v-wêz³a - \texttt{vnode\_t}}
+\label{vnodeops}
+\end{table}
+\subsection{Systemy plików}
+Struktura reprezentuj±ca zamontowane systemy plików jest analogiczna do
+struktury v-wêz³a, jednak¿e zwi±zane z ni± operacje s± mniej liczne.

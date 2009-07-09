@@ -89,7 +89,7 @@ struct file {
     vnode_t    *f_vnode;
     off_t       f_offset;
     int         f_refcnt;
-    mode_t      f_openmode;
+//    mode_t      f_openmode;
     int         f_flags;
     //pcred_t   *f_pcred;
 };
