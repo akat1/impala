@@ -34,7 +34,7 @@
 \subsection{Obraz j±dra.}\label{tech:elf}
 
 Obraz j±dra jest zapisany w~formacie ELF (\emph{Executable and Linkable
-Format}). Format charaketeryzuje zmienna ilo¶æ sekcji w pliku, gdzie
+Format}). Format charakteryzuje zmienna ilo¶æ sekcji w pliku, gdzie
 ka¿da ma swoj± nazwê. Obraz j±dra zapisany w~tym formacie zawiera
 nastêpuj±ce sekcje:
 \begin{itemize}
@@ -46,11 +46,11 @@ nastêpuj±ce sekcje:
 
 Ró¿ne dodatkowe sekcje mog± zostaæ do³±czone przez kompilator.
 
-Du¿ym udogodniem tego formatu jest mo¿liwo¶æ przypisania ka¿dej sekcji
+Du¿ym udogodnieniem tego formatu jest mo¿liwo¶æ przypisania ka¿dej sekcji
 dwóch ró¿nych adresów ich lokalizacji. Jeden to~adres wirtualny, mówi±cy
 gdzie dana sekcja znajduje siê w~wirtualnej przestrzeni adresowej. Drugi
 to~adres fizyczny informuj±cy gdzie dana sekcja bêdzie znajdowaæ siê
-w~pamiêci fyzycznej.
+w~pamiêci fizycznej.
 
 Systemy operacyjne, u¿ywaj±ce tego formatu do~obrazów programów, nie u¿ywaj±
 pola z~adresem fizycznym, poniewa¿ jest on dynamicznie ustalany podczas
@@ -65,7 +65,7 @@ jest wyparty przez format ELF, lecz jego prosta budowa czyni± go idealnym
 kandydatem do~prostego systemu operacyjnego. Obraz w~tym formacie zawiera
 w~pliku dwie sekcje.
 \begin{itemize}
- \item \texttt{.text} - kod prograu.
+ \item \texttt{.text} - kod programu.
  \item \texttt{.data} - dane programu.
 \end{itemize}
 
@@ -79,7 +79,7 @@ Skompresowany obraz j±dra (\texttt{/boot/impala.gz}) jest ³adowany przez
 program GRUB, zainstalowany w~sektorze rozruchowym dyskietki. 
 
 Z~dzia³ania j±dra w~wysokich adresach (\ref{vm:mmap}) wynika trudno¶æ
-techniczna przy ³adawaniu systemu. Program ³aduj±cy nie przygotowuje
+techniczna przy ³adowaniu systemu. Program ³aduj±cy nie przygotowuje
 mechanizmu stronicowania (pamiêci wirtualnej), w~zwi±zku z~czym ogólny
 kod j±dra jest bezu¿yteczny. 
 Poniewa¿ format ELF umo¿liwia tworzenie wielu sekcji z mo¿liwo¶ci± rozró¿nienia
@@ -93,10 +93,46 @@ odwzorowaæ kod j±dra w~wysokich adresach, a nastêpnie przekazuje
 sterowanie kodu rozruchowego z~sekcji tekstu.
 
 W pierwszej kolejno¶ci uruchamiana jest inicjalizacja modu³u platformy
-sprzêtowej. Nastêpnie sterowanie jest przekazywane do~procedy \texttt{kmain}
+sprzêtowej. Nastêpnie sterowanie jest przekazywane do~procedury \texttt{kmain}
 niezale¿nej od~platformy.
 
 
 \subsection{System budowania.}
 
+System budowania systemu jest wzorowany na~tym z systemu BSD. Idea polega
+napisaniu ogólnych skryptów dla~programu \texttt{make}, które sparametryzowane
+mog± budowaæ biblioteki, programy i j±dro. Skrypty buduj±ce system w³±czaj±
+w~siebie te ogólne i je parametryzuj± w~zale¿no¶ci od~zadania jakie chc±
+wykonaæ.
+
+Ta technika zwiêksza wygodê budowania systemu, poniewa¿ ca³a obs³uga
+jest zapachniêta do~kilku plików, a w pozosta³ych czê¶ciach drzewa
+dostêpne s± tylko krótkie i~³atwe w~zarz±dzaniu deklaracje zadañ. Poprawianie
+b³êdów tyczy siê jedynie tych g³ównych skryptów, a efekt powiela siê we
+wszystkich ich klientach.
+
+Przyk³adowy skrypt \texttt{Makefile} buduj±cy bibliotekê ze sterownikami
+j±dra:
+\begin{verbatim}
+LIBRARY= libdev
+CFLAGS=-D__KERNEL ${_K_FLAGS}
+
+SRCS=\
+    devtable.c\
+    fdc/fdc.c\
+    md/md.c\
+    pseudo/null.c\
+    pseudo/zero.c\
+
+include ${IMPALA_MK}/lib.mk
+\end{verbatim}
+
+Ostatnia linia w~skrypcie w³±cza odpowiedni skrypt, a definiowane zmienne
+s± jego parametrami.
+
+Poniewa¿ nasz zespó³
+pos³ugiwal siê ró¿nymi wariantami programu \texttt{make} to~byli¶my zmuszeni
+zrezygnowaæ z~wygodnych udogodnieñ oferowanych przez nie, z~powodu
+braku wzajemnej kompatybilno¶ci. ¬ród³a g³ównych skryptów znajduj± siê
+w~katalogu \texttt{mk/}.
 

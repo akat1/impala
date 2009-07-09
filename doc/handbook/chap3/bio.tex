@@ -38,8 +38,8 @@ nag³ówki buforów (\texttt{iobuf\_t}). Ka¿dy nag³ówek buforu zawiera
 w~sobie nastêpuj±ce pola:
 \begin{itemize}
 \item \texttt{addr} - adres bufora
-\item \texttt{size} - d³ugo¶c bufora w~bajtach
-\item \texttt{bcount} - d³ugo¶c bufora w~blokach
+\item \texttt{size} - d³ugo¶æ bufora w~bajtach
+\item \texttt{bcount} - d³ugo¶æ bufora w~blokach
 \item \texttt{blkno} - logiczny numer bloku
 \item \texttt{flags} - znaczniki
 \item \texttt{errno} - numer b³êdu
@@ -70,7 +70,7 @@ Zapamiêtane dane mog± ograniczyæ potrzebê korzystania z~urz±dzenia.
 Nale¿y zwróciæ uwagê, ¿e buforowane s± operacje wej¶cia-wyj¶cia, nie sam
 no¶nik urz±dzenia. Ta subtelna ró¿nica objawia siê tym, ¿e jeden bufor
 mo¿e pamiêtaæ ci±g stu sektorów zaczynaj±c od dwudziestego, a drugi bufor
-mo¿e pamiêtaæ ci±g dziesiêcu sektorów zaczynaj±c od piêædziesi±tego tego
+mo¿e pamiêtaæ ci±g dziesiêciu sektorów zaczynaj±c od piêædziesi±tego tego
 samego urz±dzenia.
 Mechanizm nie zapewnia, ¿e buforowanie ,,wspólnych'' sektorów  zawiera
 te~same dane. Odpowiedzialno¶æ tworzenia sensownych operacji wej¶cia-wyj¶cia
@@ -100,7 +100,7 @@ tablica jest przedstawiona na rysunku \ref{bio:bufhash}.
  \centering
  \includegraphics{work/bio_bufhash}
  \caption{Przyk³adowa tablica haszuj±ca. Bloczki z~pierwszej kolumny
- oznaczaja nag³ówki list, a z pozosta³ych kolumn nag³ówki buforów.
+ oznaczaj± nag³ówki list, a z pozosta³ych kolumn nag³ówki buforów.
  Listy $h[i]$ oznaczaj± listy tablicy haszuj±cej, a \texttt{free} oznacza
  listê wolnych nag³ówków.
 }
@@ -111,12 +111,12 @@ Bufor znajduje siê na~wolnej li¶cie tylko wtedy, gdy nie jest u¿ywany
 przez ¿adnego klienta. Mo¿e on te¿ jednocze¶nie znajdowaæ siê w~tablicy
 haszuj±cej, co oznacza ¿e buforuje poprzednio wykonan± operacjê.
 
-Tablica haszuj±c± oraz lista wolnych buforów znajduje siê
+Tablica haszuj±ca oraz lista wolnych buforów znajduje siê
 w~strukturze \texttt{bufhash}. 
 
-\subsection{Cykl ¿ycia nag³owka buforu.}
+\subsection{Cykl ¿ycia nag³ówka buforu.}
 
-Sta³a ilo¶æ buforów wymaga ustalenia rygyrystycznych zasad pos³ugiwania siê
+Sta³a ilo¶æ buforów wymaga ustalenia rygorystycznych zasad pos³ugiwania siê
 nimi. Ka¿dy nag³ówek mo¿e byæ dany jednemu klientowi.
 
 Klient mo¿e otrzymaæ bufor za~pomoc± dwóch procedur \texttt{bio\_getblk}

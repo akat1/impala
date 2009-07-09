@@ -48,19 +48,19 @@ wywodz±cych siê z~systemu UNIX i~implementowaæ mo¿liwie najwiêcej zgodnie
 ze~standardem POSIX. Jako wyznacznik dojrza³o¶ci projektu oraz funkcjonalno¶ci
 kodu przyjête zosta³o przeniesienie pow³oki systemowej \texttt{ash}
 oraz~edytora tekstu
-vi. Projektowany sytem pomimo, ¿e tworzony wy³±cznie na komputerach klasy PC,
+vi. Projektowany system pomimo, ¿e tworzony wy³±cznie na komputerach klasy PC,
 wyposa¿onych w~procesor Pentium Pro,
 mia³ byæ mo¿liwie najbardziej przeno¶ny. Dodatkow± motywacj± by³a chêæ
 zg³êbienia kodu i mechanizmów dzia³ania popularnych nastêpców systemu UNIX.
 
-Pow³oka \texttt{ash} zosta³± zaprogramowana w~1992 roku przez Kennetha
+Pow³oka \texttt{ash} zosta³a zaprogramowana w~1992 roku przez Kennetha
 Almquista
 dla~systemu BSD UNIX\footnote{Pow³oka do~dzi¶ jest stosowana w~systemie
 FreeBSD jako g³ówna pow³oka systemowa. Niektóre dystrybucje systemu Linux
 u¿ywaj± tej pow³oki jako wyznacznik zgodno¶ci skryptów ze standardem,
 w~dystrybuowanych paczkach jest dostêpna pod nazw± \texttt{dash}.
 }
-jako zastêpnik oryginalnej pow³oki Bourna. Nie posiada
+jako zastêpca oryginalnej pow³oki Bourna. Nie posiada
 wielu wygodnych funkcji, jak historia poleceñ i dope³nianie komend,
  dostêpnych w~popularnych pow³okach jak \texttt{bash}, \texttt{tcsh},
 \texttt{zsh}, lecz posiada obs³ugê zarz±dzania zadaniami, st±d mo¿na j±
@@ -73,14 +73,14 @@ budowy i zasad dzia³ania systemu operacyjnego, wszystkie wa¿ne mechanizmy
 zosta³y zaprojektowane, zaimplementowane i omówione w tej dokumentacji.
 Za³o¿enie o przeno¶no¶ci systemu zosta³o zrealizowane poprzez oddzielenie kodu
 dzia³aj±cego na poziomie sprzêtu i operuj±cego bezpo¶rednio na nim od kodu
-dzia³aj±cego niezaleznie od platformy. Podej¶cie to umo¿liwia studiowanie
+dzia³aj±cego niezale¿nie od platformy. Podej¶cie to umo¿liwia studiowanie
 mechanizmów niskopoziomowych niezale¿nie od reszty systemu. Uda³o siê
 zrealizowaæ za³o¿enie podobieñstwa do~systemu UNIX,
 czego konsekwencj± jest przeniesienie z powodzeniem pow³oki systemowej \texttt{ash},
 nie zosta³ jednak zrealizowany cel przeniesienia edytora tekstowego, który
 wymaga dalszego dostosowania.
 Uda³o siê równie¿ przenie¶æ program \texttt{vttest}, który pos³u¿y³ przy
-sprawdzaniu i~udoskanalniu naszej implementacji terminali w~emulacji VT100.
+sprawdzaniu i~udoskanalaniu naszej implementacji terminali w~emulacji VT100.
 
 Poniewa¿ pow³oka systemowa zosta³a zaprojektowana dla~systemu BSD to~podczas
 rozwijania naszego systemu by by³ w~stanie uruchomiæ ten program mogli¶my
@@ -112,7 +112,7 @@ umo¿liwi³ równie¿ robienie krótkich notek na~stronie dotycz±cych projektu.
 
 System kontroli wersji SVN zosta³ wykorzystany do synchronizacji kodu, umo¿liwi³
 on niezale¿n± i wygodn± pracê nad projektem ka¿demu z uczestników. Wykorzystane
-zosta³y mechnizmy ga³êzi do rozwijania wiêkszych mechanizmów, które nastêpnie
+zosta³y mechanizmy ga³êzi do rozwijania wiêkszych mechanizmów, które nastêpnie
 by³y scalane do g³ównego drzewa. System pozwoli³ na bie¿±co ¶ledziæ zmiany w
 kodzie wprowadzane przy kolejnych rewizjach.
 
@@ -120,7 +120,7 @@ Emulatory komputerów PC, Qemu oraz BOCHS, pozwoli³y na wygodne testowanie
 pisanego kodu, dziêki tym programom nie istnia³a potrzeba ci±g³ych restartów
 komputera w celu sprawdzenia czy wprowadzane do systemu zmiany przynios³y
 oczekiwany skutek. Zosta³o jednak uznane za sprawê wa¿n±, aby system dzia³a³
-tak¿e na prawdziwych komputerach klasy PC, po dodaniu isotnych czê¶ci systemu
+tak¿e na prawdziwych komputerach klasy PC, po dodaniu istotnych czê¶ci systemu
 by³ wiêc testowany i dostosowywany tak, aby dzia³a³ na prawdziwym sprzêcie.
 Emulator Qemu dodatkowo pos³u¿y³ do wpiêcia debuggera gdb, co umo¿liwia³o
 prostsze wy³apywanie b³êdów oraz ¶ledzenie przebiegu programu. Do obydwu
@@ -129,7 +129,7 @@ pamiêci komputera wzorcem \texttt{0xe9}, które pozwalaj± wykryæ wiêcej b³êdów
 z~u¿yciem emulatorów, domy¶lnie zeruj±cych pamiêæ RAM.
 
 
-\subsection{Opis drzewa z~kodem ¼rod³owym.}
+\subsection{Opis drzewa z~kodem ¼ród³owym.}
 
 Drzewo z~kodem ¼ród³owym ma ustalon± strukturê, w~poni¿szym opisie
 katalog \texttt{.} oznacza korzeñ drzewa.

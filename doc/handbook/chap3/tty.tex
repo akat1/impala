@@ -50,7 +50,7 @@ wska¼nik do funkcji obs³uguj±cej zapis na tym urz±dzeniu. W ten sposób, system
 terminali stanowi nak³adkê na inne urz±dzenia, implementuj±c± ich typowe
 funkcjonalno¶ci w zunifikowany sposób.
 \subsection{Re¿im linii.}
-Aby zapewniæ zgodno¶æ programów UNIX'owych z oferowanym przez nas interfejsem
+Aby zapewniæ zgodno¶æ programów Unixowych z oferowanym przez nas interfejsem
 terminali, zosta³ on zaprojektowany zgodnie ze standardem POSIX dotycz±cym tej
 kwestii. Standard reguluje jak ma przebiegaæ wej¶cie, wyj¶cie oraz zmiana
 ustawieñ terminala.
@@ -111,8 +111,8 @@ poprzez wywo³anie \texttt{ioctl} na deskryptorze pliku terminala, z poleceniem
 % Mo¿na wywaliæ / skróciæ, w zwi±zku z powielaniem tre¶ci ju¿ opisanych
 Programy przekazuj± dane na wyj¶cie terminala za pomoc± jednej z funkcji biblioteki C,
 zazwyczaj z rodziny \texttt{printf}.
-Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funcjê \texttt{sc\_write}.
-Ta z koleji, poprzez vnode zwi±zany z deskyptorem pliku przekazuje bufor z danymi
+Funkcja \texttt{printf} wywo³uje poprzez przerwanie systemow± funkcjê \texttt{sc\_write}.
+Ta z koleji, poprzez vnode zwi±zany z deskryptorem pliku przekazuje bufor z danymi
 u¿ytkownika do funkcji obs³ugi \texttt{tty\_write} urz±dzenia znakowego zwi±zanego z terminalem.
 
 Zanim bêdzie móg³ nast±piæ faktyczny zapis danych przy pomocy funkcji zarejestrowanej
@@ -157,7 +157,7 @@ Je¿eli linia nie jest jeszcze gotowa, proces zasypia w oczekiwaniu na ni±.
 Zwrócony bufor zawiera co najwy¿ej jedn± liniê z wej¶cia.
 
 W trybie kanonicznym na wej¶ciu wykonywane jest wstêpne przetwarzanie,
-wed³ug warto¶æi \texttt{c\_iflag}. Mo¿liwe operacje to m.in. ignorowanie znaków
+wed³ug warto¶ci \texttt{c\_iflag}. Mo¿liwe operacje to m.in. ignorowanie znaków
 \texttt{CR}, zamiana znaku \texttt{CR} na znak \texttt{NL} i na odwrót.
 \subsubsection{Tryb surowy.}
 W trybie surowym znaki nie s± dodatkowo przetwarzane. Poprzez ustawienie pól

@@ -59,7 +59,7 @@ przerwañ. Przerwania z~ni¿szym priorytetem ni¿ obecny s± odwlekane.
 Do zwiêkszania priorytetu s³u¿± procedury \texttt{splXXX}, gdzie \texttt{XXX}
 jest nazw± poziomu. Zwracaj± one obecny poziom uprzywilejowania.
 Procedury nigdy nie zmniejszaj± poziomu uprzywilejowania, co zapobiega
-sytuacjom gdzie priorytet zostanie po cichu zmiejszony przez jedn±
+sytuacjom gdzie priorytet zostanie po cichu zmniejszony przez jedn±
 z~wykorzystanych procedur w~kodzie maj±cym dzia³aæ z wiêkszym.
 Priorytet jest przywracany za~pomoc± procedury \texttt{splx}.
 
@@ -84,7 +84,7 @@ Obecnie wyszczególnionymi poziomami uprzywilejowania s±:
  \item \texttt{HIGH} - poziom odwleka wszystkie przerwania w systemie.
 \end{itemize}
 
-Manipiluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê na~to,
+Manipuluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê na~to,
 ¿e mo¿e to~opó¼niaæ obs³ugê urz±dzeñ przez sterowniki, co mo¿e wp³yn±æ
 na~wydajno¶æ systemu.
 
@@ -95,7 +95,7 @@ program planisty.
 Nieuwa¿ne mieszanie zmian poziomu uprzywilejowania
 z~mechanizmami synchronizacji na~w±tkach mo¿e spowodowaæ zakleszczenie ca³ego
 systemu, poniewa¿ mechanizmy synchronizacji w±tków bêd± czekaæ a¿ inny proces
-opu¶ci sekcjê krytyczn±, a zmiana poziomu uprzewilejowania wy³±czy program
+opu¶ci sekcjê krytyczn±, a zmiana poziomu uprzywilejowania wy³±czy program
 planisty, który odpowiada za~zmianê aktualnie wykonywanego w±tku.
 
 Sterowniki urz±dzeñ mog± instalowaæ swoje podprogramy obs³ugi za~pomoc±
