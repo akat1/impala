@@ -213,6 +213,8 @@ odmontowywanie go, synchronizowanie jego stanu z pamiêci± trwa³±, oraz pobranie
 v-wêz³a katalogu g³ównego systemu plików. Podobnie jak przy v-wêz³ach, dla
 wygody korzystania z tych operacji utworzone zosta³y makra, o nazwach
 \texttt{VFS\_XXX}.
+W chwili obecnej ¿aden z systemów plików nie posiada zaimplementowanej obs³ugi
+odmontowywania systemu plików.
 Do montowania systemu plików istnieje dodatkowa funkcja \texttt{vfs\_mount}
 korzystaj±ca z makra \texttt{VFS\_MOUNT} i wykonuj±ca wszelkie niezbêdne czynno¶ci
 potrzebne do zamontowania systemu plików na podstawie v-wêz³a punktu montowania,
@@ -222,7 +224,7 @@ Zaimplementowane w Impali systemy plików to:
 \begin{itemize}
 \item MFS - pamiêciowy system plików, zamontowany jako korzeñ drzewa katalogów.
 \item FAT12 - system plików potrzebny do odczytania danych z dyskietki. Dyskietka
-jest domy¶lnie montowana w systemie plików pod katalogiem \texttt{/dev/fd0/}.
+jest domy¶lnie montowana w systemie plików pod katalogiem \texttt{/mnt/fd0/}.
 \item devfs - system pe³ni±cy rolê pojemnika na pliki urz±dzeñ, a tak¿e po¶rednika
 miêdzy interfejsem plików a interfejsem urz±dzeñ. Domy¶lnie zamontowany 
 w~\texttt{/dev/}.
