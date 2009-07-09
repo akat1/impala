@@ -67,7 +67,10 @@ int       &  f\_flags & Flagi, pocz±tkowo ustawione przez open\\
 \end{center}
  
 Tak wiêc wszystkie deskryptory wskazuj±ce na ten sam plik dziel± informacje
-takie jak aktualna pozycja kursora oraz flagi pliku.
+takie jak aktualna pozycja kursora oraz flagi pliku. Do pobrania struktury
+\texttt{file\_t} na podstawie deskryptora s³u¿y funkcja \texttt{f\_get}.
+Tablica deskryptorów plików zosta³a zrealizowana jako lista kawa³ków tablicy
+o pojemno¶ci 32 wpisów.
 
 \subsection{Pliki od strony j±dra.}
 
@@ -206,7 +209,33 @@ list\_node\_t  &~L\_mountlist & wêze³ z listy zamontowanych fs\\
 \end{tabular}
 \end{center}
 Operacje, mo¿liwe do wykonania na systemie plików to montowanie systemu plików,
-odmontowywanie go, synchronizowanie jego stanu z pamiêci± trwa³±, oraz pobieranie
-v-wêz³a katalogu g³ównego systemu plików.
+odmontowywanie go, synchronizowanie jego stanu z pamiêci± trwa³±, oraz pobranie
+v-wêz³a katalogu g³ównego systemu plików. Podobnie jak przy v-wêz³ach, dla
+wygody korzystania z tych operacji utworzone zosta³y makra, o nazwach
+\texttt{VFS\_XXX}.
+Do montowania systemu plików istnieje dodatkowa funkcja \texttt{vfs\_mount}
+korzystaj±ca z makra \texttt{VFS\_MOUNT} i wykonuj±ca wszelkie niezbêdne czynno¶ci
+potrzebne do zamontowania systemu plików na podstawie v-wêz³a punktu montowania,
+informacji o nazwie systemu plików oraz strukturze urz±dzenia które nale¿y zamontowaæ.
 
+Zaimplementowane w Impali systemy plików to:
+\begin{itemize}
+\item MFS - pamiêciowy system plików, zamontowany jako korzeñ drzewa katalogów.
+\item FAT12 - system plików potrzebny do odczytania danych z dyskietki. Dyskietka
+jest domy¶lnie montowana w systemie plików pod katalogiem \texttt{/dev/fd0/}.
+\item devfs - system pe³ni±cy rolê pojemnika na pliki urz±dzeñ, a tak¿e po¶rednika
+miêdzy interfejsem plików a interfejsem urz±dzeñ. Domy¶lnie zamontowany 
+w~\texttt{/dev/}.
+\item fifofs - system plików na u¿ytek plików potoków. Nie obs³uguje on funkcji
+montowania.
+\end{itemize}
 
+Wszystkie te systemy plików kompilowane s± do pojedynczej biblioteki 
+\texttt{libfs.a} udostêpniaj±cej tablicê funkcji inicjalizacji poszczególnych
+systemów plików \texttt{fstab}. Funkcje zawarte w tej tabeli s± automatycznie
+wykonywane podczas inicjalizacji wirtualnego systemu plików.
+
+Jedn± z wa¿niejszych funkcji, udostêpnionych przez
+podsystem VFS, jest \texttt{vfs\_lookup}. S³u¿y ona do zlokalizowania
+v-wêz³a pliku na podstawie ¶cie¿ki dostêpu. Implementuje ona standardowy
+schemat rozwi±zywania ¶cie¿ek.
