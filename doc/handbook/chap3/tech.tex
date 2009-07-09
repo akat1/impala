@@ -35,9 +35,42 @@
 
 Obraz j±dra jest zapisany w~formacie ELF (\emph{Executable and Linkable
 Format}). Format charaketeryzuje zmienna ilo¶æ sekcji w pliku, gdzie
-ka¿d ma swoj± nazwê
+ka¿da ma swoj± nazwê. Obraz j±dra zapisany w~tym formacie zawiera
+nastêpuj±ce sekcje:
+\begin{itemize}
+ \item \texttt{.bootstrap} - kod rozruchowy j±dra.
+ \item \texttt{.text} - kod j±dra.
+ \item \texttt{.data} - dane j±dra.
+ \item \texttt{.rodata} - dane j±dra, przeznaczone tylko do odczytu.
+\end{itemize}
+
+Ró¿ne dodatkowe sekcje mog± zostaæ do³±czone przez kompilator.
+
+Du¿ym udogodniem tego formatu jest mo¿liwo¶æ przypisania ka¿dej sekcji
+dwóch ró¿nych adresów ich lokalizacji. Jeden to~adres wirtualny, mówi±cy
+gdzie dana sekcja znajduje siê w~wirtualnej przestrzeni adresowej. Drugi
+to~adres fizyczny informuj±cy gdzie dana sekcja bêdzie znajdowaæ siê
+w~pamiêci fyzycznej.
+
+Systemy operacyjne, u¿ywaj±ce tego formatu do~obrazów programów, nie u¿ywaj±
+pola z~adresem fizycznym, poniewa¿ jest on dynamicznie ustalany podczas
+³adowania programów. U¿ywa go natomiast program ³aduj±cy GRUB przy wybieraniu
+lokalizacji w~pamiêci gdzie dan± sekcjê za³adowaæ.
 
 \subsection{Obrazy programów.}\label{tech:aout}
+
+Obrazy programów w~naszym systemie s± trzymane w~starym formacie
+plików wykonywalnych \texttt{A.out} (assembler output). Obecnie ten format
+jest wyparty przez format ELF, lecz jego prosta budowa czyni± go idealnym
+kandydatem do~prostego systemu operacyjnego. Obraz w~tym formacie zawiera
+w~pliku dwie sekcje.
+\begin{itemize}
+ \item \texttt{.text} - kod prograu.
+ \item \texttt{.data} - dane programu.
+\end{itemize}
+
+Pocz±tek sekcji danych jest zaokr±glony do~adresu pierwszej strony
+po~sekcji tekstu, która rozpoczyna siê pod adresem 0.
 
 \subsection{Rozruch systemu.}
 
@@ -45,23 +78,24 @@ ka¿d ma swoj± nazwê
 Skompresowany obraz j±dra (\texttt{/boot/impala.gz}) jest ³adowany przez
 program GRUB, zainstalowany w~sektorze rozruchowym dyskietki. 
 
-
 Z~dzia³ania j±dra w~wysokich adresach (\ref{vm:mmap}) wynika trudno¶æ
 techniczna przy ³adawaniu systemu. Program ³aduj±cy nie przygotowuje
-mechanizmu stronicowania (pamiêci wirtualnej), w zwi±zku z czym ogólny
+mechanizmu stronicowania (pamiêci wirtualnej), w~zwi±zku z~czym ogólny
 kod j±dra jest bezu¿yteczny. 
-Poniewa¿ format ELF umo¿liwia tworzenie wielu sekcji posiadaj±cych ró¿ne
-atrybuty to problem zosta³ rozwi±zany przez wprowadzenie
-specjalnej sekcji z kodem \texttt{.bootstrap}. Sekcja w~odró¿nieniu
-od standardowej sekcji z~kodem \texttt{.text} jest przystosowana
-do pracy w niskich adresach, w tych w jakie jest ³adowane j±dro.
+Poniewa¿ format ELF umo¿liwia tworzenie wielu sekcji z mo¿liwo¶ci± rozró¿nienia
+adresu fizycznego od wirtualnego to~problem zosta³ rozwi±zany przez
+wprowadzenie specjalnej sekcji \texttt{.bootstrap}. Sekcja w~odró¿nieniu
+od standardowej sekcji \texttt{.text} jest przystosowana
+do~pracy w~¶rodowisku, gdzie adresy wirtualne odpowiadaj± adresom fizycznym.
 
 Kod rozruchowy z~tej sekcji konfiguruje mechanizm stronicowania aby
-odwzorowaæ kod j±dra w~wysokich adresach. Po tej czynno¶ci jest 
-uruchamiana niskopoziomowa inicjacja systemu, a w niej przygotowanie
-modu³u pamiêci wirtualnej, przerwañ, czasomierza i karty graficznej.
+odwzorowaæ kod j±dra w~wysokich adresach, a nastêpnie przekazuje
+sterowanie kodu rozruchowego z~sekcji tekstu.
 
-...
+W pierwszej kolejno¶ci uruchamiana jest inicjalizacja modu³u platformy
+sprzêtowej. Nastêpnie sterowanie jest przekazywane do~procedy \texttt{kmain}
+niezale¿nej od~platformy.
+
 
 \subsection{System budowania.}
 
