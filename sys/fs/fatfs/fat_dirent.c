@@ -214,7 +214,7 @@ rewrite_whole_dir(fatfs_dir_t *dir)
     err = fatfs_node_truncate(dir->node, size*32);
     if (err) return err;
 
-    fatfs_dentry_t *table = kmem_zalloc(size*32, KM_SLEEP);
+    fatfs_dentry_t *table = kmem_zalloc(512, KM_SLEEP);
     if (table == NULL) {
         DEBUGF("cannot allocate buffer for %u bytes", size);
         return -ENOMEM;
@@ -223,15 +223,15 @@ rewrite_whole_dir(fatfs_dir_t *dir)
     u.oper = UIO_WRITE;
     u.iovs = &iov;
     u.iovcnt = 1;
-    u.size = size*32;
-    u.resid = size*32;
+    u.size = 512;
+    u.resid = 512;
     u.completed = 0;
-    iov.iov_len = size*32;
+    iov.iov_len = 512;
     iov.iov_base = table;
 
     dirent = list_head(&dir->dirents);
-    for (int i = 0; i < size && dirent; ) {
-        i += fill_dentry(&table[i], dirent, size - i, i);
+    for (int i = 0; i < 512/32 && dirent; ) {
+        i += fill_dentry(&table[i], dirent, 512/32 - i, i);
         dirent = list_next(&dir->dirents, dirent);
     }
     ssize_t r = fatfs_node_write(dir->node, &u, 0);
@@ -378,8 +378,10 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
         vfatlname_insert(vln, dentry);
         return;
     }
-    if (dentry->attr == 0 || ISSET(dentry->attr, FATFS_SKIP)) return;
+    if (dentry->name[0] == 0) return;
+    if (ISSET(dentry->attr, FATFS_SKIP)) return;
     if ( mem_cmp(dentry->name, ".       ", 8) == 0) {
+        DEBUGF(".");
         fatfs_dirent_t *dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
         str_cpy(dirent->name, ".");
         dirent->firstclu = dir->node->firstclu;
@@ -389,6 +391,7 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
         list_insert_tail(&dir->dirents, dirent);
     } else
     if ( mem_cmp(dentry->name, "..      ", 8) == 0) {
+        DEBUGF("..");
         fatfs_dirent_t *dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
         str_cpy(dirent->name, "..");
         dirent->firstclu = dir->node->dirent->dirnode->firstclu;
@@ -398,6 +401,7 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
         list_insert_tail(&dir->dirents, dirent);
     } else
     if (dentry->name[0] != 0xe5) {
+        DEBUGF("entry");
         fatfs_dirent_t *dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
         fatfs_node_t *node;
         vfatlname_copy(vln, dirent, dentry);
@@ -417,6 +421,8 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
         node->dirent = dirent;
         dirent->node = node;
         list_insert_tail(&dir->dirents, dirent);
+    } else {
+        DEBUGF("unknown");
     }
     vfatlname_reset(vln);
 }
