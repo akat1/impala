@@ -312,7 +312,6 @@ bio_write(iobuf_t *bp)
 {
     bp->oper = BIO_WRITE;
     bp->resid = bp->size;
-    DEBUGF("starting BIO_WRITE xfer %u", bp->size);
     UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
     devd_strategy(bp->dev, bp);
     bio_wait(bp);

@@ -181,7 +181,6 @@ fatfs_truncate(vnode_t *v, off_t len)
 int
 fatfs_seek(vnode_t *v, off_t off)
 {
-    DEBUGF("seek not supported");
     return -ENOTSUP;
 }
 
@@ -246,7 +245,6 @@ int
 fatfs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
                            vattr_t *attr)
 {
-    DEBUGF("mkdir(%s)", path);
     int err;
     blkno_t clu;
     fatfs_node_t *node = v->v_private;
@@ -498,13 +496,10 @@ fatfs_node_truncate(fatfs_node_t *node, off_t off)
     node->csize = need;
 
     if (need == have) {
-        DEBUGF("no cluster-chain changes");
         goto end;
     } else
     if (need == 0) {
-        DEBUGF("zero");
         if (node->firstclu) {
-            DEBUGF("freeing chain");
             fatfs_space_free(fatfs, node->firstclu);
             node->firstclu = 0;
         }

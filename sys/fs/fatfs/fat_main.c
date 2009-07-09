@@ -176,7 +176,6 @@ fatfs_space_scan(fatfs_t *fatfs)
     }
     fatfs->free_first = ffree;
     fatfs->free_count = c;
-    DEBUGF("detected %u free clusters (%u bytes)", c, c*fatfs->clusize);
 }
 
 void
