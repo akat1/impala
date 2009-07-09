@@ -33,7 +33,7 @@
 
 Zadania procesora s± reprezentowane przez w±tki (\texttt{thread\_t}). Ka¿dy
 z~w±tków dostaje kwant czasu na~wykorzystanie procesora, dziêki czemu
-u¿ytkownik mo¿e odnie¶c wra¿enie, ¿e uruchomione przez niego zadania dzia³aj±
+u¿ytkownik mo¿e odnie¶æ wra¿enie, ¿e uruchomione przez niego zadania dzia³aj±
 jednocze¶nie. Za przydzia³ czasu procesora jest odpowiedzialny program
 planisty omówiony w \ref{SCHEDULER}.
 
@@ -56,11 +56,11 @@ te~dwa stosy.
 
 Stosy u¿ytkownika s± jego prywatnymi stosami, tzn istniej±cymi jedynie
 w~jego przestrzeni adresowej, natomiast stosy alternatywne znajduj± siê
-w~przestrzeni j±dra, dziêki czemu s± dostêpne zawsze dla systemu.
+w~przestrzeni j±dra, dziêki czemu s± zawsze dostêpne dla systemu.
 
 Adres procedury wej¶ciowej jest wykorzystywany je¿eli dany w±tek nie mia³
 dot±d ani razu przydzielonego czasu procesora - np. zosta³ dopiero utworzony.
-Wtedy jego dzia³anie rozpoczyna siê od~adresu procedury wej¶ciowej,
+W takim przypadku jego dzia³anie rozpoczyna siê od~adresu procedury wej¶ciowej,
 w~przeciwnym od~adresu zapisanego w~kontek¶cie.
 
 Kontekst procesora zawiera w~sobie takie informacje jak ramka przerwania,
@@ -71,7 +71,7 @@ przerwanie oraz pomocniczy schowek na~rejestry procesora.
 
 Mechanizm zmiany kontekstu procesora jest oparty o~mechanizm obs³ugi przerwañ
 przez procesor. Przed rozpoczêciem omawiania mechanizmu zmian kontekstu
-wyszczególnijmy kilka faktów, zwi±zanych z~prac± procesora.
+wyszczególnimy kilka faktów, zwi±zanych z~prac± procesora.
 \begin{itemize}
  \item procesor podczas wywo³ywania procedury k³adzie na~stos adres
        aktualnie wykonywanej instrukcji, tak aby po zakoñczeniu procedury
@@ -84,8 +84,8 @@ wyszczególnijmy kilka faktów, zwi±zanych z~prac± procesora.
 
 
 Pod obs³ugê zegara systemowego, którego przerwanie jest generowane~z
-czê¶tliwo¶ci± 100Hz, jest podpiêty program planisty, który je¿eli zdecyduje
-siê zmieniæ kontekst procesora, tzn wykonywany przez procesor w±tek
+czêstotliwo¶ci± 100Hz, jest podpiêty program planisty, który je¿eli zdecyduje
+siê zmieniæ kontekst procesora, tzn. wykonywany przez procesor w±tek,
 to~przekazuje sterownie do~procedury \texttt{thread\_switch} przekazuj±c jej
 deskryptor aktualnie wykonywanego w±tku (\texttt{curthread}) oraz w±tku
 na~jaki ma~nast±piæ zmiana.
@@ -102,19 +102,19 @@ podczas pracy drugiego w±tku). Poniewa¿ na~stosie jest zapisany ¶lad
 wywo³añ, to po podmianie stosu procesor zachowa siê dok³adnie tak, jak by siê
 zachowa³ wykonuj±c drugi w±tek po~zachowaniu jego rejestrów. Bardzo podobny
 mechanizm istnieje w~jêzyku C w~procedurach \texttt{setjmp} i \texttt{longjmp}.
-Koñcz±c pokolei procedury procesor wróci do~tej, któr± wywo³a³ procesor
+Koñcz±c po kolei procedury procesor wróci do~tej, któr± wywo³a³ procesor
 do~obs³ugi przerwania zegara podczas pracy drugiego w±tku, a jej
 zakoñczenie przywróci stan procesora z~zachowanej ramki przerwania,
-zawieraj±cej stan w±tku drugiego. Ta operacja jest prawid³owa poniewa¿
-ramki przerwañ s± zapisywane na~stosach alternatywnych, którs s± dostêpne
+zawieraj±cej stan drugiego w±tku. Ta operacja jest prawid³owa, poniewa¿
+ramki przerwañ s± zapisywane na~stosach alternatywnych, które s± dostêpne
 w~przestrzeni j±dra.
 
-Je¿eli drugi w±tek nie mia³ dot±d przydzielonego czasu procesora
+Je¿eli drugi w±tek nie mia³ dot±d przydzielonego czasu procesora,
 to~procedura zmiany kontekstu nie mia³a okazji zachowaæ jego
 rejestrów w~schowku, a procesor zapisaæ ramkê przerwania na~jego stosie
 alternatywnym. W takim wypadku uruchamiana jest procedura
-\texttt{thread\_resume}, która rêcznie buduje ramkê stosu aby oszukaæ
-procesor ¿e powraca do~obs³ugi zadania, które wcze¶niej wyw³asczy³.
+\texttt{thread\_resume}, która rêcznie buduje ramkê stosu, aby oszukaæ
+procesor, ¿e powraca do~obs³ugi zadania, które wcze¶niej wyw³asczy³.
 Jako adres wyw³aszczonej instrukcji jest podawana procedura wej¶ciowa.
 
 W schowku na~rejestry procesora jest zapisywany równie¿ rejestr kontrolny
@@ -149,18 +149,22 @@ priorytetów podzielona jest na~$32$ grupy po~$4$ warto¶ci w ka¿dej grupie,
 kolejka $Q_i$ odpowiada za~zbiór priorytetów $i,i+1,i+2,i+3$.
 Procesy przynale¿± do odpowiednich kolejek, za rozswiewanie ich odpowiada
 okresowo (co \texttt{SCHED\_RESCHEDULE} kwantów czasu) uruchamiana funkcja 
-\texttt{\_\_resched}, po~wykonaniu tej funkcji nastêpuje wybranie niepustej
+\texttt{\_\_resched}, która na dokonuje podzia³u na podstawie listy \texttt{run\_queue}, 
+w której znajduj± siê w±tki gotowe do uruchomienia, po~wykonaniu tej funkcji 
+nastêpuje wybranie niepustej
 kolejki zawieraj±cej najni¿sze priorytety i~w ramach tej kolejki planista
-realizuje podej¶cie zwane algorytmem karuzelowym, ka¿dy z w±tków w kolejce
-otrzymuje jednakowy kwant czasu. Procesy znajduj±ce siê poza kolejk± nie s±
+realizuje podej¶cie zwane algorytmem karuzelowym. Algorytm karuzelowy jest
+prostym sposobem szeregowania zadañ polegaj±cym na organizacji procesów w listê
+cykliczn±, a nastêpnie przydzielanie ka¿demu z w±tków kolejno jednakowego kwantu
+czasu. Procesy znajduj±ce siê poza t± kolejk± nie s±
 brane pod uwagê a¿ do~nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
 realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru:
 \[ \mbox{priorytet} = 2\cdot\mbox{poziom\_uprzejmosci} 
     + \mbox{wykorzystanie\_procesora}/2 \]
- Algorytm umo¿liwia
-preferowanie pewnych zadañ przez u¿ytkownika systemu za~pomoc± poziomu
-uprzejmo¶ci, oraz
-uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
+Wszystkie opisywane przez wzór warto¶ci przechowywane s± w bloku kontrolnym
+procesu.
+ Algorytm umo¿liwia preferowanie pewnych zadañ przez u¿ytkownika systemu za~pomoc± poziomu
+uprzejmo¶ci, oraz uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
 wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
 (tj. kompilatory). Na uwagê zas³uguje fakt, ¿e podobny algorytm z powodzeniem
 wykorzystywany jest do dzi¶ w systemach rodziny BSD.

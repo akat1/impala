@@ -40,16 +40,17 @@ nawet praw pozwlaj±cych mu samodzielnie zakoñczyæ swoje dzia³anie.
 Wykonanie takich operacji jest zlecane przez u¿ytkownika do~systemu
 za~pomoc± mechanizmu wywo³añ systemowych.
 
-U¿ytkownik przekazuje parametry systemowi k³ad±c je na~stos, tak jak by
+U¿ytkownik przekazuje parametry systemowi k³ad±c je na~stos, tak jakby
 mia³ wywo³aæ procedurê w~jêzyku C, lecz zamiast instrukcji wywo³uj±cej
 ustawia numer rz±danej operacji w~rejestrze procesora \texttt{eax}
 i~uruchamia instrukcje generuj±c± odpowiednie przerwanie
 programowe\footnote{W nowoczesnych procesorach s± dostarczone specjalne
-instruckje do~obs³ugi wywo³añ systemowych, zmniejszaj±ce narzut zwi±zany
-z~obs³ug± przerwañ. 
+instrukcje do~obs³ugi wywo³añ systemowych, zmniejszaj±ce narzut zwi±zany
+z~obs³ug± przerwañ, na architekturze x86 s± to instrukcje \texttt{sysenter} 
+oraz \texttt{sysexit}. 
 }. Sterowanie zostaje przekazane przez procesor do~procedury
 \texttt{ISR\_syscall}, która przekazuje odpowiednio sterowanie dalej
-do~procedury \texttt{syscall}, nie zale¿nej ju¿ od~platformy sprzêtowej.
+do~procedury \texttt{syscall}, niezale¿nej ju¿ od~platformy sprzêtowej.
 
 Po przywróceniu sterowania do~programu w~rejestrze \texttt{eax} znajduje siê
 wynik operacji, a w~rejestrze \texttt{ecx} numer b³êdu.
@@ -68,20 +69,27 @@ przez ten proces odpowiedniej akcji. Procesy mog± same decydowaæ co zrobiæ z
 sygna³em, który zosta³ do nich dostarczony, mo¿liwe jest podjêcie akcji
 domy¶lnej, zignorowanie sygna³u oraz w³asna obs³uga sygna³u. Wyj±tkiem s±
 sygna³y SIGSTOP i SIGKILL, które nie mog± zostaæ zignorowane lub zamienione
-w³asn± obs³ug± sygna³u. Wielokrotne dostarczenie jednego sygna³u do procesu
+w³asn± obs³ug± sygna³u. Akcja zapisywana jest w bloku kontrolnym procesu w 
+strukturze \texttt{sigaction} odpowiedzialnej za przechowywanie adresu obs³ugi sygna³u,
+adres mo¿e przyjmowaæ dwie warto¶ci specjalne \texttt{SIG_DFL}, \textt{SIG_IGN}
+odpowiadaj±cej odpowiednio domy¶lnej obs³udze, zignorowaniu sygna³u, lub byæ wska¼nikiem 
+na funkcjê obs³ugi sygna³u zdefiniowanej w programie przez programistê.
+Wielokrotne dostarczenie jednego sygna³u do procesu
 zanim proces zd±¿y sygna³ obs³u¿yæ jest równoznaczne z jednokrotnym wys³aniem
 sygna³u. Sygna³y w systemie dostarczane s± do procesu do bloku kontrolnego
 procesu, sygna³ mo¿e obs³u¿yæ dowolny jego w±tek, ustawiaj±c w bloku kontrolnym
-jego obs³u¿enie i nastêpnie podejmuj±c akcje odpowiedni± dla niego. Obs³ugê
-sygna³u mo¿na rozumieæ jako przerwanie dzia³ania programu, wykonanie procedury
-obs³ugi a nastêpnie powrót do miejsca, w którym nast±pi³o przerwanie.
+jego obs³u¿enie i nastêpnie podejmuj±c akcje odpowiedni± dla niego na podstawie
+tablicy \texttt{p_sigact}. Obs³ugê
+sygna³u mo¿na rozumieæ jako przerwanie dzia³ania programu, przechowanie kontekstu, 
+wykonanie procedury obs³ugi a nastêpnie powrót do miejsca, w którym nast±pi³o przerwanie i
+odtworzenie przechowanego kontekstu.
 Sprawdzanie czy nadszed³ nowy sygna³ realizowane jest przy zmianie kontekstu
 oraz powrocie z wywo³añ systemowych. Poniewa¿ mo¿liwe jest przerywanie
 dzia³ania procedur
 obs³ugi sygna³ów, to j±dro udostêpnia specjalny interfejs obs³ugi sygna³ów przez
 procedury \texttt{sigenter} i \texttt{sigreturn}, które organizuj± procedury
-obs³ugi sygna³ów w stos.
-
+obs³ugi sygna³ów w stos dzia³aj±cy analogicznie do stosu przy klasycznym wywo³ywaniu
+procedur.
 
 \subsection{Kolejki wiadomo¶ci.} \label{SYSVMSG}
 
@@ -90,7 +98,7 @@ procesami wywodz±cej siê z~Systemu V. Obok nich istniej± równie¿ mechanizmy
 pamiêci dzielonej oraz semaforów, nie zosta³y one jednak zaimplementowane.
 
 U¿ytkownik identyfikuje zasoby komunikacji miêdzy procesami za~pomoc±
-kluczy, które mo¿na porównaæ z~plikami. Charakteryzuja je takie same
+kluczy, które mo¿na porównaæ z~plikami. Charakteryzuj± je takie same
 prawa dostêpu oraz operacje tworzenia i~usuwania.
 
 Znaj±c klucz u¿ytkownik mo¿e pobraæ identyfikator kolejki wiadomo¶ci za~pomoc±
