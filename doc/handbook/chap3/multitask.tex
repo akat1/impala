@@ -37,24 +37,25 @@ u¿ytkownik mo¿e odnie¶æ wra¿enie, ¿e uruchomione przez niego zadania dzia³aj±
 jednocze¶nie. Za przydzia³ czasu procesora jest odpowiedzialny program
 planisty omówiony w \ref{SCHEDULER}.
 
-W±tek posiada w~sobie miêdzy innymi nastêpuj±ce informacje
+W±tek posiada w~sobie miêdzy innymi nastêpuj±ce informacje:
 \begin{itemize}
  \item kontekst, s³u¿±cy do~zachowywania jego stanu
- \item proces do którego przynale¿y w±tek
+ \item proces do, którego przynale¿y w±tek
  \item adres procedury wej¶ciowej, od~której rozpoczyna siê dzia³anie zadania
  \item adres stosu u¿ytkownika i jego rozmiar
  \item adres stosu alternatywnego i jego rozmiar
- \item przestrzeñ adresowa w której dzia³a to~zadanie (wspólna dla wszystkich
+ \item przestrzeñ adresowa, w której dzia³a to~zadanie (wspólna dla wszystkich
     w±tków w obrêbie tego samego procesu)
 \end{itemize}
 
-W±tki procesora wykonuj±ce kod u¿ytkownika potrzebuj± dwóch stosów,
-pierwszy stos jest przeznaczony do~standardowego u¿ytku. Natomiast stos
-alternatywny jest wykorzystywany wtedy, kiedy procesor wyw³aszcza zadanie
+W±tki procesora wykonuj±ce kod u¿ytkownika potrzebuj± dwóch stosów.
+Pierwszy stos jest przeznaczony do~standardowego u¿ytku. Stos
+alternatywny natomiast jest wykorzystywany wtedy, kiedy procesor wyw³aszcza
+zadanie
 obs³uguj±c przerwanie. W±tki wykonuj±ce kod systemu uto¿samiaj± ze~sob±
 te~dwa stosy.
 
-Stosy u¿ytkownika s± jego prywatnymi stosami, tzn istniej±cymi jedynie
+Stosy u¿ytkownika s± jego prywatnymi stosami, tzn. istniej±cymi jedynie
 w~jego przestrzeni adresowej, natomiast stosy alternatywne znajduj± siê
 w~przestrzeni j±dra, dziêki czemu s± zawsze dostêpne dla systemu.
 
@@ -73,11 +74,11 @@ Mechanizm zmiany kontekstu procesora jest oparty o~mechanizm obs³ugi przerwañ
 przez procesor. Przed rozpoczêciem omawiania mechanizmu zmian kontekstu
 wyszczególnimy kilka faktów, zwi±zanych z~prac± procesora.
 \begin{itemize}
- \item procesor podczas wywo³ywania procedury k³adzie na~stos adres
+ \item Procesor podczas wywo³ywania procedury k³adzie na~stos adres
        aktualnie wykonywanej instrukcji, tak aby po zakoñczeniu procedury
        móg³ wróciæ do~kodu j± wywo³uj±cego, zapisane w ten sposób
        adresy na~stosie tworz± ,,¶lad wywo³añ''.
- \item stos w procesorze jest definiowany przez adres w~rejestrze
+ \item Stos w procesorze jest definiowany przez adres w~rejestrze
        \texttt{esp}, a operacje na~stosie pobieraj± i~zapisuj± dane
        pod tym adresem odpowiednio go modyfikuj±c.
 \end{itemize}
@@ -97,7 +98,7 @@ wczytuje zachowane wcze¶niej rejestry ze schowka drugiego w±tku.
 Poniewa¿ w~rejestrach procesora s± zapisane adresy lokalizuj±ce stos
 to powy¿sza operacja powoduje ,,podmianê'' aktualnie wykonywanego stosu
 procesora na ten, jaki by³ w momeñcie zapisywania rejestrów drugiego w±tku
-(to znaczy dok³adni wtedy, kiedy planista uruchomi³ \texttt{thread\_switch}
+(to znaczy dok³adnie wtedy, kiedy planista uruchomi³ \texttt{thread\_switch}
 podczas pracy drugiego w±tku). Poniewa¿ na~stosie jest zapisany ¶lad
 wywo³añ, to po podmianie stosu procesor zachowa siê dok³adnie tak, jak by siê
 zachowa³ wykonuj±c drugi w±tek po~zachowaniu jego rejestrów. Bardzo podobny
@@ -141,7 +142,9 @@ nowy w±tek z~porz±danym stanem.
 
 \subsection{Synchronizacja.}
 
-\subsection{Szeregowanie zadañ} \label{SCHEDULER}
+Najprymitywniejszym ¶rodkiem synchronizacji jest wiruj±cy zamek.
+
+\subsection{Szeregowanie zadañ.} \label{SCHEDULER}
 
 Zaimplementowany w systemie algorytm szeregowania zadañ zosta³ oparty na
 algorytmach planistów zastosowanych w systemach 4.3BSD oraz SVR4. Dok³adny 
@@ -150,16 +153,16 @@ algorytmów znajduje siê w~\cite{unixjadro}.
 
 Omówimy tutaj jedynie ogólny zarys planisty oraz ró¿nice w stosunku do pierwowzoru. 
 Planista przydziela procesom priorytet na podstawie ich ostatniego zachowania w systemie 
-(tzn. zu¿ycia czasu procesora oraz innych statystyk.) oraz poziomu uprzejmo¶ci (nice).
+(tzn. zu¿ycia czasu procesora oraz innych statystyk) oraz poziomu uprzejmo¶ci (nice).
 Priorytet jest liczb± z~zakresu od~$0$ do~$127$, procesy o~mniejszej warto¶ci
 priorytetu s± traktowane jako wa¿niejsze, mo¿na wiêc rozumieæ tê warto¶æ jako
 karê nak³adan± na~proces. Wszystkie w±tki w ramach procesu traktowane s±
 jednakowo i~wszystkie posiadaj± priorytet równy priorytetowi procesu. Przestrzeñ
 priorytetów podzielona jest na~$32$ grupy po~$4$ warto¶ci w ka¿dej grupie,
 kolejka $Q_i$ odpowiada za~zbiór priorytetów $i,i+1,i+2,i+3$.
-Procesy przynale¿± do odpowiednich kolejek, za rozswiewanie ich odpowiada
+Procesy przynale¿± do odpowiednich kolejek, za rozsiewanie ich odpowiada
 okresowo (co \texttt{SCHED\_RESCHEDULE} kwantów czasu) uruchamiana funkcja 
-\texttt{\_\_resched}, która na dokonuje podzia³u na podstawie listy \texttt{run\_queue}, 
+\texttt{\_\_resched}, która dokonuje podzia³u na podstawie listy \texttt{run\_queue}, 
 w której znajduj± siê w±tki gotowe do uruchomienia, po~wykonaniu tej funkcji 
 nastêpuje wybranie niepustej
 kolejki zawieraj±cej najni¿sze priorytety i~w ramach tej kolejki planista
@@ -176,6 +179,4 @@ procesu.
  Algorytm umo¿liwia preferowanie pewnych zadañ przez u¿ytkownika systemu za~pomoc± poziomu
 uprzejmo¶ci, oraz uwzglêdnia wykorzystanie procesora przez poszczególne procesy, co umo¿liwia
 wybór zadañ interakcyjnych (tj. edytory tekstu) przed zadaniami obliczeniowymi
-(tj. kompilatory). Na uwagê zas³uguje fakt, ¿e podobny algorytm z powodzeniem
-wykorzystywany jest do dzi¶ w systemach rodziny BSD.
-
+(tj. kompilatory). 
