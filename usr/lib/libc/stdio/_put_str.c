@@ -28,3 +28,37 @@ __put_str(FILE *f, const char *str)
     }
     return res;
 }
+
+static int min(int a, int b);
+int
+min(int a, int b)
+{
+    if(a<b) return a;
+    return b;
+}
+
+int
+__put_nstr(FILE *f, const char *str, int maxlen)
+{
+    int res = 0;
+    if(ISSET(f->status, _FST_NOBUF)) {
+        if(f->writefn) {
+            res = f->writefn(f->cookie, str, min(strlen(str), maxlen));
+        } else if(f->fd!=-1) {
+            res = write(f->fd, str, min(strlen(str), maxlen));
+        } else
+            return EOF;
+        if(res <= 0)
+            return EOF;
+        return res;
+    }
+    bool lineBuf = ISSET(f->status, _FST_LINEBUF);
+    while(*str && maxlen-- > 0) {
+        char c = *(str++);
+        f->buf[f->inbuf++] = c;
+        if(f->inbuf == f->buf_size || (c == '\n' && lineBuf))
+            fflush(f);
+        res++;
+    }
+    return res;
+}

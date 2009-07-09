@@ -8,7 +8,8 @@
 
 static char *convert_int32(char *b, int32_t arg_u32, int base);
 static char *convert_uint32(char *b, uint32_t arg_u32, int base);
-static int from_string(FILE *str, char *b, char sep, int fw, bool to_right);
+static int from_string(FILE *str, char *b, char sep, int fw, int fp,
+                        bool to_right);
 
 enum {
     INTERNAL_BUF = 128
@@ -36,6 +37,8 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
             case '%': {
                 fmt++;
                 int field_width = 0;
+                int field_precision = -1;
+                int *val = &field_width;
                 char separator = ' ';
                 bool pad_to_right = TRUE;
                 bool done = FALSE;
@@ -47,19 +50,23 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                         fmt++;
                         break;
                     case '*':
-                        field_width = va_arg(ap, int);
+                        *val = va_arg(ap, int);
                         fmt++;
-                        if(field_width<0) {
-                            field_width=-field_width;
-                            pad_to_right = FALSE;
+                        if(*val<0) {
+                            *val=-*val;
+                            pad_to_right = FALSE; //?
                         }
                         break;
                     case '.':
+                        val = &field_precision;
+                        *val = 0;
+                        fmt++;
+                        break;
                     case '0':
-                        if(field_width == 0)
+                        if(*val == 0)
                             separator = '0';
                         else
-                            field_width *= 10;
+                            *val *= 10;
                         fmt++;
                         break;
                     case '1':
@@ -71,7 +78,7 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                     case '7':
                     case '8':
                     case '9':
-                        field_width = 10*field_width + (*(fmt++) - '0');
+                        *val = 10*(*val) + (*(fmt++) - '0');
                         break;
                     default:
                         done=TRUE;
@@ -124,8 +131,9 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
                         break;
                 }
                 if (pbuf)
-                    tot+=from_string(stream, pbuf, separator,
-                                        field_width, pad_to_right);
+                    tot+=from_string(stream, pbuf, separator, field_width,
+                                     (*fmt=='s')?field_precision:-1,
+                                      pad_to_right);
                 break;
             }
 
@@ -139,7 +147,7 @@ vfprintf(FILE *stream, const char *fmt, va_list ap)
 }
 
 int
-from_string(FILE *str, char *b, char sep, int fw,
+from_string(FILE *str, char *b, char sep, int fw, int fp,
                         bool to_right)
 {
     int len = strlen(b);
@@ -151,8 +159,10 @@ from_string(FILE *str, char *b, char sep, int fw,
         while(pad_count--)
             __put_char(str, sep);
     }
-    __put_str(str, b);
-
+    if(fp == -1)
+        __put_str(str, b);
+    else
+        __put_nstr(str, b, fp);
     while(pad_count-- > 0)
         __put_char(str, sep);
 

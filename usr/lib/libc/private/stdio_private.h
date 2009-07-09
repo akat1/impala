@@ -23,6 +23,7 @@ struct FILE {
 void __check_buf(FILE *f);
 int  __put_char(FILE *f, char c);
 int  __put_str(FILE *f, const char *str);
+int  __put_nstr(FILE *f, const char *str, int maxlen);
 int  __put_data(FILE *f, const char *str, size_t size);
 int  __get_data(FILE *f, char *str, size_t size);
 void __fflush_line_buffered(void);

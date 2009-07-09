@@ -7,7 +7,7 @@
 
 static char *convert_int32(char *b, int32_t arg_u32, int base);
 static char *convert_uint32(char *b, uint32_t arg_u32, int base);
-static int from_string(char *dst, int *left, char *b, char sep, int fw,
+static int from_string(char *dst, int *left, char *b, char sep, int fw, int fp,
                         bool to_right);
                         
 
@@ -35,6 +35,8 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
             case '%': {
                 fmt++;
                 int field_width = 0;
+                int field_precision = -1;
+                int *val = &field_width;
                 char separator = ' ';
                 bool pad_to_right = TRUE;
                 bool done = FALSE;
@@ -46,19 +48,23 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         fmt++;
                         break;
                     case '*':
-                        field_width = va_arg(ap, int);
+                        *val = va_arg(ap, int);
                         fmt++;
-                        if(field_width<0) {
-                            field_width=-field_width;
-                            pad_to_right = FALSE;
+                        if(*val<0) {
+                            *val=-*val;
+                            pad_to_right = FALSE; //?
                         }
                         break;
                     case '.':
+                        val = &field_precision;
+                        *val = 0;
+                        fmt++;
+                        break;
                     case '0':
-                        if(field_width == 0)
+                        if(*val == 0)
                             separator = '0';
                         else
-                            field_width *= 10;
+                            *val *= 10;
                         fmt++;
                         break;
                     case '1':
@@ -70,7 +76,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                     case '7':
                     case '8':
                     case '9':
-                        field_width = 10*field_width + (*(fmt++) - '0');
+                        *val = 10*(*val) + (*(fmt++) - '0');
                         break;
                     default:
                         done=TRUE;
@@ -82,6 +88,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                 if(*fmt == 'l') //long
                     fmt++;
                 // flagi zjedzone - do roboty
+                bool string = FALSE;
                 switch (*fmt) {
                     case '%':
                         if(left-- > 0)
@@ -116,6 +123,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         break;
                     case 's':
                         pbuf = va_arg(ap, char *);
+                        string = TRUE;
                         break;
                     case 'c':
                         if(left-- > 0)
@@ -123,8 +131,8 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
                         break;
                 }
                 if (pbuf)
-                    dst += from_string(dst, &left, pbuf, separator,
-                                        field_width, pad_to_right);
+                    dst += from_string(dst, &left, pbuf, separator, field_width,
+                                       string?field_precision:-1, pad_to_right);
                 break;
             }
 
@@ -140,7 +148,7 @@ vsnprintf(char *dst, size_t size, const char *fmt, va_list ap)
 }
 
 int
-from_string(char *dst, int *left, char *b, char sep, int fw,
+from_string(char *dst, int *left, char *b, char sep, int fw, int fp,
                         bool to_right)
 {
     char *dst_orig=dst;
@@ -154,9 +162,15 @@ from_string(char *dst, int *left, char *b, char sep, int fw,
             if((*left)-- > 0)
                 *(dst++) = sep;
     }
-    while (*b != 0)
-        if((*left)-- > 0)
-            *(dst++) = *(b++);
+    if(fp == -1) {
+        while (*b != 0)
+            if((*left)-- > 0)
+                *(dst++) = *(b++);
+    } else {
+        while (*b != 0)
+            if((*left)-- > 0 && fp-- > 0)
+                *(dst++) = *(b++);
+    }
 
     while(pad_count-- > 0)
         if((*left)-- > 0)
