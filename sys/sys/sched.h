@@ -42,6 +42,8 @@ void try_sched_yield(void);
 void do_switch(void);
 void sched_yield(void);
 void sched_exit(thread_t *thr);
+void sched_exit_1(thread_t *thr);
+void sched_exit_2(thread_t *thr);
 
 void sched_insert(thread_t *thr);
 void sched_remove(thread_t *thr);

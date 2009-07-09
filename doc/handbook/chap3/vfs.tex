@@ -80,8 +80,9 @@ prawdziw± implementacjê powi±zanych z nimi operacji. Pliki s± reprezentowane
 przez strukturê \texttt{vnode\_t}, natomiast systemy plików poprzez 
 \texttt{vfs\_t}. Implementacja zawarta w Impali bazowana by³a na tej z SVR4.
 \subsubsection{V-wêz³y}
-Aby móc zrozumieæ funkcjonowanie wirtualnego systemu plików, wa¿n± znajomo¶æ
-struktury, do której odnosi siê wiêkszo¶æ operacji. Oto jak wygl±da v-wêze³:
+Aby móc zrozumieæ funkcjonowanie wirtualnego systemu plików, wa¿n± jest
+znajomo¶æ struktury, do której odnosi siê wiêkszo¶æ operacji.
+Oto jak wygl±da v-wêze³:
 
 \begin{center}
 \begin{tabular}{|l l| l|}
@@ -119,6 +120,42 @@ Szczegó³owo zosta³a ona przedstawiona w tabeli \ref{vnodeops}.
 Dla wygody korzystania z v-wêz³ów dla ka¿dej z operacji wprowadzono
 odpowiednie makro \texttt{VOP\_XXX(v, ...)} wykonuj±ce operacjê \texttt{XXX}
 na v-wê¼le \texttt{v}.
+Dla dalszego u³atwienia pracy z v-wêz³ami, wprowadzono nastêpuj±ce ogólne
+procedury:
+\begin{itemize}
+\item \texttt{vnode\_opendev} - otwiera vnode urz±dzenia o podanej nazwie
+\item \texttt{vnode\_rdwr}, \texttt{vnode\_urdwr} - wykonuj± operacje odczytu
+i zapisu do danego v-wêz³a
+\item \texttt{vnode\_stat} - pobiera ró¿ne informacje o pliku
+\item \texttt{vnode\_isatty} - sprawdza czy v-wêze³ zwi±zany jest z urz±dzeniem
+terminalowym
+\item \texttt{vnode\_access\_ok} - weryfikuje uprawnienia danego procesu do
+dostêpu do pliku z zamiarem wykonania podanych operacji
+\item \texttt{vnode\_alloc} - przydziela now±, pust± strukturê v-wêz³a
+\item \texttt{vrele} - zwalnia dan± referencjê do v-wêz³a
+\item \texttt{vref} - tworzy now± referencjê do v-wêz³a
+\end{itemize}
+W kwestii zliczania referencji, przyjêta przez nas strategia zak³ada, ¿e
+ka¿da funkcja zwracaj±ca w wyniku v-wêze³, musi zwróciæ go ze zwiêkszon± ju¿
+liczb± referencji (tj. wykonanym \texttt{vref}). Dziêki temu, eliminujemy
+jedn± z mo¿liwych sytuacji wy¶cigu. Procedura wywo³uj±ca staje siê w ten sposób
+w³a¶cicielem zwróconego wska¼nika do v-wêz³a. Je¿eli nie bêdzie ju¿ wiêcej z
+niego korzysta³a, musi wykonaæ na nim \texttt{vrele}.
+
+Kolejnym ustaleniem, jest to, ¿e funkcja, która dosta³a v-wêze³ jako argument,
+mo¿e bez przeszkód z niego korzystaæ, o ile nie zachowuje tego wska¼nika na pó¼niej.
+Ka¿de klonowanie wska¼nika wymaga wywo³ania funkcji \texttt{vref}.
+Wyra¼nie oznaczone funkcje mog± jednak przejmowaæ prawo w³asno¶ci do referencji
+od strony wywo³uj±cej. Jest to wykorzystywane dla wygody, w sytuacjach, gdy po
+wykonaniu procedury dalszy dostêp do obiektu nie jest zazwyczaj potrzebny.
+
+Podobna strategia zosta³a zastosowana w odniesieniu do struktury \texttt{file\_t}.
+Odpowiednie funkcje maj± nazwy \texttt{frele} i \texttt{fref}.
+
+W przypadku zwalniania ostatniej referencji do v-wêz³a, wykonywana jest na nim
+operacja \texttt{VOP\_INACTIVE}, maj±ca na celu poinformowanie i-wêz³a (zale¿nej
+od sytemu plików czê¶ci v-wêz³a) o tej sytuacji. Umo¿liwi to wykonanie koñcowych
+czynno¶ci, takich jak zwolnienie i-wêz³a.
 \begin{table}
 \begin{tabular}{|l l|p{9cm}|}
 \hline
@@ -156,4 +193,16 @@ vnode\_unlink\_t    &*vop\_unlink&Usuwanie wpisu z katalogu\\
 \end{table}
 \subsection{Systemy plików}
 Struktura reprezentuj±ca zamontowane systemy plików jest analogiczna do
-struktury v-wêz³a, jednak¿e zwi±zane z ni± operacje s± mniej liczne.
+struktury v-wêz³a, jednak¿e zwi±zane z ni± operacje s± mniej liczne:
+\begin{center}
+\begin{tabular}{|l l| l|}
+\hline
+vfs\_ops\_t    &*vfs\_ops &   definicje operacji zwi±zanych z tym systemem plików\\
+vnode\_t      &*vfs\_mpoint &  v-wêze³ który przykryli¶my montuj±c ten s. plików\\
+devd\_t       &*vfs\_mdev &    urz±dzenie, u¿ywane przez ten s. plików\\
+void         &*vfs\_private & prywatne dane systemu plików\\
+vfs\_conf\_t   &*vfs\_conf &  struktura definiuj±ca typ zamontowanego systemy plików\\
+list\_node\_t  &~L\_mountlist & wêze³ z listy zamontowanych fs\\
+\hline
+\end{tabular}
+\end{center}

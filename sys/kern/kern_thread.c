@@ -132,8 +132,10 @@ void thread_exit_last(thread_t *t)
         sleepq_destroy(t->thr_joiner);
         t->thr_joiner = 0;
     }
+    sched_exit_1(t);
     kmem_cache_free(thread_cache, t);
-    sched_exit(t);
+    //ta procedura nie wymaga ju¿ poprawnej zawarto¶ci struktury t
+    sched_exit_2(t); 
 //     splx(x);
     panic("thread_exit_last() - should not be here");
 }
@@ -143,7 +145,6 @@ thread_destroy(thread_t *t)
 {
     t->thr_flags |= THREAD_ZOMBIE;
     list_remove(&threads_list, t);
-    int x = splsoftclock();
     if (t != curthread) {
         //bie¿±cego w±tku nie mo¿emy szybciej zwolniæ, bo jest w runq
         // a ponowne przydzielenie tego samego adresu na nowy w±tek narobi³o by
@@ -158,12 +159,10 @@ thread_destroy(thread_t *t)
             sleepq_destroy(t->thr_joiner);
             t->thr_joiner = 0;
         }
+        sched_exit(t); //to nie aktualny w±tek, wiêc mo¿emy tak
         kmem_cache_free(thread_cache, t);
-        splx(x);
-        sched_exit(t);
         return;
     }
-    splx(x);
     return;
 }
 

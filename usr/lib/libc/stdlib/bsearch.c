@@ -1,6 +1,6 @@
 #include <sys/types.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 #define BASE(X)         ((char *)base + size*(X))
 

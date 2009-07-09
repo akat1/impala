@@ -357,10 +357,20 @@ msleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
 void
 sched_exit(thread_t *t)
 {
+    sched_exit_1(t);
+    sched_exit_2(t);
+}
+
+void sched_exit_1(thread_t *t)
+{
     spinlock_lock(&sprq);
     list_remove(&run_queue, t);
     __resched();
     t->thr_flags &= ~(THREAD_INRUNQ|THREAD_RUN);
+}
+
+void sched_exit_2(thread_t *t)
+{
     if ( t == curthread ) {
         curthread = NULL;
         int old = splsoftclock();
@@ -401,7 +411,7 @@ select_next_thread()
         p = NULL;
     }
     
-    while ((p = list_next(/*&sched_queue[first_not_empty]*/&run_queue,p))) {
+    while ((p = list_next(&sched_queue[first_not_empty],p))) {
         if (p->thr_flags & THREAD_RUN) {
             return p;
         } else
