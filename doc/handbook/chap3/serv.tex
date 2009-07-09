@@ -71,7 +71,7 @@ domy¶lnej, zignorowanie sygna³u oraz w³asna obs³uga sygna³u. Wyj±tkiem s±
 sygna³y SIGSTOP i SIGKILL, które nie mog± zostaæ zignorowane lub zamienione
 w³asn± obs³ug± sygna³u. Akcja zapisywana jest w bloku kontrolnym procesu w 
 strukturze \texttt{sigaction} odpowiedzialnej za przechowywanie adresu obs³ugi sygna³u,
-adres mo¿e przyjmowaæ dwie warto¶ci specjalne \texttt{SIG_DFL}, \textt{SIG_IGN}
+adres mo¿e przyjmowaæ dwie warto¶ci specjalne \texttt{SIG\_DFL}, \texttt{SIG\_IGN}
 odpowiadaj±cej odpowiednio domy¶lnej obs³udze, zignorowaniu sygna³u, lub byæ wska¼nikiem 
 na funkcjê obs³ugi sygna³u zdefiniowanej w programie przez programistê.
 Wielokrotne dostarczenie jednego sygna³u do procesu
@@ -79,7 +79,7 @@ zanim proces zd±¿y sygna³ obs³u¿yæ jest równoznaczne z jednokrotnym wys³aniem
 sygna³u. Sygna³y w systemie dostarczane s± do procesu do bloku kontrolnego
 procesu, sygna³ mo¿e obs³u¿yæ dowolny jego w±tek, ustawiaj±c w bloku kontrolnym
 jego obs³u¿enie i nastêpnie podejmuj±c akcje odpowiedni± dla niego na podstawie
-tablicy \texttt{p_sigact}. Obs³ugê
+tablicy \texttt{p\_sigact}. Obs³ugê
 sygna³u mo¿na rozumieæ jako przerwanie dzia³ania programu, przechowanie kontekstu, 
 wykonanie procedury obs³ugi a nastêpnie powrót do miejsca, w którym nast±pi³o przerwanie i
 odtworzenie przechowanego kontekstu.
