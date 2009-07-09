@@ -217,6 +217,19 @@ Dziêki takim dzia³aniom progamy maj± mo¿liwo¶æ m.in. ustawiaæ pozycjê kursora
 na ekranie, przewijaæ ekran, kasowaæ jego zawarto¶æ, pobieraæ informacje
 o po³o¿eniu kursora i o wspieranych funkcjonalno¶ciach, zmieniaæ tryb pracy
 terminala i atrybuty wypisywanych znaków.
+\begin{table}
+\begin{tabular}{|l|l|}
+\hline
+ESC[2J & Czy¶ci ca³y ekran \\
+ESC3C & Przesuwa kursor o 3 pozycje w prawo \\
+ESC[1;5H & Ustawia kursor w pi±tej kolumnie pierwszego wiersza \\
+ESC[5;7;1m & W³±cza mruganie, pogrubienie oraz zamienia kolor t³a z kolorem znaku \\
+ESC[6n & ¯±da informacji o aktualnym po³o¿eniu kursora \\
+\hline
+\end{tabular}
+\caption{Przyk³adowe sekwencje steruj±ce VT100. ESC oznacza znak \texttt{$\backslash$033}}
+\end{table}
+
 %mo¿na daæ ma³± tabelkê z przyk³adowymi sekwencjami
 \subsection{Termcap.}
 Jako, ¿e istnieje wiele terminali, ró¿ni±cych siê sekwencjami
