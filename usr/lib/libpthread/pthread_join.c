@@ -41,7 +41,7 @@ pthread_join(pthread_t pth, void **arg)
 {
     pthread_t ct = pthread_self();
     if (ct == pth) return -EINVAL;
-    PTHREAD_LOG("joinging to thread %p(tid=%p)\n", pth, pth->pth_id);
+    PTHREAD_LOG("joinging to thread %p(tid=%p)", pth, pth->pth_id);
     int err = thr_join(pth->pth_id);
     if (err) return err;
     if (arg) {

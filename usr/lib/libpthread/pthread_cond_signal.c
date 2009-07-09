@@ -46,6 +46,7 @@ pthread_cond_signal(pthread_cond_t *cond)
     if (!cond->pc_mtx) {
         errno = EINVAL;
     }
+    PTHREAD_LOG("sending condition signal at %p", cond);
     err = thr_mtx_wakeup(cond->pc_mtx->pm_id);
     _PTHREAD_UNLOCK();
     return err;

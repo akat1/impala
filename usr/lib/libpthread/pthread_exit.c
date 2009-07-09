@@ -40,8 +40,8 @@ pthread_exit(void *v)
 {
     pthread_t cp = pthread_self();
     cp->pth_retval = v;
-    PTHREAD_LOG("pthread=%p(tid=%p) exit with %p\n", cp, cp->pth_id, v);
+    PTHREAD_LOG("pthread=%p(tid=%p) exit with %p", cp, cp->pth_id, v);
     thr_exit();
     
-    PTHREAD_LOG("should never be here\n");
+    PTHREAD_LOG("should never be here");
 }

@@ -38,8 +38,9 @@
 #include "pthread_priv.h"
 
 int
-pthread_cond_init(pthread_cond_t *cond)
+pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
+    PTHREAD_LOG("creating condition variable %p", cond);
     memset(cond, 0, sizeof(*cond));
     return 0;
 }

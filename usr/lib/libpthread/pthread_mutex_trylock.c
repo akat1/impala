@@ -43,7 +43,6 @@ pthread_mutex_trylock(pthread_mutex_t *mtx)
 {
     int err = -1;
     __PTHREAD_INITIALIZE();
-    _PTHREAD_LOCK();
     if (mtx->pm_owner) {
         errno = EBUSY;
     } else
@@ -53,6 +52,5 @@ pthread_mutex_trylock(pthread_mutex_t *mtx)
         mtx->pm_owner = _pthread_self();
         err = 0;
     }
-    _PTHREAD_UNLOCK();
     return err;
 }

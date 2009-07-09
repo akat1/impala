@@ -53,7 +53,8 @@ pthread_t _pthread_self(void);
 
 #ifdef PTHREAD_DEBUG
 #include <stdio.h>
-#   define PTHREAD_LOG(fmt, a...) fprintf(stderr, "PTHREAD: " fmt, ## a)
+#   define PTHREAD_LOG(fmt, a...)\
+        fprintf(stderr, "\033[33mPTHREAD: " fmt "\033[0m\n", ## a)
 #else
 #   define PTHREAD_LOG(fmt, a...)
 #endif

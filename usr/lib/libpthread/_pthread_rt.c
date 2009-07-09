@@ -13,7 +13,7 @@ static pthread_t thread0;
 void
 _pthread_rt()
 {
-    PTHREAD_LOG("initializing POSIX thread runtime (debug build)\n");
+    PTHREAD_LOG("initializing POSIX thread runtime (debug build)");
     _pthread_initialized = TRUE;
     thread0 = malloc( sizeof(struct pthread) );
     thread0->pth_id = thr_getid();

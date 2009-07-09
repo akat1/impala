@@ -45,6 +45,6 @@ pthread_mutex_init(pthread_mutex_t *mtx, const pthread_mutexattr_t *ma)
     memset(mtx, 0, sizeof(*mtx));
     mtx->pm_id = thr_mtx_create();
     if (mtx->pm_id == -1) return -1;
-    PTHREAD_LOG("created mutex %p(mid=%p)\n", mtx, mtx->pm_id);
+    PTHREAD_LOG("created mutex %p(mid=%p)", mtx, mtx->pm_id);
     return 0;
 }

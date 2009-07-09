@@ -171,7 +171,6 @@ msq_open(proc_t *p, ipcmsq_t **m, mode_t mode, key_t k)
             ik->key = k;
             ik->id = i;
             list_insert_tail(&msq_keys, ik);
-            TRACE_IN("found %u", i);
             return i;
         }
     return -1;
@@ -180,11 +179,6 @@ msq_open(proc_t *p, ipcmsq_t **m, mode_t mode, key_t k)
 int
 ipc_msg_get(proc_t *p, key_t key, int flags, int *id, ipcmsq_t **r)
 {
-    TRACE_IN("p=%p key=%p flags=%p", p, key, flags & ~0777);
-    TRACE_IN("flags<%s,%s>",
-            (flags & IPC_CREAT)? "IPC_CREAT" : "",
-            (flags & IPC_EXCL)? "IPC_EXCL" : ""
-    );
     int err = 0;
     int mid = -1;
     ipcmsq_t *msq = 0;
@@ -204,22 +198,17 @@ ipc_msg_get(proc_t *p, key_t key, int flags, int *id, ipcmsq_t **r)
     } else {
         MUTEX_LOCK(&key_lock, "msgget");
         ipckey_t *ipck = list_find(&msq_keys, find_key_eq, key);
-        TRACE_IN("ipck = %p", ipck);
         if (ipck && flags & IPC_EXCL) {
-            TRACE_IN("exlusive!");
             err = -EEXIST;
         } else
         if (ipck) {
-            TRACE_IN("OK");
             mid = ipck->id;
             msq = &msqs[ipck->id];
         } else
         if (flags & IPC_CREAT) {
-            TRACE_IN("open!");
             mid = msq_open(p, &msq, flags & 0777, key);
             if (mid == -1) err = -ENOSPC;
         } else {
-            TRACE_IN("not found");
             err = -ENOENT;
         }
         mutex_unlock(&key_lock);
@@ -268,6 +257,7 @@ ipc_msg_snd(ipcmsq_t *msq, const void *uaddr, size_t size, int flags)
     msg->size = MIN(size, MSGMAX);
     msg->type = * ((long*) msg->data);
     list_insert_tail(&msq->msq_data, msg);
+    mutex_wakeup_all(&msq->msq_mtx);
     mutex_unlock(&msq->msq_mtx);
     return 0;
 }
@@ -282,6 +272,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
     if (size < sizeof(long)) {
         return -EINVAL;
     }
+
     MUTEX_LOCK(&msq->msq_mtx, "msgrcv");
     if (type == 0) {
         while (wait && list_length(&msq->msq_data) == 0) {
@@ -293,6 +284,8 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
        msqmsg_t *msg = NULL;
        do {
             msg = list_find(&msq->msq_data, find_msq_eq_type, type);
+            DEBUGF("found %p", msg);
+            if (msg == NULL) mutex_wait(&msq->msq_mtx);
         } while (wait && msg == NULL);
     } else {
        type = -type;
@@ -302,7 +295,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
         } while (wait && msg == NULL);
     }
     ///@todo MSG_NOERROR trzeba obs³ugiwaæ (a raczej nie obs³ugiwaæ)
-    if (msg) {
+    if (msg != NULL) {
         copyout(uaddr, msg->data, MIN(size,msg->size));
         err = 0;
         kmem_cache_free(msg_cache, msg);
@@ -315,6 +308,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
 bool
 find_msq_eq_type(const msqmsg_t *msg, uintptr_t type)
 {
+    DEBUGF("%u == %u", msg->type, type);
     return (msg->type == type);
 }
 

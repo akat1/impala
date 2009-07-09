@@ -51,6 +51,7 @@ pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mtx)
     }
     cond->pc_mtx = mtx;
     mtx->pm_owner = 0;
+    PTHREAD_LOG("broadcasting condition signal at %p", cond);
     _PTHREAD_UNLOCK();              // 
     err = thr_mtx_wait(mtx->pm_id); //  niebezpieczny moment
     _PTHREAD_LOCK();                //

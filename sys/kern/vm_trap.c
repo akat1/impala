@@ -68,7 +68,7 @@ vm_trap_pfault(vm_trap_frame_t *frame)
 void
 vm_user_pfault(vm_trap_frame_t *frame)
 {
-    kprintf("Process PID=%u: access violation (killed)\n",
+    kprintf("Process PID=%u: access violation (SIGSEGV sent)\n",
         curthread->thr_proc->p_pid);
     signal_send(curthread->thr_proc, SIGSEGV);
     signal_handle(curthread);

@@ -41,7 +41,7 @@
 int
 pthread_mutex_unlock(pthread_mutex_t *mtx)
 {
-    PTHREAD_LOG("locking mutex %p(mid=%p)\n", mtx, mtx->pm_id);
+    PTHREAD_LOG("unlocking mutex %p(mid=%p)", mtx, mtx->pm_id);
     int err = -1;
     __PTHREAD_INITIALIZE();
     _PTHREAD_LOCK();

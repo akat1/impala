@@ -27,6 +27,8 @@ PROG_SBIN=\
 DEMOS_BIN=\
     pthdemo1\
     pthdemo2\
+    pthdemo3\
+    sysvmsg\
     pfault\
     signal
 
