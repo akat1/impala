@@ -401,7 +401,7 @@ select_next_thread()
         p = NULL;
     }
     
-    while ((p = list_next(&sched_queue[first_not_empty],p))) {
+    while ((p = list_next(/*&sched_queue[first_not_empty]*/&run_queue,p))) {
         if (p->thr_flags & THREAD_RUN) {
             return p;
         } else

@@ -62,6 +62,7 @@ typedef uint mode_t;
 typedef uint nlink_t;
 typedef int pid_t;
 typedef uintptr_t tid_t;
+typedef uintptr_t mid_t;
 typedef void (*sighandler_t)(int);
 typedef uint32_t sigset_t;
 

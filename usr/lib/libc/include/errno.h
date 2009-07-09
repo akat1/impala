@@ -6,12 +6,4 @@ extern int errno;
 
 
 
-
-
-
-
-
-
-
-
 #endif

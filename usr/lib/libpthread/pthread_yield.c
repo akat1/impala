@@ -32,12 +32,14 @@
 
 #include <sys/types.h>
 #include <sys/syscall.h>
-#include <pthread.h>
 #include <sched.h>
+#include <pthread.h>
+#include "pthread_priv.h"
 
 int
 pthread_yield()
 {
+    __PTHREAD_INITIALIZE();
     return sched_yield();
 }
 

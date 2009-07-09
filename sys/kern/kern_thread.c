@@ -63,6 +63,7 @@ thread_ctor(void *_thr)
         mem_zero(_thr, sizeof(thread_t));
         thread_t *t = _thr;
         mutex_init(&t->thr_mtx, MUTEX_NORMAL);
+        t->thr_joiner = 0;
 }
 
 void
@@ -123,11 +124,18 @@ thread_create(int type, addr_t entry, addr_t arg)
 //na potrzeby zamkniêcia ostatniego w±tku procesu który robi exec
 void thread_exit_last(thread_t *t)
 {
-    int x = splbio();
+//     int x = splbio();     // <- kmem u¿ywa blokad, wiêc zmiana SPL
+                             // jest ryzykowna
+    t->thr_flags |= THREAD_ZOMBIE;
+    if (t->thr_joiner) {
+        sleepq_wakeup(t->thr_joiner);
+        sleepq_destroy(t->thr_joiner);
+        t->thr_joiner = 0;
+    }
     kmem_cache_free(thread_cache, t);
     sched_exit(t);
-    splx(x);
-    panic("Shouldnt be here ;) - thread exit last");
+//     splx(x);
+    panic("thread_exit_last() - should not be here");
 }
 
 void
@@ -136,19 +144,28 @@ thread_destroy(thread_t *t)
     t->thr_flags |= THREAD_ZOMBIE;
     list_remove(&threads_list, t);
     int x = splsoftclock();
-
     if (t != curthread) {
         //bie¿±cego w±tku nie mo¿emy szybciej zwolniæ, bo jest w runq
         // a ponowne przydzielenie tego samego adresu na nowy w±tek narobi³o by
         // w takiej sytuacji k³opotów
+        if (t->thr_sleepq) {
+            // jak sobie gdziê¶ ¶pi to go przed zabójstwem budzimy
+            // inaczej bêdzie on w li¶cie ¶pi±cej kolejki, i po co ? ;]
+            sleepq_intrpt(t);
+        }
+        if (t->thr_joiner) {
+            sleepq_wakeup(t->thr_joiner);
+            sleepq_destroy(t->thr_joiner);
+            t->thr_joiner = 0;
+        }
         kmem_cache_free(thread_cache, t);
+        splx(x);
         sched_exit(t);
+        return;
     }
     splx(x);
     return;
 }
-
-
 
 /*=============================================================================
  * Obsluga mutexow. (FIFO).
@@ -174,9 +191,9 @@ mutex_init(mutex_t *m, int flags)
 void
 mutex_destroy(mutex_t *m)
 {
-    KASSERT( list_length(&m->mtx_locking) == 0 );
+    KASSERT( m->mtx_flags & MUTEX_USER || list_length(&m->mtx_locking) == 0 );
     if (m->mtx_flags & MUTEX_CONDVAR)
-        KASSERT( list_length(&m->mtx_waiting) == 0 );
+        KASSERT( m->mtx_flags & MUTEX_USER || list_length(&m->mtx_waiting) == 0 );
     spinlock_destroy(&m->mtx_slock);
 }
 

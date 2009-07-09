@@ -46,3 +46,4 @@ vfs_gen_unlock(vnode_t *vn)
 {
     mutex_unlock(&vn->v_mtx);
 }
+

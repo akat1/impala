@@ -11,10 +11,10 @@ _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\
 	-Wmissing-prototypes ${_INCDIR} -nostdlib -D__Impala__  
 _K_FLAGS=${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
-    -D__KERNEL -Werror -nostdinc -g # -fno-inline  
+    -D__KERNEL -Werror -nostdinc -g -fno-inline  
 _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include\
         -I${IMPALA_USR}/lib/libpthread/include\
-        -I${IMPALA_USR}/lib/libz/
+        -I${IMPALA_USR}/lib/libz/ 
 _U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld -nostdlib\
         -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread\
         -L${IMPALA_USR}/lib/libz

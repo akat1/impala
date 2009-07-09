@@ -60,7 +60,7 @@ proc_ctor(void *obj)
     proc->p_nice = PROC_NZERO;
     sleepq_init(&proc->p_waitq);
     mutex_init(&proc->p_mtx, MUTEX_NORMAL);
-    LIST_CREATE(&proc->p_umtxs, mutex_t, L_user, FALSE);
+    LIST_CREATE(&proc->p_umtxs, mutex_t, L_umtxs, FALSE);
 }
 
 void
@@ -249,10 +249,30 @@ void
 proc_destroy_threads(proc_t *proc)
 {
     MUTEX_LOCK(&proc->p_mtx, "proc");
+    mutex_t *m;
+
+    while ( (m = list_extract_first(&(proc->p_umtxs)) )) {
+        mutex_destroy(m);
+    }
+
     thread_t *t;
     while ( (t = list_extract_first(&(proc->p_threads))) )
-        thread_destroy(t);
+        if (t != curthread) thread_destroy(t);
     mutex_unlock(&proc->p_mtx);
+}
+
+
+void
+proc_destroy_thread(proc_t *proc, thread_t *ut)
+{
+    MUTEX_LOCK(&proc->p_mtx, "proc");
+    list_remove(&proc->p_threads, ut);
+    mutex_unlock(&proc->p_mtx);
+    if (ut==curthread) {
+        thread_exit_last(ut);
+    } else {
+        thread_destroy(ut);
+    }
 }
 
 void
@@ -277,8 +297,11 @@ proc_create_thread(proc_t *proc, uintptr_t entry)
     thread_t *t = thread_create(THREAD_USER, 0, NULL);
     t->vm_space = proc->vm_space;
     t->thr_entry_point = (void*)entry;
+    t->thr_entry_arg = 0;
     t->thr_kstack_size = THREAD_KSTACK_SIZE;
     t->thr_proc = proc;
+    t->thr_joiner = kmem_alloc(sizeof(sleepq_t), KM_SLEEP);
+    sleepq_init(t->thr_joiner);
     list_insert_tail(&proc->p_threads, t);
     mutex_unlock(&proc->p_mtx);
     return t;
@@ -292,6 +315,44 @@ proc_has_thread(proc_t *p, thread_t *t)
     bool x = list_is_member(&p->p_threads, t);
     mutex_unlock(&p->p_mtx);
     return x;
+}
+
+bool
+proc_has_mutex(proc_t *p, mutex_t *m)
+{
+    MUTEX_LOCK(&p->p_mtx, "proc");
+    bool x = list_is_member(&p->p_umtxs, m);
+    mutex_unlock(&p->p_mtx);
+    return x;
+}
+
+mutex_t *
+proc_create_mutex(proc_t *p)
+{
+    MUTEX_LOCK(&p->p_mtx, "proc");
+    mutex_t *umtx = kmem_alloc(sizeof(*umtx), KM_SLEEP);
+    mutex_init(umtx, MUTEX_CONDVAR|MUTEX_USER);
+    list_insert_tail(&p->p_umtxs, umtx);
+    mutex_unlock(&p->p_mtx);
+    return umtx;
+}
+
+int
+proc_destroy_mutex(proc_t *p, mutex_t *um)
+{
+    // Sprawdzamy czy u¿ytkownik nie wpad³´na pomysl zabiæ nam
+    // u¿ywan± blokadê. Ustawiamy odpowiedni SPL aby nie dopu¶ciæ
+    // ¿e pomiêdzy trylock() a usuniêciem bêdzie zmiana kontekstu
+    // i u¿ytkownik zamknie blokadê.
+    int s = splsoftclock();
+    if (!mutex_trylock(um)) {
+        splx(s);
+        return -EINVAL;
+    }
+    mutex_destroy(um);
+    list_remove(&p->p_umtxs, um);
+    splx(s);
+    return 0;
 }
 
 /**
@@ -320,7 +381,8 @@ proc_insert_child(proc_t *proc, proc_t *child)
     return;
 }
 
-bool find_this_pid(proc_t *p, pid_t pid)
+bool
+find_this_pid(proc_t *p, pid_t pid)
 {
     return (p->p_pid == pid);
 }

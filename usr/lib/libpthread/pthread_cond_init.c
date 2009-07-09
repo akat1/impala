@@ -31,7 +31,15 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+int
+pthread_cond_init(pthread_cond_t *cond)
+{
+    memset(cond, 0, sizeof(*cond));
+    return 0;
+}

@@ -258,8 +258,9 @@ rewrite_whole_root(fatfs_dir_t *dir)
     dentry = bp->addr;
     dirent = list_head(&dir->dirents);
     for (int i = 0; i < fatfs->maxroot && dirent; ) {
-        if (str_eq(dirent->name, ".") || str_eq(dirent->name,"..")) continue;
-        i += fill_dentry(&dentry[i], dirent, fatfs->maxroot - i, i);
+        if (!str_eq(dirent->name, ".") && !str_eq(dirent->name,"..")) {
+            i += fill_dentry(&dentry[i], dirent, fatfs->maxroot - i, i);
+        }
         dirent = list_next(&dir->dirents, dirent);
     }
     bio_write(bp);

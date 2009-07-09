@@ -6,8 +6,7 @@ GDB?=gdb
 
 DISTDIR=output/dist
 SPECDIR=output/impala
-PROG_BIN=cat ls ps sh mkdir truncate
-PROG_BINX=\
+PROG_BIN=\
     cat\
     ls\
     mkdir\
@@ -18,13 +17,25 @@ PROG_BINX=\
     test\
     truncate\
     uname\
-#    vttest
+    vttest
 
 PROG_SBIN=\
     init\
     login\
-    mount\
     ttyvrun
+
+DEMOS_BIN=\
+    pthdemo1\
+    pthdemo2\
+
+DISTDIRS=\
+    output/dist/bin\
+    output/dist/sbin\
+    output/dist/etc\
+    output/dist/demos\
+    output/impala\
+    output/dist/var/tmp\
+    output/dist/tmp
 
 .PHONY: all build build-image run init
 
@@ -40,17 +51,18 @@ run: build-image
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
-	mkdir -p output/dist/bin output/dist/sbin output/dist/etc output/impala output/dist/var/tmp output/dist/tmp
+	mkdir -p ${DISTDIRS}
 	cp COPYRIGHT ${DISTDIR}/
 	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
 	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
+	for prog in ${DEMOS_BIN}; do cp usr/demos/$$prog/$$prog ${DISTDIR}/demos/$$prog; done
 	cp usr/etc/rc.* ${DISTDIR}/etc/
 	cp usr/etc/motd ${DISTDIR}/etc/
 	cp usr/etc/profile ${DISTDIR}/etc/
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
+	#cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
 	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
 	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar

@@ -31,7 +31,17 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+void
+pthread_exit(void *v)
+{
+    pthread_t cp = pthread_self();
+    cp->pth_retval = v;
+    PTHREAD_LOG("pthread=%p(tid=%p) exit with %p\n", cp, cp->pth_id, v);
+    thr_exit();
+    
+    PTHREAD_LOG("should never be here\n");
+}

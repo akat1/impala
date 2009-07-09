@@ -31,7 +31,33 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+int
+pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mtx)
+{
+    int err = -1;
+    _PTHREAD_LOCK();
+    if (cond->pc_mtx) {
+        errno = EINVAL;
+    } else
+    if (mtx->pm_owner != _pthread_self()) {
+        errno = EPERM;
+    }
+    cond->pc_mtx = mtx;
+    mtx->pm_owner = 0;
+    _PTHREAD_UNLOCK();              // 
+    err = thr_mtx_wait(mtx->pm_id); //  niebezpieczny moment
+    _PTHREAD_LOCK();                //
+    cond->pc_mtx = 0;
+    if (!err) {
+        mtx->pm_owner = _pthread_self();
+    }
+    _PTHREAD_UNLOCK();
+    return err;
+}

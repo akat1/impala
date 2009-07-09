@@ -11,7 +11,6 @@
 
 int syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
-int _pthread_rt(void);
 void _start(void);
 int errno = 0;
 static int retval=0;
@@ -23,13 +22,6 @@ list_t __mem_chunks;
 
 char **environ = NULL;
 #define MAX_ENV 256
-
-int
-_pthread_rt()
-{
-    return 0;
-}
-
 
 int
 syscall(int SC, ...)
@@ -56,7 +48,6 @@ _start()
     );
     int c = 0;
     for (int i = 0; argv[i]; i++) c++;
-    //_pthread_rt();
     LIST_CREATE(&__open_files, FILE, L_open_files, FALSE);
     LIST_CREATE(&__mem_chunks, mem_chunk_t, L_mem_chunks, FALSE);
     _stdF[0] = fdopen(0, "r");

@@ -27,26 +27,37 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: pthread.h 486 2009-06-25 07:51:47Z wieczyk $
  */
 
-#include <sys/types.h>
-#include <sys/thread.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <pthread.h>
-#include "pthread_priv.h"
+#ifndef __PTHREAD_PRIV_H
+#define __PTHREAD_PRIV_H
+#define PTHREAD_DEBUG
 
-int
-pthread_cond_broadcast(pthread_cond_t *cond)
-{
-    int err = -1;
-    _PTHREAD_LOCK();
-    if (!cond->pc_mtx) {
-        errno = EINVAL;
-    }
-    err = thr_mtx_wakeup_all(cond->pc_mtx->pm_id);
-    _PTHREAD_UNLOCK();
-    return err;
-}
+extern bool _pthread_initialized;
+extern pthread_spinlock_t _pthread_slock;
+extern list_t _pthread_list;
+
+void _pthread_rt(void);
+pthread_t _pthread_self(void);
+
+#define __PTHREAD_INITIALIZE()\
+    do {\
+        if (!_pthread_initialized) {\
+            _pthread_rt();\
+        }\
+    } while(0);
+
+#define _PTHREAD_LOCK() pthread_spin_lock(&_pthread_slock)
+#define _PTHREAD_UNLOCK() pthread_spin_unlock(&_pthread_slock)
+
+#ifdef PTHREAD_DEBUG
+#include <stdio.h>
+#   define PTHREAD_LOG(fmt, a...) fprintf(stderr, "PTHREAD: " fmt, ## a)
+#else
+#   define PTHREAD_LOG(fmt, a...)
+#endif
+
+
+#endif
+

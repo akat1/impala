@@ -30,11 +30,14 @@
  * $Id$
  */
 
+#include <stdlib.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
 int
 pthread_detach(pthread_t p)
 {
-    ///@todo zwolniæ p.
+    __PTHREAD_INITIALIZE();
+    free(p);
     return 0;
 }

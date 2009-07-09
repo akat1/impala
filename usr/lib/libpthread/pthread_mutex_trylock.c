@@ -31,7 +31,28 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+int
+pthread_mutex_trylock(pthread_mutex_t *mtx)
+{
+    int err = -1;
+    __PTHREAD_INITIALIZE();
+    _PTHREAD_LOCK();
+    if (mtx->pm_owner) {
+        errno = EBUSY;
+    } else
+    if (thr_mtx_trylock(mtx->pm_id)) {
+        errno = EINVAL;
+    } else {
+        mtx->pm_owner = _pthread_self();
+        err = 0;
+    }
+    _PTHREAD_UNLOCK();
+    return err;
+}

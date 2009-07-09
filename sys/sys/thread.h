@@ -58,7 +58,7 @@ struct mutex {
     spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
     list_t        mtx_locking; 
     list_t        mtx_waiting; 
-    list_node_t   L_user;
+    list_node_t   L_umtxs;
 };
 
 typedef struct wdescr wdescr_t;
@@ -88,10 +88,11 @@ struct thread {
     mutex_t         thr_mtx;        ///< do synchronizacji
     bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
     sigset_t        thr_sigblock;   ///< blokowane sygna³y
+    sleepq_t       *thr_joiner;     ///< pomocnik dla join'a
     list_node_t     L_run_queue;    ///< wêze³ kolejki procesów gotowych do uruchomienia
     list_node_t     L_sched_queue;  ///< weze³ kolejki planisty
     list_node_t     L_threads;      ///< wêze³ listy w±tków
-    list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie
+    list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie.
     list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
 };
 
@@ -141,7 +142,8 @@ enum {
     MUTEX_NORMAL     = 0,
     MUTEX_CONDVAR    = 1 << 0,
     MUTEX_WAKEUP_ONE = 1 << 1,
-    MUTEX_WAKEUP_ALL = 1 << 2
+    MUTEX_WAKEUP_ALL = 1 << 2,
+    MUTEX_USER       = 1 << 3
 };
 
 enum {
@@ -237,17 +239,20 @@ extern size_t thread_kstack_size;
 
 #else
 tid_t thr_create(void *entry, void *stackaddr, size_t stacksize,  void *arg);
-int thr_destroy(tid_t tid);
+int thr_exit(void);
+int thr_join(tid_t tid);
 int thr_cancel(tid_t tid);
 tid_t thr_getid(void);
 void* thr_getarg(void);
 
-int thr_mtx_create(void);
-int thr_mtx_destroy(void);
-int thr_mtx_lock(int mid);
-int thr_mtx_unlock(int mid);
-int thr_mtx_trylock(int mid);
-int thr_mtx_wait(int mid);
+mid_t thr_mtx_create(void);
+int thr_mtx_destroy(mid_t);
+int thr_mtx_lock(mid_t);
+int thr_mtx_unlock(mid_t);
+int thr_mtx_trylock(mid_t);
+int thr_mtx_wait(mid_t);
+int thr_mtx_wakeup(mid_t);
+int thr_mtx_wakeup_all(mid_t);
 
 #endif
 

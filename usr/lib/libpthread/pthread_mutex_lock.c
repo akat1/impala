@@ -31,7 +31,26 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+int
+pthread_mutex_lock(pthread_mutex_t *mtx)
+{
+    PTHREAD_LOG("locking mutex %p(mid=%p)\n", mtx, mtx->pm_id);
+    int err = -1;
+    __PTHREAD_INITIALIZE();
+    _PTHREAD_LOCK();
+    if (thr_mtx_lock(mtx->pm_id)) {
+        errno = EINVAL;
+    } else {
+        mtx->pm_owner = _pthread_self();
+        err = 0;
+    }
+    _PTHREAD_UNLOCK();
+    return err;
+}

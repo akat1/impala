@@ -119,7 +119,6 @@ extern proc_t proc0;
 
 void proc_init(void);
 proc_t *proc_create(void);
-thread_t * proc_create_thread(proc_t *, uintptr_t entry);
 bool proc_has_thread(proc_t *, thread_t *ut);
 void proc_destroy_threads(proc_t *proc);
 void proc_reset_vmspace(proc_t *proc);
@@ -132,6 +131,13 @@ bool proc_is_parent(proc_t *parent, proc_t *child);
 int proc_fork(proc_t *p, proc_t **child);
 void proc_exit(proc_t *p, int e);
 int proc_getinfos(int off, struct procinfo *info, int n);
+
+thread_t * proc_create_thread(proc_t *, uintptr_t entry);
+void proc_destroy_thread(proc_t *, thread_t *t);
+
+mutex_t *proc_create_mutex(proc_t *);
+int proc_destroy_mutex(proc_t *, mutex_t *);
+bool proc_has_mutex(proc_t *, mutex_t *um);
 
 #else
 

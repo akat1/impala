@@ -31,7 +31,22 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
-
+int
+pthread_cond_signal(pthread_cond_t *cond)
+{
+    int err = -1;
+    _PTHREAD_LOCK();
+    if (!cond->pc_mtx) {
+        errno = EINVAL;
+    }
+    err = thr_mtx_wakeup(cond->pc_mtx->pm_id);
+    _PTHREAD_UNLOCK();
+    return err;
+}

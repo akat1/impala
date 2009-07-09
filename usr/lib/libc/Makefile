@@ -124,9 +124,18 @@ SRCS=\
     termios/tcsetattr.c\
     thr/thr_cancel.c\
     thr/thr_create.c\
-    thr/thr_destroy.c\
+    thr/thr_exit.c\
     thr/thr_getarg.c\
     thr/thr_getid.c\
+    thr/thr_join.c\
+    thr/thr_mtx_create.c\
+    thr/thr_mtx_destroy.c\
+    thr/thr_mtx_lock.c\
+    thr/thr_mtx_trylock.c\
+    thr/thr_mtx_unlock.c\
+    thr/thr_mtx_wait.c\
+    thr/thr_mtx_wakeup.c\
+    thr/thr_mtx_wakeup_all.c\
     time/ctime.c\
     time/localtime.c\
     time/localtime_r.c\

@@ -31,7 +31,20 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
+#include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
 
+int
+pthread_mutex_init(pthread_mutex_t *mtx, const pthread_mutexattr_t *ma)
+{
+    __PTHREAD_INITIALIZE();
+    memset(mtx, 0, sizeof(*mtx));
+    mtx->pm_id = thr_mtx_create();
+    if (mtx->pm_id == -1) return -1;
+    PTHREAD_LOG("created mutex %p(mid=%p)\n", mtx, mtx->pm_id);
+    return 0;
+}

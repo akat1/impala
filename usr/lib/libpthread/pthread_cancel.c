@@ -33,9 +33,11 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
 int
 pthread_cancel(pthread_t p)
 {
+    __PTHREAD_INITIALIZE();
     return 0;
 }

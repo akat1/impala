@@ -41,6 +41,7 @@ struct thr_create_args {
     uintptr_t   entry;
     uintptr_t   stack_addr;
     uintptr_t   stack_size;
+    void       *entry_arg;
 };
 
 int sc_thr_create(thread_t *p, syscall_result_t *r, thr_create_args_t *args);
@@ -58,6 +59,7 @@ sc_thr_create(thread_t *t, syscall_result_t *r, thr_create_args_t *args)
 //        ct->thr_stack = (void*)args->stack_addr;
 //    }
     ct->thr_stack_size = args->stack_size;
+    ct->thr_entry_arg = args->entry_arg;
     TRACE_IN("new thread stack=%p+%p", ct->thr_stack, ct->thr_stack_size);
     thread_prepare(ct, 0, 0, 0);
     sched_insert(ct);

@@ -3,6 +3,7 @@ PREFIX=${AOUT_PREFIX}
 CFLAGS=${_U_FLAGS}
 INCDIR=-Iinclude -Iprivate
 SRCS=\
+    _pthread_rt.c\
 	pthread_create.c\
 	pthread_cancel.c\
 	pthread_detach.c\
@@ -11,7 +12,6 @@ SRCS=\
 	pthread_join.c\
 	pthread_kill.c\
 	pthread_once.c\
-	pthread_rt.c\
 	pthread_self.c\
 	pthread_setcancelstate.c\
 	pthread_setcanceltype.c\

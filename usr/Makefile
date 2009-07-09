@@ -1,4 +1,4 @@
-SUBDIRS= lib bin sbin
+SUBDIRS= lib bin sbin demos
 PREFIX=${AOUT_PREFIX}
 
 include ${IMPALA_MK}/subdir.mk

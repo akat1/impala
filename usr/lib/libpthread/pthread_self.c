@@ -31,7 +31,7 @@
  */
 
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/thread.h>
 #include <pthread.h>
-
+#include "pthread_priv.h"
 

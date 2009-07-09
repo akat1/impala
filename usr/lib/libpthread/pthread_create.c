@@ -33,11 +33,14 @@
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <sys/errno.h>
+#include <stdlib.h>
 #include <pthread.h>
+#include "pthread_priv.h"
 
 static void __entry(void)
 {
     pthread_t t = thr_getarg();
+    PTHREAD_LOG("new thread started pthread=%p(tid=%p)\n", t, t->pth_id);
     pthread_exit( t->pth_entry(t->pth_entry_arg) );
 }
 
@@ -54,9 +57,9 @@ int
 pthread_create(pthread_t *pres, const pthread_attr_t *attr,
             pthread_entry entry, void *arg)
 {
-    ///@todo to trzeba alokowaæ!
-    static struct pthread _pth;
-    pthread_t p = &_pth;
+    __PTHREAD_INITIALIZE();
+    PTHREAD_LOG("creting new POSIX thread entry=%p arg=%p\n", entry, arg);
+    pthread_t p = malloc( sizeof(struct pthread) );
     if (attr == NULL) {
         pthread_attr_init(&p->pth_attr);
     } else {
@@ -69,8 +72,9 @@ pthread_create(pthread_t *pres, const pthread_attr_t *attr,
     size_t stack_size;
     pthread_attr_getstackaddr(&p->pth_attr, &stack_addr);
     pthread_attr_getstacksize(&p->pth_attr, &stack_size);
-    p->pth_tid = thr_create(__entry, stack_addr, stack_size, p);
-    if (p->pth_tid == -1) {
+    PTHREAD_LOG("creating kernel thread\n");
+    p->pth_id = thr_create(__entry, stack_addr, stack_size, p);
+    if (p->pth_id == -1) {
         // zwolniæ pamiêæ
         return -1;
     }
