@@ -142,7 +142,66 @@ nowy w±tek z~porz±danym stanem.
 
 \subsection{Synchronizacja.}
 
-Najprymitywniejszym ¶rodkiem synchronizacji jest wiruj±cy zamek.
+Wa¿nym elementem implementacji mechanizmów synchornizacji s± niepodzielne
+instrukcje procesora, tzn takie których nie mo¿na wyw³aszczyæ w~trakcie
+ich wykonywania. Instrukcje porównania oraz~zapisu generowane przez kompilator
+spe³niaj± tê w³a¶ciwo¶æ. Modu³ obs³ugi platformy
+sprzêtowej musi dostarczyæ jeszcze procedurê \texttt{atomic\_change\_int}
+modyfikuj±c± komórkê pamiêci i~zwracaj±c± jej star± warto¶æ w~sposób
+niepodzielny. Gdyby procedura nie spe³nia³a ¿±danej warto¶ci,
+to pomiêdzy pobraniem starej warto¶ci, a zapisaniem nowej mog³oby zostaæ
+wykonane wyw³aszczenie, podczas którego warto¶æ komórki pamiêci zosta³a
+zmodyfikowana. W takim wypadku wszelkie decyzje podjête na~podstawie
+starej warto¶ci, zwróconej przez procedurê, mog³yby byæ b³êdne.
+
+Najprotszym mechanizmem synchronizacji s± wiruj±ce zamki, wykorzystuj±ce
+wprost niepodzielne instrukcje procesora. Taki zamek jest opisywany przez
+jedn± komórkê pamiêci przyjmuj±c± warto¶c \texttt{SPINLOCK\_LOCK}
+lub~\texttt{SPINLOCK\_UNLOCK} odpowiednio do~stanu blokady. 
+
+Operacja zamkniêcia u¿ywa wspomnianej wcze¶niej procedury aby ustawiæ
+stan blokady na~\texttt{SPINLOCK\_LOCK}. Je¿eli stara warto¶æ komórki
+pamiêci by³a równa \texttt{SPINLOCK\_UNLOCK} to~z~niepodzielno¶ci u¿ytej procedury
+wynika, ¿e nikt inny nie móg³ odczytaæ ani zmodyfikowaæ jej warto¶ci i~uda³o
+siê pomy¶lnie zmieniæ stan blokady.
+Je¿eli stara warto¶c komórki pamiêci by³a równa \texttt{SPINLOCK\_LOCK},
+to równiez z~niepodzielno¶æi tej procedury wynika, to ¿e blokada zosta³a
+zamkniêta przez kogo¶ innego. W takim~wypadku procedura zamkniêcia zamka
+krêci siê wkó³ko (wiruje), dopóki nie uda siê jej zamkn±æ blokady.
+
+Ten sposób synchronizacji nie zapewnia, ¿e w±tki nie bêd± g³odzone (oczekiwaæ
+w~nieskoñczono¶æ), dodatkowo oczekiwanie na~zwolnienie blokdy jest aktywne
+co marnuje czas pracy procesora.
+
+Innym rodzajem blokady s± zamki \texttt{mutex\_t} (\emph{mutual exclue}),
+których klienci s± usypiani na~czas za³o¿onej blokady. Zamki wewnêtrznie
+u¿ywaj± kolejki FIFO do~kontrolowania kolejno¶ci budzenia w±tków, chc±cych
+wej¶æ do chronionej sekcji krytycznej - ta strategia eliminuje problem
+g³odzenia. Wewnêtrzna sturktura danych tej blokady jest chroniona za~pomoc± wiruj±cych
+zamków.
+
+\label{pthread_condvar}
+Zmienna warunkowa jest~mechanizmem ¶cisle powi±zanym z~mechanizmem blokad.
+Jej zadanie to umo¿liwienie biernego oczekiwania na~zdarzenie.
+Jest on sprzê¿ony z~wybran± blokad± w~celu wykonywania niepodzielnej operacji
+jej zwolnienia oraz u¶pienia w±tku.
+
+Mechanizm jest standardowo wykorzystywany do~implementacji kolejek, sama
+blokada mo¿e jedynie chroniæ sekcje krytyczne procedur wys³ania i odebrania
+wiadomo¶ci do kolejki, lecz uniemo¿liwia oczekiwanie w~przypadku braku
+wiadomo¶æi do odebrania. Mechanizm wykorzystuje siê tak, ¿e gdy nie ma
+wiadomo¶æi do~odebrania to klient jest usypiany, a blokada zwalaniana.
+Dziêki niepodzielno¶æi nie jest mo¿liwa sytuacja, gdy pomiêdzy u¶pieniem
+a zwolnieniem blokady kto¶ dostarczy wiadomo¶æ do kolejki.
+
+Dostarczenie zdarzenia budz±cego jest mo¿liwe do~jednego w±tku lub
+do~wszystkich naraz,  mo¿e je dostarczyæ jedynie w³a¶ciciel blokady sprzê¿±nej
+z~zmienn± warunkow±. Zdarzenie jest dostarczane przy wyj¶ciu z~sekcji
+krytycznej przez klienta je zg³aszaj±cego. Budzony w±tek dostaje od~razu
+zamkniêty zamek, dziêki czemu powraca on do~swojej sekcji krytycznej.
+
+
+Nasza implementacja zamków \texttt{mutex\_t} implemente
 
 \subsection{Szeregowanie zadañ.} \label{SCHEDULER}
 
