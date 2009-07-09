@@ -53,7 +53,7 @@ Ka¿dy sterownik dostarcza systemowi tak zwan± deskê rozdzielcz±
 procedur obs³ugi pliku urz±dzenia. Deska rozdzielcza zawiera nastêpuj±ce pola:
 \begin{itemize}
  \item \texttt{d\_open} -
-obs³uga otwarcie pliku urz±dzenia.
+obs³uga otwarcia pliku urz±dzenia.
 
  \item \texttt{d\_close} -
 obs³uga zamkniêcia pliku urz±dzenia.
@@ -62,11 +62,11 @@ obs³uga zamkniêcia pliku urz±dzenia.
 obs³uga poleceñ kontrolnych dla~sterownika.
 
  \item \texttt{d\_write} -
-obs³uga zlecenia wyj¶cie ze strumienia znakowego, mo¿e blokowaæ klienta
+obs³uga zlecenia wyj¶cia ze strumienia znakowego, mo¿e blokowaæ klienta
 na~czas wykonywania operacji.
 
  \item \texttt{d\_read} -
-obs³uga zlecenia wej¶cie ze strumienia znakowego, mo¿e blokowaæ klienta
+obs³uga zlecenia wej¶cia ze strumienia znakowego, mo¿e blokowaæ klienta
 na~czas wykonywania operacji.
 
  \item \texttt{d\_strategy} -
@@ -96,7 +96,7 @@ jak strumienie znaków.
 
 Z~powodu tych ró¿nic jednolita obs³uga wej¶cia-wyj¶cia dla~tych dwóch rodzajów
 urz±dzeñ musia³aby emulowaæ urz±dzenia blokowe jako znakowe, co nie by³oby
-wydajne. Dziêki wyodrêbnienie oddzielnej procedury sterownik zawsze dostaje
+wydajne. Dziêki wyodrêbnieniu oddzielnej procedury sterownik zawsze dostaje
 zlecenia, których d³ugo¶æ jest wielokrotno¶ci± d³ugo¶ci sektoru oraz mo¿e sam
 zadecydowaæ w~jakiej kolejno¶ci najlepiej je wykonaæ (co t³umaczy nazwê
 procedury - \emph{strategia}). 
@@ -107,15 +107,15 @@ procedury - \emph{strategia}).
 %dodatkowa metoda dostêpu, przydatna zwykle programom chc±cym bezpo¶rednio
 %modyfikowaæ dane na~urz±dzeniu lub ingerowaæ w~zapisany tam system plików
 %(jak np programy sprawdzaj±ce powierzchniê dysku czy spójno¶æ systemu plików).
-Zagadnienie wej¶cia-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
+Zagadnienia wej¶cia-wyj¶cia urz±dzeñ blokowych s± omówione w~rozdziale
 \ref{BIO}.
 
 Operacje wej¶cia-wyj¶cia na~terminalach dzia³aj± na~tej samej zasadzie
-co urz±dzeñ blokowych, z~t± ró¿ni± ¿e te~operacje przechodz± dodatkow±
+co urz±dzeñ blokowych, z~t± ró¿nic± ¿e te~operacje przechodz± dodatkow±
 warstwê zwan± re¿imem linii. Te zagadnienia s± szerzej omówione w~rozdziale
 \ref{TTY}.
 
-W kodzie systemu wiêkszo¶æ, poza specjalnymi, sterowników jest wydzielona
+W kodzie systemu wiêkszo¶æ sterowników, poza specjalnymi, jest wydzielona
 do~oddzielnej biblioteki \texttt{libdev.a} (lokalizacja: \texttt{sys/dev/}).
 System operacyjny nie zna bezpo¶rednio wszystkich
 zaimplementowanych w~niej sterowników, pobiera natomiast
@@ -126,7 +126,7 @@ wirtualne terminale emulowane przez konsolê, która jest czê¶ci± j±dra.
 System z~plikami urz±dzeñ wi±¿e deskryptor urz±dzenia {\texttt{devd\_t}},
 który zawiera w~sobie takie informacje jak nazwa urz±dzenia, wska¼nik
 na~prywatne dane sterownika oraz jego deskê rozdzielcz±. Jeden sterownik mo¿e
-stworzyæ wiele deskryptorów urz±dzeñ, w zale¿no¶ci od~tego ile wykryje urz±dzeñ
+stworzyæ wiele deskryptorów urz±dzeñ, w zale¿no¶ci od~tego ile wykryje urz±dzeñ,
 które mo¿e obs³ugiwaæ. Przyk³adowo, zaimplementowany kontroler stacji dyskietek,
 je¿eli wykryje dwie stacje dyskietek w~komputerze, to tworzy odpowiednio dwa
 pliki urz±dzeñ: \texttt{/dev/fd0} dla stacji \texttt{A:} oraz \texttt{/dev/fd1}
@@ -135,7 +135,7 @@ deskryptory, które wspó³dziel± ze sob± deskê rozdzielcz±.
 
 Nie wszystkie urz±dzenia w~sprzêcie komputerowym s± obs³ugiwane za~pomoc±
 tego modelu sterowników. Sterowniki niektórych urz±dzeñ mog± byæ programowane,
-jako modu³y dostarczaj±ce pewn± funkcjonalno¶æ, ni¿ jako ogólnie dostêpne
+jako modu³y dostarczaj±ce pewn± funkcjonalno¶æ, a nie jako ogólnie dostêpne
 pliki urz±dzeñ. Ta uwaga dotyczy niskopoziomowych urz±dzeñ, które s±
 wykorzystywane przez j±dro do dostarczania pewnych us³ug lub do~implementacji
 innych sterowników. Udostêpnienie ich jako pliki widziane dla u¿ytkownika
@@ -179,10 +179,10 @@ Omówienie sterownika stacji dyskietek wymaga uprzedzenia kilku wiadomo¶ci
 z~rozdzia³u \ref{BIO}. Jak wspomniano wcze¶niej procedura \texttt{d\_strategy}.
 s³u¿±ca do~zlecenia operacji wej¶cia-wyj¶cia, pos³uguje siê nag³ówkami buforów.
 Nag³ówki (\texttt{iobuf\_t}), zawieraj± w~sobie bufor operacji, logiczny
-numer bloku na~urz±dzeniu,d³ugo¶æ transferu oraz informacjê o kierunku
-transferu \texttt{BIO\_READ} lub \texttt{BIO\_WRITE}\footnote{wszystkie kierunku
+numer bloku na~urz±dzeniu, d³ugo¶æ transferu oraz informacjê o kierunku
+transferu \texttt{BIO\_READ} lub \texttt{BIO\_WRITE}\footnote{Wszystkie kierunki
 odnosz± siê do~podmiotu, a nie pamiêci. St±d ,,czytanie'' wszêdzie oznacza
-czytanie z~podmiotu (np urz±dzenia, pliku) do~pamiêci, a~nie czytanie z~pamiêci
+czytanie z~podmiotu (np. urz±dzenia, pliku) do~pamiêci, a~nie czytanie z~pamiêci
 do~podmiotu.}. Sterownik informuje klientów o~zakoñczeniu operacji za~pomoc±
 procedur \texttt{bio\_done} oraz, w przypadku b³êdu, \texttt{bio\_error}.
 

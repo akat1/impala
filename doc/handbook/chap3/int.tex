@@ -33,11 +33,11 @@
 
 Przerwaniem (\emph{interrupt}) jest wyw³aszczenie pracy procesora
 przez zdarzenie, które powoduje wykonanie kodu jego obs³ugi.
-Przerwania mog± byæ generowane przez
+Przerwania mog± byæ generowane przez:
 \begin{itemize}
  \item sprzêt komputerowy - nazywamy je wtedy przerwaniami sprzêtowymi
  \item kod programu - nazywamy je wtedy przerwaniami programowymi
- \item procesor - nazywamy je wtedy pu³apkami lub wyj±tami procesora
+ \item procesor - nazywamy je wtedy pu³apkami lub wyj±tkami procesora
 \end{itemize}
 
 Obs³ugê przerwañ opisuje tablica deskryptorów dostarczona procesorowi
@@ -47,8 +47,8 @@ Po zakoñczeniu obs³ugi przerwania procesor wraca do~wykonywania wyw³aszczonego
 zadania.
 
 Przerwanie mo¿e nadej¶æ w~ka¿dym momencie pracy, pomiêdzy dowolnymi
-instrukcjami procesora. W systemie z~podzia³em czasu stwarza stwarza
-to~ryzyko uszkodzenia struktur danych, które sa jednoczesnie modyfikowane
+instrukcjami procesora. W systemie z~podzia³em czasu stwarza
+to~ryzyko uszkodzenia struktur danych, które s± jednocze¶nie modyfikowane
 przez wyw³aszczony program oraz obs³ugê danego przerwania. Np. sterownik
 stacji dyskietek obs³uguj±c przerwanie mo¿e pobraæ zlecenie wej¶cia-wyj¶cia
 z~kolejki, która w³a¶nie by³a modyfikowana przez wyw³aszczony program, chc±cy
@@ -57,10 +57,10 @@ zakolejkowaæ kolejne zlecenie.
 Problem jest rozwi±zywany przez wprowadzenia poziomów uprzywilejowania dla
 przerwañ. Przerwania z~ni¿szym priorytetem ni¿ obecny s± odwlekane.
 Do zwiêkszania priorytetu s³u¿± procedury \texttt{splXXX}, gdzie \texttt{XXX}
-jest nazw± poziomu, zwracaj± one obecny poziom uprzywilejowania.
+jest nazw± poziomu. Zwracaj± one obecny poziom uprzywilejowania.
 Procedury nigdy nie zmniejszaj± poziomu uprzywilejowania, co zapobiega
-sytuacj± gdzie priorytet zostanie pocichu zmiejszony przez jedn±
-z~wykorzystanych procedur w~kodzie maj±cym dzia³ajaæ z wiêkszym.
+sytuacjom gdzie priorytet zostanie po cichu zmiejszony przez jedn±
+z~wykorzystanych procedur w~kodzie maj±cym dzia³aæ z wiêkszym.
 Priorytet jest przywracany za~pomoc± procedury \texttt{splx}.
 
 Przerwania sprzêtowe s± obs³ugiwane przez chipset Intel 8259A\footnote{
@@ -84,7 +84,7 @@ Obecnie wyszczególnionymi poziomami uprzywilejowania s±:
  \item \texttt{HIGH} - poziom odwleka wszystkie przerwania w systemie.
 \end{itemize}
 
-Manipiluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê, na~to
+Manipiluj±c poziomem uprzywilejowania nale¿y zwróciæ szczególn± uwagê na~to,
 ¿e mo¿e to~opó¼niaæ obs³ugê urz±dzeñ przez sterowniki, co mo¿e wp³yn±æ
 na~wydajno¶æ systemu.
 

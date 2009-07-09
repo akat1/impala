@@ -30,7 +30,7 @@
 % $Id$
 
 
-\section{Zarzadzanie pamiêci±.}
+\section{Zarz±dzanie pamiêci±.}
 \label{VM}
 
 Ten podrozdzia³ zawiera miêdzy innymi pobie¿ne opisy mechanizmów zwi±zanych
@@ -51,7 +51,7 @@ na~podziale pamiêci fizycznej na~bloczki o~ustalonym rozmiarze, zwane ramkami
 Pamiêæ wirtualna jest równie¿ podzielona na~takie bloczki, zwane stronami
 \footnote{strona - page}.
 Stronicowanie to przypisywanie stronom odpowiednich ramek, co mo¿na
-zinterpretowaæ jako ustalaniem jaka ramka pamiêci fizycznej kryje siê za~dan±
+zinterpretowaæ jako ustalanie jaka ramka pamiêci fizycznej kryje siê za~dan±
 stron± pamiêci wirtualnej. Adresy wirtualne z~instrukcji procesora s±
 t³umaczone sprzêtowo na~adresy fizyczne.
 
@@ -83,7 +83,7 @@ i~Mach\cite{unixjadro}\footnote{
 W dzisiejszych systemach operacyjnych pochodz±cych z~UNIXa mo¿na znale¼æ
 nastêpców tych modulów: System Solaris wywodzi siê z systemu pi±tego, a pamiêæ
 wirtualna systemu Mach przeniknê³a do~BSD.
-} Nazewnictwo procedur by³o wzorowane na~drugi z~wymienionych modu³ów.
+} Nazewnictwo procedur by³o wzorowane na~drugim z~wymienionych modu³ów.
 
 
 \subsection{Mapa pamiêci.}
@@ -103,20 +103,20 @@ postêpowania jest uzasadniony tym, ¿e sterta programu musi byæ ci±g³a
 (z~punktu widzenia j±dra), a~nowe w±tki, wraz z~ich zapotrzebowaniem na~stos,
 mog± przybywaæ podczas pracy programu.
 
-Przestrzeñ j±dra wygl±da podobnie, na~ni± wp³yw wywar³ format ELF omówiony
+Przestrzeñ j±dra wygl±da podobnie, wp³yw na~ni± wywar³ format ELF omówiony
 w~\ref{tech:elf}. Z tych samych wzglêdów stosy w±tków j±dra oraz
 stosy alternatywne w±tków u¿ytkownika s± umieszczane w koñcowych adresach.
 
-Rozk³ad pamiêci fizycznej ró¿ni siê od przedstawionego (wirtualnego) powy¿ej.
+Rozk³ad pamiêci fizycznej ró¿ni siê od przedstawionego powy¿ej (wirtualnego).
 Zawarto¶æ pamiêci w~adresach poni¿ej 1MB jest zwi±zana ze starszymi modelami
 procesorów oraz BIOSem (kod podprogramów obs³ugi przerwañ w~trybie rzeczywistym
-itp),
+itp.),
 st±d na rysunku pojawi³a siê nazwa BIOS. Miêdzy
 innymi w~tej pamiêci jest odwzorowana pamiêæ karty graficznej, a system
 operacyjny umieszcza tam bufory dla DMA\footnote{Direct Memory Access -
 technologia pozwalaj±ca kopiowaæ dane miêdzy pamiêci± RAM a urz±dzeniem
 przez szynê, bez udzia³u procesora. U¿ywanie DMA zwalnia programistê z~rêcznego
-(udzia³ procesora) wysy³ania(odbierania) bajtów z(do)~urz±dzenia.} szyny
+(udzia³ procesora) wysy³ania (odbierania) bajtów z (do)~urz±dzenia.} szyny
 ISA, na której znajduje siê kontroler stacji dyskietek.
 
 
@@ -141,7 +141,7 @@ informacja o~adresie wirtualnym strony, w~jaki jest ta~ramka odwzorowana.
 Opisy wszystkich ramek w komputerze s± umieszczone w~tablicy
 \texttt{vm\_pages}. Je¿eli przy niektórych ramkach zosta³a zapisana
 informacja o~adresie wirtualnym, to tablica mo¿e pos³u¿yæ te¿ jako
-odwrotna tablica stron - tzn do t³umaczenia adresu fizycznego
+odwrotna tablica stron - tzn. do t³umaczenia adresu fizycznego
 na~adres wirtualny.
 
 Przy rozruchu systemu
@@ -155,24 +155,24 @@ miêdzy innymi odczytuje informacje o~adresie bazowym i~d³ugo¶ci segmentu.
 Adres liniowy powstaje poprzez przesuniêcie adresu z~instrukcji o~adres bazowy
 danego segmentu\footnote{Sama segmentacja spe³nia jeszcze rolê ochronn±,
 sprawdza czy program nie wyskoczy³ za~segment oraz czy ma odpowiednie prawa
-dostêpu}. Ta~w³a¶ciwo¶æ nie jest wykorzystywana w~naszym systemie, dlatego
+dostêpu.}. Ta~w³a¶ciwo¶æ nie jest wykorzystywana w~naszym systemie, dlatego
 wszystkie adresy bazowe wynosz± 0, dziêki czemu adres liniowy jest to¿samy
 z~adresem instrukcji\footnote{Popularne systemy takie jak FreeBSD, Linux,
 Solaris równie¿ nie korzystaj± z tej w³a¶ciwo¶ci w~ogólnym zarz±dzaniu
 pamiêci±, jedynie przy implementacji prywatnych segmentów dla w±tków
 u¿ytkownika. Prawdopodobnie jest to~spowodowane tym, ¿e~jêzyk C nie wspiera
-wykorzystania tego mechanizmu. Przesuniêcia spowodowa³oby ¿e~u¿ycie adresów
+wykorzystania tego mechanizmu. Przesuniêcia spowodowa³yby, ¿e~u¿ycie adresów
 z~segmentu stosu na~kodzie operuj±cym na~segmencie danych by³oby nieprawid³owe.
-St±d nie mo¿na by³oby u¿ywaæ np procedury \texttt{strlen} i~do~tablic bêd±cych
-zmiennymi lokalnymi jak i~do~tablic bêd±cymi zmiennymi globalnymi. Wsparcie
-wymaga³oby wprowadzenie nowego typu wska¼ników, w~których oprócz samego adresu
+St±d nie mo¿na by³oby u¿ywaæ np procedury \texttt{strlen} do~tablic bêd±cych
+zmiennymi lokalnymi jak i~do~tablic bêd±cych zmiennymi globalnymi. Wsparcie
+wymaga³oby wprowadzenia nowego typu wska¼ników, w~których oprócz samego adresu
 by³by zapisany deskryptor segmentu - stare kompilatory jêzyka C na~system DOS
 w~tym celu rozszerza³y jêzyk  o~s³ówko kluczowe \texttt{far}.}.
 
 Drugim etapem jest przet³umaczenie adresu na~adres fizyczny z~u¿yciem katalogu
 stron. Sam katalog stron nie opisuje z~powodów technicznych wszystkich stron
 w~pamiêci, poniewa¿ stron mo¿e byæ a¿ $2^{24}$ to~taki katalog zajmowa³by zbyt
-du¿± ilo¶æ pamiêci (bior±c pod uwagê ¿e ka¿da przestrzeñ adresowa ma swój
+du¿± ilo¶æ pamiêci (bior±c pod uwagê, ¿e ka¿da przestrzeñ adresowa ma swój
 katalog stron). Katalog zajmuje jedn± stronê pamiêci i~jest tablic± o~1024
 elementach. Ka¿da pozycja w~katalogu zawiera adres fizyczny tablicy stron
 opisuj±cej 4MB pamiêci. Poniewa¿ $1024*4MB=4GB$ to~katalog stron~opisujê ca³±
@@ -186,7 +186,7 @@ stron. Ka¿da przestrzeñ adresowa posiada swój w³asny katalog stron, którego
 adres jest wpisywany w ten rejestr przy zmianie kontekstu. Warstwa pamiêci
 wirtualnej odpowiedzialna za~zarz±dzanie odwzorowaniami stron dla
 ka¿dej ramki przydzielonej na~katalog lub stronê zapisuje jej adres wirtualny,
-pod którym jest widziana w przestrzeni j±dra. Dziêki czemu operuj±c na katalogu
+pod którym jest widziana w przestrzeni j±dra. Dziêki temu operuj±c na katalogu
 stron, w którym wska¼niki do tablic s± adresami fizycznymi, mo¿e szybko znale¼æ
 prawid³owy adres wirtualny.
 
@@ -194,7 +194,7 @@ Odwzorowanie stron jest opisane przez typ
 \texttt{vm\_pmap\_t}. Przed programist± systemu dwustopniowa konstrukcja
 katalogu jest ukryta, poniewa¿ nie jest to~istotne w~ogólnym zarz±dzaniu
 pamiêci± oraz zrobi³oby modu³ mniej przeno¶nym\footnote{
-Rozszerzenie procesora pozwalaj±ce u¿ywaæ 48bitowych adresów pamiêci
+Rozszerzenie procesora pozwalaj±ce u¿ywaæ 48-bitowych adresów pamiêci
 (zwiêkszaj±c ograniczenie pamiêci powy¿ej 4GB) wprowadza trójstopniow±
 strukturê katalogu - dziêki ukryciu budowy zaprogramowanie obs³ugi
 takiego rozszerzenia wi±za³oby siê z~mniejsza ilo¶ci± zmian w~kodzie.}.
@@ -203,18 +203,18 @@ Operacje na odwzorowaniu zarz±dzaj± licznikiem odniesieñ do ramki, odpowiednio
 zwiêkszaj±c oraz zmniejszaj±c przy dodawaniu i~kasowaniu wpisów. Ramki
 z~wyzerowanym licznikiem trafiaj± ponownie na listê wolnych ramek i~nadaj± siê
 do~ponownego u¿ycia. Dodatkowymi operacjami s± rêczne t³umaczenie adresów
-wirtualnych na~fizyczne oraz kopiowania stron pomiêdzy odwzorowaniami,
+wirtualnych na~fizyczne oraz kopiowanie stron pomiêdzy odwzorowaniami,
 wykorzystywane przy wspó³dzieleniu pamiêci.
 
 J±dro musi byæ odwzorowane w~ka¿dej przestrzeni adresowej, poniewa¿ w~ka¿dej
 chwili musi znajdowaæ siê w pamiêci wirtualnej kod podprogramów obs³ugi
 przerwañ oraz zleceñ od programu u¿ytkownika.
 
-Odwzorowanie j±dra w~ka¿d± przestrzeñ adresow± wi±¿e siê z~dwoma trudno¶ciami
+Odwzorowanie j±dra w~ka¿d± przestrzeñ adresow± wi±¿e siê z~dwiema trudno¶ciami
 technicznymi. Pierwsza, czyszczenie pamiêci podrêcznej procesora,
 przechowuj±cej fragmenty tablic stron, przy ka¿dej zmianie aktualnej
 przestrzeni adresowej. Poniewa¿ kod j±dra jest w~ci±g³ym u¿yciu (zegar
-systemowy oraz obs³uga programów) to~procesor bêdzie musia³ ¶ci±gnaæ
+systemowy oraz obs³uga programów) to~procesor bêdzie musia³ ¶ci±gn±æ
 z~aktualnego katalogu i~tablic stron wpisy, które przed chwil± wykasowa³.
 Druga trudno¶æ wynika z~posiadania w³asnego katalogu przez ka¿d± przestrzeñ.
 Dodanie nowych tablic stron opisuj±cych pamiêæ j±dra wymaga edycji
@@ -227,7 +227,7 @@ siê we~wszystkich tablicach stron opisuj±cych te~same 4MB pamiêci.
 Druga trudno¶æ zosta³a rozwi±zana przez przydzielenie wszystkich tablic stron
 mog±cych opisywaæ przestrzeñ j±dra podczas rozruchu systemu. Dziêki temu
 katalog stron ka¿dej nowo utworzonej przestrzeni zawiera wpisy ze~wszystkimi
-tablicami jakie mo¿e u¿yæ j±dro i~nie wymaga pó¼niejszej edycji. Wad± tego
+tablicami jakie mog± zostaæ u¿yte przez j±dro i~nie wymaga pó¼niejszej edycji. Wad± tego
 rozwi±zania jest to, ¿e j±dro mo¿e nigdy podczas swojej pracy nie u¿yæ
 wszystkich tablic. Dla przestrzeni j±dra o~rozmiarze 1GB nale¿y przydzieliæ
 256 tablic stron, co ³±cznie daje koszt 4MB.
@@ -241,10 +241,10 @@ wszystkich tablic. Dla przestrzeni j±dra o~rozmiarze 1GB nale¿y przydzieliæ
 \label{vm:space}
 \end{figure}
 
-Wirtualna przestrzeñ adresowa jest dzielona na trzy wirtualne segmenty,
+Wirtualna przestrzeñ adresowa jest dzielona na trzy wirtualne segmenty:
 segment tekstu (kodu), danych (sterta i dane z~pliku) oraz stosów. Segmenty
 danych i~stosu s± we wzajemnej relacji, poniewa¿ ich wzrost przybli¿a
-koniec jednego do~pocz±tku drugiego, zatem system musi pilnowaæ momentu
+koniec jednego do~pocz±tku drugiego, zatem system musi pilnowaæ momentu,
 w którym segmenty mog³yby siê spotkaæ - taki moment oznacza koniec pamiêci
 dla programu.
 
@@ -257,8 +257,8 @@ górne na~rozmiar. Przydzielanie i~niszczenie stosów podczas pracy programu
 i~j±dra oraz odwzorowywanie ró¿nych fragmentów pamiêci w~stercie j±dra
 i~niszczenie tych odwzorowañ 
 powoduje fragmentacjê tych segmentów. Z~tego powodu
-wirtualne segmenty nie musz± byæ ci±g³ymi przestrzeniami, lecz 
-dynamicznie siê zmieniaj±cymi, obszarami. W~zwi±zku z~tym segment zawiera
+wirtualne segmenty nie musz± byæ ci±g³ymi przestrzeniami, lecz mog± byæ
+dynamicznie siê zmieniaj±cymi obszarami. W~zwi±zku z~tym segment zawiera
 w~sobie listê ci±g³ych obszarów, opisywanych przez typ \texttt{vm\_region\_t}.
 
 Rysunek \ref{vm:space} przedstawia opis przestrzeni adresowej u¿ywany

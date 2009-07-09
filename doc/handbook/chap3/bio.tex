@@ -33,7 +33,7 @@
 
 \section{Buforowane wej¶cie-wyj¶cie.} \label{BIO}
 
-Operacje wej¶cia-wyj¶cia s± na urz±dzeniach blokowych s± opisywane przez
+Operacje wej¶cia-wyj¶cia s± na urz±dzeniach blokowych opisywane przez
 nag³ówki buforów (\texttt{iobuf\_t}). Ka¿dy nag³ówek buforu zawiera
 w~sobie nastêpuj±ce pola:
 \begin{itemize}
@@ -43,24 +43,24 @@ w~sobie nastêpuj±ce pola:
 \item \texttt{blkno} - logiczny numer bloku
 \item \texttt{flags} - znaczniki
 \item \texttt{errno} - numer b³êdu
-\item \texttt{oper} - kierunek transfer \texttt{BIO\_READ}
+\item \texttt{oper} - kierunek transferu \texttt{BIO\_READ}
     lub~\texttt{BIO\_WRITE}
 \item \texttt{resid} - ilo¶æ pozosta³ych bajtów do~przes³ania (na~potrzeby
-sterowników).
+sterowników)
 \item \texttt{dev} - deskryptor urz±dzenia
 \item \texttt{sleepq} - ¶pi±ca kolejka
 \end{itemize}
 
 Zdefiniowane znaczniki \texttt{iobuf\_t.flags}:
 \begin{itemize}
-\item \texttt{BIO\_DONE} - operacja wej¶cia-wyj¶cia zakoñczona.
-\item \texttt{BIO\_ERROR} - wyst±pi³ b³±d podczas ost operacji wej¶cia-wyj¶cia
+\item \texttt{BIO\_DONE} - operacja wej¶cia-wyj¶cia zakoñczona
+\item \texttt{BIO\_ERROR} - wyst±pi³ b³±d podczas ostatniej operacji wej¶cia-wyj¶cia
 \item \texttt{BIO\_VALID} - dane w buforze s± prawid³owe
 \item \texttt{BIO\_CACHE} - nag³ówek jest w tablicy haszuj±cej
-\item \texttt{BIO\_BUSY} - nag³ówek jest zajêty przez klienta.
+\item \texttt{BIO\_BUSY} - nag³ówek jest zajêty przez klienta
 \end{itemize}
 
-System udostêpnia mechanizm buforowanego wej¶cia-wyj¶cia który jest warstw±
+System udostêpnia mechanizm buforowanego wej¶cia-wyj¶cia, który jest warstw±
 pomiêdzy swoimi klientami (modu³ami obs³ugi systemów plików) a~sterownikami
 urz±dzeñ. Mechanizm pos³uguje siê sta³± ilo¶ci± nag³ówków buforów, które
 oprócz opisywania operacji dla sterowników s³u¿± do~zapamiêtywania ich wyników.
@@ -68,8 +68,8 @@ Zapamiêtane dane mog± ograniczyæ potrzebê korzystania z~urz±dzenia.
 
 
 Nale¿y zwróciæ uwagê, ¿e buforowane s± operacje wej¶cia-wyj¶cia, nie sam
-no¶nik urz±dzenia. Ta subtelna ró¿nica objawi± siê tym, ¿e jeden bufor
-mo¿e pamiêtaæ ci±g stu sektorów zaczynaj±æ od dwudziestego, a drugi bufor
+no¶nik urz±dzenia. Ta subtelna ró¿nica objawia siê tym, ¿e jeden bufor
+mo¿e pamiêtaæ ci±g stu sektorów zaczynaj±c od dwudziestego, a drugi bufor
 mo¿e pamiêtaæ ci±g dziesiêcu sektorów zaczynaj±c od piêædziesi±tego tego
 samego urz±dzenia.
 Mechanizm nie zapewnia, ¿e buforowanie ,,wspólnych'' sektorów  zawiera
@@ -79,7 +79,7 @@ spada na~klientów tego mechanizmu.
 \subsection{Tablica haszuj±ca.}
 
 W celu przyspieszenia szukania buforów w~pamiêci system pos³uguje siê
-tablica haszuj±c±, która pos³uguje siê funkcj± haszuj±c± zale¿n± od~adresu
+tablica haszuj±c±, która korzysta z funkcji haszuj±cej zale¿nej od~adresu
 deskryptora urz±dzenia oraz pierwszego bloku operacji.
 
 \begin{eqnarray*}
@@ -92,7 +92,7 @@ deskryptora urz±dzenia oraz pierwszego bloku operacji.
 \end{eqnarray*}
 
 
-Nag³ówki s± nawlekane na~dwie listy, listê wolnych nag³ówku je¿eli z~danego
+Nag³ówki s± nawlekane na~dwie listy, listê wolnych nag³ówków je¿eli z~danego
 buforu nikt nie korzysta oraz na listê tablicy haszuj±cej. Przyk³adowa
 tablica jest przedstawiona na rysunku \ref{bio:bufhash}.
 
@@ -107,16 +107,16 @@ tablica jest przedstawiona na rysunku \ref{bio:bufhash}.
  \label{bio:bufhash}
 \end{figure}
 
-Bufor znajduje siê na~wolnej li¶cie, tylko wtedy gdy nie jest u¿ywany
-przez ¿adnego klienta. Mo¿e on te¿ jednoczêsnie znajdowaæ siê w~tablicy
-haszuj±cej co oznacza ¿e buforuje poprzednio wykonan± operacjê.
+Bufor znajduje siê na~wolnej li¶cie tylko wtedy, gdy nie jest u¿ywany
+przez ¿adnego klienta. Mo¿e on te¿ jednocze¶nie znajdowaæ siê w~tablicy
+haszuj±cej, co oznacza ¿e buforuje poprzednio wykonan± operacjê.
 
-Tablica haszuj±c± oraz lista wolnych buforów jest opisywana znajduje siê
+Tablica haszuj±c± oraz lista wolnych buforów znajduje siê
 w~strukturze \texttt{bufhash}. 
 
-\subsection{Cykl ¿ycia nag³owku buforu.}
+\subsection{Cykl ¿ycia nag³owka buforu.}
 
-Sta³± ilo¶æ buforów wymaga ustalenia rygyrystycznych zasad pos³ugiwania siê
+Sta³a ilo¶æ buforów wymaga ustalenia rygyrystycznych zasad pos³ugiwania siê
 nimi. Ka¿dy nag³ówek mo¿e byæ dany jednemu klientowi.
 
 Klient mo¿e otrzymaæ bufor za~pomoc± dwóch procedur \texttt{bio\_getblk}
@@ -126,7 +126,7 @@ musi byæ wielokrotno¶ci± sektora danego urz±dzenia.
 
 Procedura \texttt{bio\_getblk} przeszukuje najpierw tablicê haszuj±c±
 w~celu znalezienia danej operacji. Je¿eli nag³ówek jest u¿ywany
-przez innego klienta to~klient o~niego prosz±cy jest usypiany
+przez innego klienta, to~klient o~niego prosz±cy jest usypiany
 na~¶pi±cej kolejce \texttt{iobuf\_t.sleepq}. Po obudzeniu procedura jest
 restartowana, poniewa¿ dany nag³ówek buforu móg³ zmieniæ buforowan± operacjê.
 
@@ -136,7 +136,7 @@ znajduje siê równie¿ w tablicy haszuj±cej (to~znaczy buforuje inn± operacjê
 ni¿ my szukamy) to nale¿y go z niej usun±æ.
 
 Zdobyty nag³ówek buforu jest organizowany przez procedurê \texttt{buf\_alloc},
-która sprawdza czy nie nale¿y przydzieliæ buforu lub zmnieniæ rozmiar
+która sprawdza czy nie nale¿y przydzieliæ buforu lub zmieniæ rozmiaru
 obecnie przydzielonego. Nastêpnie jest naznaczany flag± \texttt{BIO\_BUSY}
 i~zwracany klientowi.
 

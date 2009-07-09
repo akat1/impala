@@ -39,9 +39,9 @@ systemu wchodzi j±dro, biblioteka systemowa (jêzyka C), biblioteka w±tków
 oraz oprogramowanie. System jest wzorowany na~systemach wywodz±cych siê
 z~systemu UNIX i~przeznaczony jest dla~komputerów klasy PC. 
 
-\subsection{Cele i motywacje projektu}
+\subsection{Cele i motywacje projektu.}
 
-G³ównym celem i~motywacj± do~postawnia projektu by³a chêæ stworzenia systemu
+G³ównym celem i~motywacj± do~powstania projektu by³a chêæ stworzenia systemu
 operacyjnego, który stanowi³by pomoc w~nauce ich budowy i~zasad dzia³ania oraz
 mechanizmów niskopoziomowych komputera. Projekt mia³ byæ wzorowany na systemach
 wywodz±cych siê z~systemu UNIX i~implementowaæ mo¿liwie najwiêcej zgodnie
@@ -66,7 +66,7 @@ wielu wygodnych funkcji, jak historia poleceñ i dope³nianie komend,
 \texttt{zsh}, lecz posiada obs³ugê zarz±dzania zadaniami, st±d mo¿na j±
 uznaæ za~wyznacznik podobieñstwa do~systemu UNIX.
 
-\subsection{Co uda³o siê osi±gn±æ}
+\subsection{Co uda³o siê osi±gn±æ.}
 
 Zrealizowany projekt z pewno¶ci± stwarza mo¿liwo¶æ zg³êbienia tajników
 budowy i zasad dzia³ania systemu operacyjnego, wszystkie wa¿ne mechanizmy
@@ -77,7 +77,7 @@ dzia³aj±cego niezaleznie od platformy. Podej¶cie to umo¿liwia studiowanie
 mechanizmów niskopoziomowych niezale¿nie od reszty systemu. Uda³o siê
 zrealizowaæ za³o¿enie podobieñstwa do~systemu UNIX,
 czego konsekwencj± jest przeniesienie z powodzeniem pow³oki systemowej \texttt{ash},
-nie zosta³ jednak zrealizowany cel przeniesienia edytora tekstowego , który
+nie zosta³ jednak zrealizowany cel przeniesienia edytora tekstowego, który
 wymaga dalszego dostosowania.
 Uda³o siê równie¿ przenie¶æ program \texttt{vttest}, który pos³u¿y³ przy
 sprawdzaniu i~udoskanalniu naszej implementacji terminali w~emulacji VT100.
@@ -92,25 +92,25 @@ testów.
 
 \subsection{U¿yte narzêdzia.}
 
-Realizacja projektu wymaga³a u¿ycia wielu narzêdzi dostarczonych z zewn±trz,
-poni¿ej znajduje siê zwiêz³y opis tych z nich, które odegra³y kluczow± rolê
+Realizacja projektu wymaga³a u¿ycia wielu narzêdzi dostarczonych z zewn±trz.
+Poni¿ej znajduje siê zwiêz³y opis tych, które odegra³y kluczow± rolê
 podczas pracy.
 
-Zarz±dzania prac± grupow± i podzia³u zadañ na poszczególnych programistów
-zosta³o wspomagane przez system EdgeWall
+Zarz±dzanie prac± grupow± i podzia³ zadañ na poszczególnych programistów
+by³o wspomagane przez system EdgeWall
 Trac\footnote{http://trac.edgewall.org/},
 kolejne etapy projektu zosta³y podzielone na mniejsze
 zadania i wprowadzone jako bilety, dziêki wykorzystaniu tego mechanizmu mo¿liwa
 by³a na bie¿±co kontrola efektów pracy i planowanie kolejnych etapów rozwoju.
 Wykorzystane zosta³y równie¿ mechanizmy zarz±dzania tre¶ci± do budowania
-zal±¿ków dokumentacji oraz wymiany naistotniejszych informacji o projekcie.
+zal±¿ków dokumentacji oraz wymiany najistotniejszych informacji o projekcie.
 Interfejs dodatkowo stanowi³ graficzn± nak³adkê na system kontroli wersji pozwalaj±c 
-wygodnie przegl±daæ kolejne rewizje kodu, udostêpniony mechanizmi wiki
+wygodnie przegl±daæ kolejne rewizje kodu, udostêpniony mechanizm wiki
 umo¿liwi³ równie¿ robienie krótkich notek na~stronie dotycz±cych projektu.
 
 
 System kontroli wersji SVN zosta³ wykorzystany do synchronizacji kodu, umo¿liwi³
-on niezale¿n± i wygodn± pracê nad projektem ka¿demu z uczestników. Wykorzysane
+on niezale¿n± i wygodn± pracê nad projektem ka¿demu z uczestników. Wykorzystane
 zosta³y mechnizmy ga³êzi do rozwijania wiêkszych mechanizmów, które nastêpnie
 by³y scalane do g³ównego drzewa. System pozwoli³ na bie¿±co ¶ledziæ zmiany w
 kodzie wprowadzane przy kolejnych rewizjach.
@@ -148,7 +148,7 @@ generowan± przez program DoxyGen (po~wykonaniu polecenia
 drzewo z~kodem j±dra systemu.
 
 \item \texttt{./sys/arch/} -
-drzewo z~wydziel± obs³ug± platform
+drzewo z~wydzielon± obs³ug± platform
 
 \item \texttt{./sys/arch/x86/} -
 kod obs³ugi platformy PC z~procesorem PentiumPro.
@@ -163,16 +163,16 @@ biblioteka \texttt{libfs.a} zawieraj±ca obs³ugê systemu plików.
 kod w³a¶ciwy j±dra.
 
 \item \texttt{./sys/sys/}
-nag³ówki jêzyka C
+nag³ówki jêzyka C.
 
 \item \texttt{./usr/} -
 drzewo z~kodem programów i~bibliotek.
 
 \item \texttt{./usr/bin/} -
-¼ród³a standardowych programów
+¼ród³a standardowych programów.
 
 \item \texttt{./usr/sbin/} -
-¼ród³a systemowych programów
+¼ród³a systemowych programów.
 
 \item \texttt{./usr/lib/} -
 poddrzewo zawieraj±ce kody bibliotek.
@@ -184,6 +184,6 @@ katalog ze skryptami startowymi systemu.
 skrypty dla programów Makefile tworz±ce nasz system budowania.
 
 \item \texttt{./image/} -
-skrypty buduj±ce obraz dyskietki
+skrypty buduj±ce obraz dyskietki.
 
 \end{itemize}

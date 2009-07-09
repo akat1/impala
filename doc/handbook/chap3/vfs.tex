@@ -55,6 +55,19 @@ J±dro systemu posiada zwi±zan± z ka¿dym procesem tabelê, s³u¿±c± do t³umaczenia
 deskryptora pliku na strukturê \texttt{file\_t}. Wiele deskryptorów plików mo¿e
 wskazywaæ na t± sam± strukturê. Oto, jak wygl±da \texttt{file\_t}:
 
+\begin{center}
+\begin{tabular}{|l l| l|}
+\hline
+vnode\_t   & *f\_vnode &	Wska¼nik na v-wêze³ zwi±zany z plikiem\\
+off\_t     &  f\_offset &	Aktualna pozycja kursora w pliku\\
+int       &  f\_refcnt &	Licznik referencji dla tej struktury\\
+int       &  f\_flags & Flagi, pocz±tkowo ustawione przez open\\
+\hline
+\end{tabular}
+\end{center}
+ 
+Tak wiêc wszystkie deskryptory wskazuj±ce na ten sam plik dziel± informacje
+takie jak aktualna pozycja kursora oraz flagi pliku.
 
 
 \subsection{Pliki od strony j±dra.}
