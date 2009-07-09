@@ -45,6 +45,7 @@
 #include <sys/uio.h>
 #include <sys/kmem.h>
 #include <sys/proc.h>
+#include <sys/clock.h>
 #include <fs/mfs/mfs_internal.h>
 
 
@@ -120,6 +121,7 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     node->type = VNODE_TO_MFS_TYPE(attr->va_type);
     node->attr = attr->va_mode;
     node->data = (attr->va_size>0)?kmem_alloc(attr->va_size, KM_SLEEP):NULL;
+    node->mtime = node->atime = node->ctime = curtime;
     if(node->data == NULL)
         node->size = 0;
     node->parent = pnode;
@@ -165,6 +167,7 @@ mfs_read(vnode_t *vn, uio_t *u, int flags)
 {
     if(vn->v_type != VNODE_TYPE_REG)
         return -EINVAL;
+    ((mfs_node_t*)(vn->v_private))->atime = curtime;
     return mfs_blk_read(vn->v_private, u);
 }
 
@@ -173,6 +176,7 @@ mfs_write(vnode_t *vn, uio_t *u, int flags)
 {
     if(vn->v_type != VNODE_TYPE_REG)
         return -EINVAL;
+    ((mfs_node_t*)(vn->v_private))->mtime = curtime;
     return mfs_blk_write(vn->v_private, u);  
 }
 
@@ -195,6 +199,7 @@ int
 mfs_truncate(vnode_t *vn, off_t off)
 {
     mfs_node_t *n = vn->v_private;
+    n->mtime = curtime;
     if(off == n->size)
         return 0;
     if(off > 10000000)
@@ -224,6 +229,11 @@ mfs_getattr(vnode_t *vn, vattr_t *attr)
         attr->va_nlink = 1; //mfs nie wspiera hardlinków
     if (attr->va_mask & VATTR_INO)
         attr->va_ino = (ino_t) node;
+    if(attr->va_mask & VATTR_TIME) {
+        attr->va_atime = node->atime;
+        attr->va_mtime = node->mtime;
+        attr->va_ctime = node->ctime;
+    }
     return 0;
 }
 
@@ -248,6 +258,11 @@ mfs_setattr(vnode_t *vn, vattr_t *attr)
     }
     if(attr->va_mask & VATTR_MODE)
         node->attr = attr->va_mode;
+    if(attr->va_mask & VATTR_TIME) {
+        node->atime=attr->va_atime;
+        node->mtime=attr->va_mtime;
+        node->ctime=attr->va_ctime;
+    }
     return 0;
 }
 

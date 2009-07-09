@@ -19,6 +19,9 @@ struct mfs_node {
     mfs_node_t      *child;
     mfs_node_t      *next;
     vnode_t         *vnode;
+    timespec_t      atime;   ///< czas ostatniego dostêpu do pliku
+    timespec_t      mtime;   ///< czas ostatniej modyfikacji
+    timespec_t      ctime;   ///< czas utworzenia pliku
     list_t          blks;
 };
 

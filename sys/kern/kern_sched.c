@@ -297,7 +297,7 @@ static inline void
 _sched_wakeup(thread_t *n)
 {
     if (!(n->thr_flags & THREAD_INRUNQ)) {
-        curthread->thr_flags |= THREAD_INRUNQ;
+        n->thr_flags |= THREAD_INRUNQ;
         list_insert_tail(&run_queue, n);
         __resched();
     }
@@ -445,18 +445,19 @@ sleepq_init(sleepq_t *q)
 void
 sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d)
 {
-    int s = splhigh();
+    splsoftclock();
+    //int s = splhigh();
     list_insert_tail(&q->sq_waiting, curthread);
     curthread->thr_sleepq = q;
     UNSET(curthread->thr_flags,THREAD_INTRPT);
     SET(curthread->thr_flags, THREAD_SLEEPQ);
-    spinlock_lock(&sprq);
-    splx(s);
-    s = splsoftclock();
-    spinlock_unlock(&sprq);
-    UNSET(curthread->thr_flags,THREAD_RUN);
-    SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
-    splx(s);
+//    spinlock_lock(&sprq);
+//    splx(s);
+//    s = splsoftclock();
+//    spinlock_unlock(&sprq);
+//    UNSET(curthread->thr_flags,THREAD_RUN);
+//    SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
+//    splx(s);
     sched_wait(fl, fn, l, d);
 }
 
@@ -478,7 +479,8 @@ sleepq_intrpt(thread_t *t)
 {
     int s = splhigh();
     sleepq_t *q = t->thr_sleepq;
-    UNSET(t->thr_flags,THREAD_SLEEPQ);
+    UNSET(t->thr_flags, THREAD_SLEEPQ);
+    SET(t->thr_flags, THREAD_INTRPT);
     _sched_wakeup(t);
     list_remove(&q->sq_waiting, t);
     t->thr_sleepq = 0;
