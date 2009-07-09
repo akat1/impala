@@ -97,7 +97,7 @@ wczytuje zachowane wcze¶niej rejestry ze schowka drugiego w±tku.
 
 Poniewa¿ w~rejestrach procesora s± zapisane adresy lokalizuj±ce stos
 to powy¿sza operacja powoduje ,,podmianê'' aktualnie wykonywanego stosu
-procesora na ten, jaki by³ w momeñcie zapisywania rejestrów drugiego w±tku
+procesora na ten, jaki by³ w momencie zapisywania rejestrów drugiego w±tku
 (to znaczy dok³adnie wtedy, kiedy planista uruchomi³ \texttt{thread\_switch}
 podczas pracy drugiego w±tku). Poniewa¿ na~stosie jest zapisany ¶lad
 wywo³añ, to po podmianie stosu procesor zachowa siê dok³adnie tak, jak by siê
@@ -115,7 +115,7 @@ to~procedura zmiany kontekstu nie mia³a okazji zachowaæ jego
 rejestrów w~schowku, a procesor zapisaæ ramkê przerwania na~jego stosie
 alternatywnym. W takim wypadku uruchamiana jest procedura
 \texttt{thread\_resume}, która rêcznie buduje ramkê stosu, aby oszukaæ
-procesor, ¿e powraca do~obs³ugi zadania, które wcze¶niej wyw³asczy³.
+procesor, ¿e powraca do~obs³ugi zadania, które wcze¶niej wyw³aszczy³.
 Jako adres wyw³aszczonej instrukcji jest podawana procedura wej¶ciowa.
 
 W schowku na~rejestry procesora jest zapisywany równie¿ rejestr kontrolny
@@ -138,25 +138,25 @@ Po stworzeniu nowego w±tku w~systemie kopiowany jest stos alternatywny
 oraz kontekst w±tku~wywo³uj±cego. Skopiowany stos zawiera ramkê przerwania
 z~zachowanym stanem w±tku wywo³uj±cego, co umo¿liwia oszukania procesora
 w~podobny sposób jak w~procedurze \texttt{thread\_resume} i~uruchomienie
-nowy w±tek z~porz±danym stanem.
+nowy w±tek z~po¿±danym stanem.
 
 \subsection{Synchronizacja.}
 
-Wa¿nym elementem implementacji mechanizmów synchornizacji s± niepodzielne
+Wa¿nym elementem implementacji mechanizmów synchronizacji s± niepodzielne
 instrukcje procesora, tzn takie których nie mo¿na wyw³aszczyæ w~trakcie
 ich wykonywania. Instrukcje porównania oraz~zapisu generowane przez kompilator
 spe³niaj± tê w³a¶ciwo¶æ. Modu³ obs³ugi platformy
 sprzêtowej musi dostarczyæ jeszcze procedurê \texttt{atomic\_change\_int}
 modyfikuj±c± komórkê pamiêci i~zwracaj±c± jej star± warto¶æ w~sposób
-niepodzielny. Gdyby procedura nie spe³nia³a ¿±danej warto¶ci,
+niepodzielny. Gdyby procedura nie spe³nia³a ¿±danej w³asno¶ci,
 to pomiêdzy pobraniem starej warto¶ci, a zapisaniem nowej mog³oby zostaæ
 wykonane wyw³aszczenie, podczas którego warto¶æ komórki pamiêci zosta³a
 zmodyfikowana. W takim wypadku wszelkie decyzje podjête na~podstawie
 starej warto¶ci, zwróconej przez procedurê, mog³yby byæ b³êdne.
 
-Najprotszym mechanizmem synchronizacji s± wiruj±ce zamki, wykorzystuj±ce
+Najprostszym mechanizmem synchronizacji s± wiruj±ce zamki, wykorzystuj±ce
 wprost niepodzielne instrukcje procesora. Taki zamek jest opisywany przez
-jedn± komórkê pamiêci przyjmuj±c± warto¶c \texttt{SPINLOCK\_LOCK}
+jedn± komórkê pamiêci przyjmuj±c± warto¶æ \texttt{SPINLOCK\_LOCK}
 lub~\texttt{SPINLOCK\_UNLOCK} odpowiednio do~stanu blokady. 
 
 Operacja zamkniêcia u¿ywa wspomnianej wcze¶niej procedury aby ustawiæ
@@ -164,24 +164,26 @@ stan blokady na~\texttt{SPINLOCK\_LOCK}. Je¿eli stara warto¶æ komórki
 pamiêci by³a równa \texttt{SPINLOCK\_UNLOCK} to~z~niepodzielno¶ci u¿ytej procedury
 wynika, ¿e nikt inny nie móg³ odczytaæ ani zmodyfikowaæ jej warto¶ci i~uda³o
 siê pomy¶lnie zmieniæ stan blokady.
-Je¿eli stara warto¶c komórki pamiêci by³a równa \texttt{SPINLOCK\_LOCK},
-to równiez z~niepodzielno¶æi tej procedury wynika, to ¿e blokada zosta³a
+Je¿eli stara warto¶æ komórki pamiêci by³a równa \texttt{SPINLOCK\_LOCK},
+to równie¿ z~niepodzielno¶ci tej procedury wynika, to ¿e blokada zosta³a
 zamkniêta przez kogo¶ innego. W takim~wypadku procedura zamkniêcia zamka
-krêci siê wkó³ko (wiruje), dopóki nie uda siê jej zamkn±æ blokady.
+krêci siê w~miejscu (wiruje), dopóki nie uda siê jej zamkn±æ blokady.
 
 Ten sposób synchronizacji nie zapewnia, ¿e w±tki nie bêd± g³odzone (oczekiwaæ
-w~nieskoñczono¶æ), dodatkowo oczekiwanie na~zwolnienie blokdy jest aktywne
+w~nieskoñczono¶æ), dodatkowo oczekiwanie na~zwolnienie blokady jest aktywne
 co marnuje czas pracy procesora.
 
-Innym rodzajem blokady s± zamki \texttt{mutex\_t} (\emph{mutual exclue}),
+Innym rodzajem blokady s± zamki \texttt{mutex\_t} (\emph{mutual exclude}),
 których klienci s± usypiani na~czas za³o¿onej blokady. Zamki wewnêtrznie
 u¿ywaj± kolejki FIFO do~kontrolowania kolejno¶ci budzenia w±tków, chc±cych
 wej¶æ do chronionej sekcji krytycznej - ta strategia eliminuje problem
-g³odzenia. Wewnêtrzna sturktura danych tej blokady jest chroniona za~pomoc± wiruj±cych
-zamków.
+g³odzenia. Wewnêtrzna struktura danych tej blokady jest chroniona za~pomoc±
+wiruj±cych zamków. Idea tych zamków odró¿nia je od semaforów tym, ¿e z~t±
+blokad± jest zwi±zana informacja o w³a¶cicielu, tzn w±tku który zamkn±³
+blokadê - w przeciwieñstwie do semaforów jedynie on ma prawo do~odblokowania.
 
 \label{pthread_condvar}
-Zmienna warunkowa jest~mechanizmem ¶cisle powi±zanym z~mechanizmem blokad.
+Zmienna warunkowa jest~mechanizmem ¶ci¶le powi±zanym z~mechanizmem blokad.
 Jej zadanie to umo¿liwienie biernego oczekiwania na~zdarzenie.
 Jest on sprzê¿ony z~wybran± blokad± w~celu wykonywania niepodzielnej operacji
 jej zwolnienia oraz u¶pienia w±tku.
@@ -189,19 +191,59 @@ jej zwolnienia oraz u¶pienia w±tku.
 Mechanizm jest standardowo wykorzystywany do~implementacji kolejek, sama
 blokada mo¿e jedynie chroniæ sekcje krytyczne procedur wys³ania i odebrania
 wiadomo¶ci do kolejki, lecz uniemo¿liwia oczekiwanie w~przypadku braku
-wiadomo¶æi do odebrania. Mechanizm wykorzystuje siê tak, ¿e gdy nie ma
-wiadomo¶æi do~odebrania to klient jest usypiany, a blokada zwalaniana.
-Dziêki niepodzielno¶æi nie jest mo¿liwa sytuacja, gdy pomiêdzy u¶pieniem
+wiadomo¶ci do odebrania. Mechanizm wykorzystuje siê tak, ¿e gdy nie ma
+wiadomo¶ci do~odebrania to klient jest usypiany, a blokada zwalniana.
+Dziêki niepodzielno¶ci nie jest mo¿liwa sytuacja, w~której pomiêdzy u¶pieniem
 a zwolnieniem blokady kto¶ dostarczy wiadomo¶æ do kolejki.
 
 Dostarczenie zdarzenia budz±cego jest mo¿liwe do~jednego w±tku lub
-do~wszystkich naraz,  mo¿e je dostarczyæ jedynie w³a¶ciciel blokady sprzê¿±nej
+do~wszystkich naraz,  mo¿e je dostarczyæ jedynie w³a¶ciciel blokady sprzê¿onej
 z~zmienn± warunkow±. Zdarzenie jest dostarczane przy wyj¶ciu z~sekcji
 krytycznej przez klienta je zg³aszaj±cego. Budzony w±tek dostaje od~razu
 zamkniêty zamek, dziêki czemu powraca on do~swojej sekcji krytycznej.
 
+Nasza implementacja zamków \texttt{mutex\_t} zawiera w~sobie mechanizm
+zmiennej warunkowej.
 
-Nasza implementacja zamków \texttt{mutex\_t} implemente
+\subsection{Biblioteka w±tków u¿ytkownika.}
+
+Istniej± trzy modele realizacji w±tków po stronie u¿ytkownika:
+\begin{itemize}
+ \item M:1 -
+wiele w±tków u¿ytkownika jest zarz±dzanych przez niego samego, a j±dro
+systemu operacyjnego widzi wszystkie jako jeden w±tek
+    (nie wie o ich istnieniu).
+
+ \item M:N -
+w±tki u¿ytkownika s± ³±czone w~grupy, które s± widziane jako pojedyncze
+w±tki dla j±dra.
+
+ \item 1:1 -
+ka¿dy w±tek u¿ytkownika jest widziany przez j±dro.
+
+\end{itemize}
+
+W naszym systemie wybrali¶my trzeci model. 
+Do zarz±dzania w±tkami dostarczone s± odpowiednie wywo³ania systemowe
+pozwalaj±ce tworzyæ nowe w±tki, oczekiwaæ na~ich zakoñczenie oraz~zarz±dzaæ
+blokadami.
+
+Identyfikatorami w±tków jakimi pos³uguje siê biblioteka s± adresy
+deskryptorów w±tków w~j±drze, poniewa¿ j±dro nie mo¿e ufaæ dostarczonym
+adresom od u¿ytkownika (podczas wskazywania identyfikatorem, którego w±tku
+tyczy siê dana operacja) ka¿dy proces posiada listê swoich w±tków. Identyfikator
+w±tku jest weryfikowany poprzez test bycia obecnym na~tej li¶cie.
+
+Blokadami tworzonymi przez u¿ytkownika s± blokady \texttt{mutex\_t} w~j±drze
+systemu. Pomys³ z~identyfikatorami i~badaniem ich poprawno¶ci jest ten sam,
+co wy¿ej omówiony.
+
+Standard \emph{POSIX Threads} definiuje procedury i semantykê w±tków
+u¿ytkownika. W naszym systemie zaimplementowali¶my podzbiór tego standardu
+pozwalaj±cy na~prostym zarz±dzaniu w±tkami, tworzeniu blokad oraz zmiennych
+warunkowych.
+
+Wewnêtrzne struktury biblioteki s± chronione przez wiruj±ce zamki.
 
 \subsection{Szeregowanie zadañ.} \label{SCHEDULER}
 
@@ -231,7 +273,7 @@ cykliczn±, a nastêpnie przydzielanie ka¿demu z w±tków kolejno jednakowego kwantu
 czasu. Procesy znajduj±ce siê poza t± kolejk± nie s±
 brane pod uwagê a¿ do~nastêpnego wywo³ania funkcji \texttt{\_\_resched}, która
 realizuje tak¿e uaktualnianie priorytetu procesów wg. wzoru:
-\[ \mbox{priorytet} = 2\cdot\mbox{poziom\_uprzejmosci} 
+\[ \mbox{priorytet} = 2\cdot\mbox{poziom\_uprzejmo¶ci} 
     + \mbox{wykorzystanie\_procesora}/2 \]
 Wszystkie opisywane przez wzór warto¶ci przechowywane s± w bloku kontrolnym
 procesu.
