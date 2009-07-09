@@ -109,6 +109,7 @@ fatfs_create(vnode_t *v, vnode_t **vpp, const char *name,
         return -EINVAL;
     }
     *vpp = fatfs_node_getv(newnode);
+    VFS_SYNC(node->fatfs->vfs);
     return 0;
 }
 
@@ -135,6 +136,7 @@ fatfs_write(vnode_t *v, uio_t *u, int flags)
     if (node->size < u->offset + u->size) {
         r = fatfs_node_truncate(node, u->offset + u->size);
         if (r) return r;
+        VFS_SYNC(node->fatfs->vfs);
     }
     r = fatfs_node_write(node, u, flags);
     return r;
@@ -497,9 +499,7 @@ fatfs_node_truncate(fatfs_node_t *node, off_t off)
 
     if (need == have) {
         DEBUGF("no cluster-chain changes");
-        fatfs_dirent_sync(node);
-
-        return 0;
+        goto end;
     } else
     if (need == 0) {
         DEBUGF("zero");
@@ -508,13 +508,11 @@ fatfs_node_truncate(fatfs_node_t *node, off_t off)
             fatfs_space_free(fatfs, node->firstclu);
             node->firstclu = 0;
         }
-        fatfs_dirent_sync(node);
-        return 0;
+        goto end;
     } else
     if (have == 0) {
         node->firstclu = fatfs_space_alloc(fatfs, need);
-        fatfs_dirent_sync(node);
-        return 0;
+        goto end;
     }
 
     // jedziemy na koniec mniejszego ³añcucha
@@ -529,7 +527,10 @@ fatfs_node_truncate(fatfs_node_t *node, off_t off)
         blkno_t blk = fatfs_space_alloc(fatfs, need-have);
         fatfs_fatset(fatfs, xclu, blk);
     }
+end:
     fatfs_dirent_sync(node);
+    if (node->dirent && node->dirent->dirnode)
+        fatfs_dir_sync(node->dirent->dirnode->dir);
     return 0;
 }
 
