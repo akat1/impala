@@ -35,11 +35,24 @@ Ta dokumentacja nie zawiera dok³adnego opisu wbudowanych poleceñ pow³oki
 \texttt{ash}
 oraz jêzyka jakim siê pos³uguje, te~opisy znajduj± siê w~\cite{freebsd:sh} oraz 
 \cite{posix:sh}. Poni¿ej znajduje siê jedynie opis podstawowych komend niezbêdnych
-do swobodnego u¿ytkownia systemu.
+do~swobodnego testowania systemu.
 
 \begin{itemize}
 \item \texttt{cd} - zmiana aktualnego katalogu.
 \item \texttt{echo} - wy¶wietlenie dostarczonego napisu.
 \item \texttt{exit} - zakoñczenie pracy.
 \item \texttt{pwd} - wy¶wietlenie aktualnego katalogu.
+\item \texttt{read} - wczytanie zmiennej z~linii poleceñ do ¶rodowiska,
+    np \texttt{read l} wczyta dane do zmiennej \texttt{\$l}.
+\item \texttt{alias} - stworzenie aliasu dla polecenia,
+    np \texttt{alias ls="ls -laiF"}.
+\item \texttt{export} - definiuje zmienn± ¶rodowiskow±,
+    np \texttt{export TERM=vt100-8025}.
+\item \texttt{jobs} - drukuje listê zadañ uruchomionych w~tle.
+\item \texttt{fg} - przywraca zadanie dzia³aj±ce w~tle do~pierwszego planu.
 \end{itemize}
+
+Zmienne ¶rodowiskowe s± podstawione za~napisy \texttt{\$nazwa\_zmiennej}.
+
+Standardowe wej¶cie i~wyj¶cie poleceñ mo¿na przekierowywaæ za~pomoc±
+znaków \texttt{<} i \texttt{>}.

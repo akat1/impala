@@ -359,7 +359,7 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
  */
 
 enum {
-    MAX_READ_SIZE   = 50,
+    MAX_READ_SIZE   = 10,
 };
 
 struct extract_ctl {
@@ -564,7 +564,11 @@ operate(int argc, char **argv, int oper, const char *file, const char *mode,
     if (zlib) {
         archive = open_gzip(file, mode);
     } else {
-        archive = fopen(file, mode);
+        if (strcmp(file,"-")) {
+            archive = fopen(file, mode);
+        } else {
+            archive = fdopen(0, mode);
+        }
     }
     if (!archive) {
         ///@todo bledy

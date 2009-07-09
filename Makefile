@@ -16,6 +16,7 @@ PROG_BIN=\
     tar\
     truncate\
     uname\
+    sleep\
     vttest
 
 PROG_SBIN=\

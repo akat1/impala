@@ -51,7 +51,7 @@ przyjêtym w systemach UNIXowych.
 \item \texttt{/var} - katalog systemowy.
 \end{itemize}
 
-\subsection{Polecenia standardowe}
+\subsection{Polecenia standardowe.}
 
 W systemie zaimplementowano czê¶æ podstawowych komend systemów UNIXowych, na
 uwagê zas³uguj± programy sh oraz vttest, które zosta³y przeniesione do projektu
@@ -64,20 +64,107 @@ bez istotnych modyfikacji w ich kodzie.
 \item \texttt{minigzip} - kompresja i dekompresja plików.
 \item \texttt{mkdir} - tworzenie katalogów.
 \item \texttt{ps} - listowanie procesów.
+\item \texttt{sleep} - ¶pi dan± ilo¶æ sekund.
 \item \texttt{sh} - pow³oka systemowa.
-\item \texttt{tar} - program archiwizuj±cy.
-\item \texttt{truncate} - ustawienie d³ugo¶ci pliku.
-\item \texttt{uname} - wy¶wietlenie informacji o systemie.
-\item \texttt{vttest} - testowanie zgodno¶ci z terminalem VT100.
+\item \texttt{tar} - ta¶mowy program archiwizuj±cy.
+\item \texttt{truncate} - przyciêcie (stworzenie) pliku do odpowiedniej
+    d³ugo¶ci, np \texttt{truncate -s 50 plik}.
+\item \texttt{uname} - wy¶wietlenie informacji o systemie, np
+    \texttt{uname -a} wydrukuje nazwê j±dra, nazwê wydania, nazwê platformy
+    oraz nazwê komputera.
+\item \texttt{vttest} - testowanie zgodno¶ci z terminalem VT100. Warto go u¿yæ
+     jako program demonstruj±cy emulacjê terminalu.
 \end{itemize}
 
-\subsection{Polecenia specjalne}
+\subsection{Polecenia specjalne.}
 
 Polecenia specjalne s³u¿± do wykonywania prac administracyjnych, systemowych
 oraz ewentualnego uzyskiwania informacji na temat systemu.
 
 \begin{itemize}
 \item \texttt{init} - rozruch systemu.
-\item \texttt{ttyvrun} - uruchomienie programu z zadanym terminalem kontrolnym
+\item \texttt{ttyvrun} - uruchomienie programu z zadanym terminalem kontroluj±cym.
 \item \texttt{login} - rozpoczêcie sesji u¿ytkownika.
+\end{itemize}
+
+\subsection{Programy demonstracyjne.}
+
+Poniewa¿ nasz projekt jest g³ównie przeznaczony dla~programistów
+to~stworzyli¶my kilka dodatkowych programów demonstracyjnych
+pokazuj±cych mo¿liwo¶ci j±dra. Wszystkie te~programy mo¿na skompilowaæ
+na~dowolnym systemie UNIXowym w~celu porównania zachowania systemów.
+
+\begin{itemize}
+\item \texttt{pfault} -
+program demonstruj±cy obs³ugê pu³apki procesora wygenerowanej przez program
+odwóluj±cy siê do nieprawid³owego adresu \texttt{0xdeadbabe}.
+
+\item \texttt{pipedemo} -
+program testuj±cy implementacjê potoków FIFO, przekopiowany ze~strony
+podrêcznika standardu. Implementacja potoków jest równie¿ testowana
+przez program \texttt{tar}, który uruchamia pocmoniczy program dekompresuj±cy
+\texttt{minigzip} i komunikuje siê z~nim za pomoc± potoku. Potoki mo¿na
+dodatkowo testowaæ pow³ok± systemow± wydajaæ polecenia z~u¿yciem znaku
+\texttt{|}, np \texttt{echo "To jest napis" | cat}.
+
+\item \texttt{pthdemo1} - 
+pierwszy program demonstruj±cy bibliotekê w±tków POSIX. Tworzy dodatkowy
+w±tek w~programie, który przez piêæ sekund drukuje napis na~ekranie
+napis \texttt{I am alive!}, a nastêpnie zwraca napis \texttt{"working well"}.
+G³ówny w±tek programu oczekuje zakoñczenia pierwszego w±tku, a nastêpnie
+drukuje zwrócony przez niego napis.
+
+\item \texttt{pthdemo2} -
+drugi program demonstruj±cy bibliotekê w±tków POSIX. Tworzy blokadê
+zamkniêt± przez g³ówny w±tek oraz dwa dodatkowe w±tki,
+próbuj±ce wej¶æ w~sekcjê krytyczn±. Po piêciu sekundach g³ówny w±tek
+zwalnia blokadê i~oczekuje zakoñczenia w±tków, które synchronizuj± siê
+za~pomoc± blokady.
+
+\item \texttt{pthdemo3} -
+trzeci program demonstruj±cy bibliotekê w±tków POSIX. Tworzy blokadê,
+oraz zmienn± warunkow± (patrz \ref{pthread_condvar}). Nastêpnie symuluje
+kolejkê przez licznik, dwa dodatkowe w±tki symuluj± odczytywanie z~kolejki,
+a~jeden dodatkowy zapisywanie. W±tek czytaj±cy z~kolejki u¿ywa zmiennej
+warunkowej do~oczekiwania na now± wiadomo¶æ, je¿eli kolejka by³a pusta.
+W±tek zapisuj±cy u¿ywa zmiennej do~budzenia innych w±tków czekaj±cych
+na~zdarzenie. Program symuluje wys³anie o¶miu wiadomo¶ci do~kolejki.
+
+\item \texttt{signal} -
+program demonstruj±cy obs³ugê sygnalów. Instaluje uchwyty sygna³ów
+\texttt{SIGHUP} oraz \texttt{SIGUSR1}, a nastêpnie wysy³a je sam do~siebie.
+
+\item \texttt{sysvmsg} - 
+program testuj±cy implementacjê kolejek wiadomo¶ci (patrz \ref{SYSVMSG}).
+Uruchamiaj±c go z~parametrem \texttt{create} tworzymy kolejkê wiadomo¶ci;
+z~parametrem \texttt{send napis} wysy³amy napis do kolejki, a~z~parametrem
+\texttt{recv} program pobiera i drukuje napis z~kolejki. Je¿eli kolejka jest
+pusta to~program zostanie zablokowany przez j±dro do czasu pojawienia siê
+wiadomo¶æi w kolejce. Wysy³anie sygna³u przerwania
+przez terminal po naci¶niêciu klawiszy CTRL+C nie odblokuje go, poniewa¿
+obecna implementacja nie obs³uguje przerywania czekania. Nale¿y w~takim
+wypadku prze³±czyæ siê na~inny wirtualny terminal i wys³aæ jak±¶ wiadomo¶æ
+do~kolejki.
+
+Pow³oki systemowej mo¿na u¿yæ do~demonstracji kontroli zadañ, dodaj±c
+znak \texttt{\&} na koñcu polecenia - uruchamiaj±cy je w~tle.
+Mo¿na zleciæ nigdy nie koñcz±ce siê polecenie
+\texttt{cat /dev/zero > /dev/zero \&}, a nastêpnie u¿yæ polecenia \texttt{jobs}
+oraz \texttt{fg}. Polecenie mo¿na zakoñczyæ naciskaj±c CTRL+C, co spowoduje
+wygenerowanie sygna³u przerwania \texttt{SIGINT} przez terminal.
+
+Mo¿na równie¿ wydaæ polecenie \texttt{sleep 5 \&}, i zobaczyæ jak pow³oka
+wykrywa zakoñczenie zadania w~tle. Pow³oka informuje o tego typu rzeczach
+dopiero po wydaniu jakiego¶ polecenia przez u¿ytkownika, poniewa¿ jest
+zablokowana przez j±dro~w oczekiwaniu na~wej¶cie z~terminalu. Wpisuj±c
+to~polecenie mo¿na napisaæ dowolne inne po~piêciu sekundach w~celu otrzymania
+komunikatu.
+
+Potoki mo¿na w efektowny sposób przetestowaæ wydaj±c polecenie
+\texttt{minigzip -d < /mnt/fd0/impala/syspack.tar.gz | tar tvf -}, które
+uruchami dwa programy po³±czone potokiem. Wej¶ciem programu \texttt{minigzip} bêdzie plik
+\texttt{syspack.tar.gz}, a wej¶ciem programu \texttt{tar} bêdzie wyj¶cie
+poprzedniego programu. Polecenie testuje poprawno¶æ archiwum i drukuje
+jego zawarto¶æ.
+
 \end{itemize}

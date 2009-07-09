@@ -16,7 +16,7 @@ tmain(void *_)
         sleep(1);
     }
     printf("\033[2K\r * end\n");
-    return "wszystko dziala";
+    return "working well";
 }
 
 int

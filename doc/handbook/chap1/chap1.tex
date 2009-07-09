@@ -98,7 +98,8 @@ podczas pracy.
 
 Zarz±dzanie prac± grupow± i podzia³ zadañ na poszczególnych programistów
 by³o wspomagane przez system EdgeWall
-Trac\footnote{http://trac.edgewall.org/},
+Trac\footnote{Instalacja tego programu na~potrzeby naszego projektu jest dostêpna
+pod adresem internetowym \texttt{http://trzask.codepainters.com/impala/trac/} },
 kolejne etapy projektu zosta³y podzielone na mniejsze
 zadania i wprowadzone jako bilety, dziêki wykorzystaniu tego mechanizmu mo¿liwa
 by³a na bie¿±co kontrola efektów pracy i planowanie kolejnych etapów rozwoju.
@@ -126,8 +127,6 @@ prostsze wy³apywanie b³êdów oraz ¶ledzenie przebiegu programu. Do obydwu
 emulatorów wraz z~projektem dostarczone s± proste ³aty wype³niaj±ce bajty
 pamiêci komputera wzorcem \texttt{0xe9}, które pozwalaj± wykryæ wiêcej b³êdów
 z~u¿yciem emulatorów, domy¶lnie zeruj±cych pamiêæ RAM.
-
-\subsection{Podzia³ pracy.}
 
 
 \subsection{Opis drzewa z~kodem ¼rod³owym.}
@@ -157,12 +156,12 @@ kod obs³ugi platformy PC z~procesorem PentiumPro.
 biblioteka \texttt{libdev.a} zawieraj±ca sterowniki urz±dzeñ.
 
 \item \texttt{./sys/fs/} -
-biblioteka \texttt{libfs.a} zawieraj±ca obs³ugê systemu plików.
+biblioteka \texttt{libfs.a} zawieraj±ca obs³ugê systemów plików.
 
 \item \texttt{./sys/kern/} -
 kod w³a¶ciwy j±dra.
 
-\item \texttt{./sys/kern/sc} -
+\item \texttt{./sys/kern/sc/} -
 obs³uga wywo³añ systemowych.
 
 \item \texttt{./sys/sys/}
