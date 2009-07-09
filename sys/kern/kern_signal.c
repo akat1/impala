@@ -167,8 +167,8 @@ signal_proc(thread_t *t)
     } else if ( signal_action(p, sig) == SIG_IGN ) {
         /* NOTHING TO DO */
     } else {
-        return 0;
         thread_sigenter(curthread, signal_action(p, sig), sig);
+        return 0;
     }
 
     return 0;
