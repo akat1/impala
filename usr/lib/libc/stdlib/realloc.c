@@ -10,6 +10,7 @@ realloc(void *ptr, size_t size)
     ///@todo poprawiæ realloc
     if(!ptr)
         return malloc(size);
+#if 0
     if(!size) {
         free(ptr);
         return NULL;
@@ -22,6 +23,9 @@ realloc(void *ptr, size_t size)
         return ptr;
     }
     //naiwna implementacja
+#endif
+    size_t oldsize = size;
+
     void* naddr = malloc(size);
     if(!naddr) {
         errno = ENOMEM;

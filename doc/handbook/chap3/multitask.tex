@@ -125,11 +125,21 @@ adresowej u¿ytkownika.
 \subsection{Rozwidlanie procesów.}
 
 Jedyn± drog± stworzenia nowego procesu w~systemie UNIX jest rozwidlenie
-istniej±cego procesu. Zgodnie z semantyk± nadan± przez standard nowy proces
-dziedziczy po~rodzicu kopiê jego deskryptorów plików i~przestrzeni adresowej.
+istniej±cego procesu. Zgodnie z~semantyk± nadan± przez standard nowy proces
+dziedziczy po~rodzicu kopiê jego deskryptorów plików, przestrzeni adresowej
+oraz ¶rodowiska.
 
-Je¿eli w procesie rodzica dzia³a³o wiele w±tków to~nowy zawiera tylko jeden,
+Je¿eli w~procesie rodzica dzia³a³o wiele w±tków to~nowy zawiera tylko jeden,
 który jest kopi± w±tku zlecaj±cego systemowi zadanie rozwidlenia.
+
+Za~obs³ugê rozwidlenia odpowiedzialna jest procedura \texttt{proc\_fork}.
+Po stworzeniu nowego w±tku w~systemie kopiowany jest stos alternatywny
+oraz kontekst w±tku~wywo³uj±cego. Skopiowany stos zawiera ramkê przerwania
+z~zachowanym stanem w±tku wywo³uj±cego, co umo¿liwia oszukania procesora
+w~podobny sposób jak w~procedurze \texttt{thread\_resume} i~uruchomienie
+nowy w±tek z~porz±danym stanem.
+
+\subsection{Synchronizacja.}
 
 \subsection{Szeregowanie zadañ} \label{SCHEDULER}
 

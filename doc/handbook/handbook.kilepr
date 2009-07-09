@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0
-lastDocument=chap3/dev.tex
+lastDocument=chap3/multitask.tex
 masterDocument=index.tex
 name=Impala Handbook
 pkg_extIsRegExp=false
@@ -21,16 +21,16 @@ column=44
 encoding=ISO 8859-2
 highlight=LaTeX
 line=29
-open=true
+open=false
 order=6
 
 [item:chap1/chap1.tex]
 archive=true
-column=0
+column=34
 encoding=ISO 8859-2
 highlight=LaTeX
-line=41
-open=true
+line=180
+open=false
 order=9
 
 [item:chap2/chap2.tex]
@@ -39,7 +39,7 @@ column=0
 encoding=ISO 8859-2
 highlight=LaTeX
 line=35
-open=true
+open=false
 order=10
 
 [item:chap2/run.tex]
@@ -48,62 +48,80 @@ column=0
 encoding=ISO 8859-2
 highlight=LaTeX
 line=60
-open=true
+open=false
 order=13
 
 [item:chap2/shell.tex]
 archive=true
-column=3
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=41
-open=true
+line=45
+open=false
 order=12
+
+[item:chap2/userland.tex]
+archive=true
+column=47
+encoding=ISO 8859-2
+highlight=LaTeX
+line=49
+open=false
+order=-1
 
 [item:chap3/bio.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=40
-open=true
+line=156
+open=false
 order=2
 
 [item:chap3/chap3.tex]
 archive=true
-column=16
+column=22
 encoding=ISO 8859-2
 highlight=LaTeX
-line=35
-open=true
+line=50
+open=false
 order=8
 
 [item:chap3/dev.tex]
 archive=true
-column=23
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=31
-open=true
+line=244
+open=false
 order=14
 
 [item:chap3/int.tex]
 archive=true
-column=21
+column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=31
-open=true
+line=103
+open=false
 order=3
 
 [item:chap3/multitask.tex]
 archive=true
-column=0
+column=27
 encoding=ISO 8859-2
 highlight=LaTeX
-line=32
+line=141
+open=true
+order=3
+
+[item:chap3/serv.tex]
+archive=true
+column=55
+encoding=ISO 8859-2
+highlight=LaTeX
+line=54
 open=false
-order=4
+order=-1
 
 [item:chap3/tech.tex]
 archive=true
@@ -111,25 +129,34 @@ column=0
 encoding=ISO 8859-2
 highlight=LaTeX
 line=35
-open=true
+open=false
 order=4
 
-[item:chap3/vfs.tex]
+[item:chap3/tty.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=34
+line=0
 open=true
-order=5
+order=1
+
+[item:chap3/vfs.tex]
+archive=true
+column=74
+encoding=ISO 8859-2
+highlight=LaTeX
+line=129
+open=true
+order=2
 
 [item:chap3/vm.tex]
 archive=true
 column=0
 encoding=ISO 8859-2
 highlight=LaTeX
-line=119
-open=true
+line=162
+open=false
 order=0
 
 [item:handbook.kilepr]
@@ -148,22 +175,22 @@ encoding=ISO 8859-2
 highlight=LaTeX
 line=38
 open=true
-order=1
+order=0
 
 [item:license.tex]
 archive=true
-column=0
+column=21
 encoding=ISO 8859-2
 highlight=LaTeX
-line=38
-open=true
+line=19
+open=false
 order=11
 
 [item:term.tex]
 archive=true
-column=25
+column=63
 encoding=ISO 8859-2
 highlight=LaTeX
-line=0
-open=true
+line=56
+open=false
 order=7

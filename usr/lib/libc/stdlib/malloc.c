@@ -27,6 +27,7 @@ __less_f(const void *x, const void *y)
 void*
 malloc(size_t size)
 {
+    return sbrk(size)-size;
     int ns = size+sizeof(mem_chunk_t);
     char *addr;
     mem_chunk_t *mc,*nc;

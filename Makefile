@@ -14,10 +14,9 @@ PROG_BIN=\
     ps\
     sh\
     tar\
-    test\
-#    truncate\
-#    uname\
-#    vttest
+    truncate\
+    uname\
+    vttest
 
 PROG_SBIN=\
     init\
@@ -30,7 +29,8 @@ DEMOS_BIN=\
     pthdemo3\
     sysvmsg\
     pfault\
-    signal
+    signal\
+    pipedemo
 
 DISTDIRS=\
     output/dist/bin\
@@ -66,7 +66,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
+	#cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
 	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
 	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar
