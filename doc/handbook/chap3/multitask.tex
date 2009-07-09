@@ -75,10 +75,11 @@ wyszczególnijmy kilka faktów, zwi±zanych z~prac± procesora.
 \begin{itemize}
  \item procesor podczas wywo³ywania procedury k³adzie na~stos adres
        aktualnie wykonywanej instrukcji, tak aby po zakoñczeniu procedury
-       móg³ wróciæ do~kodu j± wywo³uj±cego.
+       móg³ wróciæ do~kodu j± wywo³uj±cego, zapisane w ten sposób
+       adresy na~stosie tworz± ,,¶lad wywo³añ''.
  \item stos w procesorze jest definiowany przez adres w~rejestrze
-       \texttt{esp}, a operacje na~stosie pobieraj± i zapisuj± dane
-       z~pod tego
+       \texttt{esp}, a operacje na~stosie pobieraj± i~zapisuj± dane
+       pod tym adresem odpowiednio go modyfikuj±c.
 \end{itemize}
 
 
@@ -97,10 +98,38 @@ Poniewa¿ w~rejestrach procesora s± zapisane adresy lokalizuj±ce stos
 to powy¿sza operacja powoduje ,,podmianê'' aktualnie wykonywanego stosu
 procesora na ten, jaki by³ w momeñcie zapisywania rejestrów drugiego w±tku
 (to znaczy dok³adni wtedy, kiedy planista uruchomi³ \texttt{thread\_switch}
-podczas pracy drugiego w±tku). 
+podczas pracy drugiego w±tku). Poniewa¿ na~stosie jest zapisany ¶lad
+wywo³añ, to po podmianie stosu procesor zachowa siê dok³adnie tak, jak by siê
+zachowa³ wykonuj±c drugi w±tek po~zachowaniu jego rejestrów. Bardzo podobny
+mechanizm istnieje w~jêzyku C w~procedurach \texttt{setjmp} i \texttt{longjmp}.
+Koñcz±c pokolei procedury procesor wróci do~tej, któr± wywo³a³ procesor
+do~obs³ugi przerwania zegara podczas pracy drugiego w±tku, a jej
+zakoñczenie przywróci stan procesora z~zachowanej ramki przerwania,
+zawieraj±cej stan w±tku drugiego. Ta operacja jest prawid³owa poniewa¿
+ramki przerwañ s± zapisywane na~stosach alternatywnych, którs s± dostêpne
+w~przestrzeni j±dra.
 
+Je¿eli drugi w±tek nie mia³ dot±d przydzielonego czasu procesora
+to~procedura zmiany kontekstu nie mia³a okazji zachowaæ jego
+rejestrów w~schowku, a procesor zapisaæ ramkê przerwania na~jego stosie
+alternatywnym. W takim wypadku uruchamiana jest procedura
+\texttt{thread\_resume}, która rêcznie buduje ramkê stosu aby oszukaæ
+procesor ¿e powraca do~obs³ugi zadania, które wcze¶niej wyw³asczy³.
+Jako adres wyw³aszczonej instrukcji jest podawana procedura wej¶ciowa.
+
+W schowku na~rejestry procesora jest zapisywany równie¿ rejestr kontrolny
+procesora \texttt{cr3} zawieraj±cy adres katalogu stron, tak wiêc wczytuj±c
+adresy z~tego schowka nastêpuje równie¿ podmiana wirtualnej przestrzeni
+adresowej u¿ytkownika.
 
 \subsection{Rozwidlanie procesów.}
+
+Jedyn± drog± stworzenia nowego procesu w~systemie UNIX jest rozwidlenie
+istniej±cego procesu. Zgodnie z semantyk± nadan± przez standard nowy proces
+dziedziczy po~rodzicu kopiê jego deskryptorów plików i~przestrzeni adresowej.
+
+Je¿eli w procesie rodzica dzia³a³o wiele w±tków to~nowy zawiera tylko jeden,
+który jest kopi± w±tku zlecaj±cego systemowi zadanie rozwidlenia.
 
 \subsection{Szeregowanie zadañ} \label{SCHEDULER}
 
