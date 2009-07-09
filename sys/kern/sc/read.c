@@ -46,7 +46,7 @@ typedef struct sc_read_args sc_read_args;
 
 struct sc_read_args {
     int fd;
-    addr_t *data;
+    void *data;
     size_t size;
 };
 

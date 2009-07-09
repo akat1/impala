@@ -49,7 +49,7 @@ z~j±dra systemu.
 Niezale¿nie od tego, co kryje siê pod plikiem, od strony u¿ytkownika posiada
 on jednolity interfejs. Najwa¿niejszymi funkcjami wchodz±cymi w jego sk³ad s±:
 \texttt{open}, \texttt{close}, \texttt{read}, \texttt{write}, \texttt{ioctl}
-\texttt{fcntl}, \texttt{fseek} i \texttt{fstat}. Otwarty plik w programie jest
+\texttt{fcntl}, \texttt{lseek} i \texttt{fstat}. Otwarty plik w programie jest
 identyfikowany przy pomocy deskryptora pliku - zazwyczaj ma³ej liczby nieujemnej.
 J±dro systemu posiada zwi±zan± z ka¿dym procesem tabelê, s³u¿±c± do t³umaczenia
 deskryptora pliku na strukturê \texttt{file\_t}. Wiele deskryptorów plików mo¿e
@@ -205,3 +205,8 @@ list\_node\_t  &~L\_mountlist & wêze³ z listy zamontowanych fs\\
 \hline
 \end{tabular}
 \end{center}
+Operacje, mo¿liwe do wykonania na systemie plików to montowanie systemu plików,
+odmontowywanie go, synchronizowanie jego stanu z pamiêci± trwa³±, oraz pobieranie
+v-wêz³a katalogu g³ównego systemu plików.
+
+

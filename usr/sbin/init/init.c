@@ -60,6 +60,7 @@ main(int argc, char **v)
     if (p == 0) {
         execve("/bin/sh", argv, envp);
     }
-    for (;;);
+    for (;;)
+        waitpid(-1, NULL, 0);
     return 0;
 }

@@ -66,7 +66,7 @@ __rec_open(fname, flags, mode, openinfo, dflags)
 	PAGE *h;
 	struct stat sb;
 	int rfd, sverrno;
-
+printf("REC_OPEN\n");
 	/* Open the user's file -- if this fails, we're done. */
 	if (fname != NULL && (rfd = open(fname, flags, mode)) < 0)
 		return (NULL);
@@ -109,6 +109,7 @@ __rec_open(fname, flags, mode, openinfo, dflags)
 	} else
 		t->bt_bval = '\n';
 
+printf("REC_OPEN2\n");
 	F_SET(t, R_RECNO);
 	if (fname == NULL)
 		F_SET(t, R_EOF | R_INMEM);
@@ -194,6 +195,7 @@ slow:			if ((t->bt_rfp = fdopen(rfd, "r")) == NULL)
 	dbp->seq = __rec_seq;
 	dbp->sync = __rec_sync;
 
+	printf("REC_OPEN3\n");
 	/* If the root page was created, reset the flags. */
 	if ((h = mpool_get(t->bt_mp, P_ROOT, 0)) == NULL)
 		goto err;
@@ -212,6 +214,7 @@ slow:			if ((t->bt_rfp = fdopen(rfd, "r")) == NULL)
 
 einval:	errno = EINVAL;
 err:	sverrno = errno;
+	printf("ERRRRROR %i\n", errno);
 	if (dbp != NULL)
 		(void)__bt_close(dbp);
 	if (fname != NULL)

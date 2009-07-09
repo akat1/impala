@@ -277,7 +277,7 @@ fifofs_ioctl(vnode_t *vn, int cmd, uintptr_t arg)
 int
 fifofs_seek(vnode_t *vn, off_t off)
 {
-    return -ENOTSUP;
+    return -ESPIPE;
 }
 
 int
