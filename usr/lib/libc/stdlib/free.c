@@ -6,6 +6,7 @@
 void
 free(void *ptr)
 {
+    return;
     if ( ptr == NULL )
         return;
     mem_chunk_t *mc;

@@ -14,9 +14,12 @@ main(int argc, char **v)
         printf("%s: cannot open file %s\n", v[0], v[1]);
         return -1;
     }
-    int c;
-    while ( (c = fgetc(f)) != -1 ) {
-        printf("%c", c);
+    char buf[1024];
+    int n;
+    while ( (n = fread(buf, 1, 1024-1, f)) > 0 ) {
+        buf[n] = 0;
+        printf("%s", buf);
     }
+    fclose(f);
     return 0;
 }
