@@ -93,7 +93,7 @@ static void bufhash_unlock(void);
 //static void bufhash_putfree_head(iobuf_t *bp);
 void bufhash_putfree_tail(iobuf_t *bp);
 
-static void buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize);
+static int buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize);
 static void buf_ctor(void *x);
 
 static kmem_cache_t *buf_cache;
@@ -222,7 +222,7 @@ buf_ctor(void *x)
     sleepq_init(&bp->sleepq);
 }
 
-void
+int
 buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
 {
     bp->dev = d;
@@ -230,9 +230,11 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
     bp->bcount = bsize/512;
     bp->resid = bsize;
     // rozmiar bufora siê zgadza, no to po robocie.
-    if (bp->size == bsize) return;
+    if (bp->size == bsize) return 0;
     UNSET(bp->flags, BIO_DONE|BIO_ERROR);
     void *a = kmem_alloc(bsize, KM_SLEEP);
+    if(!a)
+        return -1;
     // zmieniamy bufor, zachowuj±c czê¶c danych.
     if (bp->addr && bp->size < bsize) {
         mem_cpy(a, bp->addr, bp->size);
@@ -247,6 +249,7 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
     bp->addr = a;
     bp->size = bsize;
 //     ssleep(1);
+    return 0;
 }
 
 #if 0
@@ -271,26 +274,30 @@ bio_getblk(devd_t *d, blkno_t n, size_t bsize)
     while ( (bp = bufhash_find(d,n)) ) {
         if ( ISSET(bp->flags, BIO_BUSY) ) {
             bufhash_unlock();
+            splx(s);
             SLEEPQ_WAIT(&bp->sleepq, "getblk");
             bufhash_lock();
+            s = splbio();
             continue;
         }
         bufhash_remove(bp);
         bufhash_remfree(bp);
         break;
     }
-
+    splx(s); //test
     if (!bp) {
         bp = bufhash_getfree();
     }
     SET(bp->flags, BIO_BUSY);
-    buf_alloc(bp, d, n, bsize);
+    if(buf_alloc(bp, d, n, bsize));
+        //OOPS..
+        
     bufhash_insert(bp);
     bufhash_unlock();
     // tymczasowo dorzucam ~BIO_VALID tutaj
     // z powodu jednego b³êdu w obs³udze FATFS :)
     UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
-    splx(s);
+
     return bp;
 }
 

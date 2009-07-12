@@ -124,8 +124,6 @@ thread_create(int type, addr_t entry, addr_t arg)
 //na potrzeby zamkniêcia ostatniego w±tku procesu który robi exec
 void thread_exit_last(thread_t *t)
 {
-//     int x = splbio();     // <- kmem u¿ywa blokad, wiêc zmiana SPL
-                             // jest ryzykowna
     t->thr_flags |= THREAD_ZOMBIE;
     if (t->thr_joiner) {
         sleepq_wakeup(t->thr_joiner);
@@ -136,7 +134,6 @@ void thread_exit_last(thread_t *t)
     kmem_cache_free(thread_cache, t);
     //ta procedura nie wymaga ju¿ poprawnej zawarto¶ci struktury t
     sched_exit_2(t); 
-//     splx(x);
     panic("thread_exit_last() - should not be here");
 }
 
@@ -210,6 +207,7 @@ void
 mutex_lock(mutex_t *m, const char *file, const char *func, int line,
     const char *descr)
 {
+//    KASSERT(CIPL==0);
     if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
     } else {

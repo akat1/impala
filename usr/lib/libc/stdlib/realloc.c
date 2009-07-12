@@ -31,7 +31,7 @@ realloc(void *ptr, size_t size)
         errno = ENOMEM;
         return NULL;
     }
-    memcpy(naddr, ptr, oldsize);
+    memmove(naddr, ptr, oldsize);
     free(ptr);
     return naddr;
 }

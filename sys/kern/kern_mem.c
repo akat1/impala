@@ -304,7 +304,10 @@ kmem_cache_destroy(kmem_cache_t *cache)
 void *
 kmem_cache_alloc(kmem_cache_t *cache, int flags)
 {
-    MUTEX_LOCK(&cache->mtx, "kmem");
+    if(flags == KM_SLEEP)
+        MUTEX_LOCK(&cache->mtx, "kmem");
+    else if(!mutex_trylock(&cache->mtx))
+        return NULL;
     kmem_slab_t *slab = get_slab_from_cache(cache);
     kmem_bufctl_t *bufctl = reserve_bufctl(cache, slab);
     mutex_unlock(&cache->mtx);

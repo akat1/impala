@@ -14,17 +14,18 @@ PROG_BIN=\
     ps\
     sh\
     tar\
-    truncate\
-    uname\
-    sleep\
-    vttest
+#    truncate\
+    #uname\
+#    sleep\
+#    vttest
 
 PROG_SBIN=\
     init\
     login\
     ttyvrun
 
-DEMOS_BIN=\
+DEMOS_BIN=
+A=\
     pthdemo1\
     pthdemo2\
     pthdemo3\
@@ -67,7 +68,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/bin/tar/tar ${SPECDIR}/tar
 	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	#cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
+	cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
 	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
 	cd output/dist && tar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar

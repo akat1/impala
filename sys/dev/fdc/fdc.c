@@ -603,7 +603,7 @@ fdc_init(void)
     fddrive[1].unit = 1;
     fddrive[1].ctrl = &fdctrl;
     fddrive[1].name = 'B';
-
+///@bug proszê o weryfikacjê tego if-a
     if (!fddrive[0].spec->name && !fddrive[0].spec->name) {
         DEBUGF("detected floppys are not supported by fdc driver A:%u B:%u",
             probe >> 4, probe & 0xf);

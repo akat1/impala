@@ -376,7 +376,7 @@ void sched_exit_2(thread_t *t)
         int old = splsoftclock();
         KASSERT(old <= IPL_SOFTCLOCK);
         __sched_yield();
-        spl0();
+        panic("sched_exit: shouldnt be here!");
     } else {
         spinlock_unlock(&sprq);
     }
@@ -445,11 +445,11 @@ sleepq_init(sleepq_t *q)
 void
 sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d)
 {
-    splsoftclock();
+    int s = splsoftclock();
     //int s = splhigh();
     list_insert_tail(&q->sq_waiting, curthread);
     curthread->thr_sleepq = q;
-    UNSET(curthread->thr_flags,THREAD_INTRPT);
+    UNSET(curthread->thr_flags, THREAD_INTRPT);
     SET(curthread->thr_flags, THREAD_SLEEPQ);
 //    spinlock_lock(&sprq);
 //    splx(s);
@@ -459,6 +459,7 @@ sleepq_wait(sleepq_t *q, const char *fl, const char *fn, int l, const char *d)
 //    SET(curthread->thr_flags,THREAD_SLEEP|THREAD_SLEEPQ);
 //    splx(s);
     sched_wait(fl, fn, l, d);
+    splx(s);
 }
 
 void
@@ -479,6 +480,10 @@ sleepq_intrpt(thread_t *t)
 {
     int s = splhigh();
     sleepq_t *q = t->thr_sleepq;
+    if(!t->thr_sleepq) {
+        splx(s);
+        return;
+    }
     UNSET(t->thr_flags, THREAD_SLEEPQ);
     SET(t->thr_flags, THREAD_INTRPT);
     _sched_wakeup(t);

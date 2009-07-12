@@ -19,11 +19,11 @@
 #define BASE(X)         ((char *)base + size*(X))
 
 void *
-binary_search(const void *key, void *base, size_t size, 
+binary_search(const void *key, const void *base, size_t size, 
         int (*compar)(const void *, const void *),int lo, int hi);
 
 void *
-binary_search(const void *key, void *base, size_t size, 
+binary_search(const void *key, const void *base, size_t size, 
         int (*compar)(const void *, const void *),int lo, int hi)
 {
     int mid = (lo+hi)/2;
@@ -47,7 +47,7 @@ binary_search(const void *key, void *base, size_t size,
 
 
 void *
-bsearch(const void *key, void *base, size_t nmemb, size_t size,
+bsearch(const void *key, const void *base, size_t nmemb, size_t size,
                 int (*compar)(const void *, const void *))
 {
     return binary_search(key, base, size, compar, 0, nmemb-1); 
