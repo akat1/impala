@@ -63,7 +63,9 @@ mfs_node_t*
 _alloc_node()
 {
     mfs_node_t *n = kmem_zalloc(sizeof(mfs_node_t), KM_SLEEP);
+    mutex_init(&n->nlist_mutex, MUTEX_NORMAL);
     n->vnode = NULL;
+    n->nlink = 1;
     return n;
 }
 

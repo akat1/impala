@@ -53,10 +53,8 @@ errno_t
 sc_lseek(thread_t *p, syscall_result_t *r, lseek_args *args)
 {
     file_t *f = f_get(p->thr_proc->p_fd, args->fd);
-
-    if ( f == NULL )
+    if (!f)
         return -EBADF;
-
     int res = f_seek(f, args->offset, args->whence);
     frele(f);
     if(res < 0)

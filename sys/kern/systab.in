@@ -8,7 +8,6 @@ SYS chmod
 SYS chown
 SYS fcntl
 SYS fork
-SYS fseek
 SYS fstat
 SYS fsync
 SYS ftell

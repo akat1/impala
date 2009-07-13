@@ -110,11 +110,10 @@ f_seek(file_t *f, off_t o, int whence)
         default:
             return -EINVAL;
     }
-    int res = VOP_SEEK(f->f_vnode, f->f_offset);
-    if(!res)
-        return 0;
+    if(!VOP_SEEK(f->f_vnode, f->f_offset)) //is this offset OK?
+        return f->f_offset; //Yes, it is
     f->f_offset = oldoff;
-    return res;
+    return f->f_offset;
 }
 
 int

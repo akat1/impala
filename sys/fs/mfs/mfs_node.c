@@ -116,7 +116,6 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
         return -ENOMEM;
     node->name = str_dup(name);
     node->size = attr->va_size;
-    node->mfs = pnode->mfs;
     node->alloc_size = 0;
     node->type = VNODE_TO_MFS_TYPE(attr->va_type);
     node->attr = attr->va_mode;
@@ -124,12 +123,16 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     node->mtime = node->atime = node->ctime = curtime;
     if(node->data == NULL)
         node->size = 0;
+    MUTEX_LOCK(&pnode->nlist_mutex, "mfs_nodecreate");
+    node->mfs = pnode->mfs;
     node->parent = pnode;
     node->child = NULL;
     node->next = pnode->child;
     pnode->child = node;
     LIST_CREATE(&node->blks, mfs_blk_t, L_blks, FALSE);
-    return _get_vnode(node, vpp, vn->v_vfs);
+    int res = _get_vnode(node, vpp, vn->v_vfs);
+    mutex_unlock(&pnode->nlist_mutex);
+    return res;
 }
 
 
@@ -317,15 +320,27 @@ mfs_inactive(vnode_t *vn)
 {
     mfs_node_t *n = vn->v_private;
     n->vnode = NULL;
+    if(n->nlink <= 0) {
+        // nie istnieje ju¿ ¿adne odwo³anie do tego wêz³a.
+        // pora siê go pozbyæ.
+        mfs_blk_set_area(n, 0); //wywalamy bloki
+        if(n->name)
+            kmem_free(n->name);
+        if(n->data)
+            kmem_free(n->data);
+        kmem_free(n);
+    }
     return 0;
 }
 
 int
 mfs_unlink(vnode_t *vn, char *name)
 {
+    int err = -ENOENT;
     mfs_node_t *p = vn->v_private;
     if(vn->v_type != VNODE_TYPE_DIR)
         return -ENOTDIR;
+    MUTEX_LOCK(&p->nlist_mutex, "mfs_unlink");
     mfs_node_t *node = p->child;
     mfs_node_t *prev = NULL;
     while(node) {
@@ -334,12 +349,15 @@ mfs_unlink(vnode_t *vn, char *name)
                 prev->next = node->next;
             else
                 p->child = node->next;
-            return 0;
+            node->nlink--;
+            err = 0;
+            break;
         }
         prev = node;
         node = node->next;
     }
-    return -ENOENT;
+    mutex_unlock(&p->nlist_mutex);
+    return err;
 }
 
 int
@@ -370,15 +388,17 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
         _get_vnode(en, vpp, vn->v_vfs);
         return 0;
     }
-    en = en->child;
-    while(en) {
-        if(!pc_cmp(path, en->name))
+    MUTEX_LOCK(&en->nlist_mutex, "mfs_lookup");
+    mfs_node_t *ch = en->child;
+    while(ch) {
+        if(!pc_cmp(path, ch->name))
             break;
-        en = en->next;
+        ch = ch->next;
     }
-    if(en) {
-        path->now+=str_len(en->name);
-        _get_vnode(en, vpp, vn->v_vfs);
+    mutex_unlock(&en->nlist_mutex);
+    if(ch) {
+        path->now+=str_len(ch->name);
+        _get_vnode(ch, vpp, vn->v_vfs);
         return 0;
     }
     return -ENOENT;
@@ -391,18 +411,20 @@ mfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
         return -ENOTDIR;
     count /= sizeof(dirent_t);
     mfs_node_t *node = vn->v_private;
-    node = node->child;
+    MUTEX_LOCK(&node->nlist_mutex, "mfs_getdents");
+    mfs_node_t *ch = node->child;
     int bcount = 0;
-    while(node && first-- > 0)
-        node = node->next;
-    while(node && count>0) {
-        dents->d_ino = (int)node;
-        str_cpy(dents->d_name, node->name);
+    while(ch && first-- > 0)
+        ch = ch->next;
+    while(ch && count>0) {
+        dents->d_ino = (int)ch;
+        str_cpy(dents->d_name, ch->name);
         dents++;
         count--;
-        node = node->next;
+        ch = ch->next;
         bcount += sizeof(dirent_t);
     }
+    mutex_unlock(&node->nlist_mutex);
     return bcount;
 }
 

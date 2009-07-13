@@ -26,7 +26,7 @@ fseek(FILE *stream, long offset, int whence)
         return -1;
     }
     fflush(stream);
-    int res = syscall(SYS_fseek, stream->fd, offset, whence);
+    int res = syscall(SYS_lseek, stream->fd, offset, whence);
     UNSET(stream->err, _FER_EOF);
     return res;
 }

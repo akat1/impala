@@ -24,29 +24,29 @@ const char * const sys_siglist[NSIG] = {
 "SIGILL",
 "SIGTRAP", /* 5 */
 "SIGABRT",
-"SIGIOT",
 "SIGBUS",
 "SIGFPE",
-"SIGKILL", /* 10 */
-"SIGUSR10",
+"SIGKILL",
+"SIGUSR10", /* 10 */
 "SIGSEGV",
 "SIGUSR2",
 "SIGPIPE",
-"SIGALRM", /* 15 */
-"SIGTERM",
+"SIGALRM",
+"SIGTERM", /* 15 */
 "SIGSTKFLT",
 "SIGCHLD",
 "SIGCONT",
-"SIGSTOP", /* 20 */
-"SIGTSTP0",
+"SIGSTOP",
+"SIGTSTP0", /* 20 */
 "SIGTTIN",
 "SIGTTOU",
 "SIGURG",
-"SIGXCPU", /* 25 */
-"SIGXFSZ",
+"SIGXCPU",
+"SIGXFSZ", /* 25 */
 "SIGVTALRM",
 "SIGPROF",
 "SIGWINCH",
+"SIGUNUSED",
 "SIGUNUSED", /* 30 */
 "SIGUNUSED"
 };

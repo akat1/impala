@@ -107,7 +107,7 @@ __enqueue_keycode(int kc)
     else {
         char *x = keymap_string[kc-128];
         if(x) {
-            cons_input_char(0233);
+            cons_input_string("\033O");
             cons_input_string(x);
         }
         return;

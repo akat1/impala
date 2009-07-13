@@ -23,6 +23,10 @@ struct mfs_node {
     timespec_t      mtime;   ///< czas ostatniej modyfikacji
     timespec_t      ctime;   ///< czas utworzenia pliku
     list_t          blks;
+    int             nlink;   ///< ilo¶æ dowi±zañ... obecnie 0 lub 1
+    /// nlist_mutex zabezpiecza listê dzieci tego wêz³a. Ka¿dy dostêp do niej
+    /// powinien odbywaæ siê z zamkiêtym mutexem.
+    mutex_t         nlist_mutex;
 };
 
 struct mfs_blk {
