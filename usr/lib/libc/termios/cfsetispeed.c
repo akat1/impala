@@ -10,14 +10,14 @@
  * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
- * $Id$
- */ 
+ * $Id: cfgetospeed.c 625 2009-07-09 10:17:32Z takeshi $
+ */
 #include <sys/types.h>
 #include <termios.h>
 
-
-speed_t
-cfgetospeed(const struct termios *termios_p)
+int
+cfsetispeed(struct termios *termios_p, speed_t speed)
 {
-    return termios_p->c_ospeed;
+    termios_p->c_ispeed = speed;
+    return 0;
 }

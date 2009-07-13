@@ -11,7 +11,7 @@
  * wraz z projektem.
  *
  * $Id$
- */ 
+ */
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -19,7 +19,7 @@
 #include "libc_syscall.h"
 
 int
-execl(const char *path, const char *arg, ...)
+execlp(const char *path, const char *arg, ...)
 {
     const int MAX_ARGS = 128;
     char *argv[MAX_ARGS];
@@ -31,7 +31,7 @@ execl(const char *path, const char *arg, ...)
             break;
     }
     va_end(va);
-    return execve(path, argv, environ); //environ przekazujemy?
+    return execvp(path, argv);
 }
 
 

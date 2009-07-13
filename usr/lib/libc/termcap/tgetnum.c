@@ -23,6 +23,12 @@
 #define ERR 0
 #define TC_ITEMS_MAX 256
 
+char PC;
+char * UP;
+char * BC;
+short ospeed;
+
+
 static char *_termdesc[TC_ITEMS_MAX] = {NULL, };
 static void _tgetent(char *data);
 

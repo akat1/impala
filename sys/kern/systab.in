@@ -6,6 +6,7 @@ SYS execve
 SYS exit
 SYS chmod
 SYS chown
+SYS fchmod
 SYS fcntl
 SYS fork
 SYS fstat

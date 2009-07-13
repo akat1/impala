@@ -25,10 +25,10 @@ int tcsetattr(int fd, int optional_actions,
 // int tcflush(int fd, int queue_selector);
 // int tcflow(int fd, int action);
 void cfmakeraw(struct termios *termios_p);
-// speed_t cfgetispeed(const struct termios *termios_p);
+speed_t cfgetispeed(const struct termios *termios_p);
 speed_t cfgetospeed(const struct termios *termios_p);
-// int cfsetispeed(struct termios *termios_p, speed_t speed);
-// int cfsetospeed(struct termios *termios_p, speed_t speed);
+int cfsetispeed(struct termios *termios_p, speed_t speed);
+int cfsetospeed(struct termios *termios_p, speed_t speed);
 // int cfsetspeed(struct termios *termios_p, speed_t speed);
 
 

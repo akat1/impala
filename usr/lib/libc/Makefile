@@ -104,6 +104,7 @@ SRCS=\
     signal/sigprocmask.c\
     signal/raise.c\
     sys/chmod.c\
+    sys/fchmod.c\
     sys/sched_yield.c\
     sys/sys_siglist.c\
     sys/getprocinfo.c\
@@ -119,7 +120,10 @@ SRCS=\
     sysvipc/msgsnd.c\
     termcap/tgetnum.c\
     termios/cfgetospeed.c\
+    termios/cfgetispeed.c\
     termios/cfmakeraw.c\
+    termios/cfsetispeed.c\
+    termios/cfsetospeed.c\
     termios/tcgetattr.c\
     termios/tcsetattr.c\
     thr/thr_cancel.c\
@@ -149,7 +153,9 @@ SRCS=\
     unistd/dup2.c\
     unistd/eaccess.c\
     unistd/execl.c\
+    unistd/execlp.c\
     unistd/execve.c\
+    unistd/execvp.c\
     unistd/fstat.c\
     unistd/getdents.c\
     unistd/ioctl.c\
