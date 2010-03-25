@@ -13,7 +13,7 @@ work() {
     fi
     if [ -e gensystab.awk ]
     then
-	./gensystab.awk < systab.in
+		awk -f gensystab.awk < systab.in
         touch -am systab.in
     fi
 }
