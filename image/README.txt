@@ -1,6 +1,6 @@
 # $Id$
 
-* Impala operating system
+* Impala Operating System
 
 This medium contains Impala operating system.
 
