@@ -37,10 +37,9 @@
 #ifdef __KERNEL
 
 /*
-   Moze byc uzyteczne:
-   @bug: posprzataj mnie
-   http://fxr.watson.org/fxr/source/drivers/libpci/pci_table.c?v=minix-3-1-1
-*/
+ * Mostly based on MINIX pci tables:
+ * http://fxr.watson.org/fxr/source/drivers/libpci/pci_table.c?v=minix-3-1-1
+ */
 
 #define MAX_PCI_DEV		20
 
@@ -53,7 +52,7 @@ struct pci_device {
 	struct pci_device_info *device_info;
 	struct pci_vendor_info *vendor_info;
 	struct pci_subclass *baseclass;
-	/* dodac sub/infclass */
+	/* add sub/infclass */
 	uint8_t	bus;
 	uint8_t device;
 	uint8_t func;
@@ -90,7 +89,6 @@ struct pci_device_info pci_devices_table[] =
 	{0x0000, 0x0000, "Unknown device"}
 };
 
-/* Producenci */
 struct pci_vendor_info pci_vendors_table[] =
 {
 	{0x8086, "Intel"},
@@ -99,7 +97,7 @@ struct pci_vendor_info pci_vendors_table[] =
 	{0x0000, "Unknown vendor"}
 };
 
-/* Baseclass - bazujacy na:
+/* Baseclass based on:
  * http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.1.html
  */
 struct pci_baseclass pci_baseclasses[] =
