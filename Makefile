@@ -85,8 +85,11 @@ commit:
 	fi
 
 update:
-	svn log -r BASE:HEAD > CHANGES
-	svn update && cat CHANGES
+	svn update
+	svn log -r BASE:HEAD
+
+log:
+	svn log -r BASE:HEAD
 
 install_sdk:
 	ln -sf ${IMPALA_SRCROOT}/sys/sys usr/lib/libc/include/

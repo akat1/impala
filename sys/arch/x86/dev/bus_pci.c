@@ -153,6 +153,9 @@ _pci_register_device(uint8_t bus, uint8_t device, uint8_t func)
         return FALSE;
 
 
+    if ( pci_dev_nr >= MAX_PCI_DEV )
+        panic("Too many PCI devices...");
+
     pci_dev[pci_dev_nr].bus = bus;
     pci_dev[pci_dev_nr].device = device;
     pci_dev[pci_dev_nr].func = func;
@@ -179,19 +182,12 @@ bus_pci_init()
     uint16_t vendor;
     int bus, dev, func;
 
-    bus = 4;
-    device = pci_read_16(0,0,0,DEVICE_ID);
-    vendor = pci_read_16(0,0,0,VENDOR_ID);
-
-    if ( device == (uint16_t)PCI_UNKNOWN && vendor == (uint16_t)PCI_UNKNOWN )
-        /* Nie znalezlismy kontrolera PCI */
+    if ( _pci_probe_device(0,0,0) )
+        /* PCI controller not found */
         return;
 
-    kprintf("PCI controller: %s\n", 
-            (pci_device_info(vendor,device))->device_name);
-
-
     // @bug, BUS==0?
+    // Register all devices
     for ( bus = 0 ; bus < 256 ; bus++ ) {
         for ( dev = 0 ; dev < 32 ; dev++ ) {
             for ( func = 0 ; func < 8 ; func++ ) {
@@ -205,9 +201,7 @@ bus_pci_init()
         kprintf("v: %x d: %x i: %s\n", pci_dev[dev].vendor_id,
                 pci_dev[dev].device_id, pci_dev[dev].device_info->device_name);
     }
-
-    for(;;);
-
+    
     return;
 }
 
