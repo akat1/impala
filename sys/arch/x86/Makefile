@@ -10,6 +10,7 @@ SRCS=\
 	arch/memory.c\
 	arch/thread.c\
 	dev/bus_isa.c\
+	dev/bus_pci.c\
 	dev/i8254.c\
 	dev/i8259a.c\
 	dev/pckbd.c\

@@ -46,6 +46,7 @@
 #include <machine/pckbd.h>
 #include <machine/video.h>
 #include <machine/bus/isa.h>
+#include <machine/bus/pci.h>
 
 void kmain(void);
 void init_x86(const char *);
@@ -237,6 +238,7 @@ init_x86(const char *karg)
     vm_low_init();
     video_init();
     bus_isa_init();
+	bus_pci_init();
     irq_enable();
     _cpu_info();
 
