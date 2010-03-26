@@ -51,11 +51,12 @@ struct pci_controller {
 struct pci_device {
 	struct pci_device_info *device_info;
 	struct pci_vendor_info *vendor_info;
-	struct pci_subclass *baseclass;
+	struct pci_baseclass_info *baseclass_info;
 	/* add sub/infclass */
 	uint8_t	bus;
 	uint8_t device;
 	uint8_t func;
+	uint8_t baseclass;
 	uint16_t vendor_id;
 	uint16_t device_id;
 } pci_dev[MAX_PCI_DEV];
@@ -73,15 +74,20 @@ struct pci_vendor_info {
 	char*		vendor_name;
 };
 
-struct pci_baseclass {
+struct pci_baseclass_info {
 	uint8_t		baseclass;
 	char		*baseclass_name;
 };
 
+/* @bug
+ * Only qemu hardware is listed here, feel free to extend this list.
+ *                                     -shm
+ */
+
 struct pci_device_info pci_devices_table[] =
 {
 	{0x8086, 0x1237, "Intel 82441FX (440FX)"},
-	{0x8086, 0x7000, "Intel 82371SB"},
+	{0x8086, 0x7000, "Intel 82371SB (ISA)"},
 	{0x8086, 0x7010, "Intel 82371SB (IDE)"},
 	{0x8086, 0x7113, "Intel 82371AB (Power)"},
 	{0x1013, 0x00B8, "Cirrus Logic GD 5446"},
@@ -100,7 +106,7 @@ struct pci_vendor_info pci_vendors_table[] =
 /* Baseclass based on:
  * http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.1.html
  */
-struct pci_baseclass pci_baseclasses[] =
+struct pci_baseclass_info pci_baseclasses[] =
 {
 	{0x00, "No class"},
 	{0x01, "Mass storage"},

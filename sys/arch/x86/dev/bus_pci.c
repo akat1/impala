@@ -31,14 +31,25 @@
  */
 
 /*
- * Tested on QEMU, for now we're supporting only INTEL controller.
- * KMWTW. 
+ * Tested on QEMU, for now we're supporting only INTEL controller. KMDzTDz (Komu
+ * ma dzialac temu dziala).
  *                                  - shm
  * 
- * Please take a look on in order to getting more information:
- * http://wiki.osdev.org/PCI
- * http://fxr.watson.org/fxr/source/drivers/libpci/?v=minix-3-1-1
- * http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.0.html
+ * @TODO:
+ * - memory allocation for both PCI memory and PCI I/O
+ * - fix PCI interface
+ * - add more controllers
+ * - support more devices
+ * - implement pci-pci bridge support (as i understand PCI for now QEMU don't
+ *   need it), it's needed to run on real machine
+ * 
+ * Following resources was used:
+ * http://wiki.osdev.org/PCI - briefly PCI descritpion
+ * http://tldp.org/LDP/tlk/dd/pci.html - description how PCI is handled in Linux
+ * http://fxr.watson.org/fxr/source/drivers/libpci/?v=minix-3-1-1 - minix PCI
+ * driver
+ * http://fxr.watson.org/fxr/source/pc/pci.c?v=PLAN9 - Plan9 PCI driver
+ * http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.0.html - useful tables
  */ 
 
 #include <sys/types.h>
@@ -56,12 +67,19 @@ uint32_t _pci_read(uint32_t bus, uint32_t device,
 bool _pci_register_device(uint8_t bus, uint8_t device, uint8_t func);
 struct pci_vendor_info *pci_vendor_info(uint16_t vendor_id);
 bool _pci_probe_device(uint8_t bus, uint8_t device, uint8_t func);
+struct pci_device_info * pci_device_info(uint16_t vendor_id, 
+        uint16_t device_id);
+struct pci_baseclass_info * pci_baseclass_info(uint8_t baseclass);
 
 uint32_t
 _pci_config_address(uint32_t bus, uint32_t device, uint32_t func, uint32_t reg)
 {
-    return ( 1 << ENABLE | (bus<<BUS) | (device<<DEVICE) | (func<<FUNCTION) | 
-            ( reg << REGISTER ) );
+    /* @bug: add bit masks for each piece */
+    return ( 1 << ENABLE | 
+            (bus<<BUS) | 
+            (device<<DEVICE) | 
+            (func<<FUNCTION) | 
+            ( (reg>>2) << REGISTER ) );
 }
 
 uint32_t
@@ -100,8 +118,7 @@ pci_read_32(uint32_t bus, uint32_t device, uint32_t func, uint32_t reg)
     return _pci_read(bus, device, func, PCI_REGISTER(reg));
 }
 
-struct pci_device_info *
-pci_device_info(uint16_t vendor_id, uint16_t device_id);
+
 
 struct pci_device_info *
 pci_device_info(uint16_t vendor_id, uint16_t device_id)
@@ -117,7 +134,7 @@ pci_device_info(uint16_t vendor_id, uint16_t device_id)
     }
 
     /* NOT REACHABLE */
-    KASSERT(0);
+    panic("NOT REACHABLE");
     return NULL;
 }
 
@@ -133,10 +150,26 @@ pci_vendor_info(uint16_t vendor_id)
     }
 
     /* NOT REACHABLE */
-    KASSERT(0);
+    panic("NOT REACHABLE");
     return NULL;
 };
 
+struct pci_baseclass_info *
+pci_baseclass_info(uint8_t baseclass)
+{
+    int i;
+
+    for ( i = 0 ;; i++ ) {
+        if ( pci_baseclasses[i].baseclass == baseclass )
+            return &pci_baseclasses[i];
+        if ( pci_baseclasses[i].baseclass == 0xFF )
+            panic("PCI device unknown baseclass: %x!", baseclass);
+    }
+
+    /* NOT REACHED */
+    panic("NOT REACHED");
+    return NULL;
+}
 
 bool
 _pci_probe_device(uint8_t bus, uint8_t device, uint8_t func)
@@ -156,19 +189,23 @@ _pci_register_device(uint8_t bus, uint8_t device, uint8_t func)
     if ( pci_dev_nr >= MAX_PCI_DEV )
         panic("Too many PCI devices...");
 
+    /* register device in pci_dev table */
     pci_dev[pci_dev_nr].bus = bus;
     pci_dev[pci_dev_nr].device = device;
     pci_dev[pci_dev_nr].func = func;
     pci_dev[pci_dev_nr].vendor_id = 
         pci_read_16(bus, device, func, VENDOR_ID);
-    pci_dev[pci_dev_nr].device_id = 
+    pci_dev[pci_dev_nr].device_id =  
         pci_read_16(bus, device, func, DEVICE_ID);
+    pci_dev[pci_dev_nr].baseclass =
+        pci_read_8(bus, device, func, CLASS_CODE);
     pci_dev[pci_dev_nr].device_info = 
         pci_device_info(pci_dev[pci_dev_nr].vendor_id,  
                 pci_dev[pci_dev_nr].device_id);
-
     pci_dev[pci_dev_nr].vendor_info =
         pci_vendor_info(pci_dev[pci_dev_nr].vendor_id);
+    pci_dev[pci_dev_nr].baseclass_info =
+        pci_baseclass_info(pci_dev[pci_dev_nr].baseclass);
 
     pci_dev_nr++;
 
@@ -178,12 +215,10 @@ _pci_register_device(uint8_t bus, uint8_t device, uint8_t func)
 void
 bus_pci_init()
 {
-    uint16_t device;
-    uint16_t vendor;
-    int bus, dev, func;
+    int bus, dev, func, i;
 
-    if ( _pci_probe_device(0,0,0) )
-        /* PCI controller not found */
+    if ( ! _pci_probe_device(0,0,0) )
+        /* No PCI controller found, exiting */
         return;
 
     // @bug, BUS==0?
@@ -198,14 +233,27 @@ bus_pci_init()
     }
 
     for ( dev = 0 ; dev < pci_dev_nr ; dev++ ) {
-        kprintf("v: %x d: %x i: %s\n", pci_dev[dev].vendor_id,
-                pci_dev[dev].device_id, pci_dev[dev].device_info->device_name);
+        kprintf("v: %x d: %x i: %s bdf: %x:%x:%x c: %s\n", pci_dev[dev].vendor_id,
+                pci_dev[dev].device_id, pci_dev[dev].device_info->device_name,
+                pci_dev[dev].bus, pci_dev[dev].device, pci_dev[dev].func,
+                pci_dev[dev].baseclass_info->baseclass_name);
+        /* PRINT BARS */
+        for ( i = 0 ; i < 6 ; i++ )
+        {
+            kprintf("%x|",pci_read_32(pci_dev[dev].bus,
+                        pci_dev[dev].device, pci_dev[dev].func, BAR0+i*4));
+        }
+        kprintf("\n");
     }
-    
+   
+    // @bug: handle irq
+    // ...
+    // for(;;);
+
     return;
 }
 
 /*
 shm's editor
-vim:tw=80:expandtab:fileencoding=iso-8859-2
+vim:tw=80:expandtab
 */

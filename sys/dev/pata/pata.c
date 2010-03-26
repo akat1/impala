@@ -30,3 +30,12 @@
  * $Id$
  */
 
+#include <dev/pata/pata.h>
+
+/*
+ * I'm not sure if pata is right name.
+ * ...
+ * Reading material:
+ * http://suif.stanford.edu/~csapuntz/specs/idems100.ps
+ */
+

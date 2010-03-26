@@ -34,5 +34,18 @@
 #define __DEV_PATA_PATA_H
 #ifdef __KERNEL
 
+enum {
+	COMMAND = 0x00,
+	STAUS	= 0x02,
+	PRDT_BASE = 0x04
+};
+
+enum {
+	READ_DMA_LBA28 = 0xC8,
+	READ_DMA_LBA48 = 0x25,
+	WRITE_DMA_LBA28 = 0xCA,
+	WRITE_DMA_LBA48 = 0x35
+};
+
 #endif
 #endif
