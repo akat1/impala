@@ -92,7 +92,7 @@ struct pci_device_info pci_devices_table[] =
 	{0x8086, 0x7113, "Intel 82371AB (Power)"},
 	{0x1013, 0x00B8, "Cirrus Logic GD 5446"},
 	{0x10EC, 0x8139, "Realtek RTL8139" },
-	{0x0000, 0x0000, "Unknown device"}
+	{0xFFFF, 0xFFFF, "Unknown device"}
 };
 
 struct pci_vendor_info pci_vendors_table[] =
@@ -100,7 +100,7 @@ struct pci_vendor_info pci_vendors_table[] =
 	{0x8086, "Intel"},
 	{0x1013, "Cirrus Logic" },
 	{0x10EC, "Realtek" },
-	{0x0000, "Unknown vendor"}
+	{0xFFFF, "Unknown vendor"}
 };
 
 /* Baseclass based on:
