@@ -50,7 +50,7 @@ sc_sbrk(thread_t *t, syscall_result_t *r, sbrk_args_t *args)
         uintptr_t last_byte = p->p_brk_addr-1;
 //        KASSERT(PAGE_ROUND(oldbrk) == p->vm_space->seg_data->end);
         if(PAGE_OF_ADDR(last_byte) != PAGE_OF_ADDR(last_byte+args->diff)) {
-            //musimy alokowaæ
+            //musimy alokowaÄ‡
             uintptr_t allocbeg;
             uintptr_t need = args->diff - (PAGE_ROUND(oldbrk)-oldbrk);
             vm_seg_alloc(t->vm_space->seg_data, need, &allocbeg);

@@ -30,9 +30,9 @@
  * $Id$
  */
 
-/** @file implementacja ogólnych list.
+/** @file implementacja ogÃ³lnych list.
  *
- * Ogólna obs³uga list, wzorowana na systemie Solaris.
+ * OgÃ³lna obsÅ‚uga list, wzorowana na systemie Solaris.
  */
 
 #ifndef __SYS_LIST_H
@@ -45,7 +45,7 @@
 
 /// lista
 typedef struct list list_t;
-/// wêze³
+/// wÄ™zeÅ‚
 typedef struct list_node list_node_t;
 /// predykat binarny x < y
 typedef bool list_less_f(const void *x, const void *y);
@@ -54,13 +54,13 @@ typedef bool list_pred_f(const void *x, uintptr_t arg);
 
 struct list_node {
     void     *prev;             ///< poprzedni element
-    void     *next;             ///< nastêpny element
+    void     *next;             ///< nastÄ™pny element
 };
 
 struct list {
-    uintptr_t   ls_offset;      ///< przesuniêcie wêz³a w elementach
-    list_node_t ls_root;        ///< korzeñ
-    size_t      ls_length;      ///< ilo¶c elementów
+    uintptr_t   ls_offset;      ///< przesuniÄ™cie wÄ™zÅ‚a w elementach
+    list_node_t ls_root;        ///< korzeÅ„
+    size_t      ls_length;      ///< iloÅ›c elementÃ³w
     bool        ls_cyclic;      ///< czy cykliczna
 };
 
@@ -255,7 +255,7 @@ list_insert_before(list_t *ls, void *xs, void *x)
 #define list_insert_in_order(ls, elem, is_less)\
     _list_insert_in_order(ls, elem, (list_less_f*) is_less)
 
-// Nie u¿ywaæ przy listach cyklicznych!
+// Nie uÅ¼ywaÄ‡ przy listach cyklicznych!
 static inline void
 _list_insert_in_order(list_t *ls, void *x, list_less_f *is_less)
 {

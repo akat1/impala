@@ -37,7 +37,7 @@ typedef char *va_list;
 
 #define VA_START(ap, s) ap = (char *) &s
 #define VA_END(ap)
-///@todo zrobiæ aby by³o co int bajtów.
+///@todo zrobiÄ‡ aby byÅ‚o co int bajtÃ³w.
 #define VA_ARG(ap, type) *(type*)(ap += sizeof(type))
 
 #define aligned(x) __attribute__((aligned(x)))

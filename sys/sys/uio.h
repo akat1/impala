@@ -35,8 +35,8 @@
 #ifdef __KERNEL
 
 /*
- * Poniewaø iovec jest standardowym typem na UNIXach to istnieje
- * prawdobieÒstwo, øe jaka∂ aplikacja sama sobie zdefiniuje iovec_t.
+ * Poniewa≈º iovec jest standardowym typem na UNIXach to istnieje
+ * prawdobie≈Ñstwo, ≈ºe jaka≈õ aplikacja sama sobie zdefiniuje iovec_t.
  * Zatem nie umieszczamy tego typu w sys/types.h
  *      -- wieczyk
  */
@@ -51,16 +51,16 @@ enum UIO_OPER {
     UIO_WRITE
 };
 
-/// wej∂cie-wyj∂cie
+/// wej≈õcie-wyj≈õcie
 struct uio {
-    iovec_t    *iovs;       ///< tablica buforÛw
-    size_t      iovcnt;     ///< ilo∂c buforÛw w tablicy
-    int         space;      ///< przestrzeÒ UIO_SPACE
+    iovec_t    *iovs;       ///< tablica bufor√≥w
+    size_t      iovcnt;     ///< ilo≈õc bufor√≥w w tablicy
+    int         space;      ///< przestrze≈Ñ UIO_SPACE
     int         oper;       ///< operacja UIO_OPER
     size_t      size;       ///< rozmiar
-    size_t      resid;      ///< ilo∂Ê pozosta≥ych danych
-    size_t      completed;  ///< ilo∂Ê przes≥anych danych
-    off_t       offset;     ///< przesuniÍcie
+    size_t      resid;      ///< ilo≈õƒá pozosta≈Çych danych
+    size_t      completed;  ///< ilo≈õƒá przes≈Çanych danych
+    off_t       offset;     ///< przesuniƒôcie
 };
 
 int uio_move(void *dstbuf, size_t len, uio_t *uio);

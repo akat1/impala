@@ -34,8 +34,8 @@
  * Implementacja programu ls:
  * http://www.opengroup.org/onlinepubs/000095399/utilities/ls.html
  *
- * Obs³ugiwane opcje: -a, -i, -l, -1, -F
- * Rozszerzenia: -G (wy³±cza kolorowanie)
+ * ObsÅ‚ugiwane opcje: -a, -i, -l, -1, -F
+ * Rozszerzenia: -G (wyÅ‚Ä…cza kolorowanie)
  */
 
 #include <sys/types.h>
@@ -299,7 +299,7 @@ main(int argc, char **argv)
         print_path(name);
     } else {
         progopt.many = 1;
-        // zgodnie z standardem, najpierw drukowane s± niekatalogi
+        // zgodnie z standardem, najpierw drukowane sÄ… niekatalogi
         for (int i = 0; i < argc; i++) {
             print_file(argv[i]);
         }

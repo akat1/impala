@@ -52,7 +52,7 @@ static bool sync = FALSE;
 #define VM_LOCK() if (sync) mutex_lock(&vm_mtx, __FILE__, __func__, __LINE__, "VM" )
 #define VM_UNLOCK() if (sync) mutex_unlock(&vm_mtx)
 
-/// Inicjalizuje system pamiêci wirtualnej.
+/// Inicjalizuje system pamiÄ™ci wirtualnej.
 void
 vm_init()
 {
@@ -65,14 +65,14 @@ vm_init()
 }
 
 
-/// Zamyka zamek systemu pamiêci wirtualnej.
+/// Zamyka zamek systemu pamiÄ™ci wirtualnej.
 void
 vm_lock()
 {
     VM_LOCK();
 }
 
-/// Zwalnia zamek systemu pamiêci wirtualnej.
+/// Zwalnia zamek systemu pamiÄ™ci wirtualnej.
 void
 vm_unlock()
 {
@@ -80,7 +80,7 @@ vm_unlock()
 }
 
 /**
- * Przydziela stronê pamiêci.
+ * Przydziela stronÄ™ pamiÄ™ci.
  * @return Zwracan adres uchwytu strony lub NULL gdy nie ma wolnych.
  */
 vm_page_t *
@@ -94,7 +94,7 @@ vm_alloc_page()
 }
 
 /**
- * Zwalnia stronê.
+ * Zwalnia stronÄ™.
  * @param p Uchwyt strony.
  */
 void
@@ -175,11 +175,11 @@ vm_unmap(vm_addr_t addr, vm_size_t size)
 
 /**
  *  Weryfikuje, czy napis wskazywany przez str jest poprawnym napisem
- *  mieszcz±cym siê razem z koñcz±cym zerem w maxlen bajtach.
- *  Poprawno¶æ napisu oznacza, ¿e wykorzystywane przez niego strony pamiêci
- *  s± zaalokowane i nale¿± do pamiêci u¿ytkownika.
+ *  mieszczÄ…cym siÄ™ razem z koÅ„czÄ…cym zerem w maxlen bajtach.
+ *  PoprawnoÅ›Ä‡ napisu oznacza, Å¼e wykorzystywane przez niego strony pamiÄ™ci
+ *  sÄ… zaalokowane i naleÅ¼Ä… do pamiÄ™ci uÅ¼ytkownika.
  *
- *  UWAGA: maxlen nie mo¿e pochodziæ od u¿ytkownika. Nie mo¿e przekroczyæ 1GB.
+ *  UWAGA: maxlen nie moÅ¼e pochodziÄ‡ od uÅ¼ytkownika. Nie moÅ¼e przekroczyÄ‡ 1GB.
  */
 
 int

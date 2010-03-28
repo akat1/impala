@@ -33,8 +33,8 @@
 #ifndef __MACHINE_SETJMP_H
 #define __MACHINE_SETJMP_H
 
-// piêkny triczek aby typ jmp_buf by³ przekazyway przez referencjê
-// a nie przez warto¶æ.
+// piÄ™kny triczek aby typ jmp_buf byÅ‚ przekazyway przez referencjÄ™
+// a nie przez wartoÅ›Ä‡.
 struct _jmp_buf {
     int    env[10]; 
 };

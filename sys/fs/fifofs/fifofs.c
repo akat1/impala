@@ -158,11 +158,11 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     ///@todo check for invalid name
     //check
     vnode_t *tmp;
-    ///@todo w ca³ym VFS i fs-ach trzeba przemy¶leæ strategiê blokowania...
+    ///@todo w caÅ‚ym VFS i fs-ach trzeba przemyÅ›leÄ‡ strategiÄ™ blokowania...
     error = vfs_lookup(vn, &tmp, name, NULL, LKP_NORMAL);
     if(error != -ENOENT) {
         vrele(tmp);
-        return -EEXIST; // a mo¿e raczej powinni¶my zmodyfikowaæ ist. plik?
+        return -EEXIST; // a moÅ¼e raczej powinniÅ›my zmodyfikowaÄ‡ ist. plik?
     }
     //plik nie istnieje -> tworzymy
     fifofs_node_t *pn = vn->v_private;
@@ -225,7 +225,7 @@ fifofs_read(vnode_t *vn, uio_t *u, int flags)
                 return want-u->resid;
             }
             sched_yield();
-            continue;   //busy waiting... naprawiæ..
+            continue;   //busy waiting... naprawiÄ‡..
         }
         uio_move(read_beg, read_size, u);
         l->end += read_size;
@@ -328,7 +328,7 @@ fifofs_inactive(vnode_t *vn)
     else if(vn == n->i_writenode)
         n->i_writenode = NULL;
     else return 0;
-    if(!n->i_writenode && !n->i_readnode) {   //nie ma ¿adnych vnode'ów
+    if(!n->i_writenode && !n->i_readnode) {   //nie ma Å¼adnych vnode'Ã³w
         KASSERT(n->i_buf);
         clist_destroy(n->i_buf);
         n->i_buf = NULL;

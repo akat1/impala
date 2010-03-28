@@ -75,12 +75,12 @@ static int rewrite_whole_root(fatfs_dir_t *dir);
  */
 
 /**
- * szuka wÍz≥a w katalogu.
+ * szuka wƒôz≈Ça w katalogu.
  * @param dir deksryptor katalogu
  * @param name nazwa wpisu
  *
- * Poniewaø katalogi zapamiÍtuj± wÍz≥y swoich wpisÛw to naleøy zwiÍkszyÊ
- * odpowiednio licznik odniesieÒ. Jeden jest dla klienta procedury, a drugi
+ * Poniewa≈º katalogi zapamiƒôtujƒÖ wƒôz≈Çy swoich wpis√≥w to nale≈ºy zwiƒôkszyƒá
+ * odpowiednio licznik odniesie≈Ñ. Jeden jest dla klienta procedury, a drugi
  * dla katalogu.
  */
 fatfs_node_t *
@@ -91,8 +91,8 @@ fatfs_dir_lookup(fatfs_dir_t *dir, const char *name)
 
     if (!dirent) return NULL;
     if (dirent->node) {
-        // skoro wÍze≥ istnieje, to ma juø nasz± 'referencjÍ' w liczniku
-        // wiÍc robimy tylko referencje dla klienta
+        // skoro wƒôze≈Ç istnieje, to ma ju≈º naszƒÖ 'referencjƒô' w liczniku
+        // wiƒôc robimy tylko referencje dla klienta
         fatfs_node_ref(dirent->node);
         return dirent->node;
     }
@@ -101,9 +101,9 @@ fatfs_dir_lookup(fatfs_dir_t *dir, const char *name)
     dirent->node->size = dirent->size;
     dirent->node->csize = (dirent->size + (fatfs->clusize-1))/fatfs->clusize;
     dirent->node->dirent = dirent;
-    // dopiero co utworzony wÍze≥, ma jedn± referencjÍ ustawion± z procedury
-    // alloc, traktujemy to jako referencjÍ wpisu w katalogu, wiÍc musimy
-    // jeszcze zrobiÊ referencjÍ dla klienta procedury
+    // dopiero co utworzony wƒôze≈Ç, ma jednƒÖ referencjƒô ustawionƒÖ z procedury
+    // alloc, traktujemy to jako referencjƒô wpisu w katalogu, wiƒôc musimy
+    // jeszcze zrobiƒá referencjƒô dla klienta procedury
     fatfs_node_ref(dirent->node);
     KASSERT(dirent->node->refcnt == 2);
     return dirent->node;
@@ -199,7 +199,7 @@ fatfs_dir_free(fatfs_dir_t *dir)
 
 
 /*============================================================================
- * Obs≥uga zapisu i odczytu katalogÛw z no∂nika
+ * Obs≈Çuga zapisu i odczytu katalog√≥w z no≈õnika
  */
 
 int
@@ -419,7 +419,7 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
 }
 
 /*============================================================================
- * Obs≥uga d≥ugich nazw
+ * Obs≈Çuga d≈Çugich nazw
  */
 
 void

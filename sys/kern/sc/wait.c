@@ -54,7 +54,7 @@ sc_wait(thread_t *t, syscall_result_t *r, sc_wait_args *args)
     proc_t *p = t->thr_proc;
     proc_t *p_iter;
 
-    /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
+    /* czekamy aÅ¼, ktÃ³reÅ› dziecko siÄ™ zakoÅ„czy lub nadejdzie sygnaÅ‚ */
     while(1)
     {
         kprintf("ELOO\n");

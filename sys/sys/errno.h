@@ -37,7 +37,7 @@
 #define EOK             0  ///< no error
 
 /**
- * Numery b³êdów zgodne z POSIX.
+ * Numery bÅ‚Ä™dÃ³w zgodne z POSIX.
  *
  * IEEE Std 1003.1-2001 Section 2.3 Error Numbers
  */

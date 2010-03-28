@@ -4,13 +4,13 @@
 #define PIPE_BUF 4096
 
 #ifdef __KERNEL
-///< bufor znaków w postaci kolejki
+///< bufor znakÃ³w w postaci kolejki
 struct clist {
     char     *buf;       ///< bufor na dane
-    int       beg;       ///< miejsce gdzie zaczyna siê kolejka
+    int       beg;       ///< miejsce gdzie zaczyna siÄ™ kolejka
     int       end;       ///< koniec kolejki (najstarsze dane)
-    int       size;      ///< aktualnie wykorzystana przestrzeñ
-    int       buf_size;  ///< wielko¶æ ca³ego bufora
+    int       size;      ///< aktualnie wykorzystana przestrzeÅ„
+    int       buf_size;  ///< wielkoÅ›Ä‡ caÅ‚ego bufora
     sleepq_t *slpq;      
 };
 typedef struct clist clist_t;
@@ -21,7 +21,7 @@ void clist_wakeup(clist_t *l);
 void clist_wait(clist_t *l);
 void clist_push(clist_t *l, char ch);
 char clist_unpush(clist_t *l);
-int  clist_pop(clist_t *l);   ///< ujemne, je¿eli pusto
+int  clist_pop(clist_t *l);   ///< ujemne, jeÅ¼eli pusto
 void clist_unpop(clist_t *l, char ch);
 void clist_move(clist_t *dst, clist_t *src);
 void clist_flush(clist_t *dst);

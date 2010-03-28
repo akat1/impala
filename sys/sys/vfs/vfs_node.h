@@ -39,17 +39,17 @@
 #ifdef __KERNEL
 
 /**
- * Struktura reprezentuj±ca pojêcie pliku w sposób niezale¿ny od systemu plików
+ * Struktura reprezentujÄ…ca pojÄ™cie pliku w sposÃ³b niezaleÅ¼ny od systemu plikÃ³w
  */
 
 struct vnode {
     int             v_type;        ///< typ vnode
     int             v_flags;       ///< flagi vnode
     int             v_refcnt;      ///< licznik referencji
-    vfs_t          *v_vfs_mounted_here; ///< system plików tutaj zamontowany
-    vfs_t          *v_vfs;         ///< system plików tego vnode
-    vnode_ops_t    *v_ops;         ///< wska¼nik do vnode_ops z tego fs
-    devd_t         *v_dev;         ///< urz±dzenie, je¶li to vnode urz±dzenia
+    vfs_t          *v_vfs_mounted_here; ///< system plikÃ³w tutaj zamontowany
+    vfs_t          *v_vfs;         ///< system plikÃ³w tego vnode
+    vnode_ops_t    *v_ops;         ///< wskaÅºnik do vnode_ops z tego fs
+    devd_t         *v_dev;         ///< urzÄ…dzenie, jeÅ›li to vnode urzÄ…dzenia
     void           *v_private;     ///< prywatne dane fs-a... np. inode
     mutex_t         v_mtx;         ///< blokada do synchronizacji
 };
@@ -68,19 +68,19 @@ enum {
 };
 
 /**
- *  Struktura ta jest po¶rednikiem przy pobieraniu b±d¼ zmianie atrybutów vnode
+ *  Struktura ta jest poÅ›rednikiem przy pobieraniu bÄ…dÅº zmianie atrybutÃ³w vnode
  */
 struct vattr {
-    int        va_mask;    ///< flagi wskazuj±ce które dane nas interesuj±
-    uid_t      va_uid;     ///< identyfikator w³a¶ciciela pliku
+    int        va_mask;    ///< flagi wskazujÄ…ce ktÃ³re dane nas interesujÄ…
+    uid_t      va_uid;     ///< identyfikator wÅ‚aÅ›ciciela pliku
     gid_t      va_gid;     ///< identyfikator grupy pliku
-    mode_t     va_mode;    ///< prawa dostêpu do pliku
-    size_t     va_size;    ///< wielko¶æ pliku
-    devd_t    *va_dev;     ///< urz±dzenie reprezentowane przez ten plik
-    blksize_t  va_blksize; ///< rozmiar bloku systemu plików
-    blkcnt_t   va_blocks;  ///< liczba zajêtych bloków
-    nlink_t    va_nlink;   ///< ilo¶æ dowi±zañ do pliku ///@todo robiæ co¶ z tym
-    timespec_t va_atime;   ///< czas ostatniego dostêpu do pliku
+    mode_t     va_mode;    ///< prawa dostÄ™pu do pliku
+    size_t     va_size;    ///< wielkoÅ›Ä‡ pliku
+    devd_t    *va_dev;     ///< urzÄ…dzenie reprezentowane przez ten plik
+    blksize_t  va_blksize; ///< rozmiar bloku systemu plikÃ³w
+    blkcnt_t   va_blocks;  ///< liczba zajÄ™tych blokÃ³w
+    nlink_t    va_nlink;   ///< iloÅ›Ä‡ dowiÄ…zaÅ„ do pliku ///@todo robiÄ‡ coÅ› z tym
+    timespec_t va_atime;   ///< czas ostatniego dostÄ™pu do pliku
     timespec_t va_mtime;   ///< czas ostatniej modyfikacji
     timespec_t va_ctime;   ///< czas utworzenia pliku
     int        va_type;    ///< typ vnode
@@ -113,7 +113,7 @@ typedef struct lkp_state lkp_state_t;
 enum {
     LKP_NORMAL = 0,
     LKP_GET_PARENT = 1<<0,
-    LKP_NO_FOLLOW = 1<<1,   //je¿eli ostatnia czê¶æ path to link - nie pod±¿aj
+    LKP_NO_FOLLOW = 1<<1,   //jeÅ¼eli ostatnia czÄ™Å›Ä‡ path to link - nie podÄ…Å¼aj
     LKP_ACCESS_REAL_ID = 1<<2,
 };
 
@@ -122,7 +122,7 @@ enum {
     W_OK = 1<<1,
     R_OK = 1<<2,
     F_OK = 1<<3,
-    ACCESS_REAL_ID = 1<<4 //sprawdzaæ uid / gid a nie euid / egid
+    ACCESS_REAL_ID = 1<<4 //sprawdzaÄ‡ uid / gid a nie euid / egid
 };
 
 #define VOP_OPEN(v, fl, md) (v)->v_ops->vop_open((v), (fl), (md))
@@ -148,7 +148,7 @@ enum {
 #define VOP_UNLOCK(v) //(v)->v_ops->vop_unlock(v)
 #define VOP_UNLINK(v, n) (v)->v_ops->vop_unlink((v), (n))
 
-///@todo chyba wypada dodaæ proces otwieraj±cy
+///@todo chyba wypada dodaÄ‡ proces otwierajÄ…cy
 typedef int vnode_open_t(vnode_t *v, int flags, mode_t mode);
 typedef int vnode_create_t(vnode_t *v, vnode_t **vpp, const char *name,
                             vattr_t *attr);
@@ -211,7 +211,7 @@ struct dirent {
 int vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr);
 int vfs_lookup_parent(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr);
 int vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr, int f);
-int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiæ, bio+vnode
+int tmp_vnode_dev(devd_t *dev, vnode_t **vn); //trzeba sie zastanowiÄ‡, bio+vnode
 int vnode_opendev(const char *devname, int mode, vnode_t **vn);
 int vnode_rdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);
 int vnode_urdwr(int rw, vnode_t *vn, void *addr, int len, off_t offset);

@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -34,7 +34,7 @@ free(void *ptr)
 
     mc->avail = TRUE;
 
-    /* z³±czamy s±siednie chunki */
+    /* zÅ‚Ä…czamy sÄ…siednie chunki */
     nc = list_next(&__mem_chunks, mc);
 
     if ( nc && nc->avail ) {

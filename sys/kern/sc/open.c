@@ -127,7 +127,7 @@ sc_open(thread_t *p, syscall_result_t *r, sc_open_args *arg)
         VOP_TRUNCATE(node, 0);
 
     if((error = f_alloc(proc, node, flags, &fd))) {
-        vrele(node); // <- powinno to tutaj byæ, dopisa³em bo nie by³o.
+        vrele(node); // <- powinno to tutaj byÄ‡, dopisaÅ‚em bo nie byÅ‚o.
         return error;
     }
     VOP_UNLOCK(node);

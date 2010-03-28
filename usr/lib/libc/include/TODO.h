@@ -1,6 +1,6 @@
 
-// Takie symbole siê nie rozwi±zuj±... pomó¿my im ;)
-// Tym razem nvi... ma niez³e wymagania, nie ma co...
+// Takie symbole siÄ™ nie rozwiÄ…zujÄ…... pomÃ³Å¼my im ;)
+// Tym razem nvi... ma niezÅ‚e wymagania, nie ma co...
 
 // `_ctime'
 // `_gettimeofday'

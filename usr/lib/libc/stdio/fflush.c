@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -44,7 +44,7 @@ fflush(FILE *stream)
         else if(stream->fd != -1)
             res = write(stream->fd, stream->buf+beg, stream->inbuf);
         if(res <= 0) {
-            stream->inbuf = 0;//¿eby nie przepe³ni³o siê.. :/
+            stream->inbuf = 0;//Å¼eby nie przepeÅ‚niÅ‚o siÄ™.. :/
             return EOF;
         }
         beg += res;

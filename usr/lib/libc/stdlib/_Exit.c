@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -22,7 +22,7 @@ _Exit(int status)
     syscall(SYS_exit, status);
 }
 
-//mam nadziejê, ¿e nie zostanê pobity za dwie funkcje w 1 pliku... ;p
+//mam nadziejÄ™, Å¼e nie zostanÄ™ pobity za dwie funkcje w 1 pliku... ;p
 void
 _exit(int status)
 {

@@ -74,7 +74,7 @@ sc_read(thread_t *t, syscall_result_t *r, sc_read_args *args)
     u.size = args->size;
     u.resid = u.size;
     u.oper = UIO_READ;
-    u.space = UIO_SYSSPACE; //jaka ¶ciema ;p
+    u.space = UIO_SYSSPACE; //jaka Å›ciema ;p
     int res = f_read(file, &u);
     frele(file);
     if(res < 0)

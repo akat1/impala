@@ -19,13 +19,13 @@ struct mfs_node {
     mfs_node_t      *child;
     mfs_node_t      *next;
     vnode_t         *vnode;
-    timespec_t      atime;   ///< czas ostatniego dostêpu do pliku
+    timespec_t      atime;   ///< czas ostatniego dostÄ™pu do pliku
     timespec_t      mtime;   ///< czas ostatniej modyfikacji
     timespec_t      ctime;   ///< czas utworzenia pliku
     list_t          blks;
-    int             nlink;   ///< ilo¶æ dowi±zañ... obecnie 0 lub 1
-    /// nlist_mutex zabezpiecza listê dzieci tego wêz³a. Ka¿dy dostêp do niej
-    /// powinien odbywaæ siê z zamkiêtym mutexem.
+    int             nlink;   ///< iloÅ›Ä‡ dowiÄ…zaÅ„... obecnie 0 lub 1
+    /// nlist_mutex zabezpiecza listÄ™ dzieci tego wÄ™zÅ‚a. KaÅ¼dy dostÄ™p do niej
+    /// powinien odbywaÄ‡ siÄ™ z zamkiÄ™tym mutexem.
     mutex_t         nlist_mutex;
 };
 

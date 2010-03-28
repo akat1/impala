@@ -114,7 +114,7 @@ vfs_lookup(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr, int f)
     return vfs_lookupcp(sd, vpp, &pc, thr);
 }
 
-// mo¿na to jako¶ zgrupowaæ... np. wzoruj±c siê na namei
+// moÅ¼na to jakoÅ› zgrupowaÄ‡... np. wzorujÄ…c siÄ™ na namei
 
 int
 vfs_lookup_parent(vnode_t *sd, vnode_t **vpp, const char *p, thread_t *thr)
@@ -205,10 +205,10 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
             if(*(path->now) == '.') {
                 (path->now)++;
                 if(*(path->now) == '/' || *(path->now) == '\0') {
-                    //idziemy w górê..
+                    //idziemy w gÃ³rÄ™..
                     if(cur->v_flags & VNODE_FLAG_ROOT) {
                         tmp = cur->v_vfs->vfs_mpoint;
-                        if(tmp!=NULL) {// to nie jest korzeñ
+                        if(tmp!=NULL) {// to nie jest korzeÅ„
                             vref(tmp);
                             vrele(last);
                             last = cur;
@@ -218,10 +218,10 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
                 }
                 (path->now)-=2;
             } else  //brak drugiej kropki
-            if(*(path->now) == '/' || *(path->now)=='\0') { // zostajemy gdzie jeste¶my
+            if(*(path->now) == '/' || *(path->now)=='\0') { // zostajemy gdzie jesteÅ›my
                 if (*path->now) (path->now)++;
                 continue;
-            } else  // co¶ innego z kropk±..
+            } else  // coÅ› innego z kropkÄ…..
                 (path->now)--;
         }
         if((errno = VOP_ACCESS(cur, dirmode, cred)))
@@ -263,7 +263,7 @@ vfs_lookupcp(vnode_t *sd, vnode_t **vpp, lkp_state_t *path, thread_t *thr)
                     goto end_error;
                 }
                 vrele(cur);
-                cur = tmp;  //last nie aktualizujemy, zgadza siê? ;)
+                cur = tmp;  //last nie aktualizujemy, zgadza siÄ™? ;)
 
             }
         if(*(path->now) && (cur->v_type != VNODE_TYPE_DIR)) {
@@ -373,9 +373,9 @@ vnode_stat(vnode_t *node, struct stat *buf)
     return 0;
 }
 
-/// funkcja przeznaczona g³ównie do wykorzystania przez implementacje fs
-/// sprawdza dla danego poziomu ochrony pliku, danych uprawnieñ u¿ytkownika
-/// i ¿±danego poziomu dostêpu, czy dostêp ten jest mo¿liwy
+/// funkcja przeznaczona gÅ‚Ã³wnie do wykorzystania przez implementacje fs
+/// sprawdza dla danego poziomu ochrony pliku, danych uprawnieÅ„ uÅ¼ytkownika
+/// i Å¼Ä…danego poziomu dostÄ™pu, czy dostÄ™p ten jest moÅ¼liwy
 int
 vnode_access_ok(uid_t nuid, gid_t ngid, mode_t attr, int mode, pcred_t *cred)
 {

@@ -54,7 +54,7 @@
 #define SET(a,f) ((a) |= (f))
 #define UNSET(a,f) ((a) &= ~(f))
 
-//ash tego chce, a póki co nie wiem gdzie to wrzuciæ
+//ash tego chce, a pÃ³ki co nie wiem gdzie to wrzuciÄ‡
 #define __printflike(a, b)
 #define __printf0like __printflike
 #define __unused

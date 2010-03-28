@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -43,14 +43,14 @@ strstr(const char *haystack, const char *needle)
         while ( j >= 0 && (needle[i]!=needle[j]) ) j=P[j];
     }
 
-    q=0; // gdzie siê dopasowali¶my
+    q=0; // gdzie siÄ™ dopasowaliÅ›my
     
     for ( i = 0 ; i < len_haystack ; ++i ) {
         while( q >= 0 && ( needle[q+1] != haystack[i] )) q = P[q];
         if ( needle[q+1] == haystack[i] ) q++;
         if ( q == len_needle-1 ) {
             ret = (char *)&haystack[i-len_needle];
-            break; /* dopasowali¶my siê */
+            break; /* dopasowaliÅ›my siÄ™ */
         }
     }
    

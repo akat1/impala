@@ -59,13 +59,13 @@ sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args)
 
     proc_t *dest_proc = NULL;
 
-    /* sprawdzamy sygna³ */
+    /* sprawdzamy sygnaÅ‚ */
     if ( args->sig < 0 || args->sig > _NSIG ) {
         r->result = -1;
         return EINVAL;
     }
 
-    /* szukamy procesu, któremu mamy dostarczyæ sygna³ */
+    /* szukamy procesu, ktÃ³remu mamy dostarczyÄ‡ sygnaÅ‚ */
     dest_proc = proc_find(args->pid);
 
     if ( dest_proc == NULL && args->pid != 0 ) {
@@ -73,10 +73,10 @@ sc_kill(thread_t *p, syscall_result_t *r, kill_args_t *args)
         return ESRCH;
     }
 
-    /* sprawdzamy czy mo¿emy dostarczyæ sygna³ */
+    /* sprawdzamy czy moÅ¼emy dostarczyÄ‡ sygnaÅ‚ */
     /* ... */
 
-    /* sprawdzamy komu dostarczamy sygna³ */
+    /* sprawdzamy komu dostarczamy sygnaÅ‚ */
 
     /* pojedynczy proces */
     if ( args->pid > 0 )

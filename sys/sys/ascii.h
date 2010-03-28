@@ -33,7 +33,7 @@
 #ifndef __SYS_ASCII_H
 #define __SYS_ASCII_H
 
-/// Nazwy znaków kontrolnych w ASCII
+/// Nazwy znakÃ³w kontrolnych w ASCII
 enum {
     NUL = 0,
     SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, NL=LF, VT, FF, CR, SO, SI, DLE,

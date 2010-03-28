@@ -36,9 +36,9 @@
 #define sigmask(X)      (1<<((X)-1))
 #define sig_emptymask   0
 
-#define SIG_DFL ((void*)0)  /* Domy¶lna akcja */
-#define SIG_ERR ((void*)-1) /* Warto¶æ b³êdu */
-#define SIG_IGN ((void*)1)  /* Sygna³ bêdzie ignorowany */
+#define SIG_DFL ((void*)0)  /* DomyÅ›lna akcja */
+#define SIG_ERR ((void*)-1) /* WartoÅ›Ä‡ bÅ‚Ä™du */
+#define SIG_IGN ((void*)1)  /* SygnaÅ‚ bÄ™dzie ignorowany */
 
 // SIGPROCMASK
 #define SIG_SETMASK     0
@@ -51,28 +51,28 @@ struct sigaction {
     int          sa_flags;
 };
 
-// Sygna³y
+// SygnaÅ‚y
 #define SIGHUP          1   ///< 
 #define SIGINT          2   ///< przerwanie
-#define SIGQUIT         3   ///< wyj¶cie
-#define SIGILL          4   ///< nieprawid³owa instrukcja
+#define SIGQUIT         3   ///< wyjÅ›cie
+#define SIGILL          4   ///< nieprawidÅ‚owa instrukcja
 #define SIGTRAP         5   ///< 
 #define SIGABRT         6   ///< abort
-#define SIGIOT          6   ///< co¶ staro¿ytnego
-#define SIGBUS          7   ///< b³±d szyny
-#define SIGFPE          8   ///< b³±d FPU
+#define SIGIOT          6   ///< coÅ› staroÅ¼ytnego
+#define SIGBUS          7   ///< bÅ‚Ä…d szyny
+#define SIGFPE          8   ///< bÅ‚Ä…d FPU
 #define SIGKILL         9   ///< zabicie
-#define SIGUSR1         10  ///< syg. u¿ytkownika #1
-#define SIGSEGV         11  ///< naruszenie ochrony pamiêci
-#define SIGUSR2         12  ///< syg. u¿ytkownika #2
+#define SIGUSR1         10  ///< syg. uÅ¼ytkownika #1
+#define SIGSEGV         11  ///< naruszenie ochrony pamiÄ™ci
+#define SIGUSR2         12  ///< syg. uÅ¼ytkownika #2
 #define SIGPIPE         13  ///< zapis na nieczytany potok
 #define SIGALRM         14  ///< 
-#define SIGTERM         15  ///< zakoñczenie pracy
+#define SIGTERM         15  ///< zakoÅ„czenie pracy
 #define SIGSTKFLT       16  ///<
-#define SIGCHLD         17  ///< dziecko unar³o
-#define SIGCONT         18  ///< kontynuuj dzia³anie
-#define SIGSTOP         19  ///< zatrzymaj dzia³anie
-#define SIGTSTP         20  ///< zatrzymaj dzia³anie (gen. przez tty)
+#define SIGCHLD         17  ///< dziecko unarÅ‚o
+#define SIGCONT         18  ///< kontynuuj dziaÅ‚anie
+#define SIGSTOP         19  ///< zatrzymaj dziaÅ‚anie
+#define SIGTSTP         20  ///< zatrzymaj dziaÅ‚anie (gen. przez tty)
 #define SIGTTIN         21  ///< 
 #define SIGTTOU         22  ///<
 #define SIGURG          23  ///< 

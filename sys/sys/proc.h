@@ -38,25 +38,25 @@
 /// znaczniki procesu
 enum PROC_FLAGS
 {
-    PROC_NEW        = 1<<0,         ///< proces zosta³ utworzony
+    PROC_NEW        = 1<<0,         ///< proces zostaÅ‚ utworzony
     PROC_ZOMBIE     = 1<<1,         ///< proces zostaje niszczony
     PROC_RUN        = 1<<2,         ///< proces w kolejce uruchomieniowej
-    PROC_AFTER_EXEC = 1<<3,         ///< proces wykona³ ju¿ exec
+    PROC_AFTER_EXEC = 1<<3,         ///< proces wykonaÅ‚ juÅ¼ exec
     PROC_STOP       = 1<<4          ///< 
 };
 
 enum {
     INIT_PID =  1
 };
-/// opis dzia³aj±cego procesu dla u¿ytkownika
+/// opis dziaÅ‚ajÄ…cego procesu dla uÅ¼ytkownika
 struct procinfo {
     pid_t   pid;        ///< PID
     pid_t   ppid;       ///< PPID
     uchar   nice;       ///< priorytet procesu
     uchar   pri;
-    int     threads;    ///< ilo¶æ w±tków
+    int     threads;    ///< iloÅ›Ä‡ wÄ…tkÃ³w
     int     flags;      ///< znaczniki
-    char    tty[10];    ///< terminal kontroluj±cy
+    char    tty[10];    ///< terminal kontrolujÄ…cy
     char    cmd[100];   ///< obraz
 };
 
@@ -70,8 +70,8 @@ struct procinfo {
 
 /// 
 struct pcred {
-    uid_t           p_uid;       ///< identyfikator u¿ytkownika
-    uid_t           p_euid;      ///< efektywny identyfikator u¿ytkownika
+    uid_t           p_uid;       ///< identyfikator uÅ¼ytkownika
+    uid_t           p_euid;      ///< efektywny identyfikator uÅ¼ytkownika
     gid_t           p_gid;       ///< identyfikator grupy
     gid_t           p_egid;      ///< efektywnty identyfikator grupy
     int             refcnt;      ///< licznik referencji
@@ -82,31 +82,31 @@ struct proc {
     pid_t           p_pid;       ///< identyfikator procesu
     pid_t           p_ppid;      ///< identyfikator rodzica
     pid_t           p_session;   ///< identyfikator sesji procesu
-    pid_t           p_group;     ///< identyfikator grupy procesów
-    tty_t          *p_ctty;      ///< terminal kontroluj±cy procesu
+    pid_t           p_group;     ///< identyfikator grupy procesÃ³w
+    tty_t          *p_ctty;      ///< terminal kontrolujÄ…cy procesu
     pcred_t        *p_cred;      ///< przywileje
     filetable_t    *p_fd;        ///< pliki przypisane do procesu
-    list_t          p_threads;   ///< lista w±tków wchodz±cych w sk³ad procesu
+    list_t          p_threads;   ///< lista wÄ…tkÃ³w wchodzÄ…cych w skÅ‚ad procesu
     list_t          p_children;  ///< lista dzieci procesu
     int             p_flags;     ///< flagi procesu
     int             p_status;    ///< status
-    sigset_t        p_sig;       ///< maska sygna³ów dostarczonych do procesu
-    sigset_t        p_sigignore; ///< maska sygna³ów ignorowanych
-    sigaction_t     p_sigact[_NSIG]; ///< akcje sygna³ów
-    uchar           p_nice;      ///< poziom uprzejmo¶ci procesu
-    uchar           p_ucpu;      ///< zu¿ycie procesora
+    sigset_t        p_sig;       ///< maska sygnaÅ‚Ã³w dostarczonych do procesu
+    sigset_t        p_sigignore; ///< maska sygnaÅ‚Ã³w ignorowanych
+    sigaction_t     p_sigact[_NSIG]; ///< akcje sygnaÅ‚Ã³w
+    uchar           p_nice;      ///< poziom uprzejmoÅ›ci procesu
+    uchar           p_ucpu;      ///< zuÅ¼ycie procesora
     uchar           p_pri;       ///< priorytet procesu
-    vm_space_t     *vm_space;    ///< przestrzeñ adresowa procesu
+    vm_space_t     *vm_space;    ///< przestrzeÅ„ adresowa procesu
     vnode_t        *p_curdir;    ///< aktualny katalog procesu
-    vnode_t        *p_rootdir;   ///< g³ówny katalog procesu (korzeñ)
-    ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomo¶ci
-    vm_addr_t       p_brk_addr;  ///< adres koñca segmentu danych (*)
-    sleepq_t        p_waitq;     ///< oczekiwanie na dzieci lub sygna³y.
+    vnode_t        *p_rootdir;   ///< gÅ‚Ã³wny katalog procesu (korzeÅ„)
+    ipcmsq_t       *p_ipc_msq;   ///< prywatna kolejka wiadomoÅ›ci
+    vm_addr_t       p_brk_addr;  ///< adres koÅ„ca segmentu danych (*)
+    sleepq_t        p_waitq;     ///< oczekiwanie na dzieci lub sygnaÅ‚y.
     mutex_t         p_mtx;       ///< zamek do synchronizacji
-    mask_t          p_umask;     ///< maska tworzonych plików
-    list_t          p_umtxs;     ///< lista zamków u¿ytkownika
-    list_node_t     L_procs;     ///< wêze³ procesów
-    list_node_t     L_children;  ///< wêze³ listy dzieci
+    mask_t          p_umask;     ///< maska tworzonych plikÃ³w
+    list_t          p_umtxs;     ///< lista zamkÃ³w uÅ¼ytkownika
+    list_node_t     L_procs;     ///< wÄ™zeÅ‚ procesÃ³w
+    list_node_t     L_children;  ///< wÄ™zeÅ‚ listy dzieci
     const char     *p_cmd;
 };
 

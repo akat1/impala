@@ -33,7 +33,7 @@
 #ifndef __SYS_VM_VM_LPOOL_H
 #define __SYS_VM_VM_LPOOL_H
 
-/// Ma³y zarz±dzacz pamiêci± do ma³ych elementów, spinanych w liste.
+/// MaÅ‚y zarzÄ…dzacz pamiÄ™ciÄ… do maÅ‚ych elementÃ³w, spinanych w liste.
 struct vm_lpool {
     list_t  empty_pools;
     list_t  part_pools;

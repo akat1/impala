@@ -37,15 +37,15 @@
 #include <sys/utils.h>
 #include <sys/vm.h>
 
-/// Wej¶ciowa procedura dla obs³ugi w±tku.
+/// WejÅ›ciowa procedura dla obsÅ‚ugi wÄ…tku.
 static void __kthr(void);
 static void setup_vmspace(thread_t *arg);
 
 /**
- * Tworzy nowy w±tek po stronie j±dra.
- * @param kthr referencja do deskryptora w±tku.
- * @param f adres procedury wej¶ciowej.
- * @param arg adres przekazany jako argument do procedury wej¶ciowej.
+ * Tworzy nowy wÄ…tek po stronie jÄ…dra.
+ * @param kthr referencja do deskryptora wÄ…tku.
+ * @param f adres procedury wejÅ›ciowej.
+ * @param arg adres przekazany jako argument do procedury wejÅ›ciowej.
  *
  */
 void

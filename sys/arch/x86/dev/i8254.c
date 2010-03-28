@@ -58,18 +58,18 @@ i8254_irq0()
 }
 
 /**
- * Ustawia czêstotliwo¶æ z jak± PIT generuje IRQ 0
+ * Ustawia czÄ™stotliwoÅ›Ä‡ z jakÄ… PIT generuje IRQ 0
  */
 
 void
 i8254_set_freq(uint hz)
 {
-    KASSERT(hz >= 19);  // wymagane, aby wynik mie¶ci³ siê w 2 bajtach
+    KASSERT(hz >= 19);  // wymagane, aby wynik mieÅ›ciÅ‚ siÄ™ w 2 bajtach
     
     uint res=(PIT_MAX_FREQ+hz/2)/hz;
     
     io_out8(PIT_MODE, 0x34); // licznik zero w trybie 2,
-                             // przesy³ane oba bajty kodowanej binarnie liczby
+                             // przesyÅ‚ane oba bajty kodowanej binarnie liczby
     io_out8(PIT_CHAN0, res&0xff);
     io_out8(PIT_CHAN0, (res>>8)&0xff);
 }

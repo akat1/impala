@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-//todo: lista b³êdów - ich opisów
+//todo: lista bÅ‚Ä™dÃ³w - ich opisÃ³w
 
 void
 perror(const char *s)

@@ -48,7 +48,7 @@ struct sc_nanosleep_args
 errno_t sc_nanosleep(thread_t *p, syscall_result_t *r, sc_nanosleep_args *args );
 
 /**
- * XXX: ///@todo sygna≥y i rem
+ * XXX: ///@todo sygna≈Çy i rem
  */
 
 errno_t

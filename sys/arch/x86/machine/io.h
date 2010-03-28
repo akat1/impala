@@ -35,8 +35,8 @@
 
 #include <sys/types.h>
 
-// Lepiej w funkcjach ni¿ makrach - kompilator sobie sprawdzi typy,
-// a przy -O1 i tak powinien to zoptymalizowaæ do jednej instrukcji.
+// Lepiej w funkcjach niÅ¼ makrach - kompilator sobie sprawdzi typy,
+// a przy -O1 i tak powinien to zoptymalizowaÄ‡ do jednej instrukcji.
 
 static inline uint32_t
 io_in32(uint16_t port)

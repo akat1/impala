@@ -96,7 +96,7 @@ register_fss()
 void
 vfs_register(const char *name, vfs_ops_t *ops)
 {
-    // nie sprawdzamy czy istnieje ju¿ taki system plików.
+    // nie sprawdzamy czy istnieje juÅ¼ taki system plikÃ³w.
     MUTEX_LOCK(&global_lock, "vfs");
     vfs_conf_t *vc = kmem_alloc( sizeof(*vc), KM_SLEEP);
     vc->name = name;
@@ -141,7 +141,7 @@ vfs_create(vfs_t **fs, const char *fstype)
 }
 
 
-//tylko taki schemacik, jak to w przysz³o¶ci mo¿e wygl±daæ..
+//tylko taki schemacik, jak to w przyszÅ‚oÅ›ci moÅ¼e wyglÄ…daÄ‡..
 void
 vfs_mountroot()
 {
@@ -164,7 +164,7 @@ vfs_mountroot()
 //        panic("Internal error - opendev succeded and devn NULL");
 //    }
     fs->vfs_mdev = NULL;//devn->v_dev;
-    fs->vfs_mpoint = NULL;  //montuj nigdzie -> twórz samodzielne drzewko
+    fs->vfs_mpoint = NULL;  //montuj nigdzie -> twÃ³rz samodzielne drzewko
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");
     }
@@ -183,7 +183,7 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     if (!fs)
         return -1;
     fs->vfs_mdev = dev;
-    vref(mpoint);   //niech mpoint bêdzie nasz
+    vref(mpoint);   //niech mpoint bÄ™dzie nasz
     fs->vfs_mpoint = mpoint;
     if( VFS_MOUNT(fs) != 0 ) {
         panic("cannot mount file system");

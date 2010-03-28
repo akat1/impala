@@ -88,15 +88,15 @@ static int copyout_params(thread_t *t, exec_info_t *);
  */
 
 /**
- * Zastêpuje obraz programu w procesie nowym.
+ * ZastÄ™puje obraz programu w procesie nowym.
  * @param p proces.
- * @param path ¶cie¿ka do nowego obrazu.
- * @param argv tablica parametrów, dane u u¿ytkownika
- * @param envp ¶rodowisko, dane u u¿ytkownika
+ * @param path Å›cieÅ¼ka do nowego obrazu.
+ * @param argv tablica parametrÃ³w, dane u uÅ¼ytkownika
+ * @param envp Å›rodowisko, dane u uÅ¼ytkownika
  *
- * Najpierw wczytujemy 1024 pliku (nag³ówek), sprawdzaj±c przy okazji
- * czy mamy odpowiednie prawa. Nastêpnie kopiujemy argumenty i ¶rodowisko
- * do j±dra. Nastêpnie dopasowywany jest odpowiedni interpreter obrazu
+ * Najpierw wczytujemy 1024 pliku (nagÅ‚Ã³wek), sprawdzajÄ…c przy okazji
+ * czy mamy odpowiednie prawa. NastÄ™pnie kopiujemy argumenty i Å›rodowisko
+ * do jÄ…dra. NastÄ™pnie dopasowywany jest odpowiedni interpreter obrazu
  * (a.out lub skrypt).
  */
 int
@@ -173,7 +173,7 @@ prepare_process(proc_t *p)
 int
 image_exec(proc_t *p, exec_info_t *einfo)
 {
-    // sprawdzamy wszystkie znany interpretery obrazów, wszystkie dwa :)
+    // sprawdzamy wszystkie znany interpretery obrazÃ³w, wszystkie dwa :)
     int err = -EINVAL;
     if (!einfo->interpreted)
         err = intrp_exec(p, einfo);
@@ -235,7 +235,7 @@ copyout_params(thread_t *t, exec_info_t *einfo)
     char *STACK;
     char *_STACK;
     vm_addr_t addr = (vm_addr_t)t->thr_stack + t->thr_stack_size - 3*PAGE_SIZE;
-    // odwzorowujemy 3 ostatnie strony stosu (tzn pierwsze, patrz±c od koñca)
+    // odwzorowujemy 3 ostatnie strony stosu (tzn pierwsze, patrzÄ…c od koÅ„ca)
     if (vm_segmap(t->vm_space->seg_stack, addr, 3*PAGE_SIZE, &MAP)) {
         panic("vm_segmap failed");
     }
@@ -285,12 +285,12 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     if (N_BADMAG(*exec)) {
         return -EINVAL;
     }
-    // skoro plik wydaje siê byæ OK, to bezgranicznie mu zaufajmy
+    // skoro plik wydaje siÄ™ byÄ‡ OK, to bezgranicznie mu zaufajmy
 
     // zniszczmy aktualny obraz procesu.
     prepare_process(p);
 
-    // tworzymy now± przestrzeñ adresow±, wed³ug danych z pliku.
+    // tworzymy nowÄ… przestrzeÅ„ adresowÄ…, wedÅ‚ug danych z pliku.
     vm_space_t *vm_space = p->vm_space;
     vm_seg_create(vm_space->seg_text, vm_space, 0, 0, exec->a_text,
         VM_PROT_RWX|VM_PROT_USER, VM_SEG_NORMAL);
@@ -301,20 +301,20 @@ aout_exec(proc_t *p, exec_info_t *einfo)
 
     uintptr_t _TEXT, _DATA;
     void *TEXT, *DATA;
-    // przydzielamy odpowiedni± pamiêc na kod i dane.
+    // przydzielamy odpowiedniÄ… pamiÄ™c na kod i dane.
     vm_seg_alloc(vm_space->seg_text, exec->a_text, &_TEXT);
     vm_seg_alloc(vm_space->seg_data, exec->a_data + exec->a_bss, &_DATA);
 
-    // wmapowujemy przestrzeñ adresow± programu w przestrzeñ j±dra
-    // aby skopiowaæ tam dane z pliku. (nie mo¿emy do niej kopiowaæ
-    // bezpo¶rednio, bo nie dzia³amy w nowo utworzonej przestrzeni
+    // wmapowujemy przestrzeÅ„ adresowÄ… programu w przestrzeÅ„ jÄ…dra
+    // aby skopiowaÄ‡ tam dane z pliku. (nie moÅ¼emy do niej kopiowaÄ‡
+    // bezpoÅ›rednio, bo nie dziaÅ‚amy w nowo utworzonej przestrzeni
     // adresowej
     vm_segmap(vm_space->seg_text, _TEXT, exec->a_text, &TEXT);
     vm_segmap(vm_space->seg_data, _DATA, exec->a_data + exec->a_bss, &DATA);
     mem_zero(DATA, exec->a_data + exec->a_bss);
 
-    /// @todo nie sprawdzamy b³êdów I/O, tak czy siak, proces wywo³uj±cy
-    ///       execve nie mo¿e ju¿ tego b³êdu obs³u¿yæ, bo nie ma jego
+    /// @todo nie sprawdzamy bÅ‚Ä™dÃ³w I/O, tak czy siak, proces wywoÅ‚ujÄ…cy
+    ///       execve nie moÅ¼e juÅ¼ tego bÅ‚Ä™du obsÅ‚uÅ¼yÄ‡, bo nie ma jego
     ///       danych w VM :D
     vnode_rdwr(UIO_READ, einfo->vp, TEXT, exec->a_text, N_TXTOFF(*exec));
     vnode_rdwr(UIO_READ, einfo->vp, DATA, exec->a_data, N_DATAOFF(*exec));

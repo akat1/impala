@@ -41,14 +41,14 @@
 #include <machine/interrupt.h>
 #include <machine/atomic.h>
 
-/// Wiruj±cy zamek zabezpieczaj±cy miêkkie tykniêcie.
+/// WirujÄ…cy zamek zabezpieczajÄ…cy miÄ™kkie tykniÄ™cie.
 static spinlock_t soft_guard = { SPINLOCK_LOCK };
 
-/// Licznik tykniêæ.
+/// Licznik tykniÄ™Ä‡.
 volatile uint clock_ticks;
 volatile timespec_t curtime;
 
-/// Czêstotliwo¶æ zegara systemowego
+/// CzÄ™stotliwoÅ›Ä‡ zegara systemowego
 const int HZ = 100;
 const int TICK = 1000000000/100; // 10^9 / HZ
 
@@ -95,7 +95,7 @@ load_cmos_time(void)
     curtime.tv_nsec = 0;
 }
 
-/// Inicjalizuje obs³ugê tykniêæ zegara systemowego.
+/// Inicjalizuje obsÅ‚ugÄ™ tykniÄ™Ä‡ zegara systemowego.
 void
 clock_init()
 {
@@ -106,10 +106,10 @@ clock_init()
 
 
 /**
- * Twarde tykniêcie zegara.
+ * Twarde tykniÄ™cie zegara.
  *
- * Procedura uruchamiana wewn±trz obs³ugi przerwania zegara, nie mo¿e
- * opó¼niæ kolejnego tykniêcia.
+ * Procedura uruchamiana wewnÄ…trz obsÅ‚ugi przerwania zegara, nie moÅ¼e
+ * opÃ³ÅºniÄ‡ kolejnego tykniÄ™cia.
  */
 void
 clock_hardtick()
@@ -123,17 +123,17 @@ clock_hardtick()
 }
 
 /**
- * Miêkkie tykniêcie.
+ * MiÄ™kkie tykniÄ™cie.
  *
- * Procedura uruchamiana nazewn±trz obs³ugi przerwania zegara. Czas procesora
- * zajêty przez ni± opó¼nia kolejne jej wywo³anie, nie przerwania.
+ * Procedura uruchamiana nazewnÄ…trz obsÅ‚ugi przerwania zegara. Czas procesora
+ * zajÄ™ty przez niÄ… opÃ³Åºnia kolejne jej wywoÅ‚anie, nie przerwania.
  */
 void
 clock_softtick()
 {
     if ( spinlock_trylock(&soft_guard) ) {
         spinlock_unlock(&soft_guard);
-        sched_action(); //nie dokonuje faktycznej zmiany w±tku
+        sched_action(); //nie dokonuje faktycznej zmiany wÄ…tku
         __handle_callouts();
     }
 }
@@ -176,9 +176,9 @@ __handle_callouts(void)
 }
 
 /***
- * Procedura rejestruj±ca opó¼nione wykonanie
+ * Procedura rejestrujÄ…ca opÃ³Åºnione wykonanie
  *
- * Interfejs calloutów wzorowany na SVR4
+ * Interfejs calloutÃ³w wzorowany na SVR4
  */
 
 int
@@ -196,7 +196,7 @@ clock_timeout(void (*fn)(void *), addr_t arg, uint delta)
 }
 
 /***
- * Procedura usuwaj±ca opó¼nione wykonanie z kolejki na podstawie id
+ * Procedura usuwajÄ…ca opÃ³Åºnione wykonanie z kolejki na podstawie id
  */
 
 void

@@ -53,11 +53,11 @@ _start()
     _stdF[0] = fdopen(0, "r");
     _stdF[1] = fdopen(1, "w");
     _stdF[2] = fdopen(2, "w");
-/// w teorii dla 0 i 1 powinno byæ dobrze ustawione, ale lepiej siê upewniæ:
+/// w teorii dla 0 i 1 powinno byÄ‡ dobrze ustawione, ale lepiej siÄ™ upewniÄ‡:
     _stdF[0]->status =
     _stdF[1]->status = _FST_OPEN|_FST_LINEBUF|_FST_TTY;
     _stdF[2]->status = _FST_OPEN|_FST_NOBUF|_FST_TTY;
-    //póki co:
+    //pÃ³ki co:
     environ = malloc(MAX_ENV*sizeof(char*));
     environ[0] = NULL;
     if(envp) {

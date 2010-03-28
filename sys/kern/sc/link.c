@@ -52,7 +52,7 @@ errno_t
 sc_link(thread_t *p, syscall_result_t *r, link_args *args)
 {
     r->result = 0;
-    ///@todo zaimplementowaæ kiedy¶..
+    ///@todo zaimplementowaÄ‡ kiedyÅ›..
     return -ENOSTR;
 }
 

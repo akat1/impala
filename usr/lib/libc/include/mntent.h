@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -16,7 +16,7 @@
 #define __MNTENT_H__
 
 // chwilowy zrzut z glibc
-// chcemy mieæ linuksowy interfejs do tego, czy jaki¶ inny / w³asny?
+// chcemy mieÄ‡ linuksowy interfejs do tego, czy jakiÅ› inny / wÅ‚asny?
 
 struct mntent {
     char *mnt_fsname;

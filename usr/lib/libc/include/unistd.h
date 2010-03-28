@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-//TODO: odkomentowa³em rzeczy wymagane przez ash
+//TODO: odkomentowaÅ‚em rzeczy wymagane przez ash
 int          access(const char *, int);
 //unsigned     alarm(unsigned);
 int          chown(const char *, uid_t, gid_t);
@@ -81,7 +81,7 @@ pid_t        tcgetpgrp(int);
 int          tcsetpgrp(int, pid_t);
 char        *ttyname(int);
 //int          ttyname_r(int, char *, size_t);
-int          eaccess(const char *pathname, int mode);    //chc±, to dajemy
+int          eaccess(const char *pathname, int mode);    //chcÄ…, to dajemy
 mode_t       getmode(const void *set, mode_t omode);
 void *       setmode(const char *p);
 pid_t        vfork(void);

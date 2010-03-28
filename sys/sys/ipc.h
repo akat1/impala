@@ -34,17 +34,17 @@
 #define __SYS_IPC_H
 
 /*
- * POSIX nie wymaga pola key, ale jest ono na BSD. Zatem niektóre
- * programy mog± z tego korzystaæ.
+ * POSIX nie wymaga pola key, ale jest ono na BSD. Zatem niektÃ³re
+ * programy mogÄ… z tego korzystaÄ‡.
  */
 
-/// ochrona IPC systemu pi±tego
+/// ochrona IPC systemu piÄ…tego
 struct ipc_perm {
-    uid_t       uid;        ///< obecny w³a¶ciciel
+    uid_t       uid;        ///< obecny wÅ‚aÅ›ciciel
     gid_t       gid;        ///< obecna grupa
-    uid_t       cuid;       ///< twórca
-    gid_t       cgid;       ///< grupa tworz±ca
-    mode_t      mode;       ///< tryb dostêpu
+    uid_t       cuid;       ///< twÃ³rca
+    gid_t       cgid;       ///< grupa tworzÄ…ca
+    mode_t      mode;       ///< tryb dostÄ™pu
     key_t       key;        ///< klucz
 };
 

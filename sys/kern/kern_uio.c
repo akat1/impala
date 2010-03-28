@@ -48,7 +48,7 @@ uio_move(void *buf, size_t len, uio_t *uio)
     KASSERT(len <= uio->size);
     //if (uio->space == UIO_USERSPACE)
         //panic("user space I/O not supported yet");
-    //zak³adaj±c, ¿e bufory s± sprawdzone, chyba nie ma nic wiêcej do roboty
+    //zakÅ‚adajÄ…c, Å¼e bufory sÄ… sprawdzone, chyba nie ma nic wiÄ™cej do roboty
     return kernel_copy((char*)buf, uio, len);
 }
 

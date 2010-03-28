@@ -69,7 +69,7 @@ enum {
 
 static void i8259a_update_masks(void);
 
-static uchar pic1_en_mask;  //które przerwania mamy w³±czone..
+static uchar pic1_en_mask;  //ktÃ³re przerwania mamy wÅ‚Ä…czone..
 static uchar pic2_en_mask;
 static uchar pic1_pl_mask[MAX_IPL];
 static uchar pic2_pl_mask[MAX_IPL];
@@ -100,7 +100,7 @@ i8259a_init()
     io_out8(PIC_M, OCW3_SPECIAL_MASK_MODE);
     io_out8(PIC_S, OCW3_SPECIAL_MASK_MODE);
     
-    pic1_en_mask = 0x0; // wszystkie przerwania wy³±czone
+    pic1_en_mask = 0x0; // wszystkie przerwania wyÅ‚Ä…czone
     pic2_en_mask = 0x0;
     for(int i=0; i<MAX_IRQ; i++)
         irq_priority[i] = IPL_HIGH;
@@ -114,8 +114,8 @@ i8259a_init()
 void
 i8259a_update_masks()
 {
-    //nasz cel: ustawiæ picX_pl_mask
-    //we¼my liniowy porz±dek; przerwanie o poziomie l powinno byæ w³±czone
+    //nasz cel: ustawiÄ‡ picX_pl_mask
+    //weÅºmy liniowy porzÄ…dek; przerwanie o poziomie l powinno byÄ‡ wÅ‚Ä…czone
     //na wszystkich poziomach mniejszych od l
     int irqs_at_pl[MAX_IPL];
     for(int i=0; i<MAX_IPL; i++)
@@ -145,7 +145,7 @@ i8259a_reset_mask()
     io_out8(PIC_S+1, pic2_pl_mask[CIPL]);
 }
 
-/// Przed w³±czeniem przerwania powinno mieæ ono ustawiony priorytet
+/// Przed wÅ‚Ä…czeniem przerwania powinno mieÄ‡ ono ustawiony priorytet
 void
 i8259a_irq_enable(int n)
 {

@@ -64,14 +64,14 @@ sc_chown(thread_t *t, syscall_result_t *r, chown_args_t *args)
     res = -EPERM;
     if(p->p_cred->p_euid != 0 && p->p_cred->p_euid != va.va_uid)
         goto err;
-    if(p->p_cred->p_euid != 0)  //tak... pÛki co nie ma zmian dla nie roota
+    if(p->p_cred->p_euid != 0)  //tak... p√≥ki co nie ma zmian dla nie roota
         goto err;
     va.va_mask = VATTR_UID | VATTR_GID | VATTR_MODE;
     if(args->uid!=-1)
         va.va_uid = args->uid;
     if(args->gid!=-1)
         va.va_gid = args->gid;
-    if(p->p_cred->p_euid!=0)   //tymczasowo niemoøliwe
+    if(p->p_cred->p_euid!=0)   //tymczasowo niemo≈ºliwe
         UNSET(va.va_mode, S_ISUID | S_ISGID);
     if((res = VOP_SETATTR(node, &va)))
         goto err;

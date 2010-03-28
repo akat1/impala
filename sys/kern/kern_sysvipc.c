@@ -39,7 +39,7 @@ static void ipc_msg_init(void);
 
 
 /*========================================================================
- * Komunikacja miêdzy procesami Systemu V
+ * Komunikacja miÄ™dzy procesami Systemu V
  */
 
 typedef struct ipckey ipckey_t;
@@ -66,10 +66,10 @@ find_key_eq(const ipckey_t *key, key_t k)
 }
 
 
-///@todo sprawdzaæ prawa dostêpu.
+///@todo sprawdzaÄ‡ prawa dostÄ™pu.
 
 /*========================================================================
- * Kolejki wiadomo¶ci
+ * Kolejki wiadomoÅ›ci
  */
 
 
@@ -294,7 +294,7 @@ ipc_msg_rcv(ipcmsq_t *msq, void *uaddr, size_t size, long type, int flags)
             msg = list_find(&msq->msq_data, find_msq_le_type, type);
         } while (wait && msg == NULL);
     }
-    ///@todo MSG_NOERROR trzeba obs³ugiwaæ (a raczej nie obs³ugiwaæ)
+    ///@todo MSG_NOERROR trzeba obsÅ‚ugiwaÄ‡ (a raczej nie obsÅ‚ugiwaÄ‡)
     if (msg != NULL) {
         copyout(uaddr, msg->data, MIN(size,msg->size));
         err = 0;

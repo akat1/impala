@@ -81,7 +81,7 @@ ctty_create(void)
 
 
 /*========================================================================
- * Plik urz±dzenia: /dev/tty - przekierowanie do terminala kontroluj±cego
+ * Plik urzÄ…dzenia: /dev/tty - przekierowanie do terminala kontrolujÄ…cego
  */
 
 static devd_t * getctty(void);

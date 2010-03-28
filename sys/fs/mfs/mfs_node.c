@@ -137,7 +137,7 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 
 
 /*============================================================================
- * obs³uga v-wêz³a
+ * obsÅ‚uga v-wÄ™zÅ‚a
  */
 
 int
@@ -206,7 +206,7 @@ mfs_truncate(vnode_t *vn, off_t off)
     if(off == n->size)
         return 0;
     if(off > 10000000)
-        return -EFBIG; //póki co MFS nie chce du¿ych plików ;)
+        return -EFBIG; //pÃ³ki co MFS nie chce duÅ¼ych plikÃ³w ;)
     return mfs_blk_set_area(n, off);
 }
 
@@ -229,7 +229,7 @@ mfs_getattr(vnode_t *vn, vattr_t *attr)
     if(attr->va_mask & VATTR_DEV)
         attr->va_dev = NULL;
     if(attr->va_mask & VATTR_NLINK)
-        attr->va_nlink = 1; //mfs nie wspiera hardlinków
+        attr->va_nlink = 1; //mfs nie wspiera hardlinkÃ³w
     if (attr->va_mask & VATTR_INO)
         attr->va_ino = (ino_t) node;
     if(attr->va_mask & VATTR_TIME) {
@@ -321,8 +321,8 @@ mfs_inactive(vnode_t *vn)
     mfs_node_t *n = vn->v_private;
     n->vnode = NULL;
     if(n->nlink <= 0) {
-        // nie istnieje ju¿ ¿adne odwo³anie do tego wêz³a.
-        // pora siê go pozbyæ.
+        // nie istnieje juÅ¼ Å¼adne odwoÅ‚anie do tego wÄ™zÅ‚a.
+        // pora siÄ™ go pozbyÄ‡.
         mfs_blk_set_area(n, 0); //wywalamy bloki
         if(n->name)
             kmem_free(n->name);

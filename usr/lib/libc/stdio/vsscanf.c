@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -88,7 +88,7 @@ vsscanf(const char *src, const char *fmt, va_list ap)
                 }
             }
         } else if(*f == *s) {
-            //ok, zmatchowa³o siê
+            //ok, zmatchowaÅ‚o siÄ™
             f++;
             s++;
             continue;

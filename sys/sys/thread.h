@@ -41,21 +41,21 @@
 #include <machine/atomic.h>
 
 enum {
-    THREAD_STACK_SIZE = 0x10000,  ///< domy¶lny rozmiar stosu
-    THREAD_KSTACK_SIZE = 0x8000   ///< domy¶lny rozmiar stosu alt.
+    THREAD_STACK_SIZE = 0x10000,  ///< domyÅ›lny rozmiar stosu
+    THREAD_KSTACK_SIZE = 0x8000   ///< domyÅ›lny rozmiar stosu alt.
 };
 
-/// wiruj±cy zamek.
+/// wirujÄ…cy zamek.
 struct spinlock {
     volatile int    _dlock;
 };
 
 /// zamek typu mutex.
 struct mutex {
-    thread_t     *mtx_owner;   ///< w±tek bêd±cy w³a¶cicielem zamka.
+    thread_t     *mtx_owner;   ///< wÄ…tek bÄ™dÄ…cy wÅ‚aÅ›cicielem zamka.
     int           mtx_locked;  ///< stan zamka.
     int           mtx_flags;   ///< opcje.
-    spinlock_t    mtx_slock;   ///< pomocniczy wiruj±cy zamek.
+    spinlock_t    mtx_slock;   ///< pomocniczy wirujÄ…cy zamek.
     list_t        mtx_locking; 
     list_t        mtx_waiting; 
     list_node_t   L_umtxs;
@@ -69,31 +69,31 @@ struct wdescr {
     const char      *descr;
 };
 
-/// w±tek procesora.
+/// wÄ…tek procesora.
 struct thread {
     thread_context  thr_context;    ///< kontekst
-    signal_context *thr_sigcontext; ///< stos kontekstów dla sygna³ów
-    addr_t          thr_entry_point;///< adres procedury wej¶ciowej
-    addr_t          thr_entry_arg;  ///< adres argumenty procedury wej¶ciowej
+    signal_context *thr_sigcontext; ///< stos kontekstÃ³w dla sygnaÅ‚Ã³w
+    addr_t          thr_entry_point;///< adres procedury wejÅ›ciowej
+    addr_t          thr_entry_arg;  ///< adres argumenty procedury wejÅ›ciowej
     int             thr_flags;      ///< opcje
-    uint            thr_wakeup_time;///< kiedy obudziæ u¶piony w±tek
+    uint            thr_wakeup_time;///< kiedy obudziÄ‡ uÅ›piony wÄ…tek
     vm_space_t     *vm_space;       ///< przestrzen, w ktorej jest watek.
     addr_t          thr_stack;      ///< stos
     size_t          thr_stack_size; ///< rozmiar stosu
     addr_t          thr_kstack;     ///< stos dla jadra
     size_t          thr_kstack_size;///< rozmiar stosu dla jadra
-    proc_t         *thr_proc;       ///< proces, do którego w±tek przynale¿y
-    sleepq_t       *thr_sleepq;     ///< kolejka w której ¶pi w±tek
+    proc_t         *thr_proc;       ///< proces, do ktÃ³rego wÄ…tek przynaleÅ¼y
+    sleepq_t       *thr_sleepq;     ///< kolejka w ktÃ³rej Å›pi wÄ…tek
     wdescr_t        thr_wdescr;     ///<
     mutex_t         thr_mtx;        ///< do synchronizacji
-    bool            thr_cancel;     ///< zg³oszenie anulowania w±tku
-    sigset_t        thr_sigblock;   ///< blokowane sygna³y
+    bool            thr_cancel;     ///< zgÅ‚oszenie anulowania wÄ…tku
+    sigset_t        thr_sigblock;   ///< blokowane sygnaÅ‚y
     sleepq_t       *thr_joiner;     ///< pomocnik dla join'a
-    list_node_t     L_run_queue;    ///< wêze³ kolejki procesów gotowych do uruchomienia
-    list_node_t     L_sched_queue;  ///< weze³ kolejki planisty
-    list_node_t     L_threads;      ///< wêze³ listy w±tków
-    list_node_t     L_pthreads;     ///< wêze³ listy w±tków w procesie.
-    list_node_t     L_wait;         ///< wêze³ listy w±tków oczekuj±cych
+    list_node_t     L_run_queue;    ///< wÄ™zeÅ‚ kolejki procesÃ³w gotowych do uruchomienia
+    list_node_t     L_sched_queue;  ///< wezeÅ‚ kolejki planisty
+    list_node_t     L_threads;      ///< wÄ™zeÅ‚ listy wÄ…tkÃ³w
+    list_node_t     L_pthreads;     ///< wÄ™zeÅ‚ listy wÄ…tkÃ³w w procesie.
+    list_node_t     L_wait;         ///< wÄ™zeÅ‚ listy wÄ…tkÃ³w oczekujÄ…cych
 };
 
 #define THREAD_SET_WDESCR(t,fl,fn,l,d)\
@@ -104,7 +104,7 @@ struct thread {
         (t)->thr_wdescr.descr = d;\
     } while (0)
 
-/// ¶pi±ca kolejka
+/// Å›piÄ…ca kolejka
 struct sleepq {
     mutex_t     sq_mtx;
     list_t      sq_waiting;
@@ -119,7 +119,7 @@ struct semaph {
     int             count;
 };
 
-/// wspó³biezna kolejka
+/// wspÃ³Å‚biezna kolejka
 struct cqueue {
     mutex_t     q_mtx;     ///< zamek
     list_t      q_data;    ///< lista danych
@@ -129,13 +129,13 @@ struct cqueue {
 enum THREAD_FLAGS {
     THREAD_NEW       = 1 << 0, //< w trakcie tworzenia
     THREAD_ZOMBIE    = 1 << 1, //< zombie
-    THREAD_RUN       = 1 << 2, //< dzia³a
-    THREAD_SYSCALL   = 1 << 3, //< jest w obs³udze wywo³ania
-    THREAD_SLEEP     = 1 << 4, //< u¶piony
+    THREAD_RUN       = 1 << 2, //< dziaÅ‚a
+    THREAD_SYSCALL   = 1 << 3, //< jest w obsÅ‚udze wywoÅ‚ania
+    THREAD_SLEEP     = 1 << 4, //< uÅ›piony
     THREAD_INTRPT    = 1 << 5, //< przerwano spanie
     THREAD_INRUNQ    = 1 << 6, //<
-    THREAD_USER      = 1 << 7, //< w±tek u¿ytkownika
-    THREAD_SLEEPQ    = 1 << 8  //< u¶piony przez sleepq
+    THREAD_USER      = 1 << 7, //< wÄ…tek uÅ¼ytkownika
+    THREAD_SLEEPQ    = 1 << 8  //< uÅ›piony przez sleepq
 };
 
 enum {
@@ -199,7 +199,7 @@ int sleepq_wait_i(sleepq_t *q);
 void sleepq_wakeup(sleepq_t *q);
 void sleepq_intrpt(thread_t *td);
 
-/// Inicjalizuje wiruj±cy zamek.
+/// Inicjalizuje wirujÄ…cy zamek.
 static inline void
 spinlock_init(spinlock_t *sp)
 {
@@ -222,7 +222,7 @@ spinlock_unlock(spinlock_t *sp)
       sp->_dlock = SPINLOCK_UNLOCK;
 }
 
-/// Próbuje zamkn±æ zamek.
+/// PrÃ³buje zamknÄ…Ä‡ zamek.
 static inline bool
 spinlock_trylock(spinlock_t *sp)
 {

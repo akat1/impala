@@ -110,14 +110,14 @@ int     f_truncate(file_t *f, off_t len);
 void    f_close(file_t *fd);
 off_t   f_seek(file_t *fd, off_t o, int whence);
 
-// funkcje do odpowiedzialnego klonowania oraz pozbywania siê prawa do danego
-// wska¼nika na plik
-// Po polsku: zwiêkszanie i zmniejszanie licznika referencji
+// funkcje do odpowiedzialnego klonowania oraz pozbywania siÄ™ prawa do danego
+// wskaÅºnika na plik
+// Po polsku: zwiÄ™kszanie i zmniejszanie licznika referencji
 void fref(file_t *);
 bool frele(file_t *);
 
-// nie ma sensu ich dostêpniaæ moim zdaniem. // s± wykorzystywane np. w close
-// chyba, ¿e f_close by usuwa³o file z filetable...
+// nie ma sensu ich dostÄ™pniaÄ‡ moim zdaniem. // sÄ… wykorzystywane np. w close
+// chyba, Å¼e f_close by usuwaÅ‚o file z filetable...
 file_t *f_get(filetable_t *ft, int index);
 void f_set(filetable_t *ft, file_t *fd, int index, bool cloexec);
 

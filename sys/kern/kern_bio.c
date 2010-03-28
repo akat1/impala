@@ -48,25 +48,25 @@
 // #define splx(x) x = 1
 
 /** @file
- * Ten plik zawiera implementacjê procedur odpowiedzialnych za wej¶cie-wyj¶cie
- * na urz±dzeniach blokowych. Ten mechanizm (jak wiele innych) jest wzorowany
+ * Ten plik zawiera implementacjÄ™ procedur odpowiedzialnych za wejÅ›cie-wyjÅ›cie
+ * na urzÄ…dzeniach blokowych. Ten mechanizm (jak wiele innych) jest wzorowany
  * na UNIXie (BSD: kern/vfs_bio.c, Solaris: os/bio.c, ULTRIX: fs/gfs/gfs_bio.c).
  *
- * System przechowuje w pamiêci dane z urz±dzenia blokowego w celu
- * minimalizacji wolnych operacji wej¶cia-wyj¶cia. Pamiêc podrêczna jest
- * ograniczona do NBUF buforów, które s± trzymane w tablicy haszuj±cej
- * bufhash. Sta³e BUFHASH_* s± parametrami funkcji haszuj±cej.
+ * System przechowuje w pamiÄ™ci dane z urzÄ…dzenia blokowego w celu
+ * minimalizacji wolnych operacji wejÅ›cia-wyjÅ›cia. PamiÄ™c podrÄ™czna jest
+ * ograniczona do NBUF buforÃ³w, ktÃ³re sÄ… trzymane w tablicy haszujÄ…cej
+ * bufhash. StaÅ‚e BUFHASH_* sÄ… parametrami funkcji haszujÄ…cej.
  *
- * Wielko¶æ buforów mo¿e zostaæ zmieniona przy starcie systemu przez
+ * WielkoÅ›Ä‡ buforÃ³w moÅ¼e zostaÄ‡ zmieniona przy starcie systemu przez
  * argument "iobufs".
  */
 
 enum {
-    BUFHASH_P1      = 461,      ///< parametr 'a' funkcji haszuj±cej
-    BUFHASH_P2      = 812,      ///< parametr 'b' funkcji haszuj±cej
+    BUFHASH_P1      = 461,      ///< parametr 'a' funkcji haszujÄ…cej
+    BUFHASH_P2      = 812,      ///< parametr 'b' funkcji haszujÄ…cej
     BUFHASH_P_M     = 2, //701,      ///< liczba pierwsza 'm'
     BUFHASH_P_P     = 1117,     ///< liczba pierwsza 'p'
-    NBUF            = 4096      ///< ilo¶æ buforów w pamiêci podrêcznej
+    NBUF            = 4096      ///< iloÅ›Ä‡ buforÃ³w w pamiÄ™ci podrÄ™cznej
 };
 
 // f(dev,blkno) = ((a*k + b) mod p) mod m
@@ -121,7 +121,7 @@ bio_init()
 
 
 /*============================================================================
- * Procedury odpowiedzialne za zarz±dzanie tablic± haszuj±c±.
+ * Procedury odpowiedzialne za zarzÄ…dzanie tablicÄ… haszujÄ…cÄ….
  */
 
 void
@@ -208,7 +208,7 @@ bufhash_putfree_tail(iobuf_t *bp)
 }
 
 /*============================================================================
- * Procedury odpowiedzialne za zarz±dzanie buforami.
+ * Procedury odpowiedzialne za zarzÄ…dzanie buforami.
  */
 
 
@@ -229,13 +229,13 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
     bp->blkno = n;
     bp->bcount = bsize/512;
     bp->resid = bsize;
-    // rozmiar bufora siê zgadza, no to po robocie.
+    // rozmiar bufora siÄ™ zgadza, no to po robocie.
     if (bp->size == bsize) return 0;
     UNSET(bp->flags, BIO_DONE|BIO_ERROR);
     void *a = kmem_alloc(bsize, KM_SLEEP);
     if(!a)
         return -1;
-    // zmieniamy bufor, zachowuj±c czê¶c danych.
+    // zmieniamy bufor, zachowujÄ…c czÄ™Å›c danych.
     if (bp->addr && bp->size < bsize) {
         mem_cpy(a, bp->addr, bp->size);
         kmem_free(bp->addr);
@@ -262,7 +262,7 @@ buf_destroy(iobuf_t *bp)
 }
 #endif
 /*============================================================================
- * Interfejs zewnêtrzny BIO
+ * Interfejs zewnÄ™trzny BIO
  */
 
 iobuf_t *
@@ -295,7 +295,7 @@ bio_getblk(devd_t *d, blkno_t n, size_t bsize)
     bufhash_insert(bp);
     bufhash_unlock();
     // tymczasowo dorzucam ~BIO_VALID tutaj
-    // z powodu jednego b³êdu w obs³udze FATFS :)
+    // z powodu jednego bÅ‚Ä™du w obsÅ‚udze FATFS :)
     UNSET(bp->flags, BIO_DONE|BIO_ERROR|BIO_VALID);
 
     return bp;
@@ -368,7 +368,7 @@ bio_wait(iobuf_t *bp)
 }
 
 /*============================================================================
- * Interfejs zewnêtrzny PHYSIO
+ * Interfejs zewnÄ™trzny PHYSIO
  */
 
 ssize_t
@@ -390,11 +390,11 @@ bioq_init(bio_queue_t *q)
 }
 
 /**
- * Wstawia bufor w kolejkê.
+ * Wstawia bufor w kolejkÄ™.
  * @arg bp bufor.
  *
- * Procedura wy³±cza przerwania zwi±zane z obs³ug± urz±dzeñ blokowych
- * na czas wstawiania w kolejkê w celu ochrony struktury przed uszkodzeniem.
+ * Procedura wyÅ‚Ä…cza przerwania zwiÄ…zane z obsÅ‚ugÄ… urzÄ…dzeÅ„ blokowych
+ * na czas wstawiania w kolejkÄ™ w celu ochrony struktury przed uszkodzeniem.
  */
 void
 bioq_enqueue(bio_queue_t *q, iobuf_t *bp)
@@ -408,7 +408,7 @@ bioq_enqueue(bio_queue_t *q, iobuf_t *bp)
  * Pobiera bufor z kolejki.
  * @return bufor.
  *
- * Procedura nie u¿ywa synchronizacji, dziêki czemu mo¿na j± u¿ywaæ wewn±trz
+ * Procedura nie uÅ¼ywa synchronizacji, dziÄ™ki czemu moÅ¼na jÄ… uÅ¼ywaÄ‡ wewnÄ…trz
  * przerwania.
  */
 iobuf_t *

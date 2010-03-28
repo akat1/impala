@@ -57,11 +57,11 @@ enum {
 
 /**
  * Tworzy opis segmentu
- * @param vseg wska¼nik do deskryptora segmentu.
- * @param vsp wska¼nik do przestrzeni adresowej, w której znajduje siê seg.
+ * @param vseg wskaÅºnik do deskryptora segmentu.
+ * @param vsp wskaÅºnik do przestrzeni adresowej, w ktÃ³rej znajduje siÄ™ seg.
  * @param base adres pierwszej strony w segmencie.
  * @param size rozmiar.
- * @param limit ograniczenie górne na rozmiar segmentu.
+ * @param limit ograniczenie gÃ³rne na rozmiar segmentu.
  * @param p poziom ochrony stron segmentu.
  * @param flags dodatkowe opcje.
  */
@@ -86,10 +86,10 @@ vm_seg_create(vm_seg_t *vseg, vm_space_t *vsp,
 }
 
 /**
- * Przydziela ci±g³y obszar w danym segmencie.
+ * Przydziela ciÄ…gÅ‚y obszar w danym segmencie.
  * @param vseg deskryptor segmentu.
- * @param size rozmiar ci±g³ego obszaru.
- * @param _res adres zmiennej, do uzupe³nienia przydzielonym adresem.
+ * @param size rozmiar ciÄ…gÅ‚ego obszaru.
+ * @param _res adres zmiennej, do uzupeÅ‚nienia przydzielonym adresem.
  */
 int
 vm_seg_alloc(vm_seg_t *vseg, vm_size_t size, void *_res)
@@ -105,10 +105,10 @@ vm_seg_alloc(vm_seg_t *vseg, vm_size_t size, void *_res)
 }
 
 /**
- * Rezerwuje ci±g³y obszar w danym segmencie.
+ * Rezerwuje ciÄ…gÅ‚y obszar w danym segmencie.
  * @param vseg deskryptor segmentu.
- * @param size rozmiar ci±g³ego obszaru.
- * @param _res adres zmiennej, do uzupe³nienia przydzielonym adresem.
+ * @param size rozmiar ciÄ…gÅ‚ego obszaru.
+ * @param _res adres zmiennej, do uzupeÅ‚nienia przydzielonym adresem.
  */
 int
 vm_seg_reserve(vm_seg_t *vseg, vm_size_t size, void *_res)
@@ -121,7 +121,7 @@ vm_seg_reserve(vm_seg_t *vseg, vm_size_t size, void *_res)
         if (do_first_region(vseg, &region)) return -1;
     }
 
-    // sprawdzamy czy istnieje dziura pomiêdzy pocz±tkiem segmentu
+    // sprawdzamy czy istnieje dziura pomiÄ™dzy poczÄ…tkiem segmentu
     // a pierwszym regionem
     if (size < region->begin - vseg->base) {
         *res = region->begin - size;
@@ -147,7 +147,7 @@ vm_seg_reserve(vm_seg_t *vseg, vm_size_t size, void *_res)
 
 
 /**
- * Zwalnia ci±g³y obszar i jego strony.
+ * Zwalnia ciÄ…gÅ‚y obszar i jego strony.
  * @param vseg deskryptor segmentu.
  * @param vaddr adres pierwszej strony w obszarze.
  * @param size rozmiar.
@@ -161,7 +161,7 @@ vm_seg_free(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
 }
 
 /**
- * Zwalnia ci±g³y obszar.
+ * Zwalnia ciÄ…gÅ‚y obszar.
  * @param vseg deskryptor segmentu.
  * @param vaddr adres pierwszej strony w obszarze.
  * @param size rozmiar.
@@ -172,7 +172,7 @@ vm_seg_release(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
     bool deleteRegion = FALSE;
     vm_region_t *region = list_find(&vseg->regions, is_containing_addr, vaddr);
     KASSERT(region != NULL);
-    // patrzymy, czy wyrzuciæ ca³y region, czy skróciæ go z pocz±tku.
+    // patrzymy, czy wyrzuciÄ‡ caÅ‚y region, czy skrÃ³ciÄ‡ go z poczÄ…tku.
     if (region->begin == vaddr) {
         if (region->size == size) {
             deleteRegion = TRUE;
@@ -181,12 +181,12 @@ vm_seg_release(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
             region->size  -= size;
         }
     } else
-    // lub skróciæ od koñca.
+    // lub skrÃ³ciÄ‡ od koÅ„ca.
     if (region->end == vaddr+size) {
         region->end -= size;
         region->size -= size;
     } else {
-        // pozostaje tylko podzieliæ region
+        // pozostaje tylko podzieliÄ‡ region
         vm_region_t *newreg = vm_lpool_alloc(&vm_unused_regions);
         newreg->begin = vaddr+size;
         newreg->end = region->end;
@@ -226,10 +226,10 @@ vm_seg_release(vm_seg_t *vseg, vm_addr_t vaddr, vm_size_t size)
 
 
 /**
- * Tworzy kopiê segmentu.
+ * Tworzy kopiÄ™ segmentu.
  * @param dst deskryptor segmentu docelowego.
- * @param space przestrzeñ adresowa segmentu docelowego.
- * @param src segment ¼ród³owy.
+ * @param space przestrzeÅ„ adresowa segmentu docelowego.
+ * @param src segment ÅºrÃ³dÅ‚owy.
  */
 int
 vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
@@ -270,12 +270,12 @@ vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
 /**
  * Odwzorowywuje fragment innego segmentu
  * @param dst deskryptor segmentu docelowego
- * @param src deskryptor segmentu ¼ród³owego
- * @param addr adres w segmencie ¼ród³owym
+ * @param src deskryptor segmentu ÅºrÃ³dÅ‚owego
+ * @param addr adres w segmencie ÅºrÃ³dÅ‚owym
  * @param size rozmiar
  * @param res
  *
- * Przydzielony obszar mo¿na zwalniac u¿ywaj±c vm_seg_free().
+ * Przydzielony obszar moÅ¼na zwalniac uÅ¼ywajÄ…c vm_seg_free().
  */
 
 int
@@ -291,11 +291,11 @@ vm_seg_map(vm_seg_t *dst, const vm_seg_t *src, vm_addr_t addr, vm_size_t size,
 
 
 /**
- * Zmienia ochronê segmentu.
+ * Zmienia ochronÄ™ segmentu.
  * @param seg deskryptor segmentu.
- * @param newprot nowe prawa dostêpu.
+ * @param newprot nowe prawa dostÄ™pu.
  *
- * Procedura zmienia prawa dostêpu do ka¿dej strony przydzielonej do
+ * Procedura zmienia prawa dostÄ™pu do kaÅ¼dej strony przydzielonej do
  * danego segmentu.
  */
 void
@@ -327,7 +327,7 @@ expand_region(vm_seg_t *seg, vm_region_t *region, vm_size_t size, int m,
         vm_region_t *nextreg = list_next(&seg->regions, region);
         newaddr = region->end;
         if (nextreg == NULL) {
-            // rozszerzaj±c region rozszerzamy segment
+            // rozszerzajÄ…c region rozszerzamy segment
             if (!has_space(seg,size)) return -1;
             seg->end += size;
             seg->size += size;
@@ -373,7 +373,7 @@ has_hole_after_reg(const vm_region_t *reg, vm_size_t size)
     KASSERT(reg->segment!=NULL);
     vm_region_t *regnext = list_next(&reg->segment->regions, reg);
     if (regnext == NULL) return FALSE;
-    // je¿eli nie to sprawdzamy czy zanim jest dziura o odpowiedniej wielko¶ci.
+    // jeÅ¼eli nie to sprawdzamy czy zanim jest dziura o odpowiedniej wielkoÅ›ci.
     return (reg->end + size <= regnext->begin);
 }
 

@@ -101,7 +101,7 @@ video_init()
     io_out8(VGA_PORT, REG_CUR_POS_LO);
     cur_pos |=  io_in8(VGA_PORT+1);
 
-    //chyba blink jest domy¶lnie w³±czony, ale skoro ju¿ napisa³em: ;p
+    //chyba blink jest domyÅ›lnie wÅ‚Ä…czony, ale skoro juÅ¼ napisaÅ‚em: ;p
     vga_set_attr(0x10, 0x8 | vga_get_attr(0x10));//blink enable
     vidmem = (void*)TS_VIDEO;
 
@@ -206,7 +206,7 @@ void textscreen_set_margins(struct hw_textscreen *screen, int up, int down)
 {
     screen = SELECT_SCREEN(screen);
     if(up>=down) {
-        ///@todo dowiedzieæ siê, jak tu reagowaæ
+        ///@todo dowiedzieÄ‡ siÄ™, jak tu reagowaÄ‡
         screen->margin_up = 0;
         screen->margin_down = TS_HEIGHT - 1;
         return;
@@ -244,9 +244,9 @@ textscreen_put(struct hw_textscreen *screen, char c, int8_t attr)
     screen = SELECT_SCREEN(screen);
 
     textscreen_putat(screen, screen->cursor_x, screen->cursor_y, c, attr);
-    // trik z lini± d³u¿sz± o 1 ;)
-    // putat nie mo¿e sprawdzaæ czy x wychodzi poza zakres..
-    // mo¿e wywaliæ putat z interfejsu? i daæ put parametr WRAP_ENABLED
+    // trik z liniÄ… dÅ‚uÅ¼szÄ… o 1 ;)
+    // putat nie moÅ¼e sprawdzaÄ‡ czy x wychodzi poza zakres..
+    // moÅ¼e wywaliÄ‡ putat z interfejsu? i daÄ‡ put parametr WRAP_ENABLED
     if ( screen->cursor_x == TS_WIDTH )
     {
         if ( screen->cursor_y < screen->margin_down )
@@ -303,7 +303,7 @@ textscreen_move_cursor(struct hw_textscreen *ts, int8_t dcol,
     _set_cursor(ts, curx, cury);
 }
 
-//do u¿ytku wewn. Nie walidujemy, bo wierzymy, ¿e wiemy co robimy. Zawsze ABS.
+//do uÅ¼ytku wewn. Nie walidujemy, bo wierzymy, Å¼e wiemy co robimy. Zawsze ABS.
 void
 _set_cursor(struct hw_textscreen *screen, int8_t col,
         int8_t row)
@@ -356,7 +356,7 @@ textscreen_get_cursor(struct hw_textscreen *ts, int *cx, int *cy)
     *cy = ts->cursor_y - rely;
 }
 
-// W terminologii z VT100 UG. to jest scroll up.. mo¿na by i zmieniæ..
+// W terminologii z VT100 UG. to jest scroll up.. moÅ¼na by i zmieniÄ‡..
 void
 textscreen_scroll_down(struct hw_textscreen *ts)
 {

@@ -54,7 +54,7 @@ enum {
 };
 #endif
 #if 0
-// Skroci³em nazwy, _BEGIN,_SIZE,_END by³o za d³ugie.
+// SkrociÅ‚em nazwy, _BEGIN,_SIZE,_END byÅ‚o za dÅ‚ugie.
 enum {
     VM_SPACE_TEXT       = 0x00100000,   // 1MB
     VM_SPACE_TEXT_S     = 0x00400000,   // 4MB
@@ -78,13 +78,13 @@ enum {
 
 
 #ifdef __KERNEL
-///@todo Lepiej nazwaæ i dorobiæ kilka makr jeszcze.
+///@todo Lepiej nazwaÄ‡ i dorobiÄ‡ kilka makr jeszcze.
 
-/// Wyci±ga z adresu przesuniêcie na stronie.
+/// WyciÄ…ga z adresu przesuniÄ™cie na stronie.
 #define PAGE_OFF(p) (((uintptr_t)p) & 0xfff)
-/// Wyci±ga z adresu indeks w katalogu stron.
+/// WyciÄ…ga z adresu indeks w katalogu stron.
 #define PAGE_DIR(p) (((uintptr_t)p) >> 22)
-/// Wyci±ga z adresu indeks w tablicy stron.
+/// WyciÄ…ga z adresu indeks w tablicy stron.
 #define PAGE_TBL(p) ( (((uintptr_t)p) >> 12) & 0x3ff)
 #define PAGE_NUM(p) (((uintptr_t)p) >> PAGE_SHIFT)
 #define PTE_MASK 0xfffff000
@@ -97,11 +97,11 @@ enum {
                 | ((x&PTE_US)?VM_PROT_USER:VM_PROT_SYSTEM))
 
 #define PROT_TO_PTEFLAGS(x) (((x&VM_PROT_WRITE)?PTE_RW:0) | \
-                ((x&VM_PROT_SYSTEM)?0:PTE_US)) // PTE_US da³em dwa razy
+                ((x&VM_PROT_SYSTEM)?0:PTE_US)) // PTE_US daÅ‚em dwa razy
 
 
 /**
- * Opis bitów dla wpisów w tablicy stron (Page Table Entry)
+ * Opis bitÃ³w dla wpisÃ³w w tablicy stron (Page Table Entry)
  *
  * Intel 3A 3-29, Figure 3-14
  */
@@ -122,7 +122,7 @@ enum {
 };
 
 /**
- * Opis bitów dla wpisów w katalogu stron (Page Directory Entry)
+ * Opis bitÃ³w dla wpisÃ³w w katalogu stron (Page Directory Entry)
  *
  * Intel 3A 3-29, Figure 3-14
  */
@@ -150,7 +150,7 @@ enum {
 };
 
 /**
- * Opisy bitów dla b³êdu wyj±tku b³êdu strony (Page fualt).
+ * Opisy bitÃ³w dla bÅ‚Ä™du wyjÄ…tku bÅ‚Ä™du strony (Page fualt).
  *
  * Intel 3A 5-50
  */
@@ -169,15 +169,15 @@ enum PAGE_FLAGS {
 };
 
 
-/// Deskryptor strony pamiêci
+/// Deskryptor strony pamiÄ™ci
 struct vm_page {
     vm_paddr_t  phys_addr;  ///< fizyczny adres strony
-    /// adres w wirtualnej przestrzeni j±dra
-    /// u¿ywanie jedynie dla meta-danych VM!
+    /// adres w wirtualnej przestrzeni jÄ…dra
+    /// uÅ¼ywanie jedynie dla meta-danych VM!
     vm_addr_t   kvirt_addr;
     uint32_t    flags;      ///< opcje
     int         refcnt;
-    list_node_t L_pages;    ///< wêze³ dla listy stron.
+    list_node_t L_pages;    ///< wÄ™zeÅ‚ dla listy stron.
 };
 
 /// Tablica (katalog) stron.

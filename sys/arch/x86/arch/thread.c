@@ -177,9 +177,9 @@ thread_fork(thread_t *t, thread_t *ct)
 }
 
 /**
- * Prze³±cza kontekst.
- * @param t_to deskryptor w±tku, do którego trzeba siê prze³±czyæ.
- * @param t_from deskryptor obecnie dzia³aj±cego w±tku.
+ * PrzeÅ‚Ä…cza kontekst.
+ * @param t_to deskryptor wÄ…tku, do ktÃ³rego trzeba siÄ™ przeÅ‚Ä…czyÄ‡.
+ * @param t_from deskryptor obecnie dziaÅ‚ajÄ…cego wÄ…tku.
  */
 void
 thread_switch(thread_t * volatile t_to, thread_t * volatile t_from)
@@ -222,10 +222,10 @@ thread_resume(thread_t *t)
 }
 
 /**
- * Uruchamia ¶wie¿y kontekst.
- * @param t_to deskryptor w±tku.
+ * Uruchamia Å›wieÅ¼y kontekst.
+ * @param t_to deskryptor wÄ…tku.
  *
- * Procedura wchodzi w kod w±tku, który nie zosta³ dot±d uruchomiony
+ * Procedura wchodzi w kod wÄ…tku, ktÃ³ry nie zostaÅ‚ dotÄ…d uruchomiony
  */
 void
 __thread_enter(thread_t *t_to)
@@ -239,7 +239,7 @@ __thread_enter(thread_t *t_to)
     entry_point entry = (entry_point) t_to->thr_entry_point;
     uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
 
-    CIPL = 0;       // proces ma dzia³aæ z CIPL = 0
+    CIPL = 0;       // proces ma dziaÅ‚aÄ‡ z CIPL = 0
     extern void i8259a_reset_mask(void);
     i8259a_reset_mask();
 

@@ -90,7 +90,7 @@ _get_vnode(mfs_node_t *en, vnode_t **vpp, vfs_t *fs)
 }
 
 /*============================================================================
- * obs³uga VFS
+ * obsÅ‚uga VFS
  */
 
 void
@@ -155,7 +155,7 @@ mfs_getroot(vfs_t *fs)
 
 
 /*============================================================================
- * obs³uga bloczków
+ * obsÅ‚uga bloczkÃ³w
  */
 
 int
@@ -202,7 +202,7 @@ mfs_blk_set_area(mfs_node_t *n, size_t s)
     mfs_data_t *mfs = n->mfs;
     int using = (s+511) / 512;
     int last = s%512;
-    // skracamy listê
+    // skracamy listÄ™
     while (list_length(&n->blks) > using) {
         mfs_blk_t *blk = list_extract_first(&n->blks);
         kmem_cache_free(mfs->cache_blk, blk);
@@ -215,8 +215,8 @@ mfs_blk_set_area(mfs_node_t *n, size_t s)
     }
 
     if (last) {
-        // je¿eli skracali¶my plik to trzeba wyzerowaæ bajty w bloczku
-        // wykraczaj±ce za niego.
+        // jeÅ¼eli skracaliÅ›my plik to trzeba wyzerowaÄ‡ bajty w bloczku
+        // wykraczajÄ…ce za niego.
         mfs_blk_t *blk = list_tail(&n->blks);
         mem_zero(blk->data+last, 512-last);
     }

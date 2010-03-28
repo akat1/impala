@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -17,5 +17,5 @@
 pid_t 
 vfork(void)
 {
-    return fork();  // a co... nie taki by³ cel, ale nadal "compliant" ;p
+    return fork();  // a co... nie taki byÅ‚ cel, ale nadal "compliant" ;p
 }

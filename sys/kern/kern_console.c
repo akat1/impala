@@ -77,9 +77,9 @@ struct vc_parser {
 typedef struct vconsole vconsole_t;
 
 /**
- * Struktura reprezentuj±ca wirtualn± konsolê - wirtualny zestaw
- * klawiatura - monitor. Prawdziwe urz±dzenia podpiête s± pod aktualn± wirtualn±
- * konsolê - current_vcons
+ * Struktura reprezentujÄ…ca wirtualnÄ… konsolÄ™ - wirtualny zestaw
+ * klawiatura - monitor. Prawdziwe urzÄ…dzenia podpiÄ™te sÄ… pod aktualnÄ… wirtualnÄ…
+ * konsolÄ™ - current_vcons
  */
 
 struct vconsole {
@@ -95,7 +95,7 @@ struct vconsole {
     vc_parser_t     parser;
     mutex_t         mtx;
 //    devd_t         *dev;
-    tty_t          *tty;    ///< urz±dzenie terminalowe tej konsoli wirtualnej
+    tty_t          *tty;    ///< urzÄ…dzenie terminalowe tej konsoli wirtualnej
 };
 
 #define CONS_MODE_AWRAP   1
@@ -135,7 +135,7 @@ static vconsole_t *log_vcons = NULL;
 static tty_t  *current_vcons_tty = NULL;
 //static devd_t *consttydev;
 
-// Odwzorowanie kolorów czcionki z sekwencji steruj±cych na kolory VGA
+// Odwzorowanie kolorÃ³w czcionki z sekwencji sterujÄ…cych na kolory VGA
 static int tty_fgattr_map[10] = {
     TS_FG(DEFAULT_FG),
     TS_FG(COLOR_RED),
@@ -149,7 +149,7 @@ static int tty_fgattr_map[10] = {
     TS_FG(COLOR_BRIGHTGRAY)
 };
 
-// Odwzorowanie kolorów t³a z sekwencji steruj±cych na kolory VGA
+// Odwzorowanie kolorÃ³w tÅ‚a z sekwencji sterujÄ…cych na kolory VGA
 static int tty_bgattr_map[10] = {
     TS_BG(DEFAULT_BG),
     TS_BG(COLOR_RED),
@@ -228,7 +228,7 @@ cons_output(int t, const char *c)
             char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
             ptr = str_cat(ptr, c);
             str_cat(ptr, "\033[0m");
-            int old_mode = log_vcons->mode; //zabezpieczyæ gdzie¶ mutexem?
+            int old_mode = log_vcons->mode; //zabezpieczyÄ‡ gdzieÅ› mutexem?
             log_vcons->mode |= CONS_MODE_NEWLINE;
             vcons_putstr(log_vcons, buf);
             log_vcons->mode = old_mode;
@@ -236,8 +236,8 @@ cons_output(int t, const char *c)
             vcons_putstr(current_vcons, c);
         }
     } else {
-        // Je¿eli obs³uga terminali nie jest jeszcze zainicjalizowana
-        // to nadajemy rêcznie na ekran
+        // JeÅ¼eli obsÅ‚uga terminali nie jest jeszcze zainicjalizowana
+        // to nadajemy rÄ™cznie na ekran
         for (; *c; c++) {
             if (isprint(*c)) textscreen_put(NULL, *c, CONSOLE_ATTR);
             if (*c == '\n') textscreen_next_line(NULL);
@@ -245,7 +245,7 @@ cons_output(int t, const char *c)
     }
 }
 
-//wywo³ywane póki co ze sterownika klawiatury
+//wywoÅ‚ywane pÃ³ki co ze sterownika klawiatury
 void cons_input_char(int ch)
 {
     if(current_vcons) {
@@ -262,20 +262,20 @@ void cons_input_string(const char *str)
 
 
 /*========================================================================
- * Obs³uga wirtualnych terminali w emulacji VT100
+ * ObsÅ‚uga wirtualnych terminali w emulacji VT100
  */
 
 /*
- * Sekwencje steruj±ce terminalu VT100.
- * Wszystkie zaczynaj± siê od znaku ESCAPE, klamrami {}
- * s± oznaczone zmienne. Zapis {X=y} oznacza, ¿e parametr
- * X mo¿e nie zostaæ podany, i wtedy przyjmuje domy¶ln± warto¶æ y.
- * Opis kodów dostêpny na stronie (kody poni¿ej s± w tej samej kolejno¶ci)
+ * Sekwencje sterujÄ…ce terminalu VT100.
+ * Wszystkie zaczynajÄ… siÄ™ od znaku ESCAPE, klamrami {}
+ * sÄ… oznaczone zmienne. Zapis {X=y} oznacza, Å¼e parametr
+ * X moÅ¼e nie zostaÄ‡ podany, i wtedy przyjmuje domyÅ›lnÄ… wartoÅ›Ä‡ y.
+ * Opis kodÃ³w dostÄ™pny na stronie (kody poniÅ¼ej sÄ… w tej samej kolejnoÅ›ci)
  *      http://www.termsys.demon.co.uk/vtansi.htm
  *
  * Dodatkowe oznaczenia:
  *  #   - kod jest rozpoznawany przez sterownik
- *  @   - kod jest rozpoznawany i obs³ugiwany przez sterownik
+ *  @   - kod jest rozpoznawany i obsÅ‚ugiwany przez sterownik
  */
 enum {
     ESC_RESET,      // c (@)
@@ -322,7 +322,7 @@ enum {
 void
 vcons_switch(vconsole_t *vc)
 {
-    int x = spltty();   //póki co wywo³ywane tylko z przerwania, ale i tak...
+    int x = spltty();   //pÃ³ki co wywoÅ‚ywane tylko z przerwania, ale i tak...
     textscreen_clone(&current_vcons->screen);
     current_vcons = vc;
     current_vcons_tty = vc->tty;
@@ -365,11 +365,11 @@ vcons_data_out(vconsole_t *vc, const char *cc, int n)
         CODE_SS3 = 0217
     };
     int X = spltty();
-//    mutex_lock(&vc->mtx); //w spl nie powinno byæ potrzebne, a i jest niebezpieczne
+//    mutex_lock(&vc->mtx); //w spl nie powinno byÄ‡ potrzebne, a i jest niebezpieczne
     unsigned char *c = (unsigned char *)cc;
     for (; n; c++, n--) {
         if (*c <= 032 || *c == DEL)
-            vcons_put(vc, *c);  //te znaki mog± byæ nawet w ¶rodku escape
+            vcons_put(vc, *c);  //te znaki mogÄ… byÄ‡ nawet w Å›rodku escape
         else if (vc->escape) {
             int code = vc_parser_put(&vc->parser, *c);
             if (code == PARSER_ERROR) {
@@ -448,7 +448,7 @@ set_mode(vconsole_t *vc, int m)
             break;
         case 3: //column mode
             textscreen_clear(&vc->screen);
-//            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+//            SET(vc->mode, CONS_MODE_NEWLINE); //moÅ¼e?
             break;
         case 6: //origin avs
             SET(vc->mode, CONS_MODE_ORIGIN);
@@ -478,7 +478,7 @@ reset_mode(vconsole_t *vc, int m)
             break;
         case 3:
             textscreen_clear(&vc->screen);
-//            SET(vc->mode, CONS_MODE_NEWLINE); //mo¿e?
+//            SET(vc->mode, CONS_MODE_NEWLINE); //moÅ¼e?
             break;
         case 6: //origin rel
             UNSET(vc->mode, CONS_MODE_ORIGIN);
@@ -638,12 +638,12 @@ vcons_code(vconsole_t *vc, int c)
             }
             break;
         case ESC_QUERY_DA:
-            vcons_input_string(vc, "\033[?1;0c"); //a mo¿e co¶ wiêkszego?
+            vcons_input_string(vc, "\033[?1;0c"); //a moÅ¼e coÅ› wiÄ™kszego?
             break;
         case ESC_QUERY_PARAM: {
             char buf[32];
             snprintf(buf, 32, "\033[%i;1;1;112;112;1;0x", 2+attr0);
-            vcons_input_string(vc, buf); //a mo¿e co¶ wiêkszego?
+            vcons_input_string(vc, buf); //a moÅ¼e coÅ› wiÄ™kszego?
             break;
         }
         case ESC_QUERY_DSTAT:
@@ -661,14 +661,14 @@ vcons_code(vconsole_t *vc, int c)
 
 
 /*========================================================================
- * Implementacja parsera skanuj±cego sekwencje steruj±ce VT100
+ * Implementacja parsera skanujÄ…cego sekwencje sterujÄ…ce VT100
  */
 
 
 enum {
     P_DUMMY,
     P_FIRST,         // czekamy na pierwszy znak
-    P_AFTER_HASH,    // jeste¶my po #    
+    P_AFTER_HASH,    // jesteÅ›my po #    
     P_LONG,          // czekamy na znaczki po '['
     P_LONG_ATTR,     // czekamy na atrybut po '['
     P_SET_G0,        // znaczki po '('
@@ -691,7 +691,7 @@ vc_parser_resetE(vc_parser_t *vcprs)
 }
 
 /*
- * Zastanawiam siê czy nie przepisaæ tego na jaki¶ DFA.
+ * Zastanawiam siÄ™ czy nie przepisaÄ‡ tego na jakiÅ› DFA.
  */
 int
 vc_parser_put(vc_parser_t *vcprs, char c)
@@ -767,7 +767,7 @@ vc_parser_put(vc_parser_t *vcprs, char c)
                 ret = PARSER_ERROR;
                 break;
         }
-    } else if (vcprs->state == P_LONG) {//warto pomy¶leæ nad mergem z P_LONG_ATTR
+    } else if (vcprs->state == P_LONG) {//warto pomyÅ›leÄ‡ nad mergem z P_LONG_ATTR
         if (c == '?') {
             nexts = P_LONG_ATTR;
         } else if ( '0' <= c && c <= '9') {

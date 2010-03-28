@@ -73,7 +73,7 @@ thread_dtor(void *_thr)
         mutex_destroy(&t->thr_mtx);
 }
 
-/// Inicjalizuje obs³ugê w±tków.
+/// Inicjalizuje obsÅ‚ugÄ™ wÄ…tkÃ³w.
 void
 thread_init()
 {
@@ -89,13 +89,13 @@ thread_init()
 }
 
 /**
- * Przydziela deskryptor w±tku.
+ * Przydziela deskryptor wÄ…tku.
  * @param type Poziom uprzywilejowania.
- * @param entry Adres procedury wej¶ciowej.
- * @param arg Adres argumentu przekazywany do procedury wej¶ciowej.
+ * @param entry Adres procedury wejÅ›ciowej.
+ * @param arg Adres argumentu przekazywany do procedury wejÅ›ciowej.
  *
- * Procedura przydziela ogólny deskryptor w±tku. W±tek przydzielony
- * w ten sposób znajduje siê w stanie surowym.
+ * Procedura przydziela ogÃ³lny deskryptor wÄ…tku. WÄ…tek przydzielony
+ * w ten sposÃ³b znajduje siÄ™ w stanie surowym.
  */
 thread_t *
 thread_create(int type, addr_t entry, addr_t arg)
@@ -121,7 +121,7 @@ thread_create(int type, addr_t entry, addr_t arg)
     }
 }
 
-//na potrzeby zamkniêcia ostatniego w±tku procesu który robi exec
+//na potrzeby zamkniÄ™cia ostatniego wÄ…tku procesu ktÃ³ry robi exec
 void thread_exit_last(thread_t *t)
 {
     t->thr_flags |= THREAD_ZOMBIE;
@@ -132,7 +132,7 @@ void thread_exit_last(thread_t *t)
     }
     sched_exit_1(t);
     kmem_cache_free(thread_cache, t);
-    //ta procedura nie wymaga ju¿ poprawnej zawarto¶ci struktury t
+    //ta procedura nie wymaga juÅ¼ poprawnej zawartoÅ›ci struktury t
     sched_exit_2(t); 
     panic("thread_exit_last() - should not be here");
 }
@@ -143,12 +143,12 @@ thread_destroy(thread_t *t)
     t->thr_flags |= THREAD_ZOMBIE;
     list_remove(&threads_list, t);
     if (t != curthread) {
-        //bie¿±cego w±tku nie mo¿emy szybciej zwolniæ, bo jest w runq
-        // a ponowne przydzielenie tego samego adresu na nowy w±tek narobi³o by
-        // w takiej sytuacji k³opotów
+        //bieÅ¼Ä…cego wÄ…tku nie moÅ¼emy szybciej zwolniÄ‡, bo jest w runq
+        // a ponowne przydzielenie tego samego adresu na nowy wÄ…tek narobiÅ‚o by
+        // w takiej sytuacji kÅ‚opotÃ³w
         if (t->thr_sleepq) {
-            // jak sobie gdziê¶ ¶pi to go przed zabójstwem budzimy
-            // inaczej bêdzie on w li¶cie ¶pi±cej kolejki, i po co ? ;]
+            // jak sobie gdziÄ™Å› Å›pi to go przed zabÃ³jstwem budzimy
+            // inaczej bÄ™dzie on w liÅ›cie Å›piÄ…cej kolejki, i po co ? ;]
             sleepq_intrpt(t);
         }
         if (t->thr_joiner) {
@@ -156,7 +156,7 @@ thread_destroy(thread_t *t)
             sleepq_destroy(t->thr_joiner);
             t->thr_joiner = 0;
         }
-        sched_exit(t); //to nie aktualny w±tek, wiêc mo¿emy tak
+        sched_exit(t); //to nie aktualny wÄ…tek, wiÄ™c moÅ¼emy tak
         kmem_cache_free(thread_cache, t);
         return;
     }
@@ -195,12 +195,12 @@ mutex_destroy(mutex_t *m)
 
 /**
  * Zamyka zamek.
- * @param m zamek do zamkniêcia.
+ * @param m zamek do zamkniÄ™cia.
  *
- * W przypadku gdy zamek jest zajêty aktualny w±tek
- * zostaje u¶piony.
- * W celu zapewnienia nieg³odzenia implementowana jest strategia
- * wykorzystuj±ca kolejkê FIFO.
+ * W przypadku gdy zamek jest zajÄ™ty aktualny wÄ…tek
+ * zostaje uÅ›piony.
+ * W celu zapewnienia niegÅ‚odzenia implementowana jest strategia
+ * wykorzystujÄ…ca kolejkÄ™ FIFO.
  */
 
 void
@@ -245,7 +245,7 @@ mutex_unlock(mutex_t *m)
 }
 
 /**
- * Budzenie w±tków oczekuj±cych na sygna³.
+ * Budzenie wÄ…tkÃ³w oczekujÄ…cych na sygnaÅ‚.
  */
 
 void
@@ -267,10 +267,10 @@ _mutex_wakeup(mutex_t *m)
 }
 
 /**
- * Próbuje zamkn±æ zamek.
+ * PrÃ³buje zamknÄ…Ä‡ zamek.
  * @param m zamek.
- * @return Zwraca prawdê wtedy i tylko wtedy, gdy uda³o siê zamkn±æ zamek.
- *         w przeciwnym wypadku zwracany jest fa³sz.
+ * @return Zwraca prawdÄ™ wtedy i tylko wtedy, gdy udaÅ‚o siÄ™ zamknÄ…Ä‡ zamek.
+ *         w przeciwnym wypadku zwracany jest faÅ‚sz.
  */
 
 bool
@@ -285,15 +285,15 @@ mutex_trylock(mutex_t *m)
 }
 
 /**
- * Oczekuje na danym zamku na sygna³.
- * @param m zamkniêty zamek.
+ * Oczekuje na danym zamku na sygnaÅ‚.
+ * @param m zamkniÄ™ty zamek.
  *
- * Je¿eli w±tek jest w³a¶cicielem zamku to mo¿e oczekiwaæ na nim sygna³.
- * Procedura wychodzi z sekcji krytycznej, a nastêpnie usypia w±tek.
- * U¶piony w±tek jest dodawany do listy w±tków oczekuj±cych na sygna³.
+ * JeÅ¼eli wÄ…tek jest wÅ‚aÅ›cicielem zamku to moÅ¼e oczekiwaÄ‡ na nim sygnaÅ‚.
+ * Procedura wychodzi z sekcji krytycznej, a nastÄ™pnie usypia wÄ…tek.
+ * UÅ›piony wÄ…tek jest dodawany do listy wÄ…tkÃ³w oczekujÄ…cych na sygnaÅ‚.
  *
- * Gdy w±tek zostanie obudzony to zamek zostanie automatycznie mu
- * przydzielony (powróci do swojej sekcji krytycznej).
+ * Gdy wÄ…tek zostanie obudzony to zamek zostanie automatycznie mu
+ * przydzielony (powrÃ³ci do swojej sekcji krytycznej).
  */
 
 void
@@ -306,13 +306,13 @@ mutex_wait(mutex_t *m)
 }
 
 /**
- * Budzi jeden w±tek oczekuj±cy na sygna³.
+ * Budzi jeden wÄ…tek oczekujÄ…cy na sygnaÅ‚.
  * @param m zamek.
  *
- * Je¿eli w±tek jest w³a¶cicielem zamka, to mo¿e obudziæ oczekuj±cy sygna³u
- * na tym zamku w±tek. Procedura zaznacza informacjê, ¿e przy odblokowaniu
- * zamku nale¿y przenie¶æ jeden w±tek oczekuj±cy na sygna³ do listy w±tków
- * chc±cych wej¶æ do sekcji krytycznej.
+ * JeÅ¼eli wÄ…tek jest wÅ‚aÅ›cicielem zamka, to moÅ¼e obudziÄ‡ oczekujÄ…cy sygnaÅ‚u
+ * na tym zamku wÄ…tek. Procedura zaznacza informacjÄ™, Å¼e przy odblokowaniu
+ * zamku naleÅ¼y przenieÅ›Ä‡ jeden wÄ…tek oczekujÄ…cy na sygnaÅ‚ do listy wÄ…tkÃ³w
+ * chcÄ…cych wejÅ›Ä‡ do sekcji krytycznej.
  */
 
 void
@@ -323,7 +323,7 @@ mutex_wakeup(mutex_t *m)
     spinlock_unlock(&m->mtx_slock);
 }
 
-/// Budzi wszystkie w±tki oczekuj±ce na sygna³.
+/// Budzi wszystkie wÄ…tki oczekujÄ…ce na sygnaÅ‚.
 void
 mutex_wakeup_all(mutex_t *m)
 {
@@ -338,9 +338,9 @@ mutex_wakeup_all(mutex_t *m)
 
 
 /**
- * Inicjalizuje wspó³bie¿n± kolejkê.
- * @param q wska¼nik do deskryptora kolejki.
- * @param off przesuniêcie uchwytu dla listy.
+ * Inicjalizuje wspÃ³Å‚bieÅ¼nÄ… kolejkÄ™.
+ * @param q wskaÅºnik do deskryptora kolejki.
+ * @param off przesuniÄ™cie uchwytu dla listy.
  */
 
 void
@@ -351,11 +351,11 @@ cqueue_init(cqueue_t *q, int off)
 }
 
 /**
- * Wy³±cza wspo³biezn± kolejkê.
+ * WyÅ‚Ä…cza wspoÅ‚bieznÄ… kolejkÄ™.
  * @param q kolejka.
  *
- * Niepozwala w±tkom spaæ w oczekiwaniu na kolejne dane. U¿yteczne
- * przy koñczeniu pracy z dan± kolejk±. NIEZAIMPLEMENTOWANE.
+ * Niepozwala wÄ…tkom spaÄ‡ w oczekiwaniu na kolejne dane. UÅ¼yteczne
+ * przy koÅ„czeniu pracy z danÄ… kolejkÄ…. NIEZAIMPLEMENTOWANE.
  */
 void
 cqueue_shutdown(cqueue_t *q)
@@ -364,12 +364,12 @@ cqueue_shutdown(cqueue_t *q)
 }
 
 /**
- * Wrzuca wska¼nik w kolejkê.
+ * Wrzuca wskaÅºnik w kolejkÄ™.
  * @param q kolejka
- * @param d wska¼nik do zakolejkowania.
+ * @param d wskaÅºnik do zakolejkowania.
  *
- * Procedura po zakolejkowaniu wska¼nika budzi jeden
- * z w±tków oczekuj±cych na dane.
+ * Procedura po zakolejkowaniu wskaÅºnika budzi jeden
+ * z wÄ…tkÃ³w oczekujÄ…cych na dane.
  */
 void
 cqueue_insert(cqueue_t *q, void *d)
@@ -381,11 +381,11 @@ cqueue_insert(cqueue_t *q, void *d)
 }
 
 /**
- * Pobranie z kolejki wska¼nika.
+ * Pobranie z kolejki wskaÅºnika.
  * @param q kolejka
  *
- * Procedura usypia w±tek, gdy kolejka jest pusta a kolejka
- * nie zota³a w³±czona. W przeciwnym wypadku zwraca NULL.
+ * Procedura usypia wÄ…tek, gdy kolejka jest pusta a kolejka
+ * nie zotaÅ‚a wÅ‚Ä…czona. W przeciwnym wypadku zwraca NULL.
  */
 
 void*

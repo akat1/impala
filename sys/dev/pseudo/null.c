@@ -63,7 +63,7 @@ null_init(void)
 
 
 /*========================================================================
- * Obs³uga pliku urz±dzenia znakowego /dev/null
+ * ObsÅ‚uga pliku urzÄ…dzenia znakowego /dev/null
  */
 
 int

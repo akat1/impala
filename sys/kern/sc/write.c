@@ -74,7 +74,7 @@ sc_write(thread_t *t, syscall_result_t *r, sc_write_args *args)
     u.iovs = &iov;
     u.iovcnt = 1;
     u.oper = UIO_WRITE;
-    u.space = UIO_SYSSPACE; //znowu ¶ciema
+    u.space = UIO_SYSSPACE; //znowu Å›ciema
     r->result = f_write(file, &u);
     frele(file);
     if(r->result < 0)

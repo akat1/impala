@@ -29,7 +29,7 @@ main(int argc, char **v)
     char buf[BSIZE];
     ssize_t nbytes;
     int status;
-    //printf("A tu mogê pisaæ?\n");
+    //printf("A tu mogÄ™ pisaÄ‡?\n");
     status = pipe(fildes);
     if (status == -1 ) {
         /* an error occurred */
@@ -44,7 +44,7 @@ main(int argc, char **v)
 
     case 0:  /* Child - reads from pipe */
         close(fildes[1]);                       /* Write end is unused */
-        printf("Próbujê czytaæ...\n");
+        printf("PrÃ³bujÄ™ czytaÄ‡...\n");
         nbytes = read(fildes[0], buf, BSIZE);   /* Get data from pipe */
         /* At this point, a further read would see end of file ... */
         close(fildes[0]);                       /* Finished with pipe */

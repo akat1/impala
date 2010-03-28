@@ -32,7 +32,7 @@
 
 /** @file Format Aout
  *
- * Plik zawiera standardowe definicje nag≥ÛwkÛw i makr do obs≥ugi
+ * Plik zawiera standardowe definicje nag≈Ç√≥wk√≥w i makr do obs≈Çugi
  * formatu a.out.
  */
 
@@ -40,7 +40,7 @@
 #define __SYS_AOUT_H
 
 
-/// nag≥Ûwek pliku.
+/// nag≈Ç√≥wek pliku.
 typedef struct exec exec_t;
 struct exec {
     uint32_t    a_midmag;           ///< 
@@ -48,7 +48,7 @@ struct exec {
     uint32_t    a_data;             ///< rozmiar sekcji .data
     uint32_t    a_bss;              ///< rozmiar sekcji .bss
     uint32_t    a_syms;             ///< rozmiar sekcji .syms
-    uint32_t    a_entry;            ///< adres procedury wej∂ciowej
+    uint32_t    a_entry;            ///< adres procedury wej≈õciowej
     uint32_t    a_trsize;           ///< rozmiar sekcji z relokacjami .text
     uint32_t    a_drsize;           ///< rozmiar sekcji z relokacjami .data
 };
@@ -63,7 +63,7 @@ struct nlist {
     int8_t      n_type;             ///< typ symbolu
     int8_t      n_other;            ///< 
     int16_t     n_desc;             ///< 
-    uint32_t    n_value;            ///< warto∂c symbolu
+    uint32_t    n_value;            ///< warto≈õc symbolu
 };
 
 #define OMAGIC      0407

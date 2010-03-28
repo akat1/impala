@@ -115,8 +115,8 @@ uint8_t keycode_type[] =
     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, //0x50 - 0x5f
 };
 
-/// tablica do translacji keycode -> ascii w przypadku braku wci¶niêtych
-/// klawiszy modyfikuj±cych
+/// tablica do translacji keycode -> ascii w przypadku braku wciÅ›niÄ™tych
+/// klawiszy modyfikujÄ…cych
 uint8_t keymap_normal[] =
 { 0,'\e', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=','\b', '\t',// 0x00 - 0x0f
 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\r',  0, 'a', 's', // 0x10 - 0x1f  //0x1d - brak
@@ -144,7 +144,7 @@ STX, SO, CR, ',', '.', DEL, 0  , '*', 0  , NUL, 0 ,  0 ,    0,   0,   0,   0, //
 '2', '3', '0', '.',   0,   0,   0,   0                                          // 0x50 - 0x58
 };
 
-/// flagi dla klawiszy modyfikuj±cych zachowanie pozosta³ych klawiszy
+/// flagi dla klawiszy modyfikujÄ…cych zachowanie pozostaÅ‚ych klawiszy
 enum {
     KM_LSHIFT   = 1<<0,
     KM_RSHIFT   = 1<<1,
@@ -156,7 +156,7 @@ enum {
     KM_MENU     = 1<<7
 };
 
-/// tablica z flagami oraz keycode'ami klawiszy modyfikuj±cych
+/// tablica z flagami oraz keycode'ami klawiszy modyfikujÄ…cych
 uint8_t key_modifiers_tab[8][2] = {
 {KM_LSHIFT, 0x2a},
 {KM_RSHIFT, 0x36},

@@ -34,7 +34,7 @@
 #define __MACHINE_CPU_H
 
 
-/// Opis bit體 rejestru EFLAGS
+/// Opis bit贸w rejestru EFLAGS
 enum CPU_EFLAGS {
     EFLAGS_CS   = 1 << 1,
     EFLAGS_PF   = 1 << 2,
@@ -64,7 +64,7 @@ enum CPU_EFLAGS_IOPL {
 #define EFLAGS_BITS 0x2
 
 
-/// Opis bit體 rejestru CR0
+/// Opis bit贸w rejestru CR0
 enum CPU_CR0 {
     /// tryb chroniony (protected mode)
     CR0_PE = 1 << 0,
@@ -80,13 +80,13 @@ enum CPU_CR0 {
     CR0_PG = 1 << 31    ///< Paging
 };
 
-/// Opis bit體 rejestru CR3
+/// Opis bit贸w rejestru CR3
 enum CPU_CR3 {
     CR3_PWT = 1 << 3,
     CR3_PCD = 1 << 4
 };
 
-/// Opis bit體 rejestru CR4
+/// Opis bit贸w rejestru CR4
 enum CPU_CR4 {
     CR4_VME = 1 << 0,
     CR4_PVI = 1 << 1,
@@ -102,7 +102,7 @@ enum CPU_CR4 {
 };
 
 /**
- * Opis mo縧iwo禼i procesora
+ * Opis mo偶liwo艣ci procesora
  *
  * Intel IA-32 ADSM - 2A - 3-192 - ECX
  * Intel IA-32 ADSM - 2A - 3-192 - EDX

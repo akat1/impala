@@ -157,10 +157,10 @@ _cpu_info(void)
 }
 
 /**
- * Inicjalizuje obs³ugê architektury x86.
+ * Inicjalizuje obsÅ‚ugÄ™ architektury x86.
  *
- * Procedura jest wywo³ywana przez procedurê wej¶ciow±
- * j±dra. Jej zadanie to zainicjalizowanie ¶rodowiska
+ * Procedura jest wywoÅ‚ywana przez procedurÄ™ wejÅ›ciowÄ…
+ * jÄ…dra. Jej zadanie to zainicjalizowanie Å›rodowiska
  * do pracy w systemie operacyjnym.
  */
 
@@ -251,7 +251,7 @@ setesp0(void *a)
 }
 
 
-/// Ustawia wpis w tablicy deskryptorów IDT.
+/// Ustawia wpis w tablicy deskryptorÃ³w IDT.
 void
 setidt(int i, uint selector, uintptr_t offset,
     uint access)
@@ -265,7 +265,7 @@ setidt(int i, uint selector, uintptr_t offset,
     entry->access = access;
 }
 
-/// Ustawia wpis w tablicy deskryptorów GDT.
+/// Ustawia wpis w tablicy deskryptorÃ³w GDT.
 void
 setgdt(int i, uintptr_t base, uint limit,
     uint acc, uint atrib)

@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -24,7 +24,7 @@ struct DIR {
 
 typedef struct DIR DIR;
 
-// jako¶ inaczej to trzeba zrobiæ
+// jakoÅ› inaczej to trzeba zrobiÄ‡
 #define MAX_NAME 128
 
 struct dirent {

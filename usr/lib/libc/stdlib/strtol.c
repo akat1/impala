@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -33,7 +33,7 @@ strtol(const char *nptr, char **endptr, int base)
         return 0;
     }
 
-    /* nie bierzemy pod uwagê bia³ych znaków z pocz±tku */
+    /* nie bierzemy pod uwagÄ™ biaÅ‚ych znakÃ³w z poczÄ…tku */
     while(isspace(*s)) s++;
 
     /* prefix */

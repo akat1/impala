@@ -7,7 +7,7 @@
 void*
 realloc(void *ptr, size_t size)
 {
-    ///@todo poprawiæ realloc
+    ///@todo poprawiÄ‡ realloc
     if(!ptr)
         return malloc(size);
 #if 0
@@ -19,7 +19,7 @@ realloc(void *ptr, size_t size)
     size_t oldsize = mc->size;
     if(size<oldsize)
     {
-        //mo¿na zwalniaæ nadmiarow± pam..
+        //moÅ¼na zwalniaÄ‡ nadmiarowÄ… pam..
         return ptr;
     }
     //naiwna implementacja

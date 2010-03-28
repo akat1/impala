@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -23,7 +23,7 @@
 #define NSIG _NSIG
 
 extern const char *const sys_siglist[NSIG]; //niby stare, ale ash chce
-const static int sys_nsig = NSIG; //co te¿ ten ash wymy¶la..
+const static int sys_nsig = NSIG; //co teÅ¼ ten ash wymyÅ›la..
 
 typedef int sig_atomic_t;
 

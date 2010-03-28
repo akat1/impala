@@ -66,17 +66,17 @@ union descriptor {
 /// Indeksy GDT.
 enum {
     SEL_NULL,
-    /// kod j±dra.
+    /// kod jÄ…dra.
     SEL_CODE,
-    /// dane j±dra.
+    /// dane jÄ…dra.
     SEL_DATA,
-    /// kod u¿ytkownika.
+    /// kod uÅ¼ytkownika.
     SEL_UCODE,
-    /// dane u¿ytkownika
+    /// dane uÅ¼ytkownika
     SEL_UDATA,
-    /// zadanie j±dra.
+    /// zadanie jÄ…dra.
     SEL_TSS0,
-    /// zadanie u¿ytkownika.
+    /// zadanie uÅ¼ytkownika.
 //    SEL_UTSS0,
     /// bramka do trybu rzeczywistego
 //    SEL_VM86,
@@ -84,7 +84,7 @@ enum {
 };
 
 typedef struct descriptor_register descriptor_register_t;
-/// Opis rejestrów GDT i LDT.
+/// Opis rejestrÃ³w GDT i LDT.
 struct descriptor_register {
   uint16_t  limit;
   addr_t    base;

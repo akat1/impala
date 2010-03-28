@@ -48,7 +48,7 @@ sc_getcwd(thread_t *t, syscall_result_t *r, getcwd_args_t *args)
     int err = 0;
     if((err = vm_is_avail((vm_addr_t)args->buf, args->size)))
         return err;
-    vnode_t *cd = t->thr_proc->p_curdir;    //nie boimy siê trzymaæ ten wska¼nik
+    vnode_t *cd = t->thr_proc->p_curdir;    //nie boimy siÄ™ trzymaÄ‡ ten wskaÅºnik
     vnode_t *tmp = NULL;
     str_ncpy(args->buf, "/", args->size);
     return -EOK;
@@ -57,15 +57,15 @@ sc_getcwd(thread_t *t, syscall_result_t *r, getcwd_args_t *args)
     pc.max_link_cnt = 10;
     pc.path = "..";
     pc.now = pc.path;
-    ///@todo Zaimplementowaæ getcwd
-    //Chwilowo wstrzymujê prace nad getcwd. Aby go zrealizowaæ, potrzebne jest
-    // jakie¶ rozszerzenie VFS... np. VOP_NAME() :)...
-    // z tym, ¿e vnode nie musi mieæ unikatowej nazwy.. a mo¿e nawet nie mieæ
-    // ¿adnej ;) (VOP_ANYNAME?) Mo¿na by u¿ywaæ ostatnio VOP_LOOKUPowanej nazwy
-    // wskazuj±cej na ten vnode.
+    ///@todo ZaimplementowaÄ‡ getcwd
+    //Chwilowo wstrzymujÄ™ prace nad getcwd. Aby go zrealizowaÄ‡, potrzebne jest
+    // jakieÅ› rozszerzenie VFS... np. VOP_NAME() :)...
+    // z tym, Å¼e vnode nie musi mieÄ‡ unikatowej nazwy.. a moÅ¼e nawet nie mieÄ‡
+    // Å¼adnej ;) (VOP_ANYNAME?) MoÅ¼na by uÅ¼ywaÄ‡ ostatnio VOP_LOOKUPowanej nazwy
+    // wskazujÄ…cej na ten vnode.
     //
-    // A tak na prawdê, to póki co u nas chyba wszystko ma dok³adnie jedn± nazwê
-    // Wiêc na razie nie by³o by wielkiego problemu z tak± funkcj±...
+    // A tak na prawdÄ™, to pÃ³ki co u nas chyba wszystko ma dokÅ‚adnie jednÄ… nazwÄ™
+    // WiÄ™c na razie nie byÅ‚o by wielkiego problemu z takÄ… funkcjÄ…...
     panic("Use of unimplemented syscall getcwd");
     while(cd) {
         VOP_LOOKUP(cd, &tmp, &pc);

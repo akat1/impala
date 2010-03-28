@@ -45,8 +45,8 @@
 
 
 /*=============================================================================
- * Bardzo prosta implementacja USTAR (Uniform Standard TAR), obs≥ugujemy
- * teø GNU sygnaturÍ (GNU tar produkuje tary oznaczone "prawie" jako USTAR).
+ * Bardzo prosta implementacja USTAR (Uniform Standard TAR), obs≈Çugujemy
+ * te≈º GNU sygnaturƒô (GNU tar produkuje tary oznaczone "prawie" jako USTAR).
  *      -- wieczyk
  */
 
@@ -58,7 +58,7 @@ enum OPER {
     USAGE = 'h'
 };
 
-/// nag≥Ûwek wpisu w TAR
+/// nag≈Ç√≥wek wpisu w TAR
 struct tentry {
     char    name[100];
     char    mode[8];
@@ -143,8 +143,8 @@ mode2str(const char *_m, int type)
             out[0] = '?';
             break;
     }
-    // tak, moøna to zrobiÊ w 3 iteracjach jakiej∂
-    // pÍtli interpretuj±cej po 3 bity, ale po co?
+    // tak, mo≈ºna to zrobiƒá w 3 iteracjach jakiej≈õ
+    // pƒôtli interpretujƒÖcej po 3 bity, ale po co?
     out[1] = iss(TUREAD,  'r');
     out[2] = iss(TUWRITE, 'w');
     out[3] = iss(TUEXEC,  'x');
@@ -247,12 +247,12 @@ open_gzip(const char *file, const char *mode)
 }
 
 /*=============================================================================
- * dopisywanie elementÛw do archiwum
+ * dopisywanie element√≥w do archiwum
  *
- * Do dorzucania s≥uøy append_to_arch, ktÛry w wykorzystuje
+ * Do dorzucania s≈Çu≈ºy append_to_arch, kt√≥ry w wykorzystuje
  * append_file_to_arch gdy dorzucany element to regularny plik
  * oraz append_dir_to_arch gdy to katalog - wtedy jest wzajemna rekursja
- * miÍdzy tymi dwoma procedurami.
+ * miƒôdzy tymi dwoma procedurami.
  */
 
 static void append_dir_to_arch(FILE *, const char *, int, const char *);
@@ -299,7 +299,7 @@ append_file_to_arch(FILE *archive, const char *name, int verb, const char *PREFI
 }
 
 
-///@todo obs≥uga linkÛw (czekamy na readlink(2))
+///@todo obs≈Çuga link√≥w (czekamy na readlink(2))
 void
 append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
 {
@@ -355,7 +355,7 @@ append_to_arch(FILE *archive, const char *file, int verb, const char *PREFIX)
 }
 
 /*=============================================================================
- * rozpakowywanie elementÛw z archiwum (i testowanie)
+ * rozpakowywanie element√≥w z archiwum (i testowanie)
  */
 
 enum {
@@ -402,7 +402,7 @@ progressbar(int percent, const char *fmt, ...)
     int win;
     char buf[256];
     char *msg = buf;
-    win = 80;   // czekamy na jaki∂ TIOCGETWINSZ czy tam co∂ innego
+    win = 80;   // czekamy na jaki≈õ TIOCGETWINSZ czy tam co≈õ innego
     int size = win;
     int used = ((win*FIX)/100 * percent) / FIX;
     va_start(ap, fmt);
@@ -535,7 +535,7 @@ extract_from_arch(FILE *archive, char **names, int verb, int everb,
 }
 
 /*=============================================================================
- * program w≥a∂ciwy
+ * program w≈Ça≈õciwy
  */
 
 int main(int argc, char **argv);

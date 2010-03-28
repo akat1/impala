@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -20,7 +20,7 @@
 FILE *
 fdopen(int fd, const char *mode)
 {
-    if(fd<0) { //nie sprawdzam czy mode nie jest NULL, bo w crt to wywo³uje ;)
+    if(fd<0) { //nie sprawdzam czy mode nie jest NULL, bo w crt to wywoÅ‚uje ;)
         errno = EINVAL;
         return NULL;
     }

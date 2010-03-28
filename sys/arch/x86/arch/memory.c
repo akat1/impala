@@ -57,7 +57,7 @@ static vm_ptable_t *_alloc_ptable(vm_page_t **pg);
 static vm_page_t * _alloc_kpage(void);
 static vm_page_t * _alloc_page(void);
 
-/// Wska¼nik do tablicy opisu stron.
+/// WskaÅºnik do tablicy opisu stron.
 static vm_page_t *vm_pages;
 /// Ilosc stron przeznaczona na opis.
 
@@ -104,7 +104,7 @@ vm_pmap_switch(const vm_pmap_t *pm)
     cpu_set_cr3(pm->physdir);
 }
 
-/// W³±cza stronicowanie.
+/// WÅ‚Ä…cza stronicowanie.
 void
 vm_enable_paging()
 {
@@ -134,7 +134,7 @@ vm_disable_cache()
     cpu_set_cr4(cr4);
 }
 
-/// Wy³±cza stronicowanie.
+/// WyÅ‚Ä…cza stronicowanie.
 void
 vm_disable_paging()
 {
@@ -179,7 +179,7 @@ vm_page_t *page;
 #define mem_unlock() splx(xxx);
 //mutex_unlock(&mem_mtx)
 
-/// Inicjalizuje przestrzeñ adresow± j±dra.
+/// Inicjalizuje przestrzeÅ„ adresowÄ… jÄ…dra.
 void
 create_kernel_space()
 {
@@ -202,7 +202,7 @@ create_kernel_space()
         VM_SEG_EXPDOWN);
 
 
-    // stwórz odwzorowywanie j±dra.
+    // stwÃ³rz odwzorowywanie jÄ…dra.
     vm_pmap_t *kmap = &vm_kspace.pmap;
     vm_pmap_init0(kmap);
 
@@ -227,8 +227,8 @@ create_kernel_space()
 
 #if 0
     /*
-     * Poni¿szy kod udostêpnia piersze 4MB pamiêci.
-     * NIE KASOWAÆ.
+     * PoniÅ¼szy kod udostÄ™pnia piersze 4MB pamiÄ™ci.
+     * NIE KASOWAÄ†.
      */
     paddr = 0;
     for (vaddr = 0; vaddr < 4*1024*1024; vaddr += PAGE_SIZE) {
@@ -253,7 +253,7 @@ initialize_internal()
             sizeof(vm_region_t), VM_LPOOL_NORMAL, (void*)page->kvirt_addr);
     page = _alloc_page();
 //    vm_pmap_insert(kmap, page, page->kvirt_addr,
-//                    VM_PROT_RWX | VM_PROT_SYSTEM);//ju¿ to_alloc robi?
+//                    VM_PROT_RWX | VM_PROT_SYSTEM);//juÅ¼ to_alloc robi?
     vm_lpool_insert_empty(&vm_unused_regions, (void*)page->kvirt_addr);
 
 
@@ -263,10 +263,10 @@ initialize_internal()
     reg->end = reg->begin + reg->size;
     reg->segment = kdata;
     list_insert_head(&kdata->regions, reg);
-    cpu_set_cr0(cpu_get_cr0() | CR0_WP); //w³±czamy ochronê przed zapisem
+    cpu_set_cr0(cpu_get_cr0() | CR0_WP); //wÅ‚Ä…czamy ochronÄ™ przed zapisem
 }
 
-/// Wykrywa ilo¶æ zainstalowanej pamiêci RAM.
+/// Wykrywa iloÅ›Ä‡ zainstalowanej pamiÄ™ci RAM.
 size_t
 _avail_physmem()
 {
@@ -314,7 +314,7 @@ _collect_pages()
 
 
 /*========================================================================
- * Obs³uga vm_pmap_t
+ * ObsÅ‚uga vm_pmap_t
  */
 
 static vm_ptable_t *_pmap_pde(const vm_pmap_t *vpm, vm_paddr_t addr);
@@ -323,7 +323,7 @@ static vm_ptable_t *_pmap_dir(const vm_pmap_t *vpm, vm_paddr_t addr);
 /**
  * Inicjalizuje odwzorowanie stron.
  * @param vpm odwzorowanie stron.
- * @return FALSE wtedy i tylko wtedy, gdy nie mo¿na by³o przydzieliæ
+ * @return FALSE wtedy i tylko wtedy, gdy nie moÅ¼na byÅ‚o przydzieliÄ‡
  *         strony na nowy katalog stron.
  */
 
@@ -356,8 +356,8 @@ vm_pmap_init0(vm_pmap_t *vpm)
  * @param p strona.
  * @param va wirtualny adres strony.
  * @param prot poziom ochrony strony.
- * @return FALSE wtedy i tylko wtedy gdy nie mo¿na by³o przydzieliæ pamiêci
- *         na now± tablicê stron.
+ * @return FALSE wtedy i tylko wtedy gdy nie moÅ¼na byÅ‚o przydzieliÄ‡ pamiÄ™ci
+ *         na nowÄ… tablicÄ™ stron.
  */
 bool
 vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
@@ -391,12 +391,12 @@ vm_pmap_insert(vm_pmap_t *vpm, vm_page_t *p, vm_addr_t va, vm_prot_t prot)
  * @param pa adres fizyczny strony.
  * @param va wirtualny adres strony.
  * @param prot poziom ochrony strony.
- * @return FALSE wtedy i tylko wtedy gdy mo¿na by³o przydzieliæ pamiêci
- *         na now± tablicê stron.
+ * @return FALSE wtedy i tylko wtedy gdy moÅ¼na byÅ‚o przydzieliÄ‡ pamiÄ™ci
+ *         na nowÄ… tablicÄ™ stron.
  *
- * Procedura jest wykorzystywana przez swój odpowiednik dla vm_page_t.
- * Istnieje poniewa¿ nie dla wszystkich stron robimy opis. Np
- * Nie bêdziemy zarz±dzañ stronami z kodem j±dra.
+ * Procedura jest wykorzystywana przez swÃ³j odpowiednik dla vm_page_t.
+ * Istnieje poniewaÅ¼ nie dla wszystkich stron robimy opis. Np
+ * Nie bÄ™dziemy zarzÄ…dzaÅ„ stronami z kodem jÄ…dra.
  */
 bool
 vm_pmap_insert_(vm_pmap_t *vpm, vm_paddr_t pa, vm_addr_t va, vm_prot_t prot)
@@ -416,11 +416,11 @@ vm_pmap_fill(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size, vm_prot_t prot)
 }
 
 /**
- * Ustawia prawa dostêpu do istniej±cych stron.
- * @param pmap odwzorowanie stron które modyfikujemy
- * @param addr pocz±tek fragmentu pamiêci, któremu ustawiamy prawa dostêpu
- * @param size rozmiar fragmentu pamiêci, ktremu ustawiamy prawa dostêpu
- * @param prot ¿±dane prawa dostêpu do stron
+ * Ustawia prawa dostÄ™pu do istniejÄ…cych stron.
+ * @param pmap odwzorowanie stron ktÃ³re modyfikujemy
+ * @param addr poczÄ…tek fragmentu pamiÄ™ci, ktÃ³remu ustawiamy prawa dostÄ™pu
+ * @param size rozmiar fragmentu pamiÄ™ci, ktremu ustawiamy prawa dostÄ™pu
+ * @param prot Å¼Ä…dane prawa dostÄ™pu do stron
  */
 
 void
@@ -458,7 +458,7 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
-        ///@todo mo¿na po³±czyæ obie funkcje (wykonuj± po czê¶ci t± sam± pracê)
+        ///@todo moÅ¼na poÅ‚Ä…czyÄ‡ obie funkcje (wykonujÄ… po czÄ™Å›ci tÄ… samÄ… pracÄ™)
         int prot = _pmap_page_prot(src_pmap, src_addr);
         vm_pmap_insert(dst_pmap, page, dst_addr, prot);
         src_addr += PAGE_SIZE;
@@ -491,7 +491,7 @@ vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
 }
 
 /**
- * Zwalnia stronê.
+ * Zwalnia stronÄ™.
  */
 bool
 vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
@@ -507,9 +507,9 @@ vm_pmap_remove(vm_pmap_t *pmap, vm_addr_t va)
     }
     if (pt->table[pte] & PTE_PRESENT) {
         pt->table[pte] = PTE_ADDR(pt->table[pte]);
-        ///@todo VM.synchronizacja #39: kto¶ inny móg³by jechaæ po tych
-        ///      licznikach odniesieñ i deskryptorach stron.
-        ///@todo zastanowiæ siê nad sensem poprzedniego todo
+        ///@todo VM.synchronizacja #39: ktoÅ› inny mÃ³gÅ‚by jechaÄ‡ po tych
+        ///      licznikach odniesieÅ„ i deskryptorach stron.
+        ///@todo zastanowiÄ‡ siÄ™ nad sensem poprzedniego todo
         vm_page_t *pg = &vm_pages[PAGE_NUM(pt->table[pte])];
         KASSERT(pg != NULL);
         KASSERT(pg->refcnt>0);
@@ -545,12 +545,12 @@ vm_pmap_erase(vm_pmap_t *pmap, vm_addr_t addr, vm_size_t size)
 
 
 /**
- * T³umaczy adres wirtualny na fizyczny.
+ * TÅ‚umaczy adres wirtualny na fizyczny.
  * @param vpm odwzorowanie stron.
  * @param va adres wirtualny.
  * @return adres fizyczny
- * @warning procedura jest zdefiniowiowana jedynie dla istniej±cych
- *          w danym odwzorowaniu adresów wirtualnych.
+ * @warning procedura jest zdefiniowiowana jedynie dla istniejÄ…cych
+ *          w danym odwzorowaniu adresÃ³w wirtualnych.
  */
 
 vm_paddr_t
@@ -579,7 +579,7 @@ vm_pmap_is_avail(const vm_pmap_t *vpm, vm_addr_t va)
 }
 
 /**
- * Zwraca flagi ustawione dla strony zwi±zanej z danym adresem wirtualnym
+ * Zwraca flagi ustawione dla strony zwiÄ…zanej z danym adresem wirtualnym
  */
 
 vm_prot_t
@@ -593,10 +593,10 @@ _pmap_page_prot(const vm_pmap_t *pmap, vm_addr_t addr)
 
 
 /**
- * Wstawia tablicê stron w katalog.
+ * Wstawia tablicÄ™ stron w katalog.
  * @param vpm odwzorowanie stron.
  * @param pt tablica stron.
- * @param va pocz±tek 4MB przedzia³u t³umaczonego przez dan± tablicê.
+ * @param va poczÄ…tek 4MB przedziaÅ‚u tÅ‚umaczonego przez danÄ… tablicÄ™.
  */
 void
 _pmap_insert_pte_(vm_pmap_t *vpm, vm_ptable_t *pt, vm_addr_t va)
@@ -637,14 +637,14 @@ pmap_get_page(const vm_pmap_t *pmap, vm_addr_t addr)
 }
 
 /*========================================================================
- * Obs³uga stron.
+ * ObsÅ‚uga stron.
  */
 
 
 /**
- * T³umaczy adres fizyczny na wirtualny.
- * @bug Obecnie dzia³a jedynie dla pamiêci wirtualnej j±dra.
- * @warning Zdefiniowane jedynie dla prawid³owych adresów.
+ * TÅ‚umaczy adres fizyczny na wirtualny.
+ * @bug Obecnie dziaÅ‚a jedynie dla pamiÄ™ci wirtualnej jÄ…dra.
+ * @warning Zdefiniowane jedynie dla prawidÅ‚owych adresÃ³w.
  */
 vm_addr_t
 vm_ptov(vm_paddr_t pa)
@@ -660,8 +660,8 @@ vm_ptov(vm_paddr_t pa)
  */
 
 /**
- * Przydziela stronê na tablicê lub katalog.
- * @return strona, lub NULL gdy nie uda³o siê przydzieliæ.
+ * Przydziela stronÄ™ na tablicÄ™ lub katalog.
+ * @return strona, lub NULL gdy nie udaÅ‚o siÄ™ przydzieliÄ‡.
  */
 vm_ptable_t *
 _alloc_ptable(vm_page_t **pgp)

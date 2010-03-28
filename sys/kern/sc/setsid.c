@@ -48,7 +48,7 @@ sc_setsid(thread_t *t, syscall_result_t *r, setsid_args_t *args)
         return -EPERM;
     p->p_group = p->p_pid;
     p->p_session = p->p_pid;
-    //jako¶ zamkn±æ lub co¶...
+    //jakoÅ› zamknÄ…Ä‡ lub coÅ›...
     p->p_ctty = NULL;
     r->result = p->p_pid;
     return -EOK;

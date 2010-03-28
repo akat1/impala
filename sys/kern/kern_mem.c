@@ -31,7 +31,7 @@
  */
 
 /*
- * Niniejszy plik zawiera implementacj± alokatora p≥ytowego (slab allocator)
+ * Niniejszy plik zawiera implementacjƒÖ alokatora p≈Çytowego (slab allocator)
  * zaprojektowanego przez Jeff Bonwick'a (Sun Microsystems).
  * http://www.usenix.org/publications/library/proceedings/bos94/full_papers/
  * bonwick.ps
@@ -62,7 +62,7 @@ struct kmem_cache {
     list_node_t     L_caches;
 };
 
-/// P≥yta
+/// P≈Çyta
 struct kmem_slab {
     list_t          free_bufs;
     list_t          used_bufs;
@@ -101,9 +101,9 @@ static void check_cache(kmem_cache_t *c);
 
 /// Pula cache.
 static vm_lpool_t lpool_caches;
-/// Pula p≥yt.
+/// Pula p≈Çyt.
 static vm_lpool_t lpool_slabs;
-/// Pula opisÛw buforÛw.
+/// Pula opis√≥w bufor√≥w.
 static vm_lpool_t lpool_bufctls;
 
 static mutex_t global_lock;
@@ -112,7 +112,7 @@ static mutex_t global_lock;
  * malloc
  */
 
-/// Kube≥ek.
+/// Kube≈Çek.
 typedef struct mem_bucket mem_bucket_t;
 struct mem_bucket {
     size_t size;
@@ -120,7 +120,7 @@ struct mem_bucket {
     kmem_cache_t *cache;
 };
 
-/// Obslugiwane kube≥ki pamiÍci.
+/// Obslugiwane kube≈Çki pamiƒôci.
 static mem_bucket_t buckets[] = {
     {1 <<  1, "kmem_alloc[2]", NULL},
     {1 <<  2, "kmem_alloc[4]", NULL},
@@ -141,10 +141,10 @@ static mem_bucket_t buckets[] = {
 };
 
 /**
- * Przydziela pamiÍÊ j±dra wype≥niaj±c j± zerami.
- * @param s wielko∂Ê.
- * @param flags opcje przydzia≥u.
- * @return wskaºnik do przydzielonego elementu.
+ * Przydziela pamiƒôƒá jƒÖdra wype≈ÇniajƒÖc jƒÖ zerami.
+ * @param s wielko≈õƒá.
+ * @param flags opcje przydzia≈Çu.
+ * @return wska≈∫nik do przydzielonego elementu.
  */
 
 void *
@@ -159,10 +159,10 @@ kmem_zalloc(size_t s, int flags)
 }
 
 /**
- * Przydziela pamiÍÊ j±dra.
- * @param s wielko∂Ê.
- * @param flags opcje przydzia≥u.
- * @return wskaºnik do przydzielonego elementu.
+ * Przydziela pamiƒôƒá jƒÖdra.
+ * @param s wielko≈õƒá.
+ * @param flags opcje przydzia≈Çu.
+ * @return wska≈∫nik do przydzielonego elementu.
  */
 
 
@@ -179,7 +179,7 @@ kmem_alloc(size_t s, int flags)
         }
         bctl->magic = KMEM_BUFCTL_MAGIC;
         bctl->slab = NULL;
-        // ∂rednio podoba mi siÍ ten triczek, ale niech tak zostanie.
+        // ≈õrednio podoba mi siƒô ten triczek, ale niech tak zostanie.
         bctl->addr = (void*)(s);
         return bctl+1;
     }
@@ -191,8 +191,8 @@ kmem_alloc(size_t s, int flags)
 }
 
 /**
- * Zwalnia pamiÍÊ.
- * @param ptr wskaºnik na pamiÍÊ przydzielon± przez kmem_alloc
+ * Zwalnia pamiƒôƒá.
+ * @param ptr wska≈∫nik na pamiƒôƒá przydzielonƒÖ przez kmem_alloc
  */
 //#undef kmem_free
 void
@@ -207,7 +207,7 @@ kmem_free(void *ptr)
     }
 }
 
-/// Inicjalizuje kube≥ki.
+/// Inicjalizuje kube≈Çki.
 void
 alloc_init()
 {
@@ -226,9 +226,9 @@ alloc_init()
 /**
  * Tworzy kmem_cache.
  * @param name nazwa cache.
- * @param esize wielko∂Ê elementu.
- * @param ctor wskaºnik do konstruktora.
- * @param dtor wskaºnik do destruktora.
+ * @param esize wielko≈õƒá elementu.
+ * @param ctor wska≈∫nik do konstruktora.
+ * @param dtor wska≈∫nik do destruktora.
  */
 kmem_cache_t*
 kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
@@ -273,13 +273,13 @@ kmem_cache_create(const char *name, size_t esize, kmem_ctor_t *ctor,
 
 /**
  * Niszczy kmem_cache.
- * @param cache wskaºnik do cache.
+ * @param cache wska≈∫nik do cache.
  */
 void
 kmem_cache_destroy(kmem_cache_t *cache)
 {
-    // Nigdy nie zamykamy zamkÛw w odwrotnej kolejno∂ci!
-    // Gdyby najpierw zamkn±Ê zamek globalny, to mÛg≥oby powstaÊ
+    // Nigdy nie zamykamy zamk√≥w w odwrotnej kolejno≈õci!
+    // Gdyby najpierw zamknƒÖƒá zamek globalny, to m√≥g≈Çoby powstaƒá
     // zakleszczenie !
     MUTEX_LOCK(&cache->mtx, "kmem");
     MUTEX_LOCK(&global_lock, "kmem");
@@ -297,9 +297,9 @@ kmem_cache_destroy(kmem_cache_t *cache)
 
 /**
  * Przydziela element z danego kmem_cache.
- * @param cache wskaºnik do cache.
- * @param flags opcje przydzia≥u.
- * @return wskaºnik do przydzielonego elementu.
+ * @param cache wska≈∫nik do cache.
+ * @param flags opcje przydzia≈Çu.
+ * @return wska≈∫nik do przydzielonego elementu.
  */
 void *
 kmem_cache_alloc(kmem_cache_t *cache, int flags)
@@ -324,7 +324,7 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
 {
     MUTEX_LOCK(&cache->mtx, "kmem");
     kmem_bufctl_t *bctl = get_bufctl_from_ptr(m);
-    // sprawdzamy czy dan± p≥ytÍ nie trzeba przepi±Ê.
+    // sprawdzamy czy danƒÖ p≈Çytƒô nie trzeba przepiƒÖƒá.
     if (list_length(&bctl->slab->free_bufs) == 0) {
         list_remove(&cache->full_slabs, bctl->slab);
         list_insert_head(&cache->part_slabs, bctl->slab);
@@ -347,7 +347,7 @@ kmem_cache_free(kmem_cache_t *cache, void *m)
  * maintain
  */
 
-/// Inicjalizuje modu≥.
+/// Inicjalizuje modu≈Ç.
 void
 kmem_init()
 {
@@ -375,7 +375,7 @@ static void cache_init(kmem_cache_t *c);
 
 /**
  * Inicjaluzuje schowek.
- * @param c wskaºnik do schowka
+ * @param c wska≈∫nik do schowka
  */
 void
 cache_init(kmem_cache_t *c)
@@ -389,9 +389,9 @@ cache_init(kmem_cache_t *c)
 
 
 /**
- * Przygotowuje p≥ytÍ dla danego schowka.
- * @param cache wskaºnik do schowka.
- * @param slab wskaºnik do p≥yty.
+ * Przygotowuje p≈Çytƒô dla danego schowka.
+ * @param cache wska≈∫nik do schowka.
+ * @param slab wska≈∫nik do p≈Çyty.
  */
 void
 prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
@@ -418,11 +418,11 @@ prepare_slab_for_cache(kmem_cache_t *cache, kmem_slab_t *slab)
 }
 
 /**
- * Pobiera uøyteczn± p≥ytÍ z schowka.
- * @param cache wskaºnik do schowka
- * @return wskaºnik do p≥yty.
+ * Pobiera u≈ºytecznƒÖ p≈Çytƒô z schowka.
+ * @param cache wska≈∫nik do schowka
+ * @return wska≈∫nik do p≈Çyty.
  *
- * Jeøeli nie ma uøytecznych p≥yt w schowku to przydziela now±.
+ * Je≈ºeli nie ma u≈ºytecznych p≈Çyt w schowku to przydziela nowƒÖ.
  */
 kmem_slab_t *
 get_slab_from_cache(kmem_cache_t *cache)
@@ -445,9 +445,9 @@ get_slab_from_cache(kmem_cache_t *cache)
 }
 
 /**
- * Rezerwuje element z p≥yty.
- * @param cache wskaºnik do schowka.
- * @param slab wskaºnik do uøytecznej p≥yty.
+ * Rezerwuje element z p≈Çyty.
+ * @param cache wska≈∫nik do schowka.
+ * @param slab wska≈∫nik do u≈ºytecznej p≈Çyty.
  * @return opis bufora
  */
 kmem_bufctl_t *
@@ -465,8 +465,8 @@ reserve_bufctl(kmem_cache_t *cache, kmem_slab_t *slab)
 }
 
 /**
- * Sprawdza poprawno∂Ê schowka.
- * @param cache wskaºnik do schowka.
+ * Sprawdza poprawno≈õƒá schowka.
+ * @param cache wska≈∫nik do schowka.
  */
 void
 check_cache(kmem_cache_t *cache)
@@ -486,15 +486,15 @@ check_cache(kmem_cache_t *cache)
 }
 
 /**
- * Zwraca strukturÍ kontroluj±c± dla danego bufora
- * @param ptr wskaºnik na pamiÍÊ przydzielon± w jakim∂ schowku.
+ * Zwraca strukturƒô kontrolujƒÖcƒÖ dla danego bufora
+ * @param ptr wska≈∫nik na pamiƒôƒá przydzielonƒÖ w jakim≈õ schowku.
  */
 kmem_bufctl_t *
 get_bufctl_from_ptr(void *ptr)
 {
     /*
-     * W przysz≥o∂ci ten schemat moøe siÍ zmieniÊ dla alokacji
-     * duøych porcji danych, st±d oddzielna procedura.
+     * W przysz≈Ço≈õci ten schemat mo≈ºe siƒô zmieniƒá dla alokacji
+     * du≈ºych porcji danych, stƒÖd oddzielna procedura.
      */
     KASSERT(ptr!=NULL);
     kmem_bufctl_t *bctl = ((kmem_bufctl_t*) ptr) - 1;

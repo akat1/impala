@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objÍty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objƒôty licencjƒÖ, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -29,7 +29,7 @@ getopt(int argc, char * const argv[], const char *optstring)
     static char *p = "";
     char *opt;
 
-    /* jeste∂my na koÒcu */
+    /* jeste≈õmy na ko≈Ñcu */
     if ( *p == '\0' || optreset ) {
         if ( optind >= argc ) {
             p = "";
@@ -44,13 +44,13 @@ getopt(int argc, char * const argv[], const char *optstring)
             return -1;
         }
 
-        /* jeøeli dostali∂my --, to koniec */
+        /* je≈ºeli dostali≈õmy --, to koniec */
         if ( p[0] == '-' && p[1] == '-' ) {
             p = "";
             return -1;
         }
 
-        /* dostali∂my jak±∂ opcje */
+        /* dostali≈õmy jakƒÖ≈õ opcje */
         optind++;
         p++;
     }

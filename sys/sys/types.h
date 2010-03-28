@@ -66,7 +66,7 @@ typedef uintptr_t mid_t;
 typedef void (*sighandler_t)(int);
 typedef uint32_t sigset_t;
 
-// Byæ mo¿e jaki¶ sprytny kod bêdzie definiowa³ typu o takich samych nazwach
+// ByÄ‡ moÅ¼e jakiÅ› sprytny kod bÄ™dzie definiowaÅ‚ typu o takich samych nazwach
 #ifndef __HIDE_SYSTEM_TYPEDEFS
 typedef struct thread thread_t;
 typedef struct kthread kthread_t;

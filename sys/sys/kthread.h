@@ -36,14 +36,14 @@
 #define __SYS_KTHREAD
 
 
-/// typ procedury wej¶ciowej
+/// typ procedury wejÅ›ciowej
 typedef void kthread_entry_f(void *);
 
-/// w±tek j±dra.
+/// wÄ…tek jÄ…dra.
 struct kthread {
-    thread_t *kt_thread;       ///< w±tek procesora
-    void     *kt_arg;          ///< argument procedury wej¶ciowej
-    kthread_entry_f *kt_entry; ///< adres procedury wej¶ciowej
+    thread_t *kt_thread;       ///< wÄ…tek procesora
+    void     *kt_arg;          ///< argument procedury wejÅ›ciowej
+    kthread_entry_f *kt_entry; ///< adres procedury wejÅ›ciowej
 };
 
 #ifdef __KERNEL

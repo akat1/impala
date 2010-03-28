@@ -94,7 +94,7 @@ tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops)
     if(!tty)
         return NULL;
     tty->t_private = priv;
-    tty->t_session = -1; ///@todo zrobiæ to porz±dnie
+    tty->t_session = -1; ///@todo zrobiÄ‡ to porzÄ…dnie
     tty->t_group = -1;
     tty->t_lowops = lops;
     tty->t_inq = clist_create(MAX_INPUT);
@@ -107,7 +107,7 @@ tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops)
 
 
 /*========================================================================
- * Plik urz±dzenia: /dev/ttyXX
+ * Plik urzÄ…dzenia: /dev/ttyXX
  */
 
 int
@@ -118,7 +118,7 @@ tty_open(devd_t *d, int flags)
     if(!(flags & O_NOCTTY) && (p->p_ctty == NULL) 
         && (p->p_session == p->p_pid)
         && (tty->t_session == -1)) {
-        //ustawiamy terminal steruj±cy procesu
+        //ustawiamy terminal sterujÄ…cy procesu
 //        kprintf("TTY Open: Setting as CTTY for session leader - pid %i\n",
 //                 p->p_pid);
         p->p_ctty = tty;
@@ -149,7 +149,7 @@ tty_read(devd_t *d, uio_t *u, int flags)
         if(clist_size(tty->t_inq) == 0) {
             if(flags & O_NONBLOCK)
                 return -EAGAIN;
-            clist_wait(tty->t_inq); ///@todo wy¶cig... dodaæ jakie¶ blokowanie
+            clist_wait(tty->t_inq); ///@todo wyÅ›cig... dodaÄ‡ jakieÅ› blokowanie
         }
         size_t to_go = MIN(need, clist_size(tty->t_inq));
         int i=0;
@@ -199,7 +199,7 @@ tty_write(devd_t *d, uio_t *u, int flags)
         return 0;
     proc_t *proc = curthread->thr_proc;
     if(proc->p_group != tty->t_group) {
-        //Musimy jako¶ zareagowaæ...
+        //Musimy jakoÅ› zareagowaÄ‡...
         if(ISSET(tty->t_conf.c_lflag, TOSTOP)) {
             if(signal_ign_or_blk(proc, SIGTTOU)) {
                 //do nothing, ... write allowed
@@ -253,7 +253,7 @@ tty_ioctl(devd_t *d, int cmd, uintptr_t param)
             break;
         }
         case TIOCSPGRP:
-            ///@todo testy uprawnieñ
+            ///@todo testy uprawnieÅ„
             if(curthread->thr_proc->p_ctty != tty)
                 return -ENOTTY;
             tty->t_group = (pid_t) param;
@@ -374,7 +374,7 @@ tty_erase(tty_t *tty)
     if(tty->t_conf.c_lflag & ECHOE) {
         int todel = 0;
         if(c == '\t') {
-            ///@todo poprawiæ to; powinno czasem usuwaæ mniej znaków...;)
+            ///@todo poprawiÄ‡ to; powinno czasem usuwaÄ‡ mniej znakÃ³w...;)
             for(int i=0; i<6; i++)
                 tty_output(tty, '\b');
         } else if(c > US) {
@@ -382,7 +382,7 @@ tty_erase(tty_t *tty)
         } else if(((unsigned char)c) == 0233)
             todel = 3;
         //else if(c == 033)
-          //  todel = 2; //taki sam wynik jak ni¿ej
+          //  todel = 2; //taki sam wynik jak niÅ¼ej
         else
             todel = 2;
         while(todel-- > 0) {
@@ -445,8 +445,8 @@ nomem:
     return NULL;
 }
 
-//inaczej jak przy sleepq_destroy, clist_destroy usuwa listê
-// -> bo create j± tworzy³
+//inaczej jak przy sleepq_destroy, clist_destroy usuwa listÄ™
+// -> bo create jÄ… tworzyÅ‚
 
 void
 clist_destroy(clist_t *l)
@@ -475,7 +475,7 @@ void
 clist_push(clist_t *l, char ch)
 {
     if(l->size == l->buf_size) {
-        return; ///@todo porz±dna obs³uga
+        return; ///@todo porzÄ…dna obsÅ‚uga
     }
     l->buf[l->beg] = ch;
     l->beg++;

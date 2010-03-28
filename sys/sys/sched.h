@@ -61,13 +61,13 @@ void msleep(uint mtime, const char *fl, const char *fn, int l, const char *d);
 void ssleep(uint stime, const char *fl, const char *fn, int l, const char *d);
 
 
-/* Ilo¶æ kolejek dla procesów */
+/* IloÅ›Ä‡ kolejek dla procesÃ³w */
 #define SCHED_NQ            32
-/* Ilo¶æ priorytetów na kolejke */
+/* IloÅ›Ä‡ priorytetÃ³w na kolejke */
 #define SCHED_PQ            4
-/* Ilo¶æ kwantów czasu pomiêdzy kolejnymi reorganizacjami kolejek */
+/* IloÅ›Ä‡ kwantÃ³w czasu pomiÄ™dzy kolejnymi reorganizacjami kolejek */
 #define SCHED_RESCHEDULE    100
-/* Priorytet procesu, je¿eli dostanie procesor */
+/* Priorytet procesu, jeÅ¼eli dostanie procesor */
 #define SCHED_UCPU_MAX      128
 
 #endif

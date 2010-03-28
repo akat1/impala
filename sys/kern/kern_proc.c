@@ -46,7 +46,7 @@ static void proc_dtor(void *obj);
 proc_t proc0;
 proc_t *initproc;
 
-///@todo synchronizacja na globalnych strukturach, jak lista procesów itp.
+///@todo synchronizacja na globalnych strukturach, jak lista procesÃ³w itp.
 
 void
 proc_ctor(void *obj)
@@ -102,7 +102,7 @@ proc_getinfos(int off, struct procinfo *tab, int n)
     return r;
 }
 
-/// Inicjalizuje obs³ugê procesów.
+/// Inicjalizuje obsÅ‚ugÄ™ procesÃ³w.
 void
 proc_init(void)
 {
@@ -160,7 +160,7 @@ proc_fork(proc_t *p, proc_t **child)
     proc_reset_vmspace(cp);
     vm_space_clone(cp->vm_space, p->vm_space);
 
-    // tablica deskryptorów
+    // tablica deskryptorÃ³w
     filetable_clone(cp->p_fd, p->p_fd);
     // CWD
     if (p->p_cmd) cp->p_cmd = str_dup(cp->p_cmd);
@@ -195,7 +195,7 @@ proc_create(void)
     new_p->p_ppid = 0; // XXX: fork
     new_p->p_flags = PROC_NEW;
     new_p->p_cred->p_uid = 0;  // XXX: fork
-    new_p->p_ctty = NULL; //zaczynamy bez terminala kontroluj±cego
+    new_p->p_ctty = NULL; //zaczynamy bez terminala kontrolujÄ…cego
     new_p->p_group = -1;
     new_p->p_session = -1;
     new_p->p_rootdir = rootvnode;
@@ -231,7 +231,7 @@ proc_destroy(proc_t *proc)
         proc_insert_child(initproc, p);
     }
     filetable_close(proc->p_fd);
-    ///proszê nie usuwaæ rzeczy utworzonych w ctor ;D
+    ///proszÄ™ nie usuwaÄ‡ rzeczy utworzonych w ctor ;D
  
     return;
 }
@@ -285,7 +285,7 @@ proc_reset_vmspace(proc_t *p)
         p->vm_space = kmem_alloc(sizeof(vm_space_t), KM_SLEEP);
     }
     vm_space_create(p->vm_space, VM_SPACE_USER);
-//    p->p_brk_addr = p->vm_space->seg_data->end; <- to nie mo¿e tu byæ
+//    p->p_brk_addr = p->vm_space->seg_data->end; <- to nie moÅ¼e tu byÄ‡
     mutex_unlock(&p->p_mtx);
 }
 
@@ -340,10 +340,10 @@ proc_create_mutex(proc_t *p)
 int
 proc_destroy_mutex(proc_t *p, mutex_t *um)
 {
-    // Sprawdzamy czy u¿ytkownik nie wpad³´na pomysl zabiæ nam
-    // u¿ywan± blokadê. Ustawiamy odpowiedni SPL aby nie dopu¶ciæ
-    // ¿e pomiêdzy trylock() a usuniêciem bêdzie zmiana kontekstu
-    // i u¿ytkownik zamknie blokadê.
+    // Sprawdzamy czy uÅ¼ytkownik nie wpadÅ‚Â´na pomysl zabiÄ‡ nam
+    // uÅ¼ywanÄ… blokadÄ™. Ustawiamy odpowiedni SPL aby nie dopuÅ›ciÄ‡
+    // Å¼e pomiÄ™dzy trylock() a usuniÄ™ciem bÄ™dzie zmiana kontekstu
+    // i uÅ¼ytkownik zamknie blokadÄ™.
     int s = splsoftclock();
     if (!mutex_trylock(um)) {
         splx(s);
@@ -388,11 +388,11 @@ find_this_pid(proc_t *p, pid_t pid)
 }
 
 /**
- * Zwraca strukturê procesu dla wybranego identyfikatora.
+ * Zwraca strukturÄ™ procesu dla wybranego identyfikatora.
  * @param pid identyfikator procesu
  *
- * Procedura zwraca strukturê procesu na podstawie identyfikatora, w przypadku
- * gdy identyfikatorowi nie odpowiada ¿aden proces zwracany jest NULL.
+ * Procedura zwraca strukturÄ™ procesu na podstawie identyfikatora, w przypadku
+ * gdy identyfikatorowi nie odpowiada Å¼aden proces zwracany jest NULL.
  */
 
 proc_t *

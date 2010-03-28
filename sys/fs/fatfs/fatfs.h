@@ -158,28 +158,28 @@ typedef struct fatfs_dirent fatfs_dirent_t;
 typedef blkno_t fatfs_get_t(const uint8_t *, int);
 typedef void fatfs_set_t(uint8_t *, int, blkno_t);
 
-/// opis systemu plików FAT
+/// opis systemu plikÃ³w FAT
 struct fatfs {
-    vfs_t          *vfs;            ///< wirtualny system plików
-    devd_t         *dev;            ///< urz±dzenie pod jakim jeste¶my
+    vfs_t          *vfs;            ///< wirtualny system plikÃ³w
+    devd_t         *dev;            ///< urzÄ…dzenie pod jakim jesteÅ›my
     int             type;           ///< typ
-    int             fats;           ///< ilo¶æ tablic FAT
+    int             fats;           ///< iloÅ›Ä‡ tablic FAT
     int             fatbsize;       ///< rozmiar tablicy fat w sektorach
     int             clusize;        ///< rozmiar klastra w bajtach
     int             clubsize;       ///< rozmiar klastra w sektorach
-    int             maxroot;        ///< maksymalna ilo¶æ pozycji w /
-    vnode_t        *root;           ///< g³ówny katalog
-    blkno_t         blkno_fat;      ///< po³o¿enie pierwszej tablicy FAT
-    blkno_t         blkno_root;     ///< po³o¿enie g³ównego katalogu
-    blkno_t         blkno_data;     ///< po³o¿enie danych
-    blkno_t         blkno_last;     ///< ostatni sektor na no¶niku
+    int             maxroot;        ///< maksymalna iloÅ›Ä‡ pozycji w /
+    vnode_t        *root;           ///< gÅ‚Ã³wny katalog
+    blkno_t         blkno_fat;      ///< poÅ‚oÅ¼enie pierwszej tablicy FAT
+    blkno_t         blkno_root;     ///< poÅ‚oÅ¼enie gÅ‚Ã³wnego katalogu
+    blkno_t         blkno_data;     ///< poÅ‚oÅ¼enie danych
+    blkno_t         blkno_last;     ///< ostatni sektor na noÅ›niku
     uint8_t        *fat;            ///< wczytana tablica FAT
 
     blkno_t         free_first;     ///< numer pierwszego wolnego klastra
-    size_t          free_count;     ///< ilo¶æ wolnych klastrów na no¶niku
+    size_t          free_count;     ///< iloÅ›Ä‡ wolnych klastrÃ³w na noÅ›niku
     uint            clu_free;       ///< idnetyfikator wolnego klastra
-    uint            clu_used;       ///< identyfikator zajêtego klastra
-    uint            clu_bad;        ///< identyfikator z³ego klastra
+    uint            clu_used;       ///< identyfikator zajÄ™tego klastra
+    uint            clu_bad;        ///< identyfikator zÅ‚ego klastra
     int             clu_last;       ///< identyfikator ostatniego klastra
 
     fatfs_get_t  *fat_get;          ///< procedura odczytu z tablicy FAT

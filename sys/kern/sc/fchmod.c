@@ -60,7 +60,7 @@ sc_fchmod(thread_t *t, syscall_result_t *r, fchmod_args_t *args)
     mode_t mode = args->mode & 07777;
     if(ISSET(mode, S_ISGID) && p->p_cred->p_euid!=0
         && va.va_gid!=p->p_cred->p_egid)
-        UNSET(mode, S_ISGID); //mamy prawo kasowaæ bit suid/sgid?
+        UNSET(mode, S_ISGID); //mamy prawo kasowaÄ‡ bit suid/sgid?
     va.va_mask = VATTR_MODE;
     va.va_mode = mode;
     if((res = VOP_SETATTR(file->f_vnode, &va)))

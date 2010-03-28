@@ -36,9 +36,9 @@
  * Dokumentacja kontrolera:
  *   http://www.isdaman.com/alsos/hardware/fdc/floppy.htm
  *
- * Sterownik mo¿e wydawaæ siê "zbyt elastyczny", ale fajnie by³o spróbowaæ
- * napisaæ jaki¶ kod, który ³atwo by³oby rozszerzyæ do obs³ugi wiêkszej
- * ilo¶ci kontrolerów lub innych portów I/O.
+ * Sterownik moÅ¼e wydawaÄ‡ siÄ™ "zbyt elastyczny", ale fajnie byÅ‚o sprÃ³bowaÄ‡
+ * napisaÄ‡ jakiÅ› kod, ktÃ³ry Å‚atwo byÅ‚oby rozszerzyÄ‡ do obsÅ‚ugi wiÄ™kszej
+ * iloÅ›ci kontrolerÃ³w lub innych portÃ³w I/O.
  *
  */
 
@@ -75,18 +75,18 @@ enum FDC_IO_REGISTERS {
 
 /// Polecenia
 enum FDC_COMMANDS {
-    FDC_READT       = 2,    ///< Odczytaj ¶cie¿kê
+    FDC_READT       = 2,    ///< Odczytaj Å›cieÅ¼kÄ™
     FDC_FIXDRV      = 3,
     FDC_STATUS      = 4,
     FDC_WRITE       = 0xC5, ///< Zapisz sektor.
     FDC_READ        = 0xC6, ///< Odczytaj sektor.
     FDC_CALIBRATE   = 7,    ///< Kalibruj.
-    FDC_CHECKINTRPT = 8,    ///< Sprawd¼ stan przerwania.
+    FDC_CHECKINTRPT = 8,    ///< SprawdÅº stan przerwania.
     FDC_WRITED      = 9,
     FDC_READID      = 10,
     FDC_READD       = 12,
     FDC_FORMATT     = 13,
-    FDC_SEEK        = 15    ///< Przesuñ g³owicê.
+    FDC_SEEK        = 15    ///< PrzesuÅ„ gÅ‚owicÄ™.
 };
 
 enum {
@@ -110,14 +110,14 @@ enum MSR_BITS {
 
 /// Bity rejestru DOR
 enum {
-    DOR_DR0         = 1 << 0,   ///< wybór stacji
-    DOR_DR1         = 1 << 1,   ///< wybór stacji
+    DOR_DR0         = 1 << 0,   ///< wybÃ³r stacji
+    DOR_DR1         = 1 << 1,   ///< wybÃ³r stacji
     DOR_REST        = 1 << 2,   ///< RESET
-    DOR_DMA         = 1 << 3,   ///< w³±czone DMA
-    DOR_MOTA        = 1 << 4,   ///< w³±czenie silnika stacji A:
-    DOR_MOTB        = 1 << 5,   ///< w³±czenie silnika stacji B:
-    DOR_MOTC        = 1 << 6,   ///< w³±czenie silnika stacji C:
-    DOR_MOTD        = 1 << 7    ///< w³±czenie silnika stacji D:
+    DOR_DMA         = 1 << 3,   ///< wÅ‚Ä…czone DMA
+    DOR_MOTA        = 1 << 4,   ///< wÅ‚Ä…czenie silnika stacji A:
+    DOR_MOTB        = 1 << 5,   ///< wÅ‚Ä…czenie silnika stacji B:
+    DOR_MOTC        = 1 << 6,   ///< wÅ‚Ä…czenie silnika stacji C:
+    DOR_MOTD        = 1 << 7    ///< wÅ‚Ä…czenie silnika stacji D:
 };
 
 
@@ -140,7 +140,7 @@ enum {
     ST1_EN      = 1 << 7
 };
 
-/// Warto¶ci rejestru CCR
+/// WartoÅ›ci rejestru CCR
 enum {
     CCR_500KB       = 0
 };
@@ -165,25 +165,25 @@ struct fdctrl {
     int             cmd;    ///< ostatnie polecenie
     spinlock_t      busy;   ///<
     bio_queue_t     bioq;   ///< kolejka operacji wej-wyj
-    iobuf_t        *cbp;    ///< obecnie obs³ugiwany bufor
+    iobuf_t        *cbp;    ///< obecnie obsÅ‚ugiwany bufor
     char           *iobuf;  ///< bufor transferu
     size_t          iosize; ///< rozmiar transferu
     int             retry;  ///< 
     blkno_t         blkno;  ///< aktualny blok
     bus_isa_dma_t  *dma;    ///< deskryptor ISA DMA
-    fdsec_t         pos;    ///< pozycja g³owicy    
+    fdsec_t         pos;    ///< pozycja gÅ‚owicy    
 };
 
 /// Rodzaj stacji dyskietek.
 typedef struct fdspec fdspec_t;
 struct fdspec {
     const char  *name;      ///< nazwa
-    int         heads;      ///< ilo¶æ powierzchni
-    int         tracks;     ///< ilo¶æ ¶cie¿ek
-    int         sectrack;   ///< ilo¶æ sektorów na ¶cie¿ce
-    int         sechead;    ///< ca³kowita liczba sektorów na powierzchni
-    int         secdisk;    ///< ca³kowita liczba sektorów na dysku
-    int         gap;        ///< odleg³o¶c pomiêdzy sektorami na dysku
+    int         heads;      ///< iloÅ›Ä‡ powierzchni
+    int         tracks;     ///< iloÅ›Ä‡ Å›cieÅ¼ek
+    int         sectrack;   ///< iloÅ›Ä‡ sektorÃ³w na Å›cieÅ¼ce
+    int         sechead;    ///< caÅ‚kowita liczba sektorÃ³w na powierzchni
+    int         secdisk;    ///< caÅ‚kowita liczba sektorÃ³w na dysku
+    int         gap;        ///< odlegÅ‚oÅ›c pomiÄ™dzy sektorami na dysku
 };
 
 /// Opis stacji dyskietek.
@@ -194,15 +194,15 @@ struct fddrive {
     int unit;               ///< numer jednostki
     char name;              ///< literka do printf'a
     bool busy;              ///<
-    devd_t  *devd;          ///< systemowy deskryptor urz±dzenia
+    devd_t  *devd;          ///< systemowy deskryptor urzÄ…dzenia
 
 };
 
-/// Tablica rodzajów stacji dyskietek.
+/// Tablica rodzajÃ³w stacji dyskietek.
 static fdspec_t specs[] = {
     { NULL, 0, 0, 0, 0 },
-    { "360kB 5.25\"",   2, 40,  9,  720/2,  720,  0}, // zdobyæ GAP!
-    { "1200kB 5.25\"",  2, 80, 15, 2400/2, 2400,  0}, // zdobyæ GAP!
+    { "360kB 5.25\"",   2, 40,  9,  720/2,  720,  0}, // zdobyÄ‡ GAP!
+    { "1200kB 5.25\"",  2, 80, 15, 2400/2, 2400,  0}, // zdobyÄ‡ GAP!
     { "750kB 3.5\"",    2, 80,  9, 1440/2, 1440, 23},
     { "1440kB 3.5\"",   2, 80, 18, 2880/2, 2880, 23},
     { "2880kB 3.5\"",   2, 80, 36, 5760/2, 5760, 23},
@@ -285,7 +285,7 @@ wrfifo(fdctrl_t *drv, uint8_t data )
  */
 
 
-/// T³umaczy numer bloku na jego adres.
+/// TÅ‚umaczy numer bloku na jego adres.
 int
 blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds)
 {
@@ -301,12 +301,12 @@ blkno_to_fdsec(fddrive_t *drv, blkno_t n, fdsec_t *fds)
 
 
 /*========================================================================
- * Podprogram obs³ugi przerwania.
+ * Podprogram obsÅ‚ugi przerwania.
  *
  *
  */
 
-/// Obs³uga przerwania.
+/// ObsÅ‚uga przerwania.
 bool
 fdinterrupt()
 {
@@ -404,13 +404,13 @@ seek_done(fdctrl_t *ctrl, iobuf_t *bp)
 /**
  * Oczekiwanie na przerwanie (aktywne).
  * @param ctrl kontroler stacji dyskietek
- * @param _a do wype³nienia aktualnym numerem sektora
- * @param _b do wype³nienia aktualnym numerem cylindra
+ * @param _a do wypeÅ‚nienia aktualnym numerem sektora
+ * @param _b do wypeÅ‚nienia aktualnym numerem cylindra
  * @return wynik poprzedniej operacji
  *
- * Je¿eli kontroler zosta³ podany to po przerwaniu zostanie do niego
- * wys³ane polecenie sprawdzenia przerwania. To polecenie odpowiada
- * wysy³aj±c dwa bajty, pierwszy to rejestr ST0, drugi to aktualny
+ * JeÅ¼eli kontroler zostaÅ‚ podany to po przerwaniu zostanie do niego
+ * wysÅ‚ane polecenie sprawdzenia przerwania. To polecenie odpowiada
+ * wysyÅ‚ajÄ…c dwa bajty, pierwszy to rejestr ST0, drugi to aktualny
  * numer cylindra. Rejestr ST0 zawiera w sobie aktualny numer sektora
  * oraz status wydanego polecenia.
  */
@@ -433,8 +433,8 @@ wait_for_intrpt(fdctrl_t *ctrl, uint8_t *_a, uint8_t *_b)
 /*========================================================================
  * Sterownik kontrolera.
  *
- * Polecenia do sterownika id± przez rejestr IO_REG_FIFO. Za ka¿dym
- * poleceniem do rejestru nale¿y zapisaæ jego argumenty, inaczej nast±pi
+ * Polecenia do sterownika idÄ… przez rejestr IO_REG_FIFO. Za kaÅ¼dym
+ * poleceniem do rejestru naleÅ¼y zapisaÄ‡ jego argumenty, inaczej nastÄ…pi
  * zwiecha FDC.
  */
 
@@ -540,10 +540,10 @@ fdc_io(fdctrl_t *ctrl)
 }
 
 /**
- * Kalibruje stacjê dyskietek.
+ * Kalibruje stacjÄ™ dyskietek.
  * @param drv stacja dyskietek
  *
- * Kalibracja polega na przestawieniu g³owicy na sam pocz±tek.
+ * Kalibracja polega na przestawieniu gÅ‚owicy na sam poczÄ…tek.
  */
 int
 fdc_calibrate(fddrive_t *drv)
@@ -587,7 +587,7 @@ fdc_init(void)
 
     DEBUGF("fdc port is 0x%x", fdctrl.io);
     DEBUGF("probing cmos");
-    // pytamy siê CMOS czy istniej± urz±dzenia.
+    // pytamy siÄ™ CMOS czy istniejÄ… urzÄ…dzenia.
     uint8_t probe = cmos_rdreg(CMOS_REG_FDC);
     if (probe == 0) {
         DEBUGF("any floppy disk detected");
@@ -603,13 +603,13 @@ fdc_init(void)
     fddrive[1].unit = 1;
     fddrive[1].ctrl = &fdctrl;
     fddrive[1].name = 'B';
-///@bug proszê o weryfikacjê tego if-a
+///@bug proszÄ™ o weryfikacjÄ™ tego if-a
     if (!fddrive[0].spec->name && !fddrive[0].spec->name) {
         DEBUGF("detected floppys are not supported by fdc driver A:%u B:%u",
             probe >> 4, probe & 0xf);
         return;
     }
-    // jak jakie¶ stacje s± dostêpne to przydzialny kana³ DMA,
+    // jak jakieÅ› stacje sÄ… dostÄ™pne to przydzialny kanaÅ‚ DMA,
     // instalujemy podprogram przerwania i takie tam
     fdctrl.dma = bus_isa_dma_alloc(ISA_DMA_FDC);
     spinlock_init(&ilock);
@@ -634,7 +634,7 @@ fd_create(fddrive_t *fd)
 }
 
 /*========================================================================
- * Obs³uga pliku urz±dzenia blokowego /dev/fdX
+ * ObsÅ‚uga pliku urzÄ…dzenia blokowego /dev/fdX
  */
 
 int

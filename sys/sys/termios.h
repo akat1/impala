@@ -146,26 +146,26 @@ typedef struct termios termios_t;
 typedef int tty_write_t(void* priv, char *ch, size_t size);
 
 struct tty_lowops {
-    tty_write_t *tty_write;    ///< zapisuje znak do urz±dzenia
+    tty_write_t *tty_write;    ///< zapisuje znak do urzÄ…dzenia
 };
 typedef struct tty_lowops tty_lowops_t;
 
 struct tty {
     termios_t     t_conf;     ///< ustawienia terminala
-    clist_t      *t_inq;      ///< kolejka danych wej¶ciowych
-    clist_t      *t_clq;      ///< kolejka aktualnej lini wej¶cia
-//    clist_t      *t_outq;     ///< kolejka danych wyj¶ciowych
-    tty_lowops_t *t_lowops;   ///< funkcje obs³ugi urz±dzenia komunikacyjnego
-    pid_t         t_session;  ///< sesja zwi±zana z terminalem
-    pid_t         t_group;    ///< grupa procesów pierwszoplanowych
-    void*         t_private;  ///< prywatne dane urz±dzenia komunikacyjnego
-    devd_t       *t_dev;      ///< zarejestrowane urz±dzenie terminala
+    clist_t      *t_inq;      ///< kolejka danych wejÅ›ciowych
+    clist_t      *t_clq;      ///< kolejka aktualnej lini wejÅ›cia
+//    clist_t      *t_outq;     ///< kolejka danych wyjÅ›ciowych
+    tty_lowops_t *t_lowops;   ///< funkcje obsÅ‚ugi urzÄ…dzenia komunikacyjnego
+    pid_t         t_session;  ///< sesja zwiÄ…zana z terminalem
+    pid_t         t_group;    ///< grupa procesÃ³w pierwszoplanowych
+    void*         t_private;  ///< prywatne dane urzÄ…dzenia komunikacyjnego
+    devd_t       *t_dev;      ///< zarejestrowane urzÄ…dzenie terminala
 };
 typedef struct tty tty_t;
 
-/// tworzy nowe urz±dzenie tty na podstawie urz±dzenia komunikacyjnego
+/// tworzy nowe urzÄ…dzenie tty na podstawie urzÄ…dzenia komunikacyjnego
 tty_t *tty_create(const char *name, int unit, void *priv, tty_lowops_t *lops);
-/// wywo³ywane przez urz±dzenie, gdy dostêpny jest kolejny znak na wej¶ciu
+/// wywoÅ‚ywane przez urzÄ…dzenie, gdy dostÄ™pny jest kolejny znak na wejÅ›ciu
 void tty_input(tty_t *tty, int ch);
 void tty_output(tty_t *tty, char ch);
 

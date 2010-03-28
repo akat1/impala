@@ -51,9 +51,9 @@ enum {
 };
 
 //static int bh_in_queue=0;
-int key_down[256];      ///< wykaz naci¶niêtych klawiszy, indeksowany po 'keycode'
-                        /// pewno lepiej bêdzie indeksowaæ po czym¶ innym ;)
-char key_modifiers;     /// wykaz naci¶niêtych klawiszy-modyfikatorów
+int key_down[256];      ///< wykaz naciÅ›niÄ™tych klawiszy, indeksowany po 'keycode'
+                        /// pewno lepiej bÄ™dzie indeksowaÄ‡ po czymÅ› innym ;)
+char key_modifiers;     /// wykaz naciÅ›niÄ™tych klawiszy-modyfikatorÃ³w
 
 static bool i8042_irq1(void);
 static void __enqueue_keycode(int sc);
@@ -69,7 +69,7 @@ __enqueue_keycode(int kc)
     bool ctrl =(key_modifiers & (KM_LCONTROL | KM_RCONTROL))>0;
     if(kc<MAX_SC_LINEAR) {
         if(keycode_type[kc] == KT_SPECIAL) {
-            //tymczasowo: przerobiæ na tablicê wsk. na funkcje lub co¶...
+            //tymczasowo: przerobiÄ‡ na tablicÄ™ wsk. na funkcje lub coÅ›...
             int id=0;
             switch(kc) {
                 case KC_F1:
@@ -90,7 +90,7 @@ __enqueue_keycode(int kc)
                 default:
                     id=0;
             }
-            cons_switch(id);  //prze³±cza na /dev/ttyID
+            cons_switch(id);  //przeÅ‚Ä…cza na /dev/ttyID
                 
         } else if(ctrl) {
             c = keymap_ctrl[kc];

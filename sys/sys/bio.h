@@ -30,47 +30,47 @@
  * $Id$
  */
 
-/** @file buforowane wej∂cie-wyj∂cie.
+/** @file buforowane wej≈õcie-wyj≈õcie.
  *
- * Plik zawiera deklaracje dla modu≥u BIO.
+ * Plik zawiera deklaracje dla modu≈Çu BIO.
  */
 
 #ifndef __SYS_BIO_H
 #define __SYS_BIO_H
 #ifdef __KERNEL
 
-/// Nag≥Ûwek buforu wej∂cia-wyj∂cia.
+/// Nag≈Ç√≥wek buforu wej≈õcia-wyj≈õcia.
 struct iobuf {
     void        *addr;      ///< adres buforu.
     int          oper;      ///< operacja BIO_READ/WRITE
-    int          errno;     ///< numer b≥Ídu
+    int          errno;     ///< numer b≈Çƒôdu
     blkno_t      blkno;     ///< numer bloku
-    size_t       bcount;    ///< wielko∂Ê buforu w blokach(sektorach)
-    size_t       size;      ///< wielko∂c buforu w bajtach
-    size_t       resid;     ///< ilo∂Ê pozosta≥ych bajtÛw do wys≥ania
+    size_t       bcount;    ///< wielko≈õƒá buforu w blokach(sektorach)
+    size_t       size;      ///< wielko≈õc buforu w bajtach
+    size_t       resid;     ///< ilo≈õƒá pozosta≈Çych bajt√≥w do wys≈Çania
     int          flags;     ///< znaczniki
-    devd_t      *dev;       ///< buforowane urz±dzenie
-    sleepq_t     sleepq;    ///< ∂pi±ca kolejka do czekania na wynik
+    devd_t      *dev;       ///< buforowane urzƒÖdzenie
+    sleepq_t     sleepq;    ///< ≈õpiƒÖca kolejka do czekania na wynik
     list_node_t  L_bioq; 
     list_node_t  L_bufs;
     list_node_t  L_hash;
     list_node_t  L_free;
 };
 
-/// znaczniki nag≥Ûwka buforu
+/// znaczniki nag≈Ç√≥wka buforu
 enum BUF_FLAGS {
-    BIO_BUSY      = 0x00001,    ///< bufor jest uøywany
-    BIO_DONE      = 0x00002,    ///< operacja I/O zakoÒczona pomy∂lnie
+    BIO_BUSY      = 0x00001,    ///< bufor jest u≈ºywany
+    BIO_DONE      = 0x00002,    ///< operacja I/O zako≈Ñczona pomy≈õlnie
     BIO_WRITE     = 0x00004,    ///< bufor zaw. dane do zapisu
     BIO_READ      = 0x00008,    ///< bufor do odczytu
-    BIO_ERROR     = 0x00020,    ///< operacja I/O zakoÒczona z b≥Ídem
-    BIO_CACHE     = 0x00080,    ///< bufor jest w pamiÍci podrÍcznej
-    BIO_DELWRI    = 0x00100,    ///< opÛºniony zapis
-    BIO_WANTED    = 0x00200,    ///< kto∂ oczekuje na bufor
-    BIO_VALID     = 0x00400,    ///< blkno i dev s± poprawne
+    BIO_ERROR     = 0x00020,    ///< operacja I/O zako≈Ñczona z b≈Çƒôdem
+    BIO_CACHE     = 0x00080,    ///< bufor jest w pamiƒôci podrƒôcznej
+    BIO_DELWRI    = 0x00100,    ///< op√≥≈∫niony zapis
+    BIO_WANTED    = 0x00200,    ///< kto≈õ oczekuje na bufor
+    BIO_VALID     = 0x00400,    ///< blkno i dev sƒÖ poprawne
 };
 
-/// kolejka oparacji BIO (dla sterownikÛw)
+/// kolejka oparacji BIO (dla sterownik√≥w)
 typedef struct bio_queue bio_queue_t;
 struct bio_queue {
     mutex_t     bq_mtx;

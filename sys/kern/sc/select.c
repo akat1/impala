@@ -48,7 +48,7 @@ int sc_select(thread_t *p, syscall_result_t *r, select_args_t *args);
 int
 sc_select(thread_t *t, syscall_result_t *r, select_args_t *args)
 {
-    ///@todo zaimplementowaæ select...
+    ///@todo zaimplementowaÄ‡ select...
     r->result=1;
     return -EOK;
 }

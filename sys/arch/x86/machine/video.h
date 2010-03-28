@@ -57,11 +57,11 @@ struct hw_textscreen {
     uint16_t  screen_map[TS_SIZE];
     uint8_t   tab_stop[TS_SIZE];
     uint16_t *screen_buf;
-    int8_t    cursor_y;     ///< pozycja kursora, zawsze licz±c od pocz±tku ekr.
-    int8_t    cursor_x;     ///< pozycja kursora, zawsze licz±c od pocz±tku ekr.
-    int8_t    margin_up;    ///< górny margines ekranu
-    int8_t    margin_down;  ///< dolny margines ekranu (mo¿na po nim pisaæ)
-    int8_t    origin_mode;  ///< sposób traktowania przekazywanych wsp.
+    int8_t    cursor_y;     ///< pozycja kursora, zawsze liczÄ…c od poczÄ…tku ekr.
+    int8_t    cursor_x;     ///< pozycja kursora, zawsze liczÄ…c od poczÄ…tku ekr.
+    int8_t    margin_up;    ///< gÃ³rny margines ekranu
+    int8_t    margin_down;  ///< dolny margines ekranu (moÅ¼na po nim pisaÄ‡)
+    int8_t    origin_mode;  ///< sposÃ³b traktowania przekazywanych wsp.
     uint16_t  cursor_hack;
 };
 

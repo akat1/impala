@@ -39,29 +39,29 @@ enum {
     DEVD_MAXDESCR = 128
 };
 
-/// inicjacja sterownika pliku urz±dzenia
+/// inicjacja sterownika pliku urzÄ…dzenia
 typedef void d_init_t(void);
 /// operacja otwarcia
 typedef int d_open_t(devd_t *d, int flags);
-/// operacja wej¶cia znakowego
+/// operacja wejÅ›cia znakowego
 typedef int d_read_t(devd_t *d, uio_t *u, int flags);
-/// operacja wyj¶cia znakowego
+/// operacja wyjÅ›cia znakowego
 typedef int d_write_t(devd_t *d, uio_t *u, int flags);
-/// operacja zamkniêcia
+/// operacja zamkniÄ™cia
 typedef int d_close_t(devd_t *d);
 /// operacja kontroli
 typedef int d_ioctl_t(devd_t *d, int cmd, uintptr_t param);
-/// operacja wej¶cia-wyj¶cia blokowego
+/// operacja wejÅ›cia-wyjÅ›cia blokowego
 typedef int d_strategy_t(devd_t *d, iobuf_t *b);
 
-/// deska rozdzielcza pliku urz±dzenia.
+/// deska rozdzielcza pliku urzÄ…dzenia.
 struct devsw {
-    d_open_t        *d_open;        ///< obs³uga otwarcia
-    d_close_t       *d_close;       ///< obs³uga zamkniêcia
-    d_ioctl_t       *d_ioctl;       ///< obs³uga kontroli
-    d_read_t        *d_read;        ///< obs³uga wej¶cia
-    d_write_t       *d_write;       ///< obs³uga wyj¶cia
-    d_strategy_t    *d_strategy;    ///< obs³uga wej-wyj blokowego
+    d_open_t        *d_open;        ///< obsÅ‚uga otwarcia
+    d_close_t       *d_close;       ///< obsÅ‚uga zamkniÄ™cia
+    d_ioctl_t       *d_ioctl;       ///< obsÅ‚uga kontroli
+    d_read_t        *d_read;        ///< obsÅ‚uga wejÅ›cia
+    d_write_t       *d_write;       ///< obsÅ‚uga wyjÅ›cia
+    d_strategy_t    *d_strategy;    ///< obsÅ‚uga wej-wyj blokowego
     int              type;
 };
 
@@ -74,7 +74,7 @@ int dnotsupported(devd_t *d);
 #define nowrite (d_write_t*) dnotsupported
 #define nostrategy (d_strategy_t*) dnotsupported
 
-/// deskryptor pliku urz±dzenia
+/// deskryptor pliku urzÄ…dzenia
 struct devd {
     int          unit;                  ///< numer jednostki
     char         name[DEVD_MAXNAME];    ///< nazwa
@@ -86,8 +86,8 @@ struct devd {
 };
 
 enum {
-    DEV_CDEV,       ///< urz±dzenie znakowe
-    DEV_BDEV,       ///< urz±dzenie blokowe
+    DEV_CDEV,       ///< urzÄ…dzenie znakowe
+    DEV_BDEV,       ///< urzÄ…dzenie blokowe
     DEV_TTY         ///< terminal
 };
 

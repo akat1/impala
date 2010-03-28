@@ -81,7 +81,7 @@ static vnode_ops_t fatfs_node_ops = {
 };
 
 /*============================================================================
- * Operacje na v-wê¼le
+ * Operacje na v-wÄ™Åºle
  */
 
 int
@@ -329,9 +329,9 @@ fatfs_inactive(vnode_t *v)
 {
     fatfs_node_t *fatfs = VTOFATFSN(v);
     fatfs->vnode = 0;
-#if 0 // wêz³y zostawiamy w katalogach
+#if 0 // wÄ™zÅ‚y zostawiamy w katalogach
     if (fatfs->dirent) {
-        // je¿eli w pamiêci jest katalog
+        // jeÅ¼eli w pamiÄ™ci jest katalog
         fatfs->dirent->node = 0;
         fatfs->dirent = 0;
         fatfs_node_rel(fatfs);
@@ -510,7 +510,7 @@ fatfs_node_truncate(fatfs_node_t *node, off_t off)
         goto end;
     }
 
-    // jedziemy na koniec mniejszego ³añcucha
+    // jedziemy na koniec mniejszego Å‚aÅ„cucha
     for (int i = 0; i < need && i < have; i++) {
         xclu = clu;
         clu = fatfs_fatget(fatfs, clu);

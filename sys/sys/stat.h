@@ -59,7 +59,7 @@ struct stat {
 
 #define S_IFMT     0170000
 #define S_IFSOCK   0140000      ///< gniazdko
-#define S_IFLNK    0120000      ///< odno¶nik
+#define S_IFLNK    0120000      ///< odnoÅ›nik
 #define S_IFREG    0100000      ///< plik regularny
 #define S_IFBLK    0060000      ///< urz. blokowe
 #define S_IFDIR    0040000      ///< katalog

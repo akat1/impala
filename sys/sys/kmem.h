@@ -33,7 +33,7 @@
 #define __SYS_KMEM_H
 
 enum MALLOC_FLAGS {
-    KM_SLEEP,           ///< je¿eli brakuje pamiêci to czekaj
+    KM_SLEEP,           ///< jeÅ¼eli brakuje pamiÄ™ci to czekaj
     KM_NOSLEEP          ///< nigdy nie czekaj
 };
 

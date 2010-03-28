@@ -82,7 +82,7 @@ devd_create(devsw_t *dsw, const char *name, int unit, void *priv)
     dev->priv = priv;
     dev->type = dsw->type;
     list_insert_tail(&devs, dev);
-//    devfs_register(dev, 0, 0, 0777); // niech każdy sam sobie rejestruje
+//    devfs_register(dev, 0, 0, 0777); // niech kaĹźdy sam sobie rejestruje
     return dev;
 }
 

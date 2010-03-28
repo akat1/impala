@@ -79,7 +79,7 @@ sc_writev(thread_t *t, syscall_result_t *r, writev_args_t *args)
     u.iovs = iovs;
     u.iovcnt = args->count;
     u.oper = UIO_WRITE;
-    u.space = UIO_SYSSPACE; //znowu ¶ciema
+    u.space = UIO_SYSSPACE; //znowu Å›ciema
     r->result = f_write(file, &u);
     kmem_free(iovs);
     frele(file);

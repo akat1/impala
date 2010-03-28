@@ -37,7 +37,7 @@
 
 #include <sys/systab.h>
 #ifdef __KERNEL
-/// struktura s³u¿±ca do zwracania wyników z wywo³añ systemowych
+/// struktura sÅ‚uÅ¼Ä…ca do zwracania wynikÃ³w z wywoÅ‚aÅ„ systemowych
 struct syscall_result {
     int result;
     int errno;

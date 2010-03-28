@@ -33,11 +33,11 @@
 #ifndef __SYS_VFS_H
 #define __SYS_VFS_H
 
-/// informacje o punkcie podpiêcia systemu plików
+/// informacje o punkcie podpiÄ™cia systemu plikÃ³w
 struct mountinfo {
-    char    type[10];           ///< nazwa sterownika systemu plików
+    char    type[10];           ///< nazwa sterownika systemu plikÃ³w
     char    mpoint[255];        ///< punkt zamontowania
-    char    dev[20];            ///< urz±dzenie
+    char    dev[20];            ///< urzÄ…dzenie
 };
 
 #ifdef __KERNEL
@@ -47,16 +47,16 @@ struct mountinfo {
 #include <sys/vfs/vfs_node.h>
 
 /**
- * Struktura reprezentuj±ca zamontowany system plików.
+ * Struktura reprezentujÄ…ca zamontowany system plikÃ³w.
  */
 
 struct vfs {
-     vfs_ops_t    *vfs_ops;       ///< definicje operacji zwi±zanych z tym fs
-     vnode_t      *vfs_mpoint;    ///< vnode który przykryli¶my tym fs
-     devd_t       *vfs_mdev;      ///< urz±dzenie, u¿ywane przez fs
-     void         *vfs_private;   ///< prywatne dane systemu plików
+     vfs_ops_t    *vfs_ops;       ///< definicje operacji zwiÄ…zanych z tym fs
+     vnode_t      *vfs_mpoint;    ///< vnode ktÃ³ry przykryliÅ›my tym fs
+     devd_t       *vfs_mdev;      ///< urzÄ…dzenie, uÅ¼ywane przez fs
+     void         *vfs_private;   ///< prywatne dane systemu plikÃ³w
      vfs_conf_t   *vfs_conf;
-     list_node_t   L_mountlist;   ///< wêze³ z listy zamontowanych fs
+     list_node_t   L_mountlist;   ///< wÄ™zeÅ‚ z listy zamontowanych fs
 };
 
 int vfs_create(vfs_t **vsp, const char *type);
@@ -81,7 +81,7 @@ typedef void vfs_sync_t(vfs_t *fs);
 
 
 /**
- * Abstrakcja na operacje na systemie plików
+ * Abstrakcja na operacje na systemie plikÃ³w
  */
 
 struct vfs_ops {

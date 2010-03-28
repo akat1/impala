@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -22,8 +22,8 @@ static char *get_espace(size_t s);
 char *
 get_espace(size_t s)
 {
-    ///jak zmieniæ? co z alokacj± / zwalnianiem? póki co naiwnie:
-    return malloc(s); ///nie powinno tak byæ..?
+    ///jak zmieniÄ‡? co z alokacjÄ… / zwalnianiem? pÃ³ki co naiwnie:
+    return malloc(s); ///nie powinno tak byÄ‡..?
 }
 
 int
@@ -43,7 +43,7 @@ setenv(const char *name, const char *value, int overwrite)
 
             char *new_entry = get_espace(dlen);
             sprintf(new_entry, "%s=%s", name, value);
-            *e = new_entry; //co ze star± informacj±?
+            *e = new_entry; //co ze starÄ… informacjÄ…?
             return 0;
         }
         e++;
@@ -51,7 +51,7 @@ setenv(const char *name, const char *value, int overwrite)
     //ok, pusto..
     char *new_entry = get_espace(dlen);
     sprintf(new_entry, "%s=%s", name, value);
-    *e = new_entry; //co ze star± informacj±?
-    *(++e) = NULL; // a co jak siê nie mie¶cimy ju¿... jakie du¿e jest environ?
+    *e = new_entry; //co ze starÄ… informacjÄ…?
+    *(++e) = NULL; // a co jak siÄ™ nie mieÅ›cimy juÅ¼... jakie duÅ¼e jest environ?
     return 0;
 }

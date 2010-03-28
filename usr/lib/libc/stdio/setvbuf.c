@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -19,7 +19,7 @@ int
 setvbuf(FILE *f, char *b, int mode, size_t size)
 {
     if(f->buf != NULL)
-        return -1;  //ju¿ nie mo¿na zmieniaæ -> kto¶ wykona³ I/O na f
+        return -1;  //juÅ¼ nie moÅ¼na zmieniaÄ‡ -> ktoÅ› wykonaÅ‚ I/O na f
     if(mode == _IONBF) {
         UNSET(f->status, _FST_NOBUF | _FST_LINEBUF | _FST_FULLBUF);
         SET(f->status, mode);

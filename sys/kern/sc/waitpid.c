@@ -57,14 +57,14 @@ sc_waitpid(thread_t *t, syscall_result_t *r, sc_waitpid_args *args)
     
     if(args->pid == -1) {
         proc_t *p_iter;
-        /* czekamy a¿, które¶ dziecko siê zakoñczy lub nadejdzie sygna³ */
+        /* czekamy aÅ¼, ktÃ³reÅ› dziecko siÄ™ zakoÅ„czy lub nadejdzie sygnaÅ‚ */
         while(1)
         {
             p_iter = (proc_t *)list_head(&(p->p_children));
             /* proces nie ma dzieci - czekamy na sygnal */
             if ( p_iter == NULL ) {
                 if(args->options & WNOHANG) {
-                    ///libc musi to zapatchowaæ i je¶li jest NOHANG zwróciæ 0
+                    ///libc musi to zapatchowaÄ‡ i jeÅ›li jest NOHANG zwrÃ³ciÄ‡ 0
                     return -ECHILD; 
                 }
                 if ( ISSET(t->thr_proc->p_sig,~t->thr_sigblock) )

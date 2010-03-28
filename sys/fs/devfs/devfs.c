@@ -94,7 +94,7 @@ static vnode_ops_t devfs_vnode_ops = {
 
 static int _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs);
 static int _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr);
-///@todo mo¿na by pewno wydzieliæ tê funkcjê gdzie¶
+///@todo moÅ¼na by pewno wydzieliÄ‡ tÄ™ funkcjÄ™ gdzieÅ›
 static int pc_cmp(lkp_state_t *path, const char *fname);
 
 
@@ -118,7 +118,7 @@ _get_vnode(devfs_node_t *node, vnode_t **vpp, vfs_t *fs)
         *vpp = node->i_dirvnode;
         return 0;
     }
-    //ka¿dy dev w³asny vnode.. my¶lê, ¿e to siê przyda, jak nie to zmiana
+    //kaÅ¼dy dev wÅ‚asny vnode.. myÅ›lÄ™, Å¼e to siÄ™ przyda, jak nie to zmiana
 
     vnode_t *res = vnode_alloc();
     if(!res)
@@ -138,7 +138,7 @@ devfs_open(vnode_t *vn, int flags, mode_t mode)
 {
     if(!vn->v_dev)
         return 0;
-    return devd_open(vn->v_dev, flags); //zgodno¶æ flag?
+    return devd_open(vn->v_dev, flags); //zgodnoÅ›Ä‡ flag?
 }
 
 
@@ -152,12 +152,12 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     ///@todo check for invalid name
     //check
     vnode_t *tmp;
-    ///@todo w ca³ym VFS i fs-ach trzeba przemy¶leæ strategiê blokowania...
+    ///@todo w caÅ‚ym VFS i fs-ach trzeba przemyÅ›leÄ‡ strategiÄ™ blokowania...
     error = vfs_lookup(vn, &tmp, name, NULL, LKP_NORMAL);
     if(error != -ENOENT) {
         if(!error)
             vrele(tmp);
-        return -EEXIST; // a mo¿e raczej powinni¶my zmodyfikowaæ ist. plik?
+        return -EEXIST; // a moÅ¼e raczej powinniÅ›my zmodyfikowaÄ‡ ist. plik?
     }
     //plik nie istnieje -> tworzymy
     devfs_node_t *pn = vn->v_private;
@@ -269,7 +269,7 @@ devfs_setattr(vnode_t *vn, vattr_t *attr)
     if(attr->va_mask & VATTR_SIZE) {
         return -EINVAL;
     }
-    if(attr->va_mask & VATTR_TYPE) {    //eee... a mo¿e raczej zawsze -EINVAL..
+    if(attr->va_mask & VATTR_TYPE) {    //eee... a moÅ¼e raczej zawsze -EINVAL..
         if(attr->va_type == VNODE_TYPE_DIR)
             node->i_type = _INODE_TYPE_DIR;
         else if(attr->va_type == VNODE_TYPE_DEV)
@@ -312,7 +312,7 @@ int
 devfs_inactive(vnode_t *vn)
 {
     devfs_node_t *n = vn->v_private;
-    //nie zwalniamy n, on sobie bytuje a¿ do deregister
+    //nie zwalniamy n, on sobie bytuje aÅ¼ do deregister
     if(vn->v_type == VNODE_TYPE_DIR) {
         n->i_dirvnode = NULL;
     }
@@ -391,7 +391,7 @@ devfs_init()
     vfs_register("devfs", &devfs_ops);
 
     devfs_node_t *n = kmem_zalloc(sizeof(devfs_node_t), KM_SLEEP);
-    str_cpy(n->i_name, "<devfs root>"); // ciekawe, czy da radê jako¶ to zobaczyæ...
+    str_cpy(n->i_name, "<devfs root>"); // ciekawe, czy da radÄ™ jakoÅ› to zobaczyÄ‡...
     n->i_type = _INODE_TYPE_DIR;
     n->i_attr = 0;
     n->i_uid = 0;
@@ -419,7 +419,7 @@ int
 devfs_register(devd_t *device, uid_t def_uid, gid_t def_gid,
                 mode_t def_mode)
 {
-    //szybka ¶ciema..
+    //szybka Å›ciema..
     vattr_t attr;
     attr.va_dev = device;
     attr.va_uid = def_uid;

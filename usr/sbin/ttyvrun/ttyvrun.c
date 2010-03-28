@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -35,7 +35,7 @@ main(int argc, char **v)
     close(0);
     close(1);
     close(2);
-    // je¿eli jeste¶my leaderem grupy, to nie mo¿emy zrobiæ setsid -> trik ;)
+    // jeÅ¼eli jesteÅ›my leaderem grupy, to nie moÅ¼emy zrobiÄ‡ setsid -> trik ;)
     pid_t p = fork();
     if (p) exit(0); 
     setsid();

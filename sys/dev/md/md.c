@@ -127,7 +127,7 @@ mdstrategy(devd_t *dev, iobuf_t *b)
 }
 
 /*=========================================================================
- * Zewnêtrzne procedury.
+ * ZewnÄ™trzne procedury.
  */
 
 static bool md_less(const memdisk_t *, const memdisk_t *);
@@ -147,10 +147,10 @@ md_is_this(const memdisk_t *md, uintptr_t unit)
 }
 
 /**
- * Tworzy "pamiêciowy" dysk twardy.
+ * Tworzy "pamiÄ™ciowy" dysk twardy.
  * @param unit jednostka dysku (/dev/mdXX)
  * @param data obraz, gdy NULL to sam alokuje dane
- * @param size wielko¶c w bajtach.
+ * @param size wielkoÅ›c w bajtach.
  */
 int
 md_create(int unit, void *data, size_t size)

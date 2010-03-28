@@ -58,13 +58,13 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
     proc_t *target = proc_find(pid);
     if(!target)
         return -ESRCH;
-    //liderem grupy jest proc z pid = 'pgid'; a co jak zgin±³?
+    //liderem grupy jest proc z pid = 'pgid'; a co jak zginÄ…Å‚?
     proc_t *dstleader = proc_find(pgid);
     if(!dstleader)
         return -ESRCH;//nie jestem pewien
     if(p!=target && !proc_is_parent(p, target))
         return -ESRCH;
-    //jeste¶my tutaj -> target jest nami, lub naszym dzieckiem
+    //jesteÅ›my tutaj -> target jest nami, lub naszym dzieckiem
     if(target->p_pid != p->p_pid) { //prawdziwy potomek
         if(ISSET(target->p_flags, PROC_AFTER_EXEC)) return -EACCES;
         if((target->p_session != p->p_session) || 
@@ -73,7 +73,7 @@ sc_setpgid(thread_t *t, syscall_result_t *r, setpgid_args_t *args)
     }
     if(target->p_session != dstleader->p_session)
         return -EPERM;
-    ///@todo dodaæ test: je¿eli to nowa grupa, to pgid == pid
+    ///@todo dodaÄ‡ test: jeÅ¼eli to nowa grupa, to pgid == pid
     target->p_group = pgid;
     r->result = 0;
     return -EOK;

@@ -139,12 +139,12 @@ signal_proc(thread_t *t)
         return -ENOMSG;
     }
 
-    /* sprawdzamy czy sygna≥ jest ignorowany lub blokowany */
+    /* sprawdzamy czy sygna≈Ç jest ignorowany lub blokowany */
     if ( sigmask(sig) & p->p_sigignore ) {
         return EOK;
     }
 
-    /* uruchamiamy akcje dla sygna≥u */
+    /* uruchamiamy akcje dla sygna≈Çu */
     
     if ( signal_action(p, sig) == SIG_DFL) {
         switch(_sig_acts[sig]) {
@@ -188,9 +188,9 @@ signal_send(proc_t *p, int sig)
 bool
 signal_ign_or_blk(proc_t *p, int sig)
 {
-    if(//(sigmask(sig) & p->p_sigblock) ||  // jak sprawdzaÊ blokowanie?
+    if(//(sigmask(sig) & p->p_sigblock) ||  // jak sprawdzaƒá blokowanie?
        (sigmask(sig) & p->p_sigignore) ||
-        signal_action(p, sig) == SIG_IGN) // niech kto∂ to zweryfikuje
+        signal_action(p, sig) == SIG_IGN) // niech kto≈õ to zweryfikuje
         return TRUE;
     return FALSE;
 }
@@ -200,7 +200,7 @@ signal_send_group(pid_t pgid, int sig)
 {
     if ( sig < 1 || sig > _NSIG )
         return FALSE;
-    ///@todo signal_send_group -> tak, bzdura, trzeba to zmieniÊ
+    ///@todo signal_send_group -> tak, bzdura, trzeba to zmieniƒá
     proc_t *p = NULL;
     while((p = list_next(&procs_list, p))) {
         if(p->p_group != pgid)

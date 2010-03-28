@@ -35,7 +35,7 @@
 #include <sys/vm.h>
 #include <sys/vm/vm_lpool.h>
 
-/// Wewnêtrzna pula (na stronie).
+/// WewnÄ™trzna pula (na stronie).
 typedef struct _pool _pool_t;
 struct _pool {
     list_node_t     L_pools;
@@ -49,15 +49,15 @@ static void grow_lpool(vm_lpool_t *vlp);
 static bool is_in_this_pool(uintptr_t paddr, uintptr_t target);
 
 /**
- * Tworzy strukturê lpool.
- * @param vlp wska¼nik do struktury.
- * @param offset przesuniêcie uchwytu listy w elementach.
- * @param esize wielko¶æ elementu.
+ * Tworzy strukturÄ™ lpool.
+ * @param vlp wskaÅºnik do struktury.
+ * @param offset przesuniÄ™cie uchwytu listy w elementach.
+ * @param esize wielkoÅ›Ä‡ elementu.
  * @param flags opcje.
  * @param fpool sugerowana strona.
  *
- * Procedura tworzy vlp, je¿eli fpool jest ró¿ny od NULL to adres jest
- * traktowany jako adres strony, która jest inicjalizowana jako pula.
+ * Procedura tworzy vlp, jeÅ¼eli fpool jest rÃ³Å¼ny od NULL to adres jest
+ * traktowany jako adres strony, ktÃ³ra jest inicjalizowana jako pula.
  */
 void
 vm_lpool_create_(vm_lpool_t *vlp, int offset, size_t esize, int flags,
@@ -77,14 +77,14 @@ vm_lpool_create_(vm_lpool_t *vlp, int offset, size_t esize, int flags,
 }
 
 /**
- * Tworzy ustabilizowan± strukturê lpool.
- * @param vlp wska¼nik do struktury.
- * @param offset przesuniêcie uchwytu listy w elementach.
- * @param esize wielko¶æ elementu.
+ * Tworzy ustabilizowanÄ… strukturÄ™ lpool.
+ * @param vlp wskaÅºnik do struktury.
+ * @param offset przesuniÄ™cie uchwytu listy w elementach.
+ * @param esize wielkoÅ›Ä‡ elementu.
  * @param flags opcje.
  *
- * Procedura tworzy strukturê za pomoc± vm_lpool_create_(), a nastêpnie
- * uruchamia procedurê stabilizuj±c±.
+ * Procedura tworzy strukturÄ™ za pomocÄ… vm_lpool_create_(), a nastÄ™pnie
+ * uruchamia procedurÄ™ stabilizujÄ…cÄ….
  */
 void
 vm_lpool_create(vm_lpool_t *vlp, int offset, size_t esize, int flags)
@@ -95,7 +95,7 @@ vm_lpool_create(vm_lpool_t *vlp, int offset, size_t esize, int flags)
 
 /**
  * Przydziela element z puli.
- * @param vlp pula elementów.
+ * @param vlp pula elementÃ³w.
  * @return przydzielony element.
  */
 void*
@@ -124,7 +124,7 @@ vm_lpool_alloc(vm_lpool_t *vlp)
 
 /**
  * Zwraca przydzielony element do puli.
- * @param vlp pula elementów.
+ * @param vlp pula elementÃ³w.
  * @param x przydzielony element.
  */
 void
@@ -150,9 +150,9 @@ vm_lpool_free(vm_lpool_t *vlp, void *x)
 }
 
 /**
- * Niszczy pulê.
+ * Niszczy pulÄ™.
  * @param vlp pula.
- * @warning pula musi byæ w ca³o¶ci opró¿niona.
+ * @warning pula musi byÄ‡ w caÅ‚oÅ›ci oprÃ³Å¼niona.
  */
 void
 vm_lpool_destroy(vm_lpool_t *vlp)
@@ -162,7 +162,7 @@ vm_lpool_destroy(vm_lpool_t *vlp)
 }
 
 /**
- * Przydziela stronê jako pulê.
+ * Przydziela stronÄ™ jako pulÄ™.
  * @param vlp pula.
  * @param page adres strony.
  */
@@ -175,7 +175,7 @@ vm_lpool_insert_empty(vm_lpool_t *vlp, void *page)
 }
 
 /**
- * Stabilizuje pulê.
+ * Stabilizuje pulÄ™.
  * @param vlp pula.
  */
 void
@@ -205,7 +205,7 @@ grow_lpool(vm_lpool_t *vlp)
 }
 
 /**
- * Inicjalizuje stronê do u¿ytku w puli.
+ * Inicjalizuje stronÄ™ do uÅ¼ytku w puli.
  * @param vlp pula
  * @param pl strona
  */
@@ -221,7 +221,7 @@ init_pool(vm_lpool_t *vlp, _pool_t *pl )
 }
 
 /**
- * Predykat u¿ywany do szukania strony zawieraj±cej element.
+ * Predykat uÅ¼ywany do szukania strony zawierajÄ…cej element.
  * @param addr adres strony
  * @param target adres elementu
  * @return TRUE wtedy i tylko wtedy, gdy dany element jest na danej stronie.

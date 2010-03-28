@@ -194,7 +194,7 @@ f_fcntl(filetable_t *ft, int argfd, file_t *f, int cmd, uintptr_t param)
                     return -EMFILE;
                 fc = (filetable_chunk_t *)list_next(&(ft->chunks), fc);
             }
-            //shm: todo: a co je¶li nie by³o miejsca?
+            //shm: todo: a co jeÅ›li nie byÅ‚o miejsca?
             panic("FCNTL not impl opt?\n");
             break;
         case F_GETFL:
@@ -228,9 +228,9 @@ f_get(filetable_t *ft, int index)
         return NULL;
     }
     file_t *res = fc->files[index % FILES_PER_CHUNK];
-    // zgodnie z filozofi±, zwracanie zliczanego obiektu z funkcji daje go
-    // ze zwiêkszonym licznikiem referencji
-    // w ten sposób ograniczamy mo¿liwe wy¶cigi do miejsc takich jak to ;)
+    // zgodnie z filozofiÄ…, zwracanie zliczanego obiektu z funkcji daje go
+    // ze zwiÄ™kszonym licznikiem referencji
+    // w ten sposÃ³b ograniczamy moÅ¼liwe wyÅ›cigi do miejsc takich jak to ;)
     if(res)
         fref(res);
     mutex_unlock(&ft->mtx);
@@ -238,8 +238,8 @@ f_get(filetable_t *ft, int index)
 }
 
 /**
- * f_set przejmuje prawo w³asno¶ci do fd od wywo³uj±cego i umieszcza wskazywany
- * plik w tablicy otwartych plików procesu
+ * f_set przejmuje prawo wÅ‚asnoÅ›ci do fd od wywoÅ‚ujÄ…cego i umieszcza wskazywany
+ * plik w tablicy otwartych plikÃ³w procesu
  *
  */
 
@@ -257,14 +257,14 @@ f_set(filetable_t *ft, file_t *fd, int index, bool cloexec)
         fc = _get_chunk_by_index(ft, index);
     }
 //    KASSERT(fc!=NULL);
-    // f_set przejmuje prawo w³asno¶ci do fd od wywo³uj±cego ->
-    // wywo³uj±cy przekaza³ nam prawo w³asno¶ci do tej referencji
+    // f_set przejmuje prawo wÅ‚asnoÅ›ci do fd od wywoÅ‚ujÄ…cego ->
+    // wywoÅ‚ujÄ…cy przekazaÅ‚ nam prawo wÅ‚asnoÅ›ci do tej referencji
     file_t *old = fc->files[index % FILES_PER_CHUNK];
     fc->files[index % FILES_PER_CHUNK] = fd;
     fc->close_flag[index % FILES_PER_CHUNK] = cloexec;
     mutex_unlock(&ft->mtx);
     if(old)
-        frele(old); //pozbywamy siê naszej w³asno¶ci
+        frele(old); //pozbywamy siÄ™ naszej wÅ‚asnoÅ›ci
 }
 
 void

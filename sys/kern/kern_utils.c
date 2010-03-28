@@ -38,8 +38,8 @@
 #include <machine/interrupt.h>
 
 /**
- * Funkcja wywo≥ywana w sytuacjach awaryjnych.
- * Zatrzymuje system, wy∂wietlaj±c podany komunikat.
+ * Funkcja wywo≈Çywana w sytuacjach awaryjnych.
+ * Zatrzymuje system, wy≈õwietlajƒÖc podany komunikat.
  */
 
 bool SYSTEM_DEBUG = FALSE;

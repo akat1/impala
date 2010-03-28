@@ -41,11 +41,11 @@
 #include <sys/signal.h>
 #include <machine/interrupt.h>
 
-/// Kwant czasu przydzialny programom, w tykniêciach zegara.
+/// Kwant czasu przydzialny programom, w tykniÄ™ciach zegara.
 int sched_quantum;
 
 
-/// Kolejka programów gotowych do uruchomienia
+/// Kolejka programÃ³w gotowych do uruchomienia
 static list_t run_queue;
 
 bool wantSched;
@@ -54,7 +54,7 @@ bool rescheduled;
 static int end_ticks_roundrobin;
 static int end_ticks_reschedule;
 
-/// Zamek zabezpieczaj±cy sekcje krytyczne planisty.
+/// Zamek zabezpieczajÄ…cy sekcje krytyczne planisty.
 static spinlock_t sprq;
 
 
@@ -63,8 +63,8 @@ static void __sched_yield(void);
 static inline void _sched_wakeup(thread_t *n);
 
 /*
- * Planista oparty na koncepcji szeregowania procesów z systemów 4.3BSD oraz
- * SVR3 - opis znajduje siê w ksi±¿ce J±dro Systemu UNIX, nowe horyzony - Uresh
+ * Planista oparty na koncepcji szeregowania procesÃ³w z systemÃ³w 4.3BSD oraz
+ * SVR3 - opis znajduje siÄ™ w ksiÄ…Å¼ce JÄ…dro Systemu UNIX, nowe horyzony - Uresh
  * Vahalia - WNT
  */
 
@@ -76,7 +76,7 @@ void __resched(void);
 int first_not_empty;
 static list_t sched_queue[SCHED_NQ];
 
-/// Procedura zwraca kolejkê na podstawie priorytetu
+/// Procedura zwraca kolejkÄ™ na podstawie priorytetu
 list_t *
 __queue(int pri)
 {
@@ -100,9 +100,9 @@ __resched(void)
         if ( ISSET(t->thr_flags, THREAD_USER)
             && ISSET(t->thr_flags, THREAD_RUN) ) {
             /* Wyliczamy na nowo priorytet - oryginalnie wyliczano na podstawie
-             * wzoru PUSER + 2 * nice + decay(cpu) - w SVR4 decay(cpy) by³o
-             * równe dzieleniu przez 4 w BSD by³o to dzielenie przez
-             * ¶rednie obci±¿enie systemu */
+             * wzoru PUSER + 2 * nice + decay(cpu) - w SVR4 decay(cpy) byÅ‚o
+             * rÃ³wne dzieleniu przez 4 w BSD byÅ‚o to dzielenie przez
+             * Å›rednie obciÄ…Å¼enie systemu */
             t->thr_proc->p_pri = 2 * t->thr_proc->p_nice +
                 (t->thr_proc->p_ucpu)/2;
             list_insert_head(__queue(t->thr_proc->p_pri), t);
@@ -126,7 +126,7 @@ __resched(void)
     return;
 }
 
-/// Procedura inicjuj±ca program planisty.
+/// Procedura inicjujÄ…ca program planisty.
 void
 sched_init()
 {
@@ -142,7 +142,7 @@ sched_init()
 /**
  * Podprogram planisty.
  *
- * Procedura jest uruchamiana przez program obs³ugi przerwania
+ * Procedura jest uruchamiana przez program obsÅ‚ugi przerwania
  * zegara. Odlicza odpowiedni kwant czasu i wyzwala zmiane kontekstu.
  */
 
@@ -155,13 +155,13 @@ sched_action()
 }
 
 /**
- * Pomocnicza procedura zmieniaj±ca kontekst.
+ * Pomocnicza procedura zmieniajÄ…ca kontekst.
  *
- * Powinna byæ uruchamina tylko wewn±trz sekcji krytycznych
- * chronionych przez wiruj±cy zamek sprq. Jej zadanie to wybranie
- * kolejnego w±tku, wyj¶cie z sekcji krytycznej i zmiana kontekstu.
+ * Powinna byÄ‡ uruchamina tylko wewnÄ…trz sekcji krytycznych
+ * chronionych przez wirujÄ…cy zamek sprq. Jej zadanie to wybranie
+ * kolejnego wÄ…tku, wyjÅ›cie z sekcji krytycznej i zmiana kontekstu.
  *
- * Stan na wej: przerwania w³±czone, CIPL == IPL_SOFTCLOCK
+ * Stan na wej: przerwania wÅ‚Ä…czone, CIPL == IPL_SOFTCLOCK
  */
 void
 __sched_yield()
@@ -181,9 +181,9 @@ __sched_yield()
 }
 
 /**
- * Próbuje prze³±czyæ kontekst
- * Stan na wej¶ciu: przerwania: obojêtnie
- * Stan na wyj¶ciu: przerwania: w³±czone, CIPL=0
+ * PrÃ³buje przeÅ‚Ä…czyÄ‡ kontekst
+ * Stan na wejÅ›ciu: przerwania: obojÄ™tnie
+ * Stan na wyjÅ›ciu: przerwania: wÅ‚Ä…czone, CIPL=0
  */
 void
 do_switch()
@@ -191,11 +191,11 @@ do_switch()
     int old=splsoftclock();
     KASSERT(old==0);
 
-    /* Reorganizacja kolejek w±tków */
+    /* Reorganizacja kolejek wÄ…tkÃ³w */
     if ( end_ticks_reschedule <= clock_ticks )
         __resched();
 
-    if(spinlock_trylock(&sprq)) //je¿eli odpalamy z w±tku to powinno byæ ok
+    if(spinlock_trylock(&sprq)) //jeÅ¼eli odpalamy z wÄ…tku to powinno byÄ‡ ok
         __sched_yield();
 
     spl0();
@@ -203,7 +203,7 @@ do_switch()
 }
 
 
-/// Wymusza prze³±czanie kontekstu.
+/// Wymusza przeÅ‚Ä…czanie kontekstu.
 void
 sched_yield()
 {
@@ -211,7 +211,7 @@ sched_yield()
     do_switch();
 }
 
-/// Dodaje w±tek do kolejki programów dzia³aj±cych.
+/// Dodaje wÄ…tek do kolejki programÃ³w dziaÅ‚ajÄ…cych.
 void
 sched_insert(thread_t *thr)
 {
@@ -264,7 +264,7 @@ __mutex_unlock(mutex_t *m)
 
 
 
-/// Usypia dzia³aj±cy w±tek.
+/// Usypia dziaÅ‚ajÄ…cy wÄ…tek.
 void
 sched_unlock_and_wait(mutex_t *m)
 {
@@ -278,7 +278,7 @@ sched_unlock_and_wait(mutex_t *m)
     splx(old);
 }
 
-/// Usypia dzia³aj±cy w±tek.
+/// Usypia dziaÅ‚ajÄ…cy wÄ…tek.
 void
 sched_wait(const char *fl, const char *fn, int l, const char *d)
 {
@@ -307,8 +307,8 @@ _sched_wakeup(thread_t *n)
 }
 
 /**
- * Budzi w±tek.
- * @param n Deskryptor w±tku do obudzenia.
+ * Budzi wÄ…tek.
+ * @param n Deskryptor wÄ…tku do obudzenia.
  */
 
 void
@@ -320,7 +320,7 @@ sched_wakeup(thread_t *n)
 }
 
 /**
- * Usypia w±tek na podan± ilo¶æ sekund
+ * Usypia wÄ…tek na podanÄ… iloÅ›Ä‡ sekund
  * @param stime Czas w sekundach
  */
 
@@ -342,7 +342,7 @@ imsleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
 }
 
 /**
- * Usypia w±tek na podan± ilo¶æ milisekund
+ * Usypia wÄ…tek na podanÄ… iloÅ›Ä‡ milisekund
  * @param mtime Czas w milisekundach
  */
 
@@ -353,7 +353,7 @@ msleep(uint mtime, const char *fl, const char *fn, int l, const char *d)
     sched_wait(fl, fn, l, d);
 }
 
-/// Niszczy w±tek.
+/// Niszczy wÄ…tek.
 void
 sched_exit(thread_t *t)
 {
@@ -396,7 +396,7 @@ sched_dump()
     spinlock_unlock(&sprq);
 }
 
-/// Wybiera nastêpny w±tek do obs³ugi.
+/// Wybiera nastÄ™pny wÄ…tek do obsÅ‚ugi.
 thread_t *
 select_next_thread()
 {
@@ -432,7 +432,7 @@ select_next_thread()
 
 
 /*============================================================================
- * ¦pi±ce królewny... tzn kolejki.
+ * ÅšpiÄ…ce krÃ³lewny... tzn kolejki.
  */
 
 void

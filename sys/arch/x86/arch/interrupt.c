@@ -81,7 +81,7 @@ irq_free_handler(int irq)
 }
 
 
-// Planuje wywaliÊ irq_done, ale nie wszystko na raz...
+// Planuje wywaliƒá irq_done, ale nie wszystko na raz...
 void
 irq_done()
 {
@@ -104,7 +104,7 @@ ISR_irq(interrupt_frame frame)
 //        else
 //            kprintf("Spurious interrupt!\n");
     }
-    splx(opl);  //je∂li wracamy do zera, to tu moøe nast±piÊ zmiana kontekstu
+    splx(opl);  //je≈õli wracamy do zera, to tu mo≈ºe nastƒÖpiƒá zmiana kontekstu
 }
 
 void
@@ -258,14 +258,14 @@ splx(int pl)
     irq_disable();
     CIPL=pl;   //jeszcze nie ustawiaj masek
     if(pl==0 && wantSched)
-        do_switch(); /* podmieniamy w±tek wykonania ... jeøeli gdzie indziej teø
-                        wywo≥ujemy do_switch() to moøe wyj∂Ê nie tu,
-                        a gdzie indziej. Moøe teø uruchomiÊ nowy w±tek.
-                        A chcemy, øeby dzia≥a≥ on z CIPL=0.
-                        Niech ustawianie cipl na 0 zajdzie w ∂rodku..
+        do_switch(); /* podmieniamy wƒÖtek wykonania ... je≈ºeli gdzie indziej te≈º
+                        wywo≈Çujemy do_switch() to mo≈ºe wyj≈õƒá nie tu,
+                        a gdzie indziej. Mo≈ºe te≈º uruchomiƒá nowy wƒÖtek.
+                        A chcemy, ≈ºeby dzia≈Ça≈Ç on z CIPL=0.
+                        Niech ustawianie cipl na 0 zajdzie w ≈õrodku..
                      */
     else
-        i8259a_reset_mask();    //CIPL juø jest, tylko wy∂lij do PIC'a
+        i8259a_reset_mask();    //CIPL ju≈º jest, tylko wy≈õlij do PIC'a
     irq_enable();
 }
 

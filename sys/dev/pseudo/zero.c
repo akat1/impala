@@ -63,7 +63,7 @@ zero_init(void)
 
 
 /*========================================================================
- * Obs³uga pliku urz±dzenia znakowego /dev/zero
+ * ObsÅ‚uga pliku urzÄ…dzenia znakowego /dev/zero
  */
 
 int

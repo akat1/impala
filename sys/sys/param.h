@@ -30,7 +30,7 @@
  * $Id$
  */
 
-/** @file parametry j±dra
+/** @file parametry jÄ…dra
  */
 #ifndef __SYS_PARAM_H
 #define __SYS_PARAM_H

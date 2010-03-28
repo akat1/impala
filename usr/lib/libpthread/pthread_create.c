@@ -46,11 +46,11 @@ static void __entry(void)
 
 
 /**
- * Tworzy nowy w±tek u¿ytkownika.
- * @param pres wska¼nik na deskryptor w±tku (do wype³nienia).
- * @param attr atrybuty w±tku (NULL dla domy¶lnych).
- * @param entry adres procedury wej¶ciowej.
- * @param arg argument procedury wej¶ciowej.
+ * Tworzy nowy wÄ…tek uÅ¼ytkownika.
+ * @param pres wskaÅºnik na deskryptor wÄ…tku (do wypeÅ‚nienia).
+ * @param attr atrybuty wÄ…tku (NULL dla domyÅ›lnych).
+ * @param entry adres procedury wejÅ›ciowej.
+ * @param arg argument procedury wejÅ›ciowej.
  *
  */
 int
@@ -74,7 +74,7 @@ pthread_create(pthread_t *pres, const pthread_attr_t *attr,
     pthread_attr_getstacksize(&p->pth_attr, &stack_size);
     p->pth_id = thr_create(__entry, stack_addr, stack_size, p);
     if (p->pth_id == -1) {
-        // zwolniæ pamiêæ
+        // zwolniÄ‡ pamiÄ™Ä‡
         return -1;
     }
     *pres = p;   

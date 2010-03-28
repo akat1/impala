@@ -36,7 +36,7 @@
 
 
 /**
- * Reprezentuje dostêpny w systemie typ systemu plików.
+ * Reprezentuje dostÄ™pny w systemie typ systemu plikÃ³w.
  */
 
 struct vfs_conf {

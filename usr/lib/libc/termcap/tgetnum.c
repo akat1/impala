@@ -7,7 +7,7 @@
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
  *
- * Niniejszy plik jest objêty licencj±, zobacz plik COPYRIGHT dostarczony
+ * Niniejszy plik jest objÄ™ty licencjÄ…, zobacz plik COPYRIGHT dostarczony
  * wraz z projektem.
  *
  * $Id$
@@ -126,7 +126,7 @@ int
 tgetent(char *bp, const char *name)
 {
     char *tinfo = strdup(getenv("TERMCAP"));
-    //if(!tinfo) tinfo = inne ¼ród³o tinfo
+    //if(!tinfo) tinfo = inne ÅºrÃ³dÅ‚o tinfo
     if(!tinfo)
         return -1;
     char *c = tinfo;
@@ -223,7 +223,7 @@ tgoto(char *cap, int col, int row)
     int args[2] = {col, row};
     char *c2 = res_buf;
     char *c = cap;
-    int argNum = 1; //tak - choæ to dziwne :)
+    int argNum = 1; //tak - choÄ‡ to dziwne :)
     while(*c) {
         switch(*c) {
             case '%':

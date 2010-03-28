@@ -42,7 +42,7 @@
 #define isblank(c) ((c)==' ' || (c)=='\t')
 #define iscntrl(c) ((c) == 0177 || __iir((c), 0, ' '-1))
 #define isdigit(c) __iir((c), '0', '9')
-///@todo do punct sporo rÛønych naleøy... moøe warto by by≥o uøywaÊ locale?
+///@todo do punct sporo r√≥≈ºnych nale≈ºy... mo≈ºe warto by by≈Ço u≈ºywaƒá locale?
 #define ispunct(c) (__iir((c), '!', '/') || __iir((c), ':', '@') \
                   || __iir((c), '[', '`') || __iir((c), '{', '~'))
 #define isgraph(c) (isalnum(c) || ispunct(c))

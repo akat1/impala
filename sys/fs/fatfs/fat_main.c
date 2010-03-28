@@ -30,7 +30,7 @@
  */
 
 /** @file 
- * G³ówny plik obs³ugi systemu plików MS FAT.
+ * GÅ‚Ã³wny plik obsÅ‚ugi systemu plikÃ³w MS FAT.
  */
 
 #include <sys/types.h>
@@ -64,7 +64,7 @@ blkno_t fat12_get(const uint8_t *, int);
 void fat12_set(uint8_t *, int, blkno_t);
 
 /*************************************************************************
- * Procedury obs³ugi VFS.
+ * Procedury obsÅ‚ugi VFS.
  */
 
 
@@ -117,7 +117,7 @@ fatfs_unmount(vfs_t *vfs)
     return -ENOTSUP;
 }
 
-/// pobiera opis g³ównego katalogu systemu plików
+/// pobiera opis gÅ‚Ã³wnego katalogu systemu plikÃ³w
 vnode_t *
 fatfs_getroot(vfs_t *vfs)
 {
@@ -126,7 +126,7 @@ fatfs_getroot(vfs_t *vfs)
     return fatfs->root;
 }
 
-/// synchronizuje system plików z no¶nikiem
+/// synchronizuje system plikÃ³w z noÅ›nikiem
 void
 fatfs_sync(vfs_t *vfs)
 {
@@ -149,7 +149,7 @@ fatfs_sync(vfs_t *vfs)
 }
 
 /*************************************************************************
- * Procedury zarz±dzaj±ce miejscem na no¶niku.
+ * Procedury zarzÄ…dzajÄ…ce miejscem na noÅ›niku.
  */
 
 /**
@@ -193,7 +193,7 @@ fatfs_space_repair(fatfs_t *fatfs)
 }
 
 
-/// przydziela wolne miejsce na no¶niku
+/// przydziela wolne miejsce na noÅ›niku
 blkno_t
 fatfs_space_alloc(fatfs_t *fatfs, size_t size)
 {
@@ -241,14 +241,14 @@ fatfs_space_free(fatfs_t *fatfs, blkno_t blk)
 
 
 /**
- * sprawdza pierwszy sektor no¶nika
+ * sprawdza pierwszy sektor noÅ›nika
  * @param sblock odczytany pierwszy sektor
- * @return 0 gdy opis pasuje do FAT12, -1 w przeci³nym wypadku
+ * @return 0 gdy opis pasuje do FAT12, -1 w przeciÅ‚nym wypadku
  */
 int
 fatfs_check_sblock(const fatfs_sblock_t *sblock)
 {
-    // obecnie obs³ugujemy jedynie FAT12 na dyskietkach 1440kB
+    // obecnie obsÅ‚ugujemy jedynie FAT12 na dyskietkach 1440kB
     if (sblock->media != 0xf0) {
         DEBUGF("media id (0x%x) is not 1440kB floppy (0xf0)",
             sblock->media);
@@ -286,9 +286,9 @@ fatfs_createfs(const fatfs_sblock_t *sblock)
 }
 
 /**
- * odczytuje pierwsz± tablicê FAT z no¶nika
+ * odczytuje pierwszÄ… tablicÄ™ FAT z noÅ›nika
  * @param fatfs deskryptor fatfs
- * @return 0 przy powodzeniu, lub bl±d operacji wej-wyj
+ * @return 0 przy powodzeniu, lub blÄ…d operacji wej-wyj
  */
 int
 fatfs_read_fat(fatfs_t *fatfs)
@@ -305,21 +305,21 @@ fatfs_read_fat(fatfs_t *fatfs)
 }
 
 /**
- * odwzorowuje plik na sektor klastra na no¶niku
- * @param node wêze³ którego fragment chcemy odwzorowaæ
+ * odwzorowuje plik na sektor klastra na noÅ›niku
+ * @param node wÄ™zeÅ‚ ktÃ³rego fragment chcemy odwzorowaÄ‡
  * @param off pozycja w pliku
- * @param size ograniczenie górne (w bajtach) na szukany ci±g klastrów
+ * @param size ograniczenie gÃ³rne (w bajtach) na szukany ciÄ…g klastrÃ³w
  *             (0 oznacza bez ograniczenia)
- * @param cont do uzupe³nienia ilo¶ci± ci±g³ych klastrów, NULL je¿eli ta
+ * @param cont do uzupeÅ‚nienia iloÅ›ciÄ… ciÄ…gÅ‚ych klastrÃ³w, NULL jeÅ¼eli ta
  *             informacja jest nieistotna.
- * @return zwraca numer sektora na no¶niku zawieraj±cego dany fragment pliku,
- *         lub -1 je¿eli taki sektor nie istnieje.
+ * @return zwraca numer sektora na noÅ›niku zawierajÄ…cego dany fragment pliku,
+ *         lub -1 jeÅ¼eli taki sektor nie istnieje.
  *
- * Procedura zwraca numer sektora na no¶niku, w którym rozpoczyna siê klaster
- * przechowuj±cy dan± pozycjê w pliku. Mo¿liwe jest te¿ zdobycie informacji
- * ile nastêpnych klastrów wystêpuje po sobie. W takim wypadku mo¿na je
- * wszystkie odczytaæ za pomoc± jednego transferu danych z urz±dzenia,
- * co jest istotne dla wydajno¶ci systemu.
+ * Procedura zwraca numer sektora na noÅ›niku, w ktÃ³rym rozpoczyna siÄ™ klaster
+ * przechowujÄ…cy danÄ… pozycjÄ™ w pliku. MoÅ¼liwe jest teÅ¼ zdobycie informacji
+ * ile nastÄ™pnych klastrÃ³w wystÄ™puje po sobie. W takim wypadku moÅ¼na je
+ * wszystkie odczytaÄ‡ za pomocÄ… jednego transferu danych z urzÄ…dzenia,
+ * co jest istotne dla wydajnoÅ›ci systemu.
  */
 
 blkno_t
@@ -364,7 +364,7 @@ fatfs_cmap(fatfs_t *fatfs, blkno_t clu)
 }
 
 /*************************************************************************
- * Procedury obs³ugi tablic FAT
+ * Procedury obsÅ‚ugi tablic FAT
  */
 
 blkno_t
