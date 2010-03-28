@@ -2,10 +2,10 @@ Build Impala Operating System require suitable environment:
 	IMPALA_SRCROOT      root source catalog
 	IMPALA_ARCH         architecture (x86)
 	IMPALA_MK           $IMAPAL_SRCROOT/mk
-	IMPALA_OUTPUT		output catalog
+	IMPALA_OUTPUT	    output catalog
 
 Additional variables:
-	ELF_PREFIX     		Default "" - prefix for ELF tools
+	ELF_PREFIX     	    Default "" - prefix for ELF tools
 	AOUT_PREFIX         Default "i386-aout-" - prefix for a.out tools
 
 
