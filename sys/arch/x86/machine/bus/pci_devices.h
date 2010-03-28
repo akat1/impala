@@ -1,7 +1,5 @@
 /* Impala Operating System
  *
- * Copyright (C) 2010 University of Wroclaw. Department of Computer Science
- *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2010 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
  *    http://trzask.codepainters.com/impala/trac/
  * All rights reserved.
