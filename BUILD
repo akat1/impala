@@ -1,17 +1,15 @@
-Zbudowanie systemu wymaga odpowiedniego srodowiska:
-	IMPALA_SRCROOT      katalog glowny ze zrodlami
-	IMPALA_ARCH         architektura (x86)
+Build Impala Operating System require suitable environment:
+	IMPALA_SRCROOT      root source catalog
+	IMPALA_ARCH         architecture (x86)
 	IMPALA_MK           $IMAPAL_SRCROOT/mk
+	IMPALA_OUTPUT		output catalog
 
-Dodatkowe zmienne:
-	BINUTILS_PREFIX     Domyslnie ""
-	GCC_PREFIX          Domyslnie ""
+Additional variables:
+	ELF_PREFIX     		Default "" - prefix for ELF tools
+	AOUT_PREFIX         Default "i386-aout-" - prefix for a.out tools
 
 
-Poprawne definicje sa w conf/DEFS.sh. W przypadku powlok
-kompatybilnych z Bourne Shell mozna posluzyc sie poleceniem
+Definitions can be found in conf/DEFS.sh. In case of shells compatible with
+Bourne Shell you can use command:
 	$ source conf/DEFS.sh
-w celu zdefiniowania poprawnego srodowiska.
-
-
-^^ nieaktualne
+In order to define required environment.
