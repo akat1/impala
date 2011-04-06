@@ -238,7 +238,7 @@ init_x86(const char *karg)
     vm_low_init();
     video_init();
     bus_isa_init();
-	bus_pci_init();
+    bus_pci_init();
     irq_enable();
     _cpu_info();
 
