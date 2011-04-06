@@ -18,7 +18,13 @@
 void *
 calloc(size_t nmemb, size_t size)
 {
-    void* res = malloc(nmemb*size);
+    void* res;
+    /* detect overflow */
+    if (nmemb * size < size && nmemb * size < nmemb)
+        return NULL;
+    res = malloc(nmemb*size);
+    if (res == NULL)
+        return NULL;
     memset(res, 0, nmemb*size);
     return res;
 }
