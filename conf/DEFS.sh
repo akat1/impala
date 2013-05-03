@@ -2,5 +2,6 @@ export IMPALA_ARCH=${IMPALA_ARCH:="x86"}
 export IMPALA_SRCROOT=$PWD
 export IMPALA_MK=$IMPALA_SRCROOT/mk
 export IMPALA_OUTPUT=$IMPALA_SRCROOT/output
-export ELF_PREFIX=${ELF_PREFIX:="i386-elf-"}
-export AOUT_PREFIX=${AOUT_PREFIX:="i386-aout-"}
+export IMPALA_SDK=${HOME}/ImpalaSDK
+export ELF_PREFIX=${IMPALA_SDK}/bin/${ELF_PREFIX:="i386-elf-"}
+export AOUT_PREFIX=${IMPALA_SDK}/bin/${AOUT_PREFIX:="i386-aout-"}

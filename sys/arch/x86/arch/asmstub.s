@@ -37,7 +37,6 @@
 .equ udata_selector, 0x20
 .equ SEL_DPL3, 0x3
 
-.global
 .global cpu_user_mode
 .global cpu_gdt_load
 .global cpu_ldt_load

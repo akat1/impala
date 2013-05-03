@@ -79,7 +79,7 @@ build_gcc_for_target ()
 {
     target=$1
     print_section "Building and installing gcc-core-${GCC_VERSION} for ${target}"
-    in_gcc_obj "${target}" gcc_build_command "${target}" #> output.out 2> output.err
+    in_gcc_obj "${target}" gcc_build_command "${target}" > output.out 2> output.err
 }
 
 build_binutils () {
