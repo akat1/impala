@@ -68,7 +68,7 @@ main(int argc, char **v)
     }
     waitpid(p, &status, 0);
 #endif
-    printf("\033[2Kinvoking tar %s %s\r", argv[1], argv[2]);
+    printf("\033[2Kinvoking tar %s %s\n", argv[1], argv[2]);
     fflush(stdout);
     
     if ( (p = fork()) == 0 ) {
