@@ -238,9 +238,7 @@ init_x86(const char *karg)
     vm_low_init();
     video_init();
     bus_isa_init();
-#ifdef PCI_SKELETON
     bus_pci_init();
-#endif
     irq_enable();
     _cpu_info();
 

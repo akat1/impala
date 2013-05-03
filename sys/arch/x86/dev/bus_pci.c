@@ -233,7 +233,7 @@ bus_pci_init()
     kprintf("%x\n", pci_dev_nr);
 
     for ( dev = 0 ; dev < pci_dev_nr ; dev++ ) {
-        kprintf("v: %x d: %x i: %s bdf: %x:%x:%x c: %s\n", pci_dev[dev].vendor_id,
+        kprintf("pci-probe: %x d: %x i: %s bdf: %x:%x:%x c: %s\n", pci_dev[dev].vendor_id,
                 pci_dev[dev].device_id, pci_dev[dev].device_info->device_name,
                 pci_dev[dev].bus, pci_dev[dev].device, pci_dev[dev].func,
                 pci_dev[dev].baseclass_info->baseclass_name);
@@ -248,8 +248,7 @@ bus_pci_init()
    
     // @bug: handle irq
     // ...
-    for(;;);
-
+//    for(;;);
     return;
 }
 
