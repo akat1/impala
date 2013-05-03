@@ -43,7 +43,7 @@ DISTDIRS=\
     output/dist/var/tmp\
     output/dist/tmp
 
-.PHONY: all build build-image run init
+.PHONY: all build build-image run init distribution
 
 all: build
 
@@ -54,7 +54,10 @@ build-image: ${IMAGE_FILE} build
 run: build-image
 	cd image && qemu-system-i386 -s -fda floppy.img #bochs -f impala-usr-local.bochs 
 
-dist: init
+
+distribution:
+	@DIST_PROFILE="${DIST_PROFILE}" sh tools/distribution.sh
+
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	rm -rf output
 	mkdir -p ${DISTDIRS}
@@ -75,29 +78,6 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
-
-commit:
-	if [ -e COMMIT ];\
-	then\
-		svn commit -F COMMIT && rm COMMIT;\
-	else\
-		svn commit;\
-	fi
-
-update:
-	svn update
-	svn log -r BASE:HEAD
-
-log:
-	svn log -r BASE:HEAD
-
-install_sdk:
-	ln -sf ${IMPALA_SRCROOT}/sys/sys usr/lib/libc/include/
-	ln -sf ${IMPALA_SRCROOT}/sys/arch/x86/machine usr/lib/libc/include/
-	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libc/include ${AOUT_PATH}/
-	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${AOUT_PATH}/lib/
-	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/crt/crt0.o ${AOUT_PATH}/lib/
-	sudo ln -sf ${IMPALA_SRCROOT}/usr/lib/libpthread/libpthread.a ${AOUT_PATH}/lib/
 
 debug: build
 	${GDB} -x tools/gdbscript sys/kern/impala

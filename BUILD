@@ -1,3 +1,5 @@
+Run tools/install_sdk.sh in empty directory to build SDK.
+
 Build Impala Operating System require suitable environment:
 	IMPALA_SRCROOT      root source catalog
 	IMPALA_ARCH         architecture (x86)
@@ -5,7 +7,7 @@ Build Impala Operating System require suitable environment:
 	IMPALA_OUTPUT	    output catalog
 
 Additional variables:
-	ELF_PREFIX     	    Default "" - prefix for ELF tools
+	ELF_PREFIX     	    Default "i386-elf" - prefix for ELF tools
 	AOUT_PREFIX         Default "i386-aout-" - prefix for a.out tools
 
 
