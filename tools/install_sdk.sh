@@ -3,7 +3,7 @@
 # wget http://ftp.gnu.org/gnu/gcc/gcc-3.4.0/gcc-3.4.0.tar.gz
 
 BINUTILS_VERSION="2.23"
-GCC_VERSION="4.2.0"
+GCC_VERSION="4.3.2"
 SDK_PATH=${HOME}/ImpalaSDK
 
 
