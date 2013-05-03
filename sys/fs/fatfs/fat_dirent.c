@@ -414,6 +414,7 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
         dirent->node = node;
         list_insert_tail(&dir->dirents, dirent);
     } else {
+        // !?
     }
     vfatlname_reset(vln);
 }
@@ -458,7 +459,7 @@ vfatlname_copy83(vfatlname_t *vln, fatfs_dirent_t *dirent,
     const fatfs_dentry_t *d)
 {
 #define ugly_tolower(c) ( ('A' <= (c) && (c) <= 'Z')? (c) - ('A'-'a') : (c))
-    str_cpy(dirent->name, (const char *)d->name);
+    str_ncpy(dirent->name, (const char *)d->name, 8);
     for (int i = 0; i < 8; i++)
         if (dirent->name[i] == ' ') dirent->name[i] = 0;
     if (d->ext[0] != ' ') {

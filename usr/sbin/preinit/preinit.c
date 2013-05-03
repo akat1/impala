@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <sys/thread.h>
 
-#define syspack "/mnt/fd0/impala/syspack.tar"
+#define syspack "/mnt/fd0/impala/syspack.tar.gz"
 #define tar "/mnt/fd0/impala/tar"
 #define init "/sbin/init"
 #define gzip "/mnt/fd0/impala/minigzip"
