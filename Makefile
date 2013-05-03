@@ -55,7 +55,7 @@ run: build-image
 	cd image && qemu-system-i386 -s -fda floppy.img #bochs -f impala-usr-local.bochs 
 
 
-distribution:
+distribution: build
 	@DIST_PROFILE="${DIST_PROFILE}" sh tools/distribution.sh
 
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
