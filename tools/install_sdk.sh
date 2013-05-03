@@ -100,10 +100,10 @@ echo Desired binutils version is ${BINUTILS_VERSION}.
 echo Desired gcc version is ${GCC_VERSION}.
 echo Installation path is ${SDK_PATH}.
 
-#prepare_binutils_src
+prepare_binutils_src
 prepare_gcc_src
 
-#build_binutils
+build_binutils
 build_gcc
 
 print_msg "Done, go and replace your operating system by Impala"
