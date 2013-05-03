@@ -320,8 +320,11 @@ fatfs_access(vnode_t *v, int mode, pcred_t *c)
 int
 fatfs_sync(vnode_t *v)
 {
+#if 0
     DEBUGF("fsync not supported");
     return -ENOTSUP;
+#endif
+    return -EOK;
 }
 
 int
