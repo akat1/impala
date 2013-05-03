@@ -52,7 +52,7 @@ build-image: ${IMAGE_FILE} build
 	cd image && ./mtools.sh
 
 run: build-image
-	cd image && qemu -s -fda floppy.img #bochs -f impala-usr-local.bochs 
+	cd image && qemu-system-i386 -s -fda floppy.img #bochs -f impala-usr-local.bochs 
 
 dist: init
 init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
