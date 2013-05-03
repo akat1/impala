@@ -70,7 +70,7 @@ init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
 	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
 	#cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
 	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
-	cd output/dist && tar -cvf ../impala/syspack.tar *
+	cd output/dist && tar --format=ustar -cvf ../impala/syspack.tar *
 	gzip -9 output/impala/syspack.tar
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
