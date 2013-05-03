@@ -35,8 +35,11 @@
 
 #define FILENAME_MAX 4096
 #define PATH_MAX     4096
-#define CHAR_BIT        8
 #define IOV_MAX      1024
+
+#ifndef CHAR_BIT
+#define CHAR_BIT        8
+#endif
 
 #endif
 

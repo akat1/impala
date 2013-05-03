@@ -13,7 +13,7 @@ ${_PROG_BUILD}: ${PROG}
 
 ${PROG}: ${OBJS} ${IMPALA_SRCROOT}/usr/lib/libc/libc.a ${IMPALA_SRCROOT}/usr/lib/crt/crt0.o
 	@echo " LINK ${PROG}"
-	@${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS} ${LIBS}
+	${VERBOSE}${CC} -o ${PROG} ${_CFLAGS} ${OBJS} ${_U_LDFLAGS} ${LIBS}
 
 ${_PROG_CLEAN}:
 	@echo " CLEAN"

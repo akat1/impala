@@ -4,8 +4,13 @@
 srcdir=	./..
 CC=	i386-aout-gcc
 OPTFLAG=-O
-CFLAGS=	-c $(OPTFLAG)  -I. -I$(srcdir)/include -I$(srcdir)/regex -I$(srcdir)/db/include -I$(srcdir)/curses  
-LDFLAGS= -static -Wl,-e,__start
+CFLAGS=	-c $(OPTFLAG)  -I. -I$(srcdir)/include -I$(srcdir)/regex -I$(srcdir)/db/include -I$(srcdir)/curses ${IMPALA_CFLAGS}
+IMPALA_CFLAGS= -I$(srcdir)/../../../sys -I$(srcdir)/../../../usr/lib/libc/include -I$(srcdir)/../../../sys/arch/${IMPALA_ARCH}
+IMPALA_USR=${IMPALA_SRCROOT}/usr
+_U_LDFLAGS=-Wl,-e,__start -T${IMPALA_SRCROOT}/usr/conf/user.ld -nostdlib\
+        -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread\
+        -L${IMPALA_USR}/lib/libz -L${IMPALA_USR}/lib/crt
+LDFLAGS= -static ${_U_LDFLAGS}
 PERL=	/usr/bin/perl
 PERLLIB=
 SHRPENV=
@@ -414,7 +419,7 @@ v_sentence.o: $(srcdir)/vi/v_sentence.c
 v_status.o: $(srcdir)/vi/v_status.c
 	$(CC) $(CFLAGS) $?
 v_txt.o: $(srcdir)/vi/v_txt.c
-	$(CC) -c -O  -I. -I$(srcdir)/include -I$(srcdir)/regex -I$(srcdir)/db/include -I$(srcdir)/curses   $?
+	$(CC) $(CFLAGS)  $?
 v_ulcase.o: $(srcdir)/vi/v_ulcase.c
 	$(CC) $(CFLAGS) $?
 v_undo.o: $(srcdir)/vi/v_undo.c

@@ -11,8 +11,8 @@ ${_LIB_BUILD}: ${LIBRARY}.a
 
 ${LIBRARY}.a: ${OBJS}
 	@echo " AR ${LIBRARY}.a"
-	@${AR} r ${LIBRARY}.a ${OBJS}
-	@${RANLIB} ${LIBRARY}.a
+	${VERBOSE}${AR} r ${LIBRARY}.a ${OBJS}
+	${VERBOSE}${RANLIB} ${LIBRARY}.a
 
 ${_LIB_CLEAN}:
 	@echo " CLEAN"
@@ -29,6 +29,6 @@ ${_LIB_CLEANDEPEND}:
 
 ${_LIB_INSTALL}:
 	@echo " CP ${LIBRARY}.a"
-	@cp ${LIBRARY}.a ${IMPALA_OUTPUT}/lib/
+	${VERBOSE}cp ${LIBRARY}.a ${IMPALA_OUTPUT}/lib/
 
 include .depend

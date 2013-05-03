@@ -4,7 +4,7 @@ build:
 	@make all
 
 all:
-	@cd build; make
+	(cd build; make) && cp build/nvi vi
 
 clean:
 	@cd build; make clean

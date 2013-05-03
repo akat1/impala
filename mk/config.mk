@@ -17,7 +17,7 @@ _U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include\
         -I${IMPALA_USR}/lib/libz/ 
 _U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld -nostdlib\
         -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread\
-        -L${IMPALA_USR}/lib/libz
+        -L${IMPALA_USR}/lib/libz -L${IMPALA_USR}/lib/crt
 _CFLAGS?= ${_K_FLAGS_} ${CFLAGS}
 #CFLAGS?=${_CFLAGS}
 CC= ${PREFIX}gcc
@@ -33,4 +33,4 @@ LIBDIR?=
 LD_FLAGS=-nostdlib -T ${LD_SCRIPT} --cref -Map ${LD_MAP} ${LIBDIR}
 INSTALL=cp
 AWK=awk
-
+VERBOSE?=@

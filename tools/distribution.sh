@@ -8,6 +8,8 @@ prepare_dirs() {
     mkdir -p ${SYSPACK_DIR}/bin
     mkdir -p ${SYSPACK_DIR}/sbin
     mkdir -p ${SYSPACK_DIR}/demos
+    mkdir -p ${SYSPACK_DIR}/tmp
+    mkdir -p ${SYSPACK_DIR}/var/tmp
     mkdir -p ${IMAGE_DIR}
     mkdir -p ${IMAGE_DIR}/boot
     mkdir -p ${IMAGE_DIR}/boot/grub
@@ -35,9 +37,14 @@ prepare_root() {
 
 prepare_syspack() {
     cp -r usr/etc ${SYSPACK_DIR}
-    for file in `cat ${PROFILE_FILE}`; do
-         exe_name=`basename ${file}`
-         cp ./usr/${file}/${exe_name} ${SYSPACK_DIR}/${file}
+    for entry in `cat ${PROFILE_FILE}`; do
+         file=`echo ${entry} | sed -e 's/:.*/'/`
+         exe_name=`echo ${entry} | sed -e 's/.*://'`
+         if [ -z ${exe_name} ]; then
+            exe_name=${file}/`basename ${file}`
+         fi
+         echo "install ${exe_name} as ${file}"
+         cp ./usr/${exe_name} ${SYSPACK_DIR}/${file}
     done
     (cd ${SYSPACK_DIR}; tar --format=ustar -zcf ../syspack.tar.gz .)
 }
