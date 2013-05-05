@@ -71,12 +71,34 @@
 
 # naglowek MULTIBOOT dla programu GRUB.
 
+#Offset 	Type 	Field Name 	Note
+
 multiboot_header:
 .align 4
+#0 	u32 	magic 	required
 .long MAGIC
+#4 	u32 	flags 	required
 .long FLAGS
+#8 	u32 	checksum 	required
 .long CHECKSUM
-
+#12 	u32 	header_addr 	if flags[16] is set
+.long 0
+#16 	u32 	load_addr 	if flags[16] is set
+.long 0
+#20 	u32 	load_end_addr 	if flags[16] is set
+.long 0
+#24 	u32 	bss_end_addr 	if flags[16] is set
+.long 0
+#28 	u32 	entry_addr 	if flags[16] is set
+.long 0
+#32 	u32 	mode_type 	if flags[2] is set
+.long 1
+#36 	u32 	width 	if flags[2] is set
+.long 80
+#40 	u32 	height 	if flags[2] is set
+.long 25
+#44 	u32 	depth 	if flags[2] is set 
+.long 0
 
 cmdline:    .long 0
 
