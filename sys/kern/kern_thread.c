@@ -3,7 +3,7 @@
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://trzask.codepainters.com/impala/trac/
+ *    http://bitbucket.org/wieczyk/impala/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -208,10 +208,11 @@ mutex_lock(mutex_t *m, const char *file, const char *func, int line,
     const char *descr)
 {
 //    KASSERT(CIPL==0);
+    spinlock_lock(&m->mtx_slock);
     if ( atomic_change_int(&m->mtx_locked, MUTEX_LOCKED) == MUTEX_UNLOCKED) {
         m->mtx_owner = curthread;
+        spinlock_unlock(&m->mtx_slock);
     } else {
-        spinlock_lock(&m->mtx_slock);
         list_insert_tail(&m->mtx_locking, curthread);
         int x = spltty();
         spinlock_unlock(&m->mtx_slock);

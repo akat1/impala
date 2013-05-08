@@ -2,7 +2,7 @@
  * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
  *    http://www.ii.uni.wroc.pl/
  * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://trzask.codepainters.com/impala/trac/
+ *    http://bitbucket.org/wieczyk/impala/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,7 +143,7 @@ print_welcome()
     extern int kernel_start, kernel_end;
     kprintf("Copyright (C) 2009\n");
     kprintf("   Mateusz Kocielski, Artur Koninski, Pawel Wieczorek\n");
-    kprintf("   http://trzask.codepainters.com/impala/trac/\n");
+    kprintf("   http://bitbucket.org/wieczyk/impala/\n");
     kprintf("Copyright (C) 2009\n");
     kprintf("   Department of Computer Science. "
             "University of Wroclaw. Poland.\n");

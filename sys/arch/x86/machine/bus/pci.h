@@ -1,7 +1,7 @@
 /* Impala Operating System
  *
  * Copyright (C) 2010 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://trzask.codepainters.com/impala/trac/
+ *    http://bitbucket.org/wieczyk/impala/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

@@ -28,6 +28,8 @@ prepare_root() {
     cp COPYRIGHT ${IMAGE_DIR}
     cp sys/kern/impala.gz ${IMAGE_DIR}/boot/
     cp image/root/boot/grub/menu.lst ${IMAGE_DIR}/boot/grub
+    cp image/root/boot/grub/grub.cfg ${IMAGE_DIR}/boot/grub
+    cp image/root/boot/grub2.img ${IMAGE_DIR}/boot/
     mv ${WORKDIR}/syspack.tar.gz ${IMAGE_DIR}/impala/
     cp usr/sbin/preinit/preinit ${IMAGE_DIR}/impala/
     cp usr/bin/tar/tar ${IMAGE_DIR}/impala/
@@ -53,6 +55,8 @@ build_image() {
     mcopy -s -i ../floppy.img impala ::/impala
     mcopy -s -i ../floppy.img boot/impala.gz ::/boot/
     mcopy -s -i ../floppy.img boot/grub/menu.lst ::/boot/grub/
+    mcopy -s -i ../floppy.img boot/grub/grub.cfg ::/boot/grub/
+    mcopy -s -i ../floppy.img boot/grub2.img ::/boot/
     for f in `find . -maxdepth 1 -type f`; do
         if [ $f != "." ]; then
             mcopy -i ../floppy.img $f ::$f
