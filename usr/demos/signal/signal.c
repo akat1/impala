@@ -1,5 +1,5 @@
+#include <stdio.h>
 #include <signal.h>
-
 
 void test(int sig);
 void test2(int sig);
@@ -17,7 +17,7 @@ void test2(int sig)
 }
 
 int
-main()
+main(int argc, char **argv)
 {
     printf("handlers..\n");
 	signal(SIGHUP, test);
