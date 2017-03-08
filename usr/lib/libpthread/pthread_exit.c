@@ -30,6 +30,7 @@
  * $Id$
  */
 
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/thread.h>
 #include <pthread.h>
