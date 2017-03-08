@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 
+#if 0
 static int months[2][12] = {
     { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
@@ -27,6 +28,8 @@ static int years[] = {
 };
 
 #define LEAP(y) (y)%4
+#endif
+
 struct tm *
 localtime_r(const time_t *t, struct tm *buf)
 {
