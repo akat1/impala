@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+void printV(const char *, int);
+
 
 void
 printV(const char *msg, int v)
