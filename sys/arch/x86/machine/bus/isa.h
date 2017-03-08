@@ -38,7 +38,7 @@ typedef struct bus_isa_dma bus_isa_dma_t;
 typedef struct bus_isa_pnp bus_isa_pnp_t;
 
 enum {
-    ISA_DMA_FDC = 0x2
+    ISA_DMA_FDC = 0x02
 };
 
 enum {
