@@ -2,7 +2,7 @@
 #	@(#)Makefile.in	8.75 (Berkeley) 10/23/96
 
 srcdir=	./..
-CC=	i386-aout-gcc
+CC=${AOUT_PREFIX}gcc
 OPTFLAG=-O
 CFLAGS=	-c $(OPTFLAG)  -I. -I$(srcdir)/include -I$(srcdir)/regex -I$(srcdir)/db/include -I$(srcdir)/curses ${IMPALA_CFLAGS}
 IMPALA_CFLAGS= -I$(srcdir)/../../../sys -I$(srcdir)/../../../usr/lib/libc/include -I$(srcdir)/../../../sys/arch/${IMPALA_ARCH}
