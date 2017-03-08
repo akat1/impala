@@ -12,6 +12,7 @@
  *
  * $Id$
  */ 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <string.h>
