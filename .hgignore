@@ -1,4 +1,0 @@
-glob:*.o
-glob:*.swp
-glob:.depend
-glob:tags
