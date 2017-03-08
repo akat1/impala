@@ -1,11 +1,9 @@
 #!/bin/sh
 
-# wget http://ftp.gnu.org/gnu/gcc/gcc-3.4.0/gcc-3.4.0.tar.gz
-
-BINUTILS_VERSION="2.23"
-GCC_VERSION="4.3.2"
+BINUTILS_VERSION="2.26"
+GCC_VERSION="4.3.4"
 SDK_PATH=${HOME}/ImpalaSDK
-
+MAKE=make
 
 print_msg () {
     echo "[33;7;1m$@[0m"
@@ -51,21 +49,23 @@ in_gcc_obj () {
 
 binutils_build_command () {
     ./configure --prefix=${SDK_PATH} --target=$1
-    (make && make install)
+    # ugly hack to let it build on the FreeBSD
+    rm gprof/*.m
+    ($MAKE && $MAKE install)
     if [ ! $? -eq 0 ]; then
         exit 1
     fi
-    make distclean
+    $MAKE distclean
 }
 
 gcc_build_command () {
     export PATH=${SDK_PATH}/bin:${PATH}
     ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-quadmath --disable-libgomp
-    (make && make install)
+    ($MAKE && $MAKE install)
     if [ ! $? -eq 0 ]; then
         exit 1
     fi
-    make distclean
+    $MAKE distclean
 }
 
 build_binutils_for_target ()
@@ -92,8 +92,22 @@ build_gcc () {
     build_gcc_for_target "i386-elf"
 }
 
-print_msg "#### ImpalaSDK"
+# Detect OS
+OS=`uname`
+case $OS in
+    'Linux')
+        ;;
+    'FreeBSD')
+        # use GNU make, it's requried by gcc 4.3.4
+        MAKE=gmake
+        ;;
+    *)
+        print_msg "!!! You platform is unsupported, feel free to experiment and send PR implementing it!"
+        exit 1
+        ;;
+esac
 
+print_msg "#### ImpalaSDK"
 
 echo Output of build commands are redirected to output.out and output.err files.
 echo Desired binutils version is ${BINUTILS_VERSION}.
