@@ -14,10 +14,10 @@ PROG_BIN=\
     ps\
     sh\
     tar\
-#    truncate\
-    #uname\
-#    sleep\
-#    vttest
+    truncate\
+    uname\
+    sleep\
+    vttest
 
 PROG_SBIN=\
     init\
@@ -43,7 +43,7 @@ DISTDIRS=\
     output/dist/var/tmp\
     output/dist/tmp
 
-.PHONY: all build build-image run init distribution
+.PHONY: all build build-image run distribution
 
 all: build
 
@@ -57,24 +57,6 @@ run: build-image
 
 distribution: build
 	@DIST_PROFILE="${DIST_PROFILE}" sh tools/distribution.sh
-
-init: build ${IMPALA_SRCROOT}/usr/sbin/init/init
-	rm -rf output
-	mkdir -p ${DISTDIRS}
-	cp COPYRIGHT ${DISTDIR}/
-	for prog in ${PROG_BIN}; do cp usr/bin/$$prog/$$prog ${DISTDIR}/bin/$$prog; done
-	for prog in ${PROG_SBIN}; do cp usr/sbin/$$prog/$$prog ${DISTDIR}/sbin/$$prog; done
-	for prog in ${DEMOS_BIN}; do cp usr/demos/$$prog/$$prog ${DISTDIR}/demos/$$prog; done
-	cp usr/etc/rc.* ${DISTDIR}/etc/
-	cp usr/etc/motd ${DISTDIR}/etc/
-	cp usr/etc/profile ${DISTDIR}/etc/
-	cp usr/bin/tar/tar ${SPECDIR}/tar
-	cp usr/bin/minigzip/minigzip ${SPECDIR}/minigzip
-	cp usr/sbin/preinit/preinit ${SPECDIR}/preinit
-	#cp usr/bin/vi/build/nvi ${DISTDIR}/bin/vi
-	#cp usr/bin/vi/build/nex ${DISTDIR}/bin/ex
-	cd output/dist && tar --format=ustar -cvf ../impala/syspack.tar *
-	gzip -9 output/impala/syspack.tar
 
 ${IMAGE_FILE}: ${IMAGE_FILE_}
 	@cp ${IMAGE_FILE_} ${IMAGE_FILE}
