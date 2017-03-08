@@ -4,7 +4,6 @@ int
 main(int argc, char **v)
 {
     FILE *f;
-    char ch;
     if (argc != 2) {
         f = stdin;
     } else {
