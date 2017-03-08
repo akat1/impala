@@ -12,7 +12,6 @@
 int
 main(int argc, char **v)
 {
-    char msg[100];
     int fildes[2];
     const int BSIZE = 100;
     char buf[BSIZE];
