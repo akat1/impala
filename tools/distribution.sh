@@ -1,4 +1,3 @@
-
 prepare_dirs() {
     WORKDIR=distribution/${DIST_PROFILE}
     SYSPACK_DIR=${WORKDIR}/syspack
@@ -55,8 +54,6 @@ build_image() {
     mcopy -s -i ../floppy.img impala ::/impala
     mcopy -s -i ../floppy.img boot/impala.gz ::/boot/
     mcopy -s -i ../floppy.img boot/grub/menu.lst ::/boot/grub/
-    mcopy -s -i ../floppy.img boot/grub/grub.cfg ::/boot/grub/
-    mcopy -s -i ../floppy.img boot/grub2.img ::/boot/
     for f in `find . -maxdepth 1 -type f`; do
         if [ $f != "." ]; then
             mcopy -i ../floppy.img $f ::$f
