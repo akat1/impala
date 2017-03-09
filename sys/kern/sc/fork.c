@@ -42,17 +42,6 @@
 
 errno_t sc_fork(thread_t *t, syscall_result_t *r);
 
-// thread_t *__copy_thread(thread_t *t);
-
-void teest(void);
-
-void teest(void)
-{
-    for(;;)
-    kprintf("!");
-}
-
-
 errno_t
 sc_fork(thread_t *t, syscall_result_t *r)
 {
@@ -64,4 +53,3 @@ sc_fork(thread_t *t, syscall_result_t *r)
     r->result = child->p_pid;
     return -EOK;
 }
-
