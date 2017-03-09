@@ -47,6 +47,7 @@
 #include <sys/vfs.h>
 #include <sys/exec.h>
 #include <dev/md/md.h>
+#include <dev/pata/pata.h>
 #include <fs/devfs/devfs.h>
 #include <machine/interrupt.h>
 #include <machine/cpu.h>
@@ -172,6 +173,7 @@ init_kernel()
     cons_init();
     sysvipc_init();
     dev_initdevs();
+    pata_init();
     kprintf("kernel initialized\n");
     SSLEEP(1, "kinit");
     kprintf("current time: %i\n", curtime.tv_sec);
