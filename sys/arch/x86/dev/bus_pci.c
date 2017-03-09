@@ -1,31 +1,9 @@
-/* Impala Operating System
- *
- * Copyright (C) 2010 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://bitbucket.org/wieczyk/impala/
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in the
- *  documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * $Id$
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE"
+ * If we meet some day, and you think this stuff is worth it, you can buy us 
+ * a beer in return. - AUTHORS
+ * ----------------------------------------------------------------------------
  */
 
 /*
@@ -34,10 +12,11 @@
  *                                  - shm
  * 
  * @TODO:
- * - memory allocation for both PCI memory and PCI I/O
+ *
+ * - memory allocation for both PCI memory and PCI I/O (?)
  * - fix PCI interface
- * - implement pci-pci bridge support (as i understand PCI for now QEMU don't
- *   need it), it's needed to run on real machine
+ * - implement pci-pci bridge support (as I understand PCI for now QEMU don't
+ *   need it), it's needed to run on a real machine
  * 
  * Following resources was used:
  * http://wiki.osdev.org/PCI - briefly PCI descritpion
@@ -106,7 +85,8 @@ struct pci_baseclass_info pci_baseclasses[] =
 	{0xFF, "Misc device"}
 };
 
-
+static void _pci_write(uint32_t bus, uint32_t device, uint32_t func, uint32_t
+  reg, uint32_t val);
 
 uint8_t pci_read_8(uint32_t bus, uint32_t device, uint32_t func, uint32_t
   reg);
@@ -138,13 +118,38 @@ _pci_config_address(uint32_t bus, uint32_t device, uint32_t func,
             ( (reg>>2) << REGISTER ) );
 }
 
+/*****************************************************************************
+ * 
+ * WRITE
+ *
+ */
+
+static void
+_pci_write(uint32_t bus, uint32_t device, uint32_t func, uint32_t reg,
+  uint32_t val)
+{
+    io_out32(CONFIG_ADDRESS, _pci_config_address(bus, device, func, reg));
+    io_out32(CONFIG_DATA, val);
+}
+
+void
+pci_dev_write_32(struct pci_device *dev, uint32_t reg, uint32_t val)
+{
+    _pci_write(dev->bus, dev->device, dev->func, reg, val);
+}
+
+/*****************************************************************************
+ * 
+ * READ
+ *
+ */
+
 uint32_t
 _pci_read(uint32_t bus, uint32_t device, uint32_t func, uint32_t reg)
 {
-    io_out32(CONFIG_ADDRES, _pci_config_address(bus, device, func, reg));
+    io_out32(CONFIG_ADDRESS, _pci_config_address(bus, device, func, reg));
     return io_in32(CONFIG_DATA);
 }
-
 
 uint8_t
 pci_read_8(uint32_t bus, uint32_t device, uint32_t func, uint32_t reg)
@@ -191,6 +196,12 @@ pci_dev_read_32(struct pci_device *dev, uint32_t reg)
 {
     return pci_read_32(dev->bus, dev->device, dev->func, reg);
 }
+
+/*****************************************************************************
+ * 
+ * HELPERS
+ *
+ */
 
 struct pci_device_info *
 pci_device_info(uint16_t vendor_id, uint16_t device_id)
@@ -336,6 +347,6 @@ bus_pci_init()
    
     // @bug: handle irq
     // ...
-    for(;;);
+    // for(;;);
     return;
 }

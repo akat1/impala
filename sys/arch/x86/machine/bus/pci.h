@@ -1,4 +1,10 @@
-/* XXX: relicense me */
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE"
+ * If we meet some day, and you think this stuff is worth it, you can buy us 
+ * a beer in return. - AUTHORS
+ * ----------------------------------------------------------------------------
+ */
 
 #ifndef __MACHINE_BUS_PCI_H
 #define __MACHINE_BUS_PCI_H
@@ -7,7 +13,7 @@
 #include <machine/bus/pci_devices.h>
 
 enum {
-    CONFIG_ADDRES   = 0xCF8,
+    CONFIG_ADDRESS  = 0xCF8,
     CONFIG_DATA     = 0xCFC
 };
 
@@ -26,7 +32,7 @@ enum {
 enum {
     VENDOR_ID   = 0x00,
     DEVICE_ID   = 0x02,
-    COMMAND     = 0x04,
+    PCI_COMMAND = 0x04,
     STATUS      = 0x06,
     REVISION_ID = 0x08,
     PROG_IF     = 0x09,
@@ -58,9 +64,13 @@ enum {
 };
 
 
+/* read from registers */
 uint8_t pci_dev_read_8(struct pci_device *dev, uint32_t reg);
 uint16_t pci_dev_read_16(struct pci_device *dev, uint32_t reg);
 uint32_t pci_dev_read_32(struct pci_device *dev, uint32_t reg);
+
+/* write to registers */
+void pci_dev_write_32(struct pci_device *dev, uint32_t reg, uint32_t val);
 
 /*
 void pci_map_range_io(dev, vaddr, size_t)
