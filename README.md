@@ -1,4 +1,5 @@
-# Welcome
+Welcome
+=======
 
 Impala is homemade UNIX-like operating system, it was developed as bechelor project at University of Wroclaw, Poland.
 
@@ -9,7 +10,8 @@ Authors
 - Artur Koninski (takeshi)
 - Pawel Wieczorek (wieczyk)
 
-# Kernel features
+Kernel features
+===============
 
 - virtual memory (supports i686 global pages extension)
 - virtual file system layer, with FAT12, device file system (devfs) and memory file system support
@@ -34,10 +36,13 @@ User-space features
 - tar (handles only USTAR archives) program which progress bar :-)
 - ported nvi (from FreeBSD sources)
 
-# Quality
+Quality
+=======
 
 We put many effort to achieve good quality, but we had only few months to develop whole system, so it contains many bugs etc. If you are interrested in hacking operating system then Impala could be good sandbox for you.
+
 Building
+========
 
 To build operating system you need binutils and gcc for i386-pc-aout and i386-pc-elf targets. Run the tools/install_sdk.sh script in empty directory, it will automaticly install toolchains (in the ${HOME}/ImpalaSDK directory).
 
@@ -47,7 +52,8 @@ When you have SDK, type those commands to build whole system:
 - `sh prepare.sh`
 - `make build`
 
-# Running
+Running
+=======
 
 To prepare floppy images you need to type this command:
 
