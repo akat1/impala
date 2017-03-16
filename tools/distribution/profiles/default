@@ -13,6 +13,7 @@ bin/truncate:
 bin/uname:
 bin/vi:bin/vi/vi/nvi
 bin/vttest:
+sbin/mount:
 sbin/login:
 sbin/init:
 demos/pfault:
