@@ -27,8 +27,6 @@ prepare_root() {
     cp COPYRIGHT ${IMAGE_DIR}
     cp sys/kern/impala.gz ${IMAGE_DIR}/boot/
     cp image/root/boot/grub/menu.lst ${IMAGE_DIR}/boot/grub
-    cp image/root/boot/grub/grub.cfg ${IMAGE_DIR}/boot/grub
-    cp image/root/boot/grub2.img ${IMAGE_DIR}/boot/
     mv ${WORKDIR}/syspack.tar.gz ${IMAGE_DIR}/impala/
     cp usr/sbin/preinit/preinit ${IMAGE_DIR}/impala/
     cp usr/bin/tar/tar ${IMAGE_DIR}/impala/
