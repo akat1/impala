@@ -5,7 +5,6 @@ ELF_PREFIX?=
 ELF_CC=${ELF_PREFIX}gcc
 AOUT_PREFIX?=i386-aout-
 AOUT_CC=${AOUT_PREFIX}gcc
-AOUT_PATH=/usr/local/i386-aout/
 __INCDIR= -I ${IMPALA_SRCROOT}/sys -I ${IMPALA_SRCROOT}/sys/arch/${IMPALA_ARCH}/ 
 _INCDIR?=${__INCDIR} ${INCDIR}
 __C_FLAGS=-m32 -std=c99 -ffreestanding -Wall -Wstrict-prototypes\
@@ -19,7 +18,6 @@ _U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld -nostdlib\
         -L${IMPALA_USR}/lib/libc -L${IMPALA_USR}/lib/libpthread\
         -L${IMPALA_USR}/lib/libz -L${IMPALA_USR}/lib/crt
 _CFLAGS?= ${_K_FLAGS_} ${CFLAGS}
-#CFLAGS?=${_CFLAGS}
 CC= ${PREFIX}gcc
 AS= ${PREFIX}as
 AS_FLAGS= -32 
