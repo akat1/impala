@@ -1,5 +1,5 @@
-# Z poni¿szej tabeli s± generowane tablice wywo³an systemowych:
-# kern/systab.c oraz sys/systab.h
+# Below table is used to generate syscall table:
+# kern/systab.c and sys/systab.h files
 
 SYS access
 SYS execve
@@ -84,3 +84,4 @@ SYS uname
 SYS writev
 SYS gettimeofday
 SYS nice
+SYS mount
