@@ -11,3 +11,6 @@ clean:
 
 depend:
 	@echo Depend not supported on nvi yet
+
+cleandepend:
+	@echo Clean depend not supported on nvi yet
