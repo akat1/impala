@@ -1,6 +1,5 @@
-# $Id$ 
+ * Impala Operating System license:
 
- * System operacyjny Impala
 Copyright (C) 2009 University of Wroclaw. Department of Computer Science
     http://www.ii.uni.wroc.pl/
 Copyright (C) 2009, 2010 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
@@ -28,8 +27,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
- * Program Almquist Shell (usr/bin/sh) zosta³ skopiowany z FreeBSD 7.1
- * Jest udostêpniony na licencji:
+ * Almquist Shell (usr/bin/sh) was obtained from the FreeBSD 7.1 sources
+ * It's distributed under following license:
 
 Copyright (c) 1992-2009
     The FreeBSD Project. All rights reserved.
@@ -63,7 +62,7 @@ are met:
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  SUCH DAMAGE.
 
- * program /bin/vttest jest udostêpniony na licencji:
+ * program /bin/vttest is shared under following license:
 
 Copyright 1996-2005,2007 by Thomas E. Dickey
 
@@ -86,7 +85,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
- * biblioteka libz i program minigzip na licencji:
+ * libz library and minigzip program are released under following license:
 
 Copyright (C) 1995-2005 Jean-loup Gailly and Mark Adler
 
@@ -105,5 +104,3 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
-
-
