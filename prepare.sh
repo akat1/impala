@@ -1,6 +1,4 @@
 #!/bin/sh
-# $Id$
-
 
 work() {
     if [ -e Makefile ]
@@ -18,14 +16,18 @@ work() {
     fi
 }
 
-
 recur() {
     for entry in *
     do
         if [ -d $entry ]
         then
-            # echo "===> $cpath$entry (config)"
+            echo "===> $cpath$entry (config)"
             cd $entry
+            if [ $? != 0 ]
+            then
+                echo "-!- can't cd to $cpath$entry"
+                continue
+            fi
             work
             cpath="$cpath$entry/" recur
             cd ..
@@ -34,4 +36,3 @@ recur() {
 }
 
 cpath="" recur
-
