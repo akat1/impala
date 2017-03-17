@@ -1,0 +1,46 @@
+/*
+ * devs:
+ *
+ * init
+ * ioctl (configuration)
+ * transmit packets
+ * start
+ *
+ */
+
+/*
+ * protocols:
+ * input
+ * output
+ *
+ */
+
+/*
+ * sockets:
+ * 
+ * recv
+ * send
+ * bind
+ * listen
+ * accept
+ * connect
+ * sendto
+ * recvfrom
+ *
+ */
+
+/*
+ * route
+ *
+ * add
+ * del
+ * check
+ *
+ */
+
+/*
+ * protocols:
+ * arp
+ * ipv4
+ * {udp, tcp,icmp}
+ */
