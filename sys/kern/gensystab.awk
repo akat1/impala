@@ -1,14 +1,13 @@
 #!/usr/bin/awk -f
-# $Id$
 
 function printHc(file) {
-    print "/* PLIK GENEROWANY AUTOMATYCZNIE, WSZELKIE ZMIANY BÊD¡ NADPISANE! */" > file;
+    print "/* FILE GENERATED AUTOMATICALLY, ALL CHANGES WILL BE OVERWRITTEN  */" > file;
     print "/* Generator: gensystab.awk */" >> file;
     print "" >> file;
 }
 
 function printHhash(file) {
-    print "# PLIK GENEROWANY AUTOMATYCZNIE, WSZELKIE ZMIANY BÊD¡ NADPISANE!" > file
+    print "# FILE GENERATED AUTOMATICALLY, ALL CHANGES WILL BE OVERWRITTEN" > file
     print "# Generator: gensystab.awk" >> file;
     print "" >> file;
 }
@@ -30,10 +29,24 @@ BEGIN {
 }
 
 /^#/ {
+    next
 }
 
 /^SYS / {
     systab[n++] = $2;
+    next
+}
+
+# empty line
+/^$/ {
+    next
+}
+
+# no match
+{
+    print "error in line ",NR,":";
+    print $0;
+    exit 1;
 }
 
 END {
@@ -57,5 +70,3 @@ END {
     }
     fprint(systab_c, "    NULL\n};\n");
 }
-
-
