@@ -112,6 +112,7 @@ SRCS=\
     sys/gettimeofday.c\
     sys/uname.c\
     sys/mkdir.c\
+    sys/mount.c\
     sys/writev.c\
     sysvipc/ftok.c\
     sysvipc/msgctl.c\
