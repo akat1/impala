@@ -37,9 +37,9 @@
 typedef struct getmountinfo_args getmountinfo_args_t;
 
 struct getmountinfo_args {
-	int off;
+	off_t off;
 	struct mountinfo *tab;
-	int n;
+	size_t n;
 };
 
 int sc_getmountinfo(thread_t *p, syscall_result_t *r, getmountinfo_args_t *args);
@@ -51,7 +51,7 @@ sc_getmountinfo(thread_t *t, syscall_result_t *r, getmountinfo_args_t *args)
         N = 50
     };
     struct mountinfo tab[N];
-    int n = MIN(N,args->n);
+    size_t n = MIN(N,args->n);
     r->result = vfs_getinfos(args->off,tab,n);
     copyout(args->tab, tab, r->result*sizeof(struct mountinfo));
     return 0;

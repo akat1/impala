@@ -65,7 +65,7 @@ int vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev);
 int vfs_destroy(vfs_t *vp);
 void vfs_init(void);
 void vfs_mountroot(void);
-int vfs_getinfos(int off, struct mountinfo *tab, int n);
+int vfs_getinfos(off_t off, struct mountinfo *tab, size_t n);
 extern vnode_t *rootvnode;
 
 #define VFS_MOUNT(fs) (fs)->vfs_ops->vfs_mount((fs))
