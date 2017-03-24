@@ -30,6 +30,8 @@ treader(void *_)
         pthread_mutex_unlock(&mutex);
         sleep(1);
     }
+
+    return NULL;
 }
 
 void *
@@ -48,6 +50,8 @@ twriter(void *_)
     quit = 1;
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
+
+    return NULL;
 }
 
 
