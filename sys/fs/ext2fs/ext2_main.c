@@ -69,8 +69,6 @@ ext2fs_mount(vfs_t *vfs)
         return -EINVAL;
     }
 
-    bio_release(bp);
-
     /* parse superblock */
     ext2fs = kmem_zalloc((sizeof *ext2fs), KM_SLEEP);
 
@@ -83,6 +81,8 @@ ext2fs_mount(vfs_t *vfs)
     ext2fs->frags_per_group = ext2sb->sb_fragsb_per_group;
     ext2fs->inode_size = ext2sb->sb_inode_size;
     ext2fs->first_data_block = ext2sb->sb_first_data_block;
+    
+    bio_release(bp);
 
     DEBUGF("ext2 found:\nblocks: %x  inodes: %x block size: %x",
         ext2fs->blocks_count, ext2fs->inodes_count, ext2fs->block_size);
