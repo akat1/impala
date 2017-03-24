@@ -11,10 +11,11 @@
  * wraz z projektem.
  *
  * $Id$
- */ 
+ */
+#include <sys/cdefs.h>
 #include <stdlib.h>
 
-void
+__noreturn void
 abort(void)
 {
     //raise(SIGABORT);

@@ -34,6 +34,7 @@
 #define __SYS_CDEFS_H
 
 #define __packed __attribute__((packed))
+#define __noreturn __attribute__((__noreturn__))
 
 #ifndef NULL
 #   define NULL (void*)0
@@ -54,12 +55,10 @@
 #define SET(a,f) ((a) |= (f))
 #define UNSET(a,f) ((a) &= ~(f))
 
-//ash tego chce, a póki co nie wiem gdzie to wrzucić
+/* ash wants it, I don't know where to place it */
 #define __printflike(a, b)
 #define __printf0like __printflike
 #define __unused
-
-
 
 #endif
 

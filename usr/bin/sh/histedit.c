@@ -487,6 +487,10 @@ bindcmd(int argc, char **argv)
 #else
 #include "error.h"
 
+int histcmd(int argc, char **argv);
+int bindcmd(int argc, char **argv);
+
+
 int
 histcmd(int argc, char **argv)
 {

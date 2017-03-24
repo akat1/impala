@@ -483,7 +483,9 @@ static int yy_flex_strlen YY_PROTO(( yyconst char * ));
 #ifdef __cplusplus
 static int yyinput YY_PROTO(( void ));
 #else
+#if 0 
 static int input YY_PROTO(( void ));
+#endif
 #endif
 #endif
 
@@ -1293,6 +1295,7 @@ register char *yy_bp;
 	}
 #endif	/* ifndef YY_NO_UNPUT */
 
+#if 0
 
 #ifdef __cplusplus
 static int yyinput()
@@ -1365,7 +1368,7 @@ static int input()
 
 	return c;
 	}
-
+#endif /* if 0 */
 
 #ifdef YY_USE_PROTOS
 void yyrestart( FILE *input_file )

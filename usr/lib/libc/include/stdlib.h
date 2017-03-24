@@ -37,14 +37,14 @@
 
 void    _exit(int status);
 void    _Exit(int status);
-void    abort(void); //
+__noreturn void    abort(void);
 int     atoi(const char *nptr);
 long    atol(const char *nptr);
 void   *calloc(size_t nmemb, size_t size);
-void    exit(int status);
-void    free(void *ptr); //
+__noreturn void    exit(int status);
+void    free(void *ptr);
 char   *getenv(const char *name);
-void   *malloc(size_t size); //
+void   *malloc(size_t size);
 void   *realloc(void *ptr, size_t size);
 int     setenv(const char *name, const char *value, int overwrite);
 int     unsetenv(const char *name);
@@ -60,7 +60,7 @@ unsigned long int strtoul(const char *nptr, char **endptr, int base);
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
-#define ALIGN(x) x //sam nie wiem co to ;)
+#define ALIGN(x) x // XXX: I've no idea what's this
 
 
 #endif

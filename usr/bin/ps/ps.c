@@ -1,7 +1,6 @@
 #include <sys/types.h>
 #include <sys/proc.h>
-
-
+#include <stdio.h>
 
 int
 main(int argc, char **v)

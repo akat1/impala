@@ -12,12 +12,13 @@
  *
  * $Id$
  */ 
+#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <stdlib.h>
 #include <stdio_private.h>
 
-void
+__noreturn void
 exit(int status)
 {
     FILE *f = NULL;

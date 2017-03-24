@@ -351,6 +351,8 @@ exitcmd(int argc, char **argv)
 	return 0;
 }
 
+int yywrap(void);
+
 int yywrap()
 {
 	return 1;

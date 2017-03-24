@@ -95,7 +95,6 @@ static void write_header(FILE *, struct tentry *, const char *, const char *,
         uid_t, gid_t, size_t, mode_t, time_t );
 static void write_num(char *, int, int);
 static unsigned int read_num(const char *, int );
-static int is_in_list(char **, const char *);
 static const char *mode2str(const char *, int);
 FILE * open_gzip(const char *, const char *);
 
@@ -157,16 +156,6 @@ mode2str(const char *_m, int type)
     out[10] = 0;
 #undef iss
     return out;
-}
-
-int
-is_in_list(char **argv, const char *name)
-{
-    for (;*argv; argv++) {
-        if (strcmp(name, *argv) == 0)
-            return 1;
-    }
-    return 0;
 }
 
 void

@@ -42,6 +42,8 @@ struct {
     mode_t mode;
 } progopt;
 
+int create_path(const char *p);
+
 int
 create_path(const char *p)
 {
@@ -56,7 +58,7 @@ int
 main(int argc, char **argv)
 {
     char ch;
-    progopt.intercreat;
+    progopt.intercreat = 0;
     progopt.mode = 0750;
 
     while ( (ch = getopt(argc, argv, "p")) != -1 )
