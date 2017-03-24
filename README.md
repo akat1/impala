@@ -14,8 +14,9 @@ Kernel features
 ===============
 
 - virtual memory (supports i686 global pages extension)
-- virtual file system layer, with FAT12, device file system (devfs) and memory file system support
+- virtual file system layer, with FAT12, ext2, device file system (devfs) and memory file system support
 - floppy controller driver with ISA DMA support
+- ATA controller driver with PIO support
 - kernel-level threads
 - priority-based scheduler
 - inter process communication: SystemV message queues, pipes, signals
