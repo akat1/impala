@@ -57,8 +57,10 @@ create_path(const char *p)
 int
 main(int argc, char **argv)
 {
+    int error = EXIT_SUCCESS;
     char ch;
     progopt.intercreat = 0;
+    /* XXX: umask? */
     progopt.mode = 0750;
 
     while ( (ch = getopt(argc, argv, "p")) != -1 )
@@ -74,10 +76,9 @@ main(int argc, char **argv)
     argv += optind;
 
     for (int i = 0; i < argc; i++) {
-        printf("%u\n", i);
-        if (create_path(argv[i])) return -1;
+        if (create_path(argv[i])) 
+            error = EXIT_FAILURE;
     }
 
-    return 0;
+    return error;
 }
-
