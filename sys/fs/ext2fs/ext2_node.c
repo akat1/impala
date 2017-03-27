@@ -332,7 +332,7 @@ ext2fs_read_block(ext2fs_t *fs, uint32_t group, uint32_t block, uint8_t *buf)
 }
 
 /* block here is offset block */
-static int
+int
 ext2fs_read_from_inode(ext2fs_t *fs, ext2fs_inode_t *inode, uint8_t *buf,
     uint32_t block, uint32_t count)
 {
@@ -366,7 +366,7 @@ ext2fs_read_from_inode(ext2fs_t *fs, ext2fs_inode_t *inode, uint8_t *buf,
     return 0;
 }
 
-static int
+int
 ext2fs_read_node(ext2fs_t *fs, uint32_t inode_no, ext2fs_node_t **node)
 {
     uint32_t group;
