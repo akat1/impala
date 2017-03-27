@@ -1,33 +1,9 @@
-/* Impala Operating System
- *
- * Copyright (C) 2010 University of Wroclaw. Department of Computer Science
- *    http://www.ii.uni.wroc.pl/
- * Copyright (C) 2010 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://bitbucket.org/wieczyk/impala/
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in the
- *  documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * $Id$
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE"
+ * If we meet some day, and you think this stuff is worth it, you can buy us 
+ * a beer in return. - AUTHORS
+ * ----------------------------------------------------------------------------
  */
 
 #include <sys/types.h>
@@ -48,16 +24,13 @@
  * TODO:
  *
  * - major clean up
- * - add write
+ * - lba48 support
  * - physio
  * - get rid of PIO
- */
-
-/*
- * I'm not sure if pata is right name.
- * ...
+ *
  * Reading material:
  * http://suif.stanford.edu/~csapuntz/specs/idems100.ps
+ * http://www.fysnet.net/media_storage_devices.htm
  */
 
 /* no more devices than 4: 2 x PRIMARY + 2 x SECONDARY */
@@ -75,16 +48,16 @@ struct pata_device {
 int pata_devices_no = 0;
 
 /* private */
-void _pata_set_drive(int bus, int disk);
-void _pata_send_command(int bus, int cmd);
-uint8_t _pata_read_status(int bus);
-void _pata_probe(int bus, int disk);
-void _pata_register(int bus, int disk, uint16_t *identify);
-size_t _pata_read_lba28(struct pata_device *dev, uint16_t *buf, uint32_t addr,
-  uint8_t count);
-int pata_open(devd_t *d, int flags);
-int pata_close(devd_t *d);
-int pata_strategy(devd_t *d, iobuf_t *bp);
+static void _pata_set_drive(int bus, int disk);
+static void _pata_send_command(int bus, int cmd);
+static uint8_t _pata_read_status(int bus);
+static void _pata_probe(int bus, int disk);
+static void _pata_register(int bus, int disk, uint16_t *identify);
+static size_t _pata_read_lba28(struct pata_device *dev, uint16_t *buf,
+  uint32_t addr, uint8_t count);
+static int pata_open(devd_t *d, int flags);
+static int pata_close(devd_t *d);
+static int pata_strategy(devd_t *d, iobuf_t *bp);
 
 devsw_t pata_devsw = {
     pata_open,
@@ -96,41 +69,35 @@ devsw_t pata_devsw = {
     DEV_BDEV
 };
 
-
 /*
  * Sets current disk on particular bus
  * @bus - primary/secondary
  * @disk - master/slave
  */
-void
+static void
 _pata_set_drive(int bus, int disk)
 {
     io_out8(PATA_REGISTER(bus, PATA_REG_DRIVE), disk);
 }
 
-/*
- _pata_probe
- _pata_register
-*/
-
-void
+static void
 _pata_send_command(int bus, int cmd)
 {
     io_out8(PATA_REGISTER(bus, PATA_REG_COMMAND), cmd);
 }
 
 
-uint8_t
+static uint8_t
 _pata_read_status(int bus)
 {
     return io_in8(PATA_REGISTER(bus, PATA_REG_STATUS));
 }
 
 
-/* read sector */
-size_t
+/* read sectors */
+static size_t
 _pata_read_lba28(struct pata_device *dev, uint16_t *buf, uint32_t addr,
-        uint8_t count)
+  uint8_t count)
 {
     uint8_t drv, status, sect;
     int i;
@@ -159,15 +126,14 @@ _pata_read_lba28(struct pata_device *dev, uint16_t *buf, uint32_t addr,
         /* XXX: irq some day */
         for(;;) {
             status = _pata_read_status(dev->bus);
-            if ((status & PATA_STATUS_ERR) != 0)
+            if (ISSET(status, PATA_STATUS_ERR))
                 return -1;
-            if ((status & PATA_STATUS_DF) != 0)
+            if (ISSET(status, PATA_STATUS_DF))
                 return -1;
-            if ((status & PATA_STATUS_BSY) == 0 &&
-             (status & PATA_STATUS_DRQ) != 0)
+            if (ISUNSET(status, PATA_STATUS_BSY) &&
+              ISSET(status, PATA_STATUS_DRQ))
                 break;
         }
-
 
         for (i = 0; i < 256; i++) {
             /* XXX: repinsw? */
@@ -178,7 +144,60 @@ _pata_read_lba28(struct pata_device *dev, uint16_t *buf, uint32_t addr,
     return count;
 }
 
-void
+/* write sectors */
+static size_t
+_pata_write_lba28(struct pata_device *dev, uint16_t *buf, uint32_t addr,
+  uint8_t count)
+{
+    uint8_t drv, status, sect;
+    int i;
+
+    /* XXX: move it to set_drive */
+    drv = (dev->disk == PATA_MASTER) ? 0xE0 : 0xF0;
+    drv |= (addr >> 24) & 0x0F;
+
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_DRIVE), drv);
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_FEATURES), 0);
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_SECTOR_CNT), count);
+
+    /* lba28 */
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_LBA_LO), addr & 0xFF);
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_LBA_MID), (addr >> 8) & 0xFF);
+    io_out8(PATA_REGISTER(dev->bus, PATA_REG_LBA_HI), (addr >> 16) & 0xFF);
+
+    _pata_send_command(dev->bus, PATA_CMD_PIO_WRITE);
+
+    for (sect = 0; sect < count; sect++) {
+        /* 400ns delay (reading status takes 100ns) */
+        for (i = 0; i < 4; i++) {
+            (void)_pata_read_status(dev->bus);
+        }
+
+        /* XXX: irq some day */
+        for(;;) {
+            status = _pata_read_status(dev->bus);
+            if (ISSET(status, PATA_STATUS_ERR))
+                return -1;
+            if (ISSET(status, PATA_STATUS_DF))
+                return -1;
+            if (ISUNSET(status, PATA_STATUS_BSY) &&
+              ISSET(status, PATA_STATUS_DRQ))
+                break;
+        }
+
+        for (i = 0; i < 256; i++) {
+            io_out16(PATA_REGISTER(dev->bus, PATA_REG_DATA), buf[sect*256+i]);
+        }
+
+        /* XXX: is it really necessary? */
+        _pata_send_command(dev->bus, PATA_CMD_CACHE_FLUSH);
+    }
+
+
+    return count;
+}
+
+static void
 _pata_register(int bus, int disk, uint16_t *identify)
 {
     pata_devices[pata_devices_no].bus = bus;
@@ -204,7 +223,7 @@ _pata_register(int bus, int disk, uint16_t *identify)
     pata_devices_no++;
 }
 
-void
+static void
 _pata_probe(int bus, int disk)
 {
     int i;
@@ -229,7 +248,7 @@ _pata_probe(int bus, int disk)
     }
 
     /* wait until ready */
-    while (_pata_read_status(bus) & PATA_STATUS_BSY);
+    while (ISSET(_pata_read_status(bus), PATA_STATUS_BSY));
 
     /* could be ATAPI drive, according to:
      * http://wiki.osdev.org/ATA_PIO_Mode#IDENTIFY_command */
@@ -240,10 +259,10 @@ _pata_probe(int bus, int disk)
     }
 
     /* wait until data is ready */
-    while ((_pata_read_status(bus) & (PATA_STATUS_DRQ | PATA_STATUS_ERR))
-      == 0);
+    while (ISUNSET(_pata_read_status(bus),
+      (PATA_STATUS_DRQ | PATA_STATUS_ERR)));
 
-    if (_pata_read_status(bus) & PATA_STATUS_ERR) {
+    if (ISSET(_pata_read_status(bus), PATA_STATUS_ERR)) {
         /* error has occured, screw that drive */
         return;
     }
@@ -263,10 +282,9 @@ pata_init(void)
     _pata_probe(PATA_PRIMARY, PATA_SLAVE);
     _pata_probe(PATA_SECONDARY, PATA_MASTER);
     _pata_probe(PATA_SECONDARY, PATA_SLAVE);
-
 }
 
-int
+static int
 pata_open(devd_t *d, int flags)
 {
     struct pata_device *dev = d->priv;
@@ -277,7 +295,7 @@ pata_open(devd_t *d, int flags)
     return 0;
 }
 
-int
+static int
 pata_close(devd_t *d)
 {
     struct pata_device *dev = d->priv;
@@ -285,19 +303,25 @@ pata_close(devd_t *d)
     return 0;
 }
 
-int
+static int
 pata_strategy(devd_t *d, iobuf_t *b)
 {
     int s;
 
     struct pata_device *dev = d->priv;
     s = splbio();
-    if (b->oper) {
-        /* XXX: bcount is bounded here */
+    switch (b->oper) {
+    /* XXX: bcount is bounded here */
+    case BIO_READ:
         _pata_read_lba28(dev, b->addr, b->blkno, b->bcount);
-    } else
-        /* not supported for now */
-        b->flags |= BIO_ERROR;
+        break;
+    case BIO_WRITE:
+        _pata_write_lba28(dev, b->addr, b->blkno, b->bcount);
+        break;
+    default:
+        panic("unknown b->oper");
+        /*NOTREACHED*/
+    }
     splx(s);
     bio_done(b);
     return 0;

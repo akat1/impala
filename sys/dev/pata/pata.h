@@ -1,33 +1,9 @@
-/* Impala Operating System
- *
- * Copyright (C) 2009 University of Wroclaw. Department of Computer Science
- *    http://www.ii.uni.wroc.pl/
- * Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
- *    http://bitbucket.org/wieczyk/impala/
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in the
- *  documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * $Id$
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE"
+ * If we meet some day, and you think this stuff is worth it, you can buy us 
+ * a beer in return. - AUTHORS
+ * ----------------------------------------------------------------------------
  */
 
 #ifndef __DEV_PATA_PATA_H
@@ -37,20 +13,20 @@
 void pata_init(void);
 
 /* XXX:
-   screw CHS
-   LBA28
-   LBA48
-*/
+ * screw CHS
+ * LBA28
+ * LBA48
+ */
 
 /* 
  * http://ethv.net/workshops/osdev/notes/notes-5 
  * http://wiki.osdev.org/ATA_PIO_Mode#Registers
  */
 
-#define PATA_REGISTER(X, Y) (X + Y)
+#define PATA_REGISTER(X, Y) ((X) + (Y))
 
 enum {
-    /* IO ports */
+    /* I/O ports */
     PATA_PRIMARY        = 0x1F0,
     PATA_SECONDARY      = 0x170,
     /* Device Control Register / Alternate Status */
@@ -98,6 +74,7 @@ enum {
 	PATA_CMD_READ_DMA_LBA48     = 0x25,
 	PATA_CMD_WRITE_DMA_LBA28    = 0xCA,
 	PATA_CMD_WRITE_DMA_LBA48    = 0x35,
+    PATA_CMD_CACHE_FLUSH        = 0xE7,
     PATA_CMD_IDENTIFY           = 0xEC
 };
 
