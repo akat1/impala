@@ -15,31 +15,33 @@
 #include <fs/ext2fs/ext2_private.h>
 
 /*
- * BIO PATA - it shouldn't be aware of block size of device
+ * XXX: BIO PATA - it shouldn't be aware of block size of device?
+ * XXX: write
  */
-enum {
-    
+enum {  
     DEV_BLK_SIZE = 512
 };
 
-int ext2fs_sync(vnode_t *v);
-int ext2fs_getdents(vnode_t *v, dirent_t *dents, int first, int count);
-int ext2fs_access(vnode_t *v, int mode, pcred_t *c);
-int ext2fs_symlink(vnode_t *v, char *name, char *dst);
-int ext2fs_readlink(vnode_t *v, char *buf, int bsize);
-int ext2fs_setattr(vnode_t *v, vattr_t *attr);
-int ext2fs_open(vnode_t *vn, int flags, mode_t mode);
-int ext2fs_close(vnode_t *v);
-int ext2fs_ioctl(vnode_t *v, int cmd, uintptr_t arg);
-int ext2fs_seek(vnode_t *v, off_t off);
-int ext2fs_read(vnode_t *v, uio_t *u, int flags);
-int ext2fs_write(vnode_t *v, uio_t *u, int flags);
-int ext2fs_truncate(vnode_t *v, off_t len);
-int ext2fs_create(vnode_t *v, vnode_t **vpp, const char *name, vattr_t *attr);
-int ext2fs_getattr(vnode_t *v, vattr_t *attr);
-int ext2fs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *state);
-int ext2fs_mkdir(vnode_t *v, vnode_t **vpp, const char *path, vattr_t *attr);
-int ext2fs_inactive(vnode_t *v);
+static int ext2fs_sync(vnode_t *v);
+static int ext2fs_getdents(vnode_t *v, dirent_t *dents, int first, int count);
+static int ext2fs_access(vnode_t *v, int mode, pcred_t *c);
+static int ext2fs_symlink(vnode_t *v, char *name, char *dst);
+static int ext2fs_readlink(vnode_t *v, char *buf, int bsize);
+static int ext2fs_setattr(vnode_t *v, vattr_t *attr);
+static int ext2fs_open(vnode_t *vn, int flags, mode_t mode);
+static int ext2fs_close(vnode_t *v);
+static int ext2fs_ioctl(vnode_t *v, int cmd, uintptr_t arg);
+static int ext2fs_seek(vnode_t *v, off_t off);
+static int ext2fs_read(vnode_t *v, uio_t *u, int flags);
+static int ext2fs_write(vnode_t *v, uio_t *u, int flags);
+static int ext2fs_truncate(vnode_t *v, off_t len);
+static int ext2fs_create(vnode_t *v, vnode_t **vpp, const char *name, vattr_t
+  *attr);
+static int ext2fs_getattr(vnode_t *v, vattr_t *attr);
+static int ext2fs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *state);
+static int ext2fs_mkdir(vnode_t *v, vnode_t **vpp, const char *path, vattr_t
+  *attr);
+static int ext2fs_inactive(vnode_t *v);
 
 vnode_ops_t ext2fs_node_ops = {
     ext2fs_open,
@@ -65,10 +67,10 @@ vnode_ops_t ext2fs_node_ops = {
 };
 
 /* HELPERS */
-int
+static int
 ext2fs_dtype_to_vtype(int exttype);
 
-int
+static int
 ext2fs_dtype_to_vtype(int exttype)
 {
     switch (exttype) {
@@ -92,6 +94,7 @@ ext2fs_dtype_to_vtype(int exttype)
 
     return -1;
 }
+
 vnode_t *
 ext2fs_get_vnode(ext2fs_t *fs, uint32_t inode_no, int v_type)
 {
@@ -109,10 +112,10 @@ ext2fs_get_vnode(ext2fs_t *fs, uint32_t inode_no, int v_type)
 }
 
 /* XXX: common */
-int
+static int
 pc_cmp(lkp_state_t *path, const char *fname);
 
-int
+static int
 pc_cmp(lkp_state_t *path, const char *fname)
 {
     const char *c = path->now;
@@ -124,7 +127,7 @@ pc_cmp(lkp_state_t *path, const char *fname)
     return 0;
 }
 
-int
+static int
 ext2fs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *path)
 {
     ext2fs_node_t *node = v->v_private;
@@ -146,13 +149,13 @@ ext2fs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *path)
     return -ENOENT;
 }
 
-int
+static int
 ext2fs_inactive(vnode_t *v)
 {
     return 0;
 }
 
-int
+static int
 ext2fs_getdents(vnode_t *v, dirent_t *dents, int first, int count) {
 
     ext2fs_node_t *node = v->v_private;
@@ -182,18 +185,18 @@ ext2fs_getdents(vnode_t *v, dirent_t *dents, int first, int count) {
     return records;
 }
 
-int
+static int
 ext2fs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
 vattr_t *attr) {
     return 0;
 }
 
-int
+static int
 ext2fs_truncate(vnode_t *v, off_t len) {
     return 0;
 }
 
-int
+static int
 ext2fs_getattr(vnode_t *v, vattr_t *attr) {
     ext2fs_node_t *node = v->v_private;
     ext2fs_inode_t *inode = node->inode;
@@ -256,18 +259,18 @@ ext2fs_getattr(vnode_t *v, vattr_t *attr) {
     return 0;
 }
 
-int
+static int
 ext2fs_create(vnode_t *v, vnode_t **vpp, const char *name,
 vattr_t *attr) {
     return 0;
 }
 
-int
+static int
 ext2fs_write(vnode_t *v, uio_t *u, int flags) {
     return 0;
 }
 
-int
+static int
 ext2fs_read(vnode_t *v, uio_t *u, int flags) {
     ext2fs_node_t *node = v->v_private;
     ext2fs_inode_t *inode = node->inode;
@@ -302,10 +305,10 @@ ext2fs_block_offset(ext2fs_t *fs, uint32_t group, uint32_t block)
     );
 }
 
-int
+static int
 ext2fs_read_block(ext2fs_t *fs, uint32_t group, uint32_t block, uint8_t *buf);
 
-int
+static int
 ext2fs_read_block(ext2fs_t *fs, uint32_t group, uint32_t block, uint8_t *buf)
 {
     iobuf_t *bp;
@@ -329,7 +332,7 @@ ext2fs_read_block(ext2fs_t *fs, uint32_t group, uint32_t block, uint8_t *buf)
 }
 
 /* block here is offset block */
-int
+static int
 ext2fs_read_from_inode(ext2fs_t *fs, ext2fs_inode_t *inode, uint8_t *buf,
     uint32_t block, uint32_t count)
 {
@@ -363,7 +366,7 @@ ext2fs_read_from_inode(ext2fs_t *fs, ext2fs_inode_t *inode, uint8_t *buf,
     return 0;
 }
 
-int
+static int
 ext2fs_read_node(ext2fs_t *fs, uint32_t inode_no, ext2fs_node_t **node)
 {
     uint32_t group;
@@ -430,58 +433,58 @@ ext2fs_read_node(ext2fs_t *fs, uint32_t inode_no, ext2fs_node_t **node)
     return 0;
 }
 
-int
+static int
 ext2fs_open(vnode_t *vn, int flags, mode_t mode)
 {
     return 0;
 }
 
-int
+static int
 ext2fs_close(vnode_t *v)
 {
     return 0;
 }
 
 
-int
+static int
 ext2fs_ioctl(vnode_t *v, int cmd, uintptr_t arg)
 {
     return -EINVAL;
 }
 
-int
+static int
 ext2fs_seek(vnode_t *v, off_t off)
 {
     return -ENOTSUP;
 }
 
 
-int
+static int
 ext2fs_setattr(vnode_t *v, vattr_t *attr)
 {
     DEBUGF("setattr not supported");
     return -ENOTSUP;
 }
 
-int
+static int
 ext2fs_readlink(vnode_t *v, char *buf, int bsize)
 {
     return -ENOTSUP;
 }
 
-int
+static int
 ext2fs_symlink(vnode_t *v, char *name, char *dst)
 {
     return -ENOTSUP;
 }
 
-int
+static int
 ext2fs_access(vnode_t *v, int mode, pcred_t *c)
 {
     return 0;
 }
 
-int
+static int
 ext2fs_sync(vnode_t *v)
 {
     return -EOK;

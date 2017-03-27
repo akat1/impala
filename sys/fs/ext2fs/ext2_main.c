@@ -20,17 +20,15 @@
  */
 
 void ext2fs_init(void);
-int ext2fs_mount(vfs_t *fs);
-int ext2fs_unmount(vfs_t *fs);
-vnode_t *ext2fs_getroot(vfs_t *fs);
+static int ext2fs_mount(vfs_t *fs);
+static int ext2fs_unmount(vfs_t *fs);
+static vnode_t *ext2fs_getroot(vfs_t *fs);
 
 vfs_ops_t ext2fs_ops = {
     .vfs_mount = ext2fs_mount,
     .vfs_unmount = ext2fs_unmount,
     .vfs_getroot = ext2fs_getroot
 };
-
-
 
 void
 ext2fs_init()
@@ -39,7 +37,7 @@ ext2fs_init()
 }
 
 
-int
+static int
 ext2fs_mount(vfs_t *vfs)
 {
     devd_t *dev = vfs->vfs_mdev;
@@ -58,7 +56,7 @@ ext2fs_mount(vfs_t *vfs)
         return -error;
     }
 
-    /* XXX: parse superblock */
+    /* parse superblock */
     ext2sb = (ext2fs_superblock_t *)bp->addr;
 
     /* check if we deal with ext2 */
@@ -69,9 +67,7 @@ ext2fs_mount(vfs_t *vfs)
         return -EINVAL;
     }
 
-    /* parse superblock */
     ext2fs = kmem_zalloc((sizeof *ext2fs), KM_SLEEP);
-
     ext2fs->vfs = vfs;
     ext2fs->blocks_count = ext2sb->sb_blocks_count;
     ext2fs->inodes_count = ext2sb->sb_inodes_count;
@@ -91,7 +87,7 @@ ext2fs_mount(vfs_t *vfs)
     /* ceil() */
     ext2fs->groups = (ext2fs->blocks_count-1) / ext2fs->blocks_per_group;
     ext2fs->groups++;
-    DEBUGF("groups: %x", ext2fs->groups);
+    DEBUGF("ext2 groups: %x", ext2fs->groups);
 
     /* get group descriptors */
     DEBUGF("group descriptors size: %x", ext2fs->groups *
@@ -125,14 +121,14 @@ ext2fs_mount(vfs_t *vfs)
     return 0;
 }
 
-int
+static int
 ext2fs_unmount(vfs_t *fs)
 {
     /* XXX: MUAHAH */
     return 0;
 }
 
-vnode_t *
+static vnode_t *
 ext2fs_getroot(vfs_t *vfs)
 {
     ext2fs_t *ext2fs = vfs->vfs_private;
