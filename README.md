@@ -22,7 +22,7 @@ Kernel features
 - kernel-level threads
 - priority-based scheduler
 - inter process communication: SystemV message queues, pipes, signals
-- scanning PCI devies :) (not finished driver for PCI bus)
+- scanning PCI devices :) (not finished driver for PCI bus)
 
 and very small thing:
 
