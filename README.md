@@ -4,7 +4,9 @@ Welcome
 Impala is homemade UNIX-like operating system, it was developed as bechelor project at University of Wroclaw, Poland.
 
 The 4.4BSD, FreeBSD, Ultrix and Solaris source codes had big impact on structure of our operating system, so probably it could be a good start to developing real UNIX-based system (not Linux based).
+
 Authors
+=======
 
 - Mateusz Kocielski (shm)
 - Artur Koninski (takeshi)
