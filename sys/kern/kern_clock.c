@@ -58,11 +58,11 @@ const int mdays[] = {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
 static void load_cmos_time(void);
 static uint8_t read_bcd_cmos(uint8_t index);
 
-int __callout_id = 0;
-bool __is_less_callout(callout_t *x, callout_t *y);
-bool __is_equal_id(callout_t *x, int id);
-list_t __callouts;
-void __handle_callouts(void);
+static int callout_id = 0;
+static bool is_less_callout(callout_t *x, callout_t *y);
+static bool is_equal_id(callout_t *x, int id);
+static list_t callouts;
+static void handle_callouts(void);
 
 uint8_t read_bcd_cmos(uint8_t index)
 {
@@ -101,7 +101,7 @@ clock_init()
 {
      spinlock_init(&soft_guard);
      load_cmos_time();
-     list_create(&__callouts, offsetof(callout_t, L_callouts), FALSE);
+     list_create(&callouts, offsetof(callout_t, L_callouts), FALSE);
 }
 
 
@@ -134,12 +134,12 @@ clock_softtick()
     if ( spinlock_trylock(&soft_guard) ) {
         spinlock_unlock(&soft_guard);
         sched_action(); //nie dokonuje faktycznej zmiany wątku
-        __handle_callouts();
+        handle_callouts();
     }
 }
 
-bool
-__is_less_callout(callout_t *x, callout_t *y)
+static bool
+is_less_callout(callout_t *x, callout_t *y)
 {
     if ( x->timeout < y->timeout )
         return TRUE;
@@ -147,26 +147,26 @@ __is_less_callout(callout_t *x, callout_t *y)
         return FALSE;
 }
 
-bool
-__is_equal_id(callout_t *x, int id)
+static bool
+is_equal_id(callout_t *x, int id)
 {
     return (x->id == id);
 }
 
-void
-__handle_callouts(void)
+static void
+handle_callouts(void)
 {
     callout_t *c;
     
     while(1) { 
-        c = list_head(&__callouts);
+        c = list_head(&callouts);
 
         if ( c == NULL )
             break;
 
         if ( clock_ticks >= c->timeout ) {
             (c->fn)(c->arg);
-            list_remove(&__callouts, c);
+            list_remove(&callouts, c);
             kmem_free(c);
         } else
             break;
@@ -185,14 +185,14 @@ int
 clock_timeout(void (*fn)(void *), addr_t arg, uint delta)
 {
     callout_t *nc = kmem_zalloc(sizeof(callout_t), KM_SLEEP);
-    nc->id = __callout_id;
+    nc->id = callout_id;
     nc->fn = fn;
     nc->arg = arg;
     nc->timeout = clock_ticks + delta;
 
-    list_insert_in_order(&__callouts, nc, __is_less_callout);
+    list_insert_in_order(&callouts, nc, is_less_callout);
 
-    return __callout_id++;
+    return callout_id++;
 }
 
 /***
@@ -203,12 +203,12 @@ void
 clock_untimeout(int id)
 {
     callout_t *c;
-    c = list_find(&__callouts, __is_equal_id, id);
+    c = list_find(&callouts, is_equal_id, id);
 
     if ( c == NULL )
         return;
 
-    list_remove(&__callouts, c);
+    list_remove(&callouts, c);
 
     return;
 }
