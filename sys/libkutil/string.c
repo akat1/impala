@@ -123,7 +123,7 @@ mem_set16(addr_t s, uint16_t o, size_t len)
 size_t
 str_len(const char *s)
 {
-    ssize_t len;
+    size_t len;
     for (len = 0; *s != 0; s++, len++);
     return len;
 }
