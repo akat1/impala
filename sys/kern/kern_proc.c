@@ -51,7 +51,7 @@ proc_t *initproc;
 void
 proc_ctor(void *obj)
 {
-    mem_zero(obj, sizeof(proc_t));
+    memzero(obj, sizeof(proc_t));
     proc_t *proc = obj;
     proc->vm_space = 0;
     proc->p_cred = kmem_zalloc(sizeof(pcred_t), KM_SLEEP);
@@ -90,10 +90,10 @@ proc_getinfos(int off, struct procinfo *tab, int n)
             tab[i].pri = p->p_pri;
             tab[i].threads = list_length(&p->p_threads);
             if (p->p_ctty)
-                str_ncpy(tab[i].tty, p->p_ctty->t_dev->name, sizeof(tab[i].tty));
+                strncpy(tab[i].tty, p->p_ctty->t_dev->name, sizeof(tab[i].tty));
                 else tab[i].tty[0] = 0;
             if (p->p_cmd)
-                str_ncpy(tab[i].cmd, p->p_cmd, sizeof(tab[i].cmd));
+                strncpy(tab[i].cmd, p->p_cmd, sizeof(tab[i].cmd));
                 else tab[i].cmd[0] = 0;
         }
         r = i;
@@ -116,7 +116,7 @@ proc_init(void)
     proc0.p_ppid = 0;
     proc0.p_nice = PROC_NZERO;
     proc0.p_cred = NULL;
-    proc0.p_cmd = str_dup(karg_get_name());
+    proc0.p_cmd = strdup(karg_get_name());
     LIST_CREATE(&proc0.p_threads, thread_t, L_pthreads, FALSE);
     LIST_CREATE(&proc0.p_children, proc_t, L_children, FALSE);
 
@@ -163,7 +163,7 @@ proc_fork(proc_t *p, proc_t **child)
     // tablica deskryptorów
     filetable_clone(cp->p_fd, p->p_fd);
     // CWD
-    if (p->p_cmd) cp->p_cmd = str_dup(cp->p_cmd);
+    if (p->p_cmd) cp->p_cmd = strdup(cp->p_cmd);
     cp->p_rootdir = p->p_rootdir;
     vref(cp->p_rootdir);
     cp->p_curdir = p->p_curdir;

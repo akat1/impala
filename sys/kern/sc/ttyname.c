@@ -62,11 +62,11 @@ sc_ttyname(thread_t *t, syscall_result_t *r, ttyname_args_t *args)
         return -ENOTTY;
     }
     const char *name = file->f_vnode->v_dev->name;
-    if(str_len(name) + 1 > len) {
+    if(strlen(name) + 1 > len) {
         frele(file);
         return -ERANGE;
     }
-//    str_ncpy(buf, name, len);
+//    strncpy(buf, name, len);
     snprintf(buf, len, "/dev/%s", name);
     frele(file);
     return 0;

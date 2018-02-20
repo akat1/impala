@@ -82,7 +82,7 @@ int
 zero_read(devd_t *d, uio_t *u, int flags)
 {
     char buf[256];
-    mem_zero(buf, sizeof(buf));
+    memzero(buf, sizeof(buf));
     while (u->resid) {
         int n = MIN(sizeof(buf), u->resid);
         uio_move(buf, n, u);

@@ -86,7 +86,7 @@ static int rewrite_whole_root(fatfs_dir_t *dir);
 fatfs_node_t *
 fatfs_dir_lookup(fatfs_dir_t *dir, const char *name)
 {
-    fatfs_dirent_t *dirent = list_find(&dir->dirents, str_eq, name);
+    fatfs_dirent_t *dirent = list_find(&dir->dirents, streq, name);
     fatfs_t *fatfs = dir->node->fatfs;
 
     if (!dirent) return NULL;
@@ -116,7 +116,7 @@ fatfs_dir_getdents(fatfs_dir_t *dir, dirent_t *dents, int first, int n)
     fatfs_dirent_t *dirent = list_get_n(&dir->dirents, first);
     if (dirent == NULL) return 0;
     for (r = 0; r < n && dirent; r++) {
-        str_ncpy(dents[r].d_name, dirent->name, MAX_NAME);
+        strncpy(dents[r].d_name, dirent->name, MAX_NAME);
         dents[r].d_ino = dirent->firstclu;
         dirent = list_next(&dir->dirents, dirent);
     }
@@ -129,8 +129,8 @@ fatfs_dir_create(fatfs_dir_t *dir, const char *name, int type, blkno_t clu)
     KASSERT(type == FATFS_DIR || type == FATFS_REG);
     fatfs_node_t *node = fatfs_node_alloc(dir->node->fatfs, type);
     fatfs_dirent_t *dirent = kmem_zalloc( sizeof(*dirent), KM_SLEEP );
-    str_ncpy(node->name, name, sizeof(node->name));
-    str_ncpy(dirent->name, name, sizeof(dirent->name));
+    strncpy(node->name, name, sizeof(node->name));
+    strncpy(dirent->name, name, sizeof(dirent->name));
     dirent->node = node;
     dirent->dirnode = dir->node;
     node->dirent = dirent;
@@ -250,11 +250,11 @@ rewrite_whole_root(fatfs_dir_t *dir)
     iobuf_t *bp;
 
     bp = bio_getblk(fatfs->dev, fatfs->blkno_root, fatfs->maxroot*32);
-    mem_zero(bp->addr, bp->size);
+    memzero(bp->addr, bp->size);
     dentry = bp->addr;
     dirent = list_head(&dir->dirents);
     for (int i = 0; i < fatfs->maxroot && dirent; ) {
-        if (!str_eq(dirent->name, ".") && !str_eq(dirent->name,"..")) {
+        if (!streq(dirent->name, ".") && !streq(dirent->name,"..")) {
             i += fill_dentry(&dentry[i], dirent, fatfs->maxroot - i, i);
         }
         dirent = list_next(&dir->dirents, dirent);
@@ -275,9 +275,9 @@ fill_dentry(fatfs_dentry_t *dentry, const fatfs_dirent_t *dirent,
     char *helper = (char*) copy.name;
     vfatlname_t vln;
 
-    mem_zero(&copy, sizeof(copy));
+    memzero(&copy, sizeof(copy));
     snprintf(helper, 9, "E%07u", n);
-    mem_set(copy.ext, ' ', 3);
+    memset(copy.ext, ' ', 3);
 
     for (int i = 0; i < 11; i++) {
         sum = (((sum & 1) << 7) | ((sum & 0xFE) >> 1)) + helper[i];
@@ -292,7 +292,7 @@ fill_dentry(fatfs_dentry_t *dentry, const fatfs_dirent_t *dirent,
     if ( x < left ) {
         vfatlname_fill(&vln, dentry);
     } else x = 0;
-    mem_cpy(dentry+x, &copy, sizeof(copy));
+    memcpy(dentry+x, &copy, sizeof(copy));
     return 1+x;
 }
 
@@ -306,7 +306,7 @@ load_from_root(fatfs_dir_t *dir)
     fatfs_dirent_t *dirent;
 
     dirent  = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
-    str_cpy(dirent->name, ".");
+    strcpy(dirent->name, ".");
     dirent->firstclu = dir->node->firstclu;
     dirent->size = 0;
     dirent->dirnode = dir->node;
@@ -314,7 +314,7 @@ load_from_root(fatfs_dir_t *dir)
     list_insert_tail(&dir->dirents, dirent);
 
     dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
-    str_cpy(dirent->name, "..");
+    strcpy(dirent->name, "..");
     dirent->firstclu = dir->node->firstclu;
     dirent->size = 0;
     dirent->dirnode = dir->node;
@@ -375,18 +375,18 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
     }
     if (dentry->name[0] == 0) return;
     if (ISSET(dentry->attr, FATFS_SKIP)) return;
-    if ( mem_cmp(dentry->name, ".       ", 8) == 0) {
+    if ( memcmp(dentry->name, ".       ", 8) == 0) {
         fatfs_dirent_t *dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
-        str_cpy(dirent->name, ".");
+        strcpy(dirent->name, ".");
         dirent->firstclu = dir->node->firstclu;
         dirent->size = 0;
         dirent->dirnode = dir->node;
         dirent->node = dir->node;
         list_insert_tail(&dir->dirents, dirent);
     } else
-    if ( mem_cmp(dentry->name, "..      ", 8) == 0) {
+    if ( memcmp(dentry->name, "..      ", 8) == 0) {
         fatfs_dirent_t *dirent = kmem_zalloc(sizeof(*dirent), KM_SLEEP);
-        str_cpy(dirent->name, "..");
+        strcpy(dirent->name, "..");
         dirent->firstclu = dir->node->dirent->dirnode->firstclu;
         dirent->size = 0;
         dirent->dirnode = dir->node;
@@ -426,7 +426,7 @@ check_dentry(const fatfs_dentry_t *dentry, vfatlname_t *vln, fatfs_dir_t *dir)
 void
 vfatlname_reset(vfatlname_t *vln)
 {
-    mem_zero(vln, sizeof(*vln));
+    memzero(vln, sizeof(*vln));
 }
 
 void
@@ -439,7 +439,7 @@ vfatlname_insert(vfatlname_t *vln, const fatfs_dentry_t *d)
     }
     if (lname->n-- == 0) return;
     if (lname->n < VFAT_NAME_PARTS) {
-        mem_cpy(&vln->parts[lname->n], lname, sizeof(*lname));
+        memcpy(&vln->parts[lname->n], lname, sizeof(*lname));
     }
 }
 
@@ -459,12 +459,12 @@ vfatlname_copy83(vfatlname_t *vln, fatfs_dirent_t *dirent,
     const fatfs_dentry_t *d)
 {
 #define ugly_tolower(c) ( ('A' <= (c) && (c) <= 'Z')? (c) - ('A'-'a') : (c))
-    str_ncpy(dirent->name, (const char *)d->name, 8);
+    strncpy(dirent->name, (const char *)d->name, 8);
     for (int i = 0; i < 8; i++)
         if (dirent->name[i] == ' ') dirent->name[i] = 0;
     if (d->ext[0] != ' ') {
-        str_cat(dirent->name, ".");
-        str_cat(dirent->name, (const char *)d->ext);
+        strcat(dirent->name, ".");
+        strcat(dirent->name, (const char *)d->ext);
         for (int i = 0; i < 14; i++)
             if (dirent->name[i] == ' ') dirent->name[i] = 0;
     }
@@ -500,7 +500,7 @@ vfatlname_copylong(vfatlname_t *vln, fatfs_dirent_t *dirent)
 int
 vfatlname_generate(vfatlname_t *vln, const char *name, uint8_t sum)
 {
-    int n =  (str_len(name)+12)/13;
+    int n =  (strlen(name)+12)/13;
     KASSERT(n < VFAT_NAME_PARTS);
     for (int i = 0; i < n && *name; i++) {
         char *helper;
@@ -511,9 +511,9 @@ vfatlname_generate(vfatlname_t *vln, const char *name, uint8_t sum)
         vln->parts[i].clu[1] = 0;
         vln->parts[i].checksum = sum;
 
-        mem_set(vln->parts[i].name1, 0xff, 10);
-        mem_set(vln->parts[i].name2, 0xff, 12);
-        mem_set(vln->parts[i].name3, 0xff,  4);
+        memset(vln->parts[i].name1, 0xff, 10);
+        memset(vln->parts[i].name2, 0xff, 12);
+        memset(vln->parts[i].name3, 0xff,  4);
 
         helper = (char*)vln->parts[i].name1;
         for (j = 0; j < 5 && *name; j++, name++) {
@@ -560,6 +560,6 @@ vfatlname_generate(vfatlname_t *vln, const char *name, uint8_t sum)
 void
 vfatlname_fill(vfatlname_t *vln, fatfs_dentry_t *dentry)
 {
-    mem_cpy(dentry, vln->parts, vln->ready * sizeof(fatfs_lname_t));
+    memcpy(dentry, vln->parts, vln->ready * sizeof(fatfs_lname_t));
 }
 

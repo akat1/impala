@@ -331,17 +331,17 @@ bool
 vm_pmap_init(vm_pmap_t *vpm)
 {
     vm_page_t *page;
-    mem_zero(vpm, sizeof(*vpm));
+    memzero(vpm, sizeof(*vpm));
     vpm->pdir = (vm_ptable_t*) _alloc_ptable(&page);
     vpm->physdir = page->phys_addr;
-    mem_cpy(vpm->pdir, vm_kspace.pmap.pdir, PAGE_SIZE);
+    memcpy(vpm->pdir, vm_kspace.pmap.pdir, PAGE_SIZE);
     return (vpm->pdir != 0);
 }
 
 bool
 vm_pmap_init0(vm_pmap_t *vpm)
 {
-    mem_zero(vpm, sizeof(*vpm));
+    memzero(vpm, sizeof(*vpm));
     vm_page_t *page = _alloc_kpage();
     vpm->physdir = page->phys_addr;
     vpm->pdir = (vm_ptable_t*) page->kvirt_addr;
@@ -476,7 +476,7 @@ vm_pmap_clone(vm_pmap_t *dst, const vm_pmap_t *src)
             vm_page_t *page;
             vm_ptable_t *newpt = _alloc_ptable(&page);
             vm_ptable_t *oldpt = _pmap_pde(src, sdir->table[i]);
-            mem_cpy(newpt, oldpt, PAGE_SIZE);
+            memcpy(newpt, oldpt, PAGE_SIZE);
             ddir->table[i] = PTE_FLAGS(sdir->table[i]) | page->phys_addr;
             for(int pte=0; pte<1024; pte++) {
                 if (newpt->table[pte] & PTE_PRESENT) {
@@ -669,7 +669,7 @@ _alloc_ptable(vm_page_t **pgp)
 #if 0
     vm_page_t *p = vm_kernel_alloc_page();
     if (p) {
-        mem_zero((void*)p->phys_addr, PAGE_SIZE);
+        memzero((void*)p->phys_addr, PAGE_SIZE);
         return (vm_ptable_t*)p->phys_addr;
     } else {
         return NULL;
@@ -693,7 +693,7 @@ _alloc_page()
     kseg_data.size += PAGE_SIZE;
     vm_pmap_insert(&vm_kspace.pmap, p, p->kvirt_addr,
          VM_PROT_RWX | VM_PROT_SYSTEM);
-    mem_zero((void*)p->kvirt_addr, PAGE_SIZE);
+    memzero((void*)p->kvirt_addr, PAGE_SIZE);
     return p;
 }
 
@@ -707,6 +707,6 @@ _alloc_kpage()
     kseg_data.end += PAGE_SIZE;
     kseg_data.size += PAGE_SIZE;
     list_remove(&vm_free_pages, p);
-    mem_zero((void*)p->kvirt_addr, PAGE_SIZE);
+    memzero((void*)p->kvirt_addr, PAGE_SIZE);
     return p;
 }

@@ -36,11 +36,11 @@
 #include <sys/utils.h>
 
 /*
- * mem_move()
+ * memmove()
  * kopiuje len bajtow z src do dst
  */
 addr_t
-mem_move(addr_t dst, const addr_t src, size_t len)
+memmove(addr_t dst, const addr_t src, size_t len)
 {
     addr_t org = dst;
     ssize_t i;
@@ -58,12 +58,12 @@ mem_move(addr_t dst, const addr_t src, size_t len)
 }
 
 /*
- * mem_cpy()
+ * memcpy()
  * kopiuje len bajtow z src do dst
  */
 
 addr_t
-mem_cpy(addr_t _dst, const addr_t _src, size_t len)
+memcpy(addr_t _dst, const addr_t _src, size_t len)
 {
     addr_t org = _dst;
     char *dst = (char*)_dst;
@@ -75,7 +75,7 @@ mem_cpy(addr_t _dst, const addr_t _src, size_t len)
 }
 
 int
-mem_cmp(const addr_t a, const addr_t b, size_t n)
+memcmp(const addr_t a, const addr_t b, size_t n)
 {
     const uint8_t *ma = a;
     const uint8_t *mb = b;
@@ -88,12 +88,12 @@ mem_cmp(const addr_t a, const addr_t b, size_t n)
 }
 
 /*
- * mem_set()
+ * memset()
  * ustawia len bajtow poczawszy od adresu s na c
  */
 
 addr_t
-mem_set(addr_t s, char c, size_t len)
+memset(addr_t s, char c, size_t len)
 {
     addr_t org = s;
     while(len > 0) {
@@ -104,7 +104,7 @@ mem_set(addr_t s, char c, size_t len)
 }
 
 addr_t
-mem_set16(addr_t s, uint16_t o, size_t len)
+memset16(addr_t s, uint16_t o, size_t len)
 {
     addr_t org = s;
     uint16_t *dst = (uint16_t*)s;
@@ -116,12 +116,12 @@ mem_set16(addr_t s, uint16_t o, size_t len)
     return org;
 }
 /*
- * str_len()
+ * strlen()
  * zwraca dlugosc napisu s nie liczac znaku '\0'
  */
 
 size_t
-str_len(const char *s)
+strlen(const char *s)
 {
     size_t len;
     for (len = 0; *s != 0; s++, len++);
@@ -130,7 +130,7 @@ str_len(const char *s)
 
 
 int
-str_cmp(const char *a, const char *b)
+strcmp(const char *a, const char *b)
 {
     while (*a && *b && *a == *b) {
         a++;
@@ -141,13 +141,13 @@ str_cmp(const char *a, const char *b)
 }
 
 bool
-str_eq(const char *a, const char *b)
+streq(const char *a, const char *b)
 {
-    return str_cmp(a,b)==0;
+    return strcmp(a,b)==0;
 }
 
 char *
-str_cpy(char *str, const char *s)
+strcpy(char *str, const char *s)
 {
     while (*s) {
         *str = *s;
@@ -159,7 +159,7 @@ str_cpy(char *str, const char *s)
 }
 
 char *
-str_ncpy(char *str, const char *s, size_t len)
+strncpy(char *str, const char *s, size_t len)
 {
     while (*s && len--) {
         *str = *s;
@@ -172,18 +172,18 @@ str_ncpy(char *str, const char *s, size_t len)
 }
 
 char *
-str_cat(char *str, const char *s)
+strcat(char *str, const char *s)
 {
     while (*str) str++;
-    return str_cpy(str, s);
+    return strcpy(str, s);
 }
 
 char *
-str_dup(const char *s)
+strdup(const char *s)
 {
-    int len = str_len(s);
+    int len = strlen(s);
     char *res = kmem_alloc(len+1, KM_SLEEP);
-    str_cpy(res, s);
+    strcpy(res, s);
     return res;
 }
 
@@ -328,7 +328,7 @@ from_string(char *dst, int *left, char *b, char sep, int fw,
                         bool to_right)
 {
     char *dst_orig=dst;
-    int len = str_len(b);
+    int len = strlen(b);
     if(fw < len)
         fw = len;
     int pad_count = fw - len;

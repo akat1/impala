@@ -72,16 +72,16 @@ vfs_getinfos(off_t off, struct mountinfo *tab, size_t n)
     for (i = 0; i < off && v; i++, v = list_next(&mounted_fs, v));
     if (i == off && v != NULL) {
         for (i = 0; i < n && v; i++, v = list_next(&mounted_fs, v)) {
-            str_cpy(tab[i].type, v->vfs_conf->name);
+            strcpy(tab[i].type, v->vfs_conf->name);
             /* root point */
             if (v->vfs_mpoint == NULL)
-                str_cpy(tab[i].mpoint, "/");
+                strcpy(tab[i].mpoint, "/");
             else
                 /* XXX */
-                str_cpy(tab[i].mpoint, "<unknown>");
+                strcpy(tab[i].mpoint, "<unknown>");
             if (v->vfs_mdev)
-                str_cpy(tab[i].dev, v->vfs_mdev->name);
-                else str_cpy(tab[i].dev, "null");
+                strcpy(tab[i].dev, v->vfs_mdev->name);
+                else strcpy(tab[i].dev, "null");
         }
         r = i;
     }
@@ -123,7 +123,7 @@ vfs_byname(const char *name)
 bool
 is_this_fsname(const vfs_conf_t *conf, const char *known)
 {
-    return (str_cmp(conf->name,known)==0);
+    return (strcmp(conf->name,known)==0);
 }
 
 
@@ -168,6 +168,10 @@ vfs_mountroot()
 }
 
 
+/*
+ * XXX: flags here?
+ */
+
 int
 vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
 {
@@ -191,3 +195,14 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
     return 0;
 }
 
+int
+vfs_unmount(vnode_t *node)
+{
+    /* XXX */
+    vfs_t *fs = NULL;
+
+    if (node->v_type != VNODE_TYPE_DIR)
+        return -ENOTDIR;
+
+    return VFS_UNMOUNT(fs);
+}

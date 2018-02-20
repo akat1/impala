@@ -153,7 +153,7 @@ kmem_zalloc(size_t s, int flags)
     void *x;
 
     x = kmem_alloc(s, flags);
-    mem_zero(x, s);
+    memzero(x, s);
 
     return x;
 }

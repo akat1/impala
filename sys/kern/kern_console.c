@@ -225,9 +225,9 @@ cons_output(int t, const char *c)
     if (current_vcons) {
         if (t != CONS_TTY) {
             char buf[SPRINTF_BUFSIZE];
-            char *ptr = str_cpy(buf,CONSOLE_ATTR_CODE);
-            ptr = str_cat(ptr, c);
-            str_cat(ptr, "\033[0m");
+            char *ptr = strcpy(buf,CONSOLE_ATTR_CODE);
+            ptr = strcat(ptr, c);
+            strcat(ptr, "\033[0m");
             int old_mode = log_vcons->mode; //zabezpieczyć gdzieś mutexem?
             log_vcons->mode |= CONS_MODE_NEWLINE;
             vcons_putstr(log_vcons, buf);
@@ -353,7 +353,7 @@ vcons_input_string(vconsole_t *vc, const char* str)
 void
 vcons_putstr(vconsole_t *vc, const char *c)
 {
-    vcons_data_out(vc, c, str_len(c));
+    vcons_data_out(vc, c, strlen(c));
 }
 
 void
@@ -679,14 +679,14 @@ enum {
 void
 vc_parser_reset(vc_parser_t *vcprs)
 {
-    mem_zero(vcprs, sizeof(vc_parser_t));
+    memzero(vcprs, sizeof(vc_parser_t));
     vcprs->state = P_FIRST;
 }
 
 void
 vc_parser_resetE(vc_parser_t *vcprs)
 {
-    mem_zero(vcprs, sizeof(vc_parser_t));
+    memzero(vcprs, sizeof(vc_parser_t));
     vcprs->state = P_LONG;
 }
 

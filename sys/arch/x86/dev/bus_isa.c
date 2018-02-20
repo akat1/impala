@@ -217,7 +217,7 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     io_out8(IO_CHMASK(ch),  _IDX(ch));
 
     if (ch->mode & ISA_DMA_WRITE) {
-        mem_cpy(ch->bufaddr, ch->req_addr, ch->req_size);
+        memcpy(ch->bufaddr, ch->req_addr, ch->req_size);
     }
 
     splx(s);
@@ -228,7 +228,7 @@ void
 bus_isa_dma_finish(bus_isa_dma_t *ch)
 {
     if (ch->mode & ISA_DMA_READ) {
-        mem_cpy(ch->req_addr, ch->bufaddr, ch->req_size);
+        memcpy(ch->req_addr, ch->bufaddr, ch->req_size);
     }
     ch->mode = 0;
 }

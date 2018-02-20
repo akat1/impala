@@ -83,7 +83,7 @@ bool
 karg_is_set(const char *name)
 {
     for (int i = 0; i < kargc; i++) {
-        if (str_cmp(name, kargs[i].name) == 0) return TRUE;
+        if (strcmp(name, kargs[i].name) == 0) return TRUE;
     }
     return FALSE;
 }
@@ -92,7 +92,7 @@ int
 karg_get_s(const char *name, const char **s)
 {
     for (int i = 0; i < kargc; i++) {
-        if (str_cmp(name, kargs[i].name) == 0) {
+        if (strcmp(name, kargs[i].name) == 0) {
             *s = kargs[i].value;
             return 0;
         }
@@ -110,7 +110,7 @@ int
 karg_get_i(const char *name, int *x)
 {
     for (int i = 0; i < kargc; i++) {
-        if (str_cmp(name, kargs[i].name) == 0) {
+        if (strcmp(name, kargs[i].name) == 0) {
             *x = parse_int(kargs[i].value);
             return 0;
         }

@@ -112,7 +112,7 @@ _cpu_info(void)
     int oldbrand;
     struct cpuid_result cpuid_r;
 
-    mem_zero(&cpu_i, sizeof(struct cpu_info));
+    memzero(&cpu_i, sizeof(struct cpu_info));
 
     _cpuid(CPUID_BASIC ,&cpuid_r);
 
@@ -151,7 +151,7 @@ _cpu_info(void)
         if (oldbrand == 0 || oldbrand > 0x18) {
             snprintf(cpu_i.brand_string, 54, "brand id %u", oldbrand);
         } else {
-            str_ncpy(cpu_i.brand_string, cpu_old_brands[oldbrand], 54);
+            strncpy(cpu_i.brand_string, cpu_old_brands[oldbrand], 54);
         }
     }
 }
@@ -191,8 +191,8 @@ init_x86(const char *karg)
     kargs_init();
 
     // Ustawienie GDT
-    mem_zero(&p_gdt, sizeof(p_gdt));
-    mem_zero(&p_tss0, sizeof(p_tss0));
+    memzero(&p_gdt, sizeof(p_gdt));
+    memzero(&p_tss0, sizeof(p_tss0));
     setgdt(SEL_CODE, 0x0, 0xfffff, code, attr);
     setgdt(SEL_DATA, 0x0, 0xfffff, data, attr);
     setgdt(SEL_UCODE, 0x0, 0xfffff, ucode, attr);
@@ -203,7 +203,7 @@ init_x86(const char *karg)
 //    p_tss0.tss_cs=0x8;
 //    p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
 
-    mem_zero(&p_gdtr, sizeof(p_gdtr));
+    memzero(&p_gdtr, sizeof(p_gdtr));
     p_gdtr.base = &p_gdt;
     p_gdtr.limit = sizeof(p_gdt) -1;
     cpu_gdt_load(&p_gdtr);
@@ -228,7 +228,7 @@ init_x86(const char *karg)
     setidt(INTRPT_SYSCALL, SEL_MK(SEL_CODE, SEL_DPL0),
         (uintptr_t)_intrpt_syscall, intrpt_attr | GATE_DPL3);
 
-    mem_zero(&p_idtr, sizeof(p_idtr));
+    memzero(&p_idtr, sizeof(p_idtr));
     p_idtr.base = &p_idt;
     p_idtr.limit = sizeof(p_idt)-1;
     cpu_idt_load(&p_idtr);

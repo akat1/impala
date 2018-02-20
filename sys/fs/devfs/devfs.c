@@ -165,7 +165,7 @@ _create(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     if(!n)
         return -ENOMEM;
 
-    str_cpy(n->i_name, name);
+    strcpy(n->i_name, name);
     n->i_type = (attr->va_type == VNODE_TYPE_DEV)?
                             _INODE_TYPE_DEV:_INODE_TYPE_DIR;
     n->i_attr = attr->va_mode;
@@ -353,7 +353,7 @@ devfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
         en = en->i_next;
     }
     if(en) {
-        path->now+=str_len(en->i_name);
+        path->now+=strlen(en->i_name);
         return _get_vnode(en, vpp, vn->v_vfs);
     }
     return -ENOENT;
@@ -372,7 +372,7 @@ devfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
         node = node->i_next;
     while(node && count>0) {
         dents->d_ino = (int)node;
-        str_cpy(dents->d_name, node->i_name);
+        strcpy(dents->d_name, node->i_name);
         dents++;
         count--;
         node = node->i_next;
@@ -391,7 +391,7 @@ devfs_init()
     vfs_register("devfs", &devfs_ops);
 
     devfs_node_t *n = kmem_zalloc(sizeof(devfs_node_t), KM_SLEEP);
-    str_cpy(n->i_name, "<devfs root>"); // ciekawe, czy da radę jakoś to zobaczyć...
+    strcpy(n->i_name, "<devfs root>"); // ciekawe, czy da radę jakoś to zobaczyć...
     n->i_type = _INODE_TYPE_DIR;
     n->i_attr = 0;
     n->i_uid = 0;

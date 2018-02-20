@@ -116,7 +116,7 @@ ISR_syscall(interrupt_frame frame)
     thread_t *thisthr = curthread;
     irq_enable();
     
-    mem_zero(&result, sizeof(result));
+    memzero(&result, sizeof(result));
     ap = (va_list) (frame.f_esp + 16);
     thisthr->thr_flags |= THREAD_SYSCALL;
     

@@ -60,7 +60,7 @@ sc_unlink(thread_t *t, syscall_result_t *r, unlink_args *args)
         return err;
     }
     char *bname = path;
-    for(int i=str_len(path)-1; i>=0; i--) {
+    for(int i=strlen(path)-1; i>=0; i--) {
         if(path[i]!='/')
             break;
         else

@@ -136,7 +136,7 @@ textscreen_init(struct hw_textscreen *ts)
 void
 textscreen_init_tab(struct hw_textscreen *ts)
 {
-    mem_set(ts->tab_stop, 0, TS_SIZE);
+    memset(ts->tab_stop, 0, TS_SIZE);
     for(int y=0; y<TS_HEIGHT; y++)
         for(int x=0; x<TS_WIDTH; x+=6)
             ts->tab_stop[y*TS_WIDTH+x] = 1;
@@ -199,7 +199,7 @@ void textscreen_del_tab(struct hw_textscreen *screen)
 void textscreen_del_all_tab(struct hw_textscreen *screen)
 {
     screen = SELECT_SCREEN(screen);
-    mem_set(screen->tab_stop, 0, TS_SIZE);
+    memset(screen->tab_stop, 0, TS_SIZE);
 }
 
 void textscreen_set_margins(struct hw_textscreen *screen, int up, int down)
@@ -363,11 +363,11 @@ textscreen_scroll_down(struct hw_textscreen *ts)
     ts = SELECT_SCREEN(ts);
     uint16_t *map = SELECT_MAP(ts);
 
-    mem_move(&map[(ts->margin_up+0)*TS_WIDTH],
+    memmove(&map[(ts->margin_up+0)*TS_WIDTH],
              &map[(ts->margin_up+1)*TS_WIDTH],
             (ts->margin_down - ts->margin_up)*TS_WIDTH*sizeof(uint16_t));
 
-    mem_set16(&map[ts->margin_down*TS_WIDTH], COLOR_WHITE<<8 | ' ',
+    memset16(&map[ts->margin_down*TS_WIDTH], COLOR_WHITE<<8 | ' ',
             TS_WIDTH*sizeof(uint16_t));
     
     ts->cursor_y--;
@@ -380,11 +380,11 @@ textscreen_scroll_up(struct hw_textscreen *ts)
     ts = SELECT_SCREEN(ts);
     uint16_t *map = SELECT_MAP(ts);
 
-    mem_move(&map[(ts->margin_up+1)*TS_WIDTH],
+    memmove(&map[(ts->margin_up+1)*TS_WIDTH],
              &map[(ts->margin_up+0)*TS_WIDTH], 
             (ts->margin_down - ts->margin_up)*TS_WIDTH*sizeof(uint16_t));
 
-    mem_set16(&map[(ts->margin_up)*TS_WIDTH],
+    memset16(&map[(ts->margin_up)*TS_WIDTH],
             COLOR_WHITE<<8 | ' ', TS_WIDTH*sizeof(uint16_t));
     
     ts->cursor_y++;
@@ -488,7 +488,7 @@ void
 textscreen_draw(struct hw_textscreen *screen)
 {
     current = screen;
-    mem_cpy(vidmem, screen->screen_map,
+    memcpy(vidmem, screen->screen_map,
             TS_SIZE*sizeof(uint16_t));
     screen->screen_buf = (uint16_t*) vidmem;
     _set_cursor(screen, screen->cursor_x, screen->cursor_y);
@@ -504,8 +504,8 @@ textscreen_switch(struct hw_textscreen *screen)
 void
 textscreen_clone(struct hw_textscreen *screen)
 {
-    mem_move(screen, current, sizeof(*screen));
-    mem_move(screen->screen_map, current->screen_buf, TS_SIZE*2);
+    memmove(screen, current, sizeof(*screen));
+    memmove(screen->screen_map, current->screen_buf, TS_SIZE*2);
     screen->screen_buf = NULL;
 }
 

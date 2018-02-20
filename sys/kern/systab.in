@@ -85,3 +85,4 @@ SYS writev
 SYS gettimeofday
 SYS nice
 SYS mount
+SYS unmount

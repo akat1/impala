@@ -237,7 +237,7 @@ buf_alloc(iobuf_t *bp, devd_t *d, blkno_t n, size_t bsize)
         return -1;
     // zmieniamy bufor, zachowując częśc danych.
     if (bp->addr && bp->size < bsize) {
-        mem_cpy(a, bp->addr, bp->size);
+        memcpy(a, bp->addr, bp->size);
         kmem_free(bp->addr);
         bp->addr = a;
     } else

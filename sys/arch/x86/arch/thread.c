@@ -57,7 +57,7 @@ void
 thread_context_init(thread_t *t, thread_context *ctx)
 {
     uintptr_t frame = (uintptr_t)t->thr_kstack;
-    mem_zero(ctx, sizeof(thread_context));
+    memzero(ctx, sizeof(thread_context));
     ctx->c_eflags = EFLAGS_BITS;
     ctx->c_frame = (interrupt_frame*)frame;
 }
@@ -68,8 +68,8 @@ thread_context_copy(thread_context *ctx)
     thread_context *nctx = kmem_alloc(sizeof(thread_context), KM_SLEEP);
     interrupt_frame *nif = kmem_alloc(sizeof(interrupt_frame), KM_SLEEP);
 
-    mem_cpy(nctx, ctx, sizeof(thread_context));
-    mem_cpy(nif, ctx->c_frame, sizeof(interrupt_frame));
+    memcpy(nctx, ctx, sizeof(thread_context));
+    memcpy(nif, ctx->c_frame, sizeof(interrupt_frame));
 
     nctx->c_frame = nif;
 
@@ -96,8 +96,8 @@ thread_sigenter(thread_t *t, addr_t proc, int signum)
     t->thr_sigblock = t->thr_proc->p_sigact[signum].sa_mask;
     t->thr_sigcontext = stx;
 
-    mem_cpy((char *)t->thr_context.c_frame->f_esp-sizeof(int), &signum, sizeof(int));
-    mem_cpy((char *)t->thr_context.c_frame->f_esp-sizeof(int)*2, &(t->thr_context.c_frame->f_eip), sizeof(int));
+    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int), &signum, sizeof(int));
+    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int)*2, &(t->thr_context.c_frame->f_eip), sizeof(int));
     t->thr_context.c_frame->f_esp -= 2*sizeof(int);
     t->thr_context.c_frame->f_eip = (uint32_t)proc;
     return;
@@ -116,8 +116,8 @@ thread_sigreturn(thread_t *t)
     t->thr_sigcontext = stx->prev;
 
     ifr = t->thr_context.c_frame;
-    mem_cpy(&t->thr_context, stx->context, sizeof(thread_context));
-    mem_cpy(t->thr_context.c_frame, stx->context->c_frame, sizeof(interrupt_frame));
+    memcpy(&t->thr_context, stx->context, sizeof(thread_context));
+    memcpy(t->thr_context.c_frame, stx->context->c_frame, sizeof(interrupt_frame));
     t->thr_context.c_frame = ifr;
     t->thr_sigblock = stx->sigblock;
 
@@ -132,7 +132,7 @@ thread_prepare(thread_t *t, vm_addr_t av, vm_addr_t ev, vm_size_t off)
 {
     uint32_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - 4 - off;
     interrupt_frame *frame = t->thr_context.c_frame;
-    mem_zero(t->thr_kstack, t->thr_kstack_size);
+    memzero(t->thr_kstack, t->thr_kstack_size);
     if (t->thr_flags & THREAD_USER) {
         frame->f_cs = SEL_MK(SEL_UCODE, SEL_DPL3);
         frame->f_ds = SEL_MK(SEL_UDATA, SEL_DPL3);
@@ -165,9 +165,9 @@ void
 thread_fork(thread_t *t, thread_t *ct)
 {
     uintptr_t frame = (uintptr_t)ct->thr_kstack;
-    mem_cpy(&ct->thr_context, &t->thr_context, sizeof(t->thr_context));
+    memcpy(&ct->thr_context, &t->thr_context, sizeof(t->thr_context));
     ct->thr_context.c_frame = (interrupt_frame*)frame;
-    mem_cpy(ct->thr_context.c_frame, t->thr_context.c_frame,
+    memcpy(ct->thr_context.c_frame, t->thr_context.c_frame,
         sizeof(interrupt_frame));
     ct->thr_stack = t->thr_stack;
     ct->thr_stack_size = t->thr_stack_size;

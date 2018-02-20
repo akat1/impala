@@ -114,13 +114,13 @@ mdstrategy(devd_t *dev, iobuf_t *b)
         DEBUGF("memory disk read (%p -> %p) %u bytes",
             md->data+off, b->addr, len);
 */
-        mem_cpy(b->addr, md->data + off, len);
+        memcpy(b->addr, md->data + off, len);
     } else {
 /*
         DEBUGF("memory disk write (%p -> %p) %u bytes",
             b->addr, md->data+off, len);
 */
-        mem_cpy(md->data + off, b->addr, len);
+        memcpy(md->data + off, b->addr, len);
     }
     bio_done(b);
     return 0;

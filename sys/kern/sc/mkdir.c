@@ -60,7 +60,7 @@ sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
         return err;
     }
     char *bname = path;
-    for(int i=str_len(path)-1; i>=0; i--) {
+    for(int i=strlen(path)-1; i>=0; i--) {
         if(path[i]!='/')
             break;
         else
@@ -73,7 +73,7 @@ sc_mkdir(thread_t *t, syscall_result_t *r, mkdir_args_t *args)
             bname = &path[i+1];
     }
     vattr_t a;
-    mem_zero(&a, sizeof(a));
+    memzero(&a, sizeof(a));
     a.va_type = VNODE_TYPE_DIR;
     a.va_mode = args->m & ~(p->p_umask) & 0777;
     a.va_uid = p->p_cred->p_uid;

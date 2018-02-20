@@ -45,11 +45,11 @@ int
 sc_uname(thread_t *t, syscall_result_t *r, uname_args_t *args)
 {
     struct utsname uname;
-    str_cpy(uname.sysname, "Impala");
-    str_cpy(uname.nodename, "");
-    str_cpy(uname.release, IMPALA_RELEASE);
-    str_cpy(uname.version, IMPALA_VERSION);
-    str_cpy(uname.machine, IMPALA_MACHINE);
+    strcpy(uname.sysname, "Impala");
+    strcpy(uname.nodename, "");
+    strcpy(uname.release, IMPALA_RELEASE);
+    strcpy(uname.version, IMPALA_VERSION);
+    strcpy(uname.machine, IMPALA_MACHINE);
     int err = copyout(args->name, &uname, sizeof(uname));
     if(err < 0)
         return err;

@@ -140,7 +140,7 @@ ext2fs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *path)
         if (pc_cmp(path, cur->dirnode.name) == 0) {
             *vpp = ext2fs_get_vnode(node->fs, cur->dirnode.inode_no,
                     ext2fs_dtype_to_vtype(cur->dirnode.type));
-            path->now += str_len(cur->dirnode.name);
+            path->now += strlen(cur->dirnode.name);
             return 0;
         }
         cur = list_next(&(node->dirnodes), cur);
@@ -172,7 +172,7 @@ ext2fs_getdents(vnode_t *v, dirent_t *dents, int first, int count) {
         if (first == 0) {
             dents->d_ino = cur->dirnode.inode_no;
             /* XXX: truncate name */
-            str_ncpy(dents->d_name, cur->dirnode.name, sizeof(dents->d_name));
+            strncpy(dents->d_name, cur->dirnode.name, sizeof(dents->d_name));
             dents++;
             count--;
             records += sizeof(dirent_t);
@@ -324,7 +324,7 @@ ext2fs_read_block(ext2fs_t *fs, uint32_t group, uint32_t block, uint8_t *buf)
         return -error;
     }
 
-    mem_cpy(buf, bp->addr, fs->block_size);
+    memcpy(buf, bp->addr, fs->block_size);
 
     bio_release(bp);
 
@@ -356,7 +356,7 @@ ext2fs_read_from_inode(ext2fs_t *fs, ext2fs_inode_t *inode, uint8_t *buf,
             ext2fs_read_block(fs, 0, blocks[block], buf);
         } else {
             DEBUGF("XXX: fix me please!");
-            mem_set(buf, 0, fs->block_size);
+            memset(buf, 0, fs->block_size);
         }
 
         buf += fs->block_size;
@@ -391,7 +391,7 @@ ext2fs_read_node(ext2fs_t *fs, uint32_t inode_no, ext2fs_node_t **node)
     
     ext2fs_read_block(fs, group, block, buf);
     inode = kmem_zalloc(sizeof(ext2fs_inode_t), KM_SLEEP);
-    mem_cpy(inode, &((ext2fs_inode_t *)buf)[block_offset],
+    memcpy(inode, &((ext2fs_inode_t *)buf)[block_offset],
             sizeof(ext2fs_inode_t));
     
     *node = kmem_zalloc(sizeof(ext2fs_node_t), KM_SLEEP);
@@ -424,7 +424,7 @@ ext2fs_read_node(ext2fs_t *fs, uint32_t inode_no, ext2fs_node_t **node)
                 break;
             }
             nodedir = kmem_zalloc(sizeof(ext2fs_node_dir_t), KM_SLEEP);
-            mem_cpy(&(nodedir->dirnode), dirnode, sizeof(ext2fs_dirnode_t));
+            memcpy(&(nodedir->dirnode), dirnode, sizeof(ext2fs_dirnode_t));
             nodedir->dirnode.name[nodedir->dirnode.length] = '\0';
             list_insert_tail(&(*node)->dirnodes, nodedir);
         }

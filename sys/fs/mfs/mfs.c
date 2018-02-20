@@ -210,7 +210,7 @@ mfs_blk_set_area(mfs_node_t *n, size_t s)
     while (list_length(&n->blks) < using) {
         mfs_blk_t *blk = kmem_cache_alloc(mfs->cache_blk, KM_SLEEP);
         if (blk == NULL) return -1;
-        mem_zero(blk, sizeof(*blk));
+        memzero(blk, sizeof(*blk));
         list_insert_tail(&n->blks, blk);
     }
 
@@ -218,7 +218,7 @@ mfs_blk_set_area(mfs_node_t *n, size_t s)
         // jeżeli skracaliśmy plik to trzeba wyzerować bajty w bloczku
         // wykraczające za niego.
         mfs_blk_t *blk = list_tail(&n->blks);
-        mem_zero(blk->data+last, 512-last);
+        memzero(blk->data+last, 512-last);
     }
     n->size = s;
     return 0;

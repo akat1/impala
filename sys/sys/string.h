@@ -35,18 +35,18 @@
 
 #ifdef __KERNEL
 
-addr_t mem_move(addr_t dst, const addr_t src, size_t len);
-addr_t mem_cpy(addr_t dst, const addr_t src, size_t len);
-int mem_cmp(const addr_t a, const addr_t b, size_t len);
-addr_t mem_set(addr_t s, char c, size_t len);
-addr_t mem_set16(addr_t s, uint16_t c, size_t len);
-size_t str_len(const char *s);
-int str_cmp(const char *a, const char *b);
-bool str_eq(const char *a, const char *b);
-char * str_cat(char *str, const char *s);
-char * str_cpy(char *str, const char *s);
-char * str_ncpy(char *str, const char *s, size_t len);
-char * str_dup(const char *s);
+addr_t memmove(addr_t dst, const addr_t src, size_t len);
+addr_t memcpy(addr_t dst, const addr_t src, size_t len);
+int memcmp(const addr_t a, const addr_t b, size_t len);
+addr_t memset(addr_t s, char c, size_t len);
+addr_t memset16(addr_t s, uint16_t c, size_t len);
+size_t strlen(const char *s);
+int strcmp(const char *a, const char *b);
+bool streq(const char *a, const char *b);
+char *strcat(char *str, const char *s);
+char *strcpy(char *str, const char *s);
+char *strncpy(char *str, const char *s, size_t len);
+char *strdup(const char *s);
 
 int snprintf(char *dst, size_t size, const char *fmt, ...);
 int vsnprintf(char *dst, size_t size, const char *fmt, va_list ap);
@@ -56,7 +56,7 @@ enum {
 };
 
 
-#define mem_zero(s, l) mem_set(s, 0, l)
+#define memzero(s, l) memset(s, 0, l)
 #endif
 
 #endif

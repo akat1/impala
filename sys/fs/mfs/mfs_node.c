@@ -99,11 +99,11 @@ int
 mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
 {
     char namex[256];
-    str_ncpy(namex, name, 256);
+    strncpy(namex, name, 256);
     name = namex;
     // szybki hack
-    if (namex[str_len(name)-1] == '/')
-        namex[str_len(name)-1] = 0;
+    if (namex[strlen(name)-1] == '/')
+        namex[strlen(name)-1] = 0;
 
     *vpp = NULL;
     if(!name || !attr)
@@ -114,7 +114,7 @@ mfs_nodecreate(vnode_t *vn, vnode_t **vpp, const char *name, vattr_t *attr)
     mfs_node_t *node = _alloc_node();
     if(!node)
         return -ENOMEM;
-    node->name = str_dup(name);
+    node->name = strdup(name);
     node->size = attr->va_size;
     node->alloc_size = 0;
     node->type = VNODE_TO_MFS_TYPE(attr->va_type);
@@ -276,7 +276,7 @@ mfs_readlink(vnode_t *v, char *buf, int bsize)
     if(n->type != MFS_TYPE_LNK)
         return -EINVAL;
     int len = MIN(bsize, n->size);
-    mem_cpy(buf, n->data, len);
+    memcpy(buf, n->data, len);
     return len;
 }
 
@@ -288,14 +288,14 @@ mfs_symlink(vnode_t *v, char *name, char *dst)
     va.va_type = VNODE_TYPE_LNK;
     va.va_uid = 0;// thread w arg?
     va.va_gid = 0;
-    va.va_size = str_len(dst);
+    va.va_size = strlen(dst);
     va.va_mode = 0777;
     vnode_t *vn;
     int err = mfs_nodecreate(v, &vn, name, &va);
     if(err)
         return err;
     mfs_node_t *n = vn->v_private;
-    mem_cpy(n->data, dst, n->size);
+    memcpy(n->data, dst, n->size);
     vrele(vn);
     return 0;
 }
@@ -344,7 +344,7 @@ mfs_unlink(vnode_t *vn, char *name)
     mfs_node_t *node = p->child;
     mfs_node_t *prev = NULL;
     while(node) {
-        if(!str_cmp(name, node->name)) {
+        if(!strcmp(name, node->name)) {
             if(prev)
                 prev->next = node->next;
             else
@@ -397,7 +397,7 @@ mfs_lookup(vnode_t *vn, vnode_t **vpp, lkp_state_t *path)
     }
     mutex_unlock(&en->nlist_mutex);
     if(ch) {
-        path->now+=str_len(ch->name);
+        path->now+=strlen(ch->name);
         _get_vnode(ch, vpp, vn->v_vfs);
         return 0;
     }
@@ -418,7 +418,7 @@ mfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
         ch = ch->next;
     while(ch && count>0) {
         dents->d_ino = (int)ch;
-        str_cpy(dents->d_name, ch->name);
+        strcpy(dents->d_name, ch->name);
         dents++;
         count--;
         ch = ch->next;

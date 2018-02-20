@@ -61,7 +61,7 @@ sc_writev(thread_t *t, syscall_result_t *r, writev_args_t *args)
 
     uio_t u;
     iovec_t *iovs = kmem_alloc(vec_size, KM_SLEEP);
-    mem_cpy(iovs, args->vector, vec_size);
+    memcpy(iovs, args->vector, vec_size);
     size_t size = 0;
     for(int i=0; i<args->count; i++) {
         if((err = vm_is_avail((vm_addr_t)iovs[i].iov_base, iovs[i].iov_len)))

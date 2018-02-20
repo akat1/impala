@@ -46,7 +46,7 @@ static const char * _get_last_cmpt(const char *path);
 const char *
 _get_last_cmpt(const char *path)
 {
-    int l=str_len(path);
+    int l=strlen(path);
     for(const char *r = path+l-1; r>=path; r--) {
         if(*r == '/')
             return r+1;

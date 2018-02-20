@@ -68,9 +68,9 @@ kernel_copy(char *buf, uio_t *uio, size_t len)
         DEBUGF("xfer: %p+%u %u", uio->iovs[i].iov_base, clen,
             uio->oper);
         if (uio->oper == UIO_WRITE) {
-            mem_cpy(buf, uio->iovs[i].iov_base, clen);
+            memcpy(buf, uio->iovs[i].iov_base, clen);
         } else {
-            mem_cpy(uio->iovs[i].iov_base, buf, clen);
+            memcpy(uio->iovs[i].iov_base, buf, clen);
         }
         buf += clen;
     }
@@ -96,9 +96,9 @@ uio_move(void *_buf, size_t len, uio_t *uio)
 //         DEBUGF("xfer: base=%p xfer=%u len=%u resid=%u", iov->iov_base, xfer,len,uio->resid);
         if (uio->space == UIO_SYSSPACE || 1) {
             if (uio->oper == UIO_WRITE) {
-                mem_cpy(buf, iov->iov_base, xfer);
+                memcpy(buf, iov->iov_base, xfer);
             } else {
-                mem_cpy(iov->iov_base, buf, xfer);
+                memcpy(iov->iov_base, buf, xfer);
             }
         } else {
             panic("e");

@@ -438,7 +438,7 @@ select_next_thread()
 void
 sleepq_init(sleepq_t *q)
 {
-    mem_zero(q, sizeof(*q));
+    memzero(q, sizeof(*q));
     LIST_CREATE(&q->sq_waiting, thread_t, L_wait, FALSE);
 }
 

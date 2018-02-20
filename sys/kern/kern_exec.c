@@ -110,8 +110,8 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     char header[HEADER_SIZE];
     ssize_t len = HEADER_SIZE;
     vnode_t *vp = NULL;
-    mem_zero(header, HEADER_SIZE);
-    mem_zero(&einfo, sizeof(einfo));
+    memzero(header, HEADER_SIZE);
+    memzero(&einfo, sizeof(einfo));
     if ( (err = vfs_lookup(p->p_curdir, &vp, path, NULL, LKP_NORMAL)) ) {
         TRACE_IN("cannot lookup");
         return err;
@@ -152,7 +152,7 @@ execve(proc_t *p, const char *path, char *argv[], char *envp[])
     if ( (err = image_exec(p, &einfo)) ) goto fail;
     if (p->p_cmd) kmem_free((void*)p->p_cmd);
     
-    p->p_cmd = str_dup(path);
+    p->p_cmd = strdup(path);
     vrele(vp);
     return 0;
 fail:
@@ -199,7 +199,7 @@ copyin_params(proc_t *p, exec_info_t *einfo)
                 break;
             einfo->safe_argv[i] = (char*)cur;
             copyinstr(&einfo->argv_data[cur], uaddr, PAGE_SIZE-cur);
-            cur += str_len(uaddr) + 1;
+            cur += strlen(uaddr) + 1;
         }
         einfo->safe_argv[argc] = 0;
         einfo->argc = argc;
@@ -218,7 +218,7 @@ copyin_params(proc_t *p, exec_info_t *einfo)
 
         einfo->safe_envp[i] = (char*)cur;
         copyinstr(&einfo->envp_data[cur], uaddr, PAGE_SIZE-cur);
-        cur += str_len(uaddr) + 1;
+        cur += strlen(uaddr) + 1;
     }
     einfo->safe_envp[envc] = 0;
     einfo->envp_size = cur;
@@ -244,25 +244,25 @@ copyout_params(thread_t *t, exec_info_t *einfo)
     if (einfo->argv_size > 0) {
         STACK -= einfo->argv_size;
         _STACK -= einfo->argv_size;
-        mem_cpy(STACK, einfo->argv_data, einfo->argv_size);
+        memcpy(STACK, einfo->argv_data, einfo->argv_size);
         for (int i = 0; i < einfo->argc; i++) {
             einfo->safe_argv[i] += (uintptr_t)_STACK;
         }
         STACK -= (einfo->argc+1) * sizeof(char*);
         _STACK -= (einfo->argc+1) * sizeof(char*);
-        mem_cpy(STACK, einfo->safe_argv, (einfo->argc+1) * sizeof(char*));
+        memcpy(STACK, einfo->safe_argv, (einfo->argc+1) * sizeof(char*));
         einfo->u_argv = (vm_addr_t)_STACK;
     }
     if (einfo->envp_size > 0) {
         STACK -= einfo->envp_size;
         _STACK -= einfo->envp_size;
-        mem_cpy(STACK, einfo->envp_data, einfo->envp_size);
+        memcpy(STACK, einfo->envp_data, einfo->envp_size);
         for (int i = 0; i < einfo->envc; i++) {
             einfo->safe_envp[i] += (uintptr_t)_STACK;
         }
         STACK -= (einfo->envc+1) * sizeof(char*);
         _STACK -= (einfo->envc+1) * sizeof(char*);
-        mem_cpy(STACK, einfo->safe_envp, (einfo->envc+1) * sizeof(char*));
+        memcpy(STACK, einfo->safe_envp, (einfo->envc+1) * sizeof(char*));
         einfo->u_envp = (vm_addr_t)_STACK;
     }
     einfo->u_off = (MAP+3*PAGE_SIZE) - (vm_addr_t)STACK;
@@ -311,7 +311,7 @@ aout_exec(proc_t *p, exec_info_t *einfo)
     // adresowej
     vm_segmap(vm_space->seg_text, _TEXT, exec->a_text, &TEXT);
     vm_segmap(vm_space->seg_data, _DATA, exec->a_data + exec->a_bss, &DATA);
-    mem_zero(DATA, exec->a_data + exec->a_bss);
+    memzero(DATA, exec->a_data + exec->a_bss);
 
     /// @todo nie sprawdzamy błędów I/O, tak czy siak, proces wywołujący
     ///       execve nie może już tego błędu obsłużyć, bo nie ma jego

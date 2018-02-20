@@ -229,7 +229,7 @@ fatfs_lookup(vnode_t *v, vnode_t **vpp, lkp_state_t *state)
 
     if (v->v_type != VNODE_TYPE_DIR) return -ENOTDIR;
     for (i = 0; i < 256 && state->now[i] && state->now[i] != '/'; i++);
-    str_ncpy(bufname, state->now, i);
+    strncpy(bufname, state->now, i);
     bufname[i] = 0;
     err = fatfs_node_getdir(VTOFATFSN(v), &dir);
     if (err) return err;
@@ -266,7 +266,7 @@ fatfs_mkdir(vnode_t *v, vnode_t **vpp, const char *path,
     }
 
     bp = bio_getblk(fatfs->dev, fatfs_cmap(fatfs,clu), fatfs->clusize);
-    mem_zero(bp->addr, bp->size);
+    memzero(bp->addr, bp->size);
     bio_write(bp);
     bio_wait(bp);
     if ( ISSET(bp->flags, BIO_ERROR) ) {

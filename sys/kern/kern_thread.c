@@ -60,7 +60,7 @@ size_t thread_kstack_size = THREAD_KSTACK_SIZE;
 void
 thread_ctor(void *_thr)
 {
-        mem_zero(_thr, sizeof(thread_t));
+        memzero(_thr, sizeof(thread_t));
         thread_t *t = _thr;
         mutex_init(&t->thr_mtx, MUTEX_NORMAL);
         t->thr_joiner = 0;
@@ -83,7 +83,7 @@ thread_init()
     curthread = thread_create(0, 0, 0);
     curthread->thr_flags = THREAD_RUN;
     curthread->vm_space = &vm_kspace;
-    mem_zero(&curthread->thr_wdescr, sizeof(wdescr_t));
+    memzero(&curthread->thr_wdescr, sizeof(wdescr_t));
     karg_get_i("stacksize", (int*)&thread_stack_size);
     karg_get_i("kstacksize", (int*)&thread_kstack_size);
 }
@@ -173,7 +173,7 @@ static void _mutex_wakeup(mutex_t *m);
 void
 mutex_init(mutex_t *m, int flags)
 {
-    mem_zero(m, sizeof(mutex_t));
+    memzero(m, sizeof(mutex_t));
     m->mtx_flags = flags;
     m->mtx_locked = MUTEX_UNLOCKED;
     spinlock_init(&m->mtx_slock);

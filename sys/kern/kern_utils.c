@@ -95,7 +95,7 @@ copyin(void *kaddr, const void *uaddr, size_t len)
 {
     int err=0;
     if ((err=vm_is_avail((vm_addr_t)uaddr, len))) return err;
-    mem_cpy(kaddr, uaddr, len);
+    memcpy(kaddr, uaddr, len);
     return len;
 }
 
@@ -104,7 +104,7 @@ copyout(void *uaddr, const void *kaddr, size_t len)
 {
     int err=0;
     if ((err=vm_is_avail((vm_addr_t)uaddr, len))) return err;
-    mem_cpy(uaddr, kaddr, len);
+    memcpy(uaddr, kaddr, len);
     return len;
 }
 
@@ -114,7 +114,7 @@ copyinstr(void *kaddr, const void *uaddr, size_t limit)
 {
     int err=0;
     if ((err=vm_validate_string(uaddr, limit))<0) return err;
-    str_ncpy(kaddr, uaddr, err+1);
+    strncpy(kaddr, uaddr, err+1);
     return 0;
 }
 

@@ -63,7 +63,7 @@ sc_sigprocmask(thread_t *t, syscall_result_t *r, sigprocmask_args_t *args)
             }
             copyin(&sigblock, args->set, sizeof(sigset_t));
             sigblock |= t->thr_sigblock;
-            mem_cpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
+            memcpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
             r->result = 0;
             return EOK;
         case SIG_UNBLOCK:
@@ -72,7 +72,7 @@ sc_sigprocmask(thread_t *t, syscall_result_t *r, sigprocmask_args_t *args)
             }
             copyin(&sigblock, args->set, sizeof(sigset_t));
             sigblock &= ~t->thr_sigblock;
-            mem_cpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
+            memcpy(&t->thr_sigblock, &sigblock, sizeof(sigset_t));
             r->result = 0;
             return EOK;
         case SIG_SETMASK:

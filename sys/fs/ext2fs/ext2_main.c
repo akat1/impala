@@ -105,7 +105,7 @@ ext2fs_mount(vfs_t *vfs)
         return -error;
     }
 
-    mem_cpy(ext2fs->group_descriptors, bp->addr, ext2fs->groups *
+    memcpy(ext2fs->group_descriptors, bp->addr, ext2fs->groups *
       sizeof(ext2fs_group_descriptor_t));
 
     bio_release(bp);

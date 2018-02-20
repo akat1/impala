@@ -253,7 +253,7 @@ vm_seg_clone(vm_seg_t *dst, vm_space_t *space, vm_seg_t *src)
         vm_addr_t SRC,DST;
         vm_segmap(dst, clonereg->begin, clonereg->size, &DST);
         vm_segmap(src, reg->begin, reg->size, &SRC);
-        mem_cpy((void*)DST, (void*)SRC, reg->size);
+        memcpy((void*)DST, (void*)SRC, reg->size);
         vm_unmap(DST, reg->size);
         vm_unmap(SRC, reg->size);
     }

@@ -136,7 +136,7 @@ fatfs_sync(vfs_t *vfs)
     fatfs_space_repair(fatfs);
 
     bp = bio_getblk(fatfs->dev, fatfs->blkno_fat, fatfs->fatbsize*BSIZE);
-    mem_cpy(bp->addr, fatfs->fat, fatfs->fatbsize*BSIZE);
+    memcpy(bp->addr, fatfs->fat, fatfs->fatbsize*BSIZE);
     bio_write(bp);
     bio_wait(bp);
     if ( ISSET(bp->flags, BIO_ERROR) ) {
@@ -299,7 +299,7 @@ fatfs_read_fat(fatfs_t *fatfs)
         bio_release(bp);
         return -bp->errno;
     }
-    mem_cpy(fatfs->fat, bp->addr, fatfs->fatbsize*BSIZE);
+    memcpy(fatfs->fat, bp->addr, fatfs->fatbsize*BSIZE);
     bio_release(bp);
     return 0;
 }
