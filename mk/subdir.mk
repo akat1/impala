@@ -1,4 +1,3 @@
-
 _SUBDIR_BUILD?= build
 _SUBDIR_CLEAN?= clean
 _SUBDIR_DEPEND?= depend
@@ -47,4 +46,3 @@ ${_SUBDIR_CLEANDEPEND}:
 	done
 
 include ${IMPALA_MK}/config.mk
-

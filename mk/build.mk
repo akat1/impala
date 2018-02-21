@@ -17,4 +17,3 @@ OBJS= ${OBJS_2}
 .s.o:
 	@echo " AS $<"
 	${VERBOSE}${AS} ${AS_FLAGS} -o $@ $<
-
