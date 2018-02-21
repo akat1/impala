@@ -107,7 +107,6 @@ struct interrupt_frame {
 #ifdef __KERNEL
 void irq_install_handler(int irq, irq_handler_f *h, int ipl);
 void irq_free_handler(int irq);
-void irq_done(void);
 
 extern int volatile CIPL;
 extern bool wantSched;

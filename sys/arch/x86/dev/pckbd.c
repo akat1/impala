@@ -144,7 +144,6 @@ i8042_irq1()
 
     if(last_scancode == 0 && (scancode == 0xe0 || scancode == 0xe1)) {
         last_scancode = scancode;
-        irq_done();
         return TRUE;
     }
 
@@ -184,7 +183,6 @@ i8042_irq1()
         set_modifiers();
     }
 
-    irq_done();
     return TRUE;
 }
 

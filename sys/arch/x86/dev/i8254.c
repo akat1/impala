@@ -52,7 +52,6 @@ bool
 i8254_irq0()
 {
     clock_hardtick();
-    irq_done();
     clock_softtick();
     return TRUE;
 }

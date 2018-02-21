@@ -79,13 +79,6 @@ irq_free_handler(int irq)
     }
 }
 
-
-// Planuje wywalić irq_done, ale nie wszystko na raz...
-void
-irq_done()
-{
-}
-
 void
 ISR_irq(interrupt_frame frame)
 {
