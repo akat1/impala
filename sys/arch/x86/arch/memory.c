@@ -224,19 +224,6 @@ create_kernel_space()
         paddr += PAGE_SIZE;
     }
 
-
-#if 0
-    /*
-     * Poniższy kod udostępnia piersze 4MB pamięci.
-     * NIE KASOWAĆ.
-     */
-    paddr = 0;
-    for (vaddr = 0; vaddr < 4*1024*1024; vaddr += PAGE_SIZE) {
-        int i = PAGE_NUM(paddr);
-        vm_pmap_insert(kmap, &vm_pages[i], vaddr, VM_PROT_RWX|VM_PROT_SYSTEM);
-        paddr += PAGE_SIZE;
-    }
-#endif
     vm_pmap_switch(kmap);
 }
 
@@ -244,7 +231,6 @@ create_kernel_space()
 void
 initialize_internal()
 {
-//    vm_pmap_t *kmap = &vm_kspace.pmap;
     vm_seg_t *kdata = vm_kspace.seg_data;
 
     // przydzielamy miejsce na poczatkowe regiony
@@ -252,8 +238,6 @@ initialize_internal()
     vm_lpool_create_(&vm_unused_regions, offsetof(vm_region_t,L_regions),
             sizeof(vm_region_t), VM_LPOOL_NORMAL, (void*)page->kvirt_addr);
     page = _alloc_page();
-//    vm_pmap_insert(kmap, page, page->kvirt_addr,
-//                    VM_PROT_RWX | VM_PROT_SYSTEM);//już to_alloc robi?
     vm_lpool_insert_empty(&vm_unused_regions, (void*)page->kvirt_addr);
 
 
@@ -458,7 +442,6 @@ vm_pmap_map(vm_pmap_t *dst_pmap, vm_addr_t dst_addr, const vm_pmap_t *src_pmap,
 {
     for (size+=dst_addr; dst_addr < size; dst_addr += PAGE_SIZE) {
         vm_page_t *page = pmap_get_page(src_pmap, src_addr);
-        ///@todo można połączyć obie funkcje (wykonują po części tą samą pracę)
         int prot = _pmap_page_prot(src_pmap, src_addr);
         vm_pmap_insert(dst_pmap, page, dst_addr, prot);
         src_addr += PAGE_SIZE;
@@ -666,15 +649,6 @@ vm_ptov(vm_paddr_t pa)
 vm_ptable_t *
 _alloc_ptable(vm_page_t **pgp)
 {
-#if 0
-    vm_page_t *p = vm_kernel_alloc_page();
-    if (p) {
-        memzero((void*)p->phys_addr, PAGE_SIZE);
-        return (vm_ptable_t*)p->phys_addr;
-    } else {
-        return NULL;
-    }
-#endif
     vm_ptable_t *res;
     vm_seg_alloc(vm_kspace.seg_data, PAGE_SIZE, &res);
     vm_page_t *pg = pmap_get_page(&vm_kspace.pmap, (vm_addr_t)res);

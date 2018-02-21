@@ -45,8 +45,8 @@
 #include <machine/i8259a.h>
 
 void setesp0(void* a);
-void __thread_enter(thread_t *t);
-void __enter_arg_esp(void* entry, void* arg, uint32_t esp);
+static void __thread_enter(thread_t *t);
+static void __enter_arg_esp(void* entry, void* arg, uint32_t esp);
 
 /**
  * Inicjalizuje kontekst.
@@ -96,8 +96,10 @@ thread_sigenter(thread_t *t, addr_t proc, int signum)
     t->thr_sigblock = t->thr_proc->p_sigact[signum].sa_mask;
     t->thr_sigcontext = stx;
 
-    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int), &signum, sizeof(int));
-    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int)*2, &(t->thr_context.c_frame->f_eip), sizeof(int));
+    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int),
+      &signum, sizeof(int));
+    memcpy((char *)t->thr_context.c_frame->f_esp-sizeof(int)*2,
+      &(t->thr_context.c_frame->f_eip), sizeof(int));
     t->thr_context.c_frame->f_esp -= 2*sizeof(int);
     t->thr_context.c_frame->f_eip = (uint32_t)proc;
     return;
@@ -117,7 +119,8 @@ thread_sigreturn(thread_t *t)
 
     ifr = t->thr_context.c_frame;
     memcpy(&t->thr_context, stx->context, sizeof(thread_context));
-    memcpy(t->thr_context.c_frame, stx->context->c_frame, sizeof(interrupt_frame));
+    memcpy(t->thr_context.c_frame,
+      stx->context->c_frame, sizeof(interrupt_frame));
     t->thr_context.c_frame = ifr;
     t->thr_sigblock = stx->sigblock;
 
@@ -148,11 +151,6 @@ thread_prepare(thread_t *t, vm_addr_t av, vm_addr_t ev, vm_size_t off)
     frame->f_esp = ESP;
     frame->f_edi = av;
     frame->f_esi = ev;
-#if 0
-    kprintf("[%p] %p %p %p %p %p\n", frame, frame->f_cs, frame->f_ds, frame->f_eip,
-        frame->f_esp, frame->f_ebp);
-    kprintf(".\n");
-#endif
 }
 
 uintptr_t
@@ -227,19 +225,18 @@ thread_resume(thread_t *t)
  *
  * Procedura wchodzi w kod wątku, który nie został dotąd uruchomiony
  */
-void
+static void
 __thread_enter(thread_t *t_to)
 {
     typedef void (*entry_point)(void*);
     t_to->thr_flags &= ~THREAD_NEW;
-            //kprintf("pmap: %p\n", &t_to->vm_space->pmap);
 
     vm_pmap_switch(&t_to->vm_space->pmap);
     void *arg = t_to->thr_entry_arg;
     entry_point entry = (entry_point) t_to->thr_entry_point;
     uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
 
-    CIPL = 0;       // proces ma działać z CIPL = 0
+    CIPL = 0;
     extern void i8259a_reset_mask(void);
     i8259a_reset_mask();
 
@@ -248,11 +245,11 @@ __thread_enter(thread_t *t_to)
     }
     else
         irq_enable();
-    __enter_arg_esp(entry, arg, ESP); //na wszelki wypadek ;)
+    __enter_arg_esp(entry, arg, ESP);
     panic("ERROR: should never be here! thread_enter/machine/thread.c\n");
 }
 
-void
+static void
 __enter_arg_esp(void* entry, void* arg, uint32_t esp)
 {
     typedef void (*entry_point)(void*);

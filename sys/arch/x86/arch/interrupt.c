@@ -64,7 +64,6 @@ irq_install_handler(int irq, irq_handler_f *f, int ipl)
 {
     if (irq < MAX_IRQ) {
          irq_handlers[irq] = f;
-//         assert(ipl < MAX_IPL)
          i8259a_set_irq_priority(irq, ipl);
          i8259a_irq_enable(irq);
     }
@@ -85,8 +84,6 @@ irq_free_handler(int irq)
 void
 irq_done()
 {
-//    irq_enable();
-//    i8259a_send_eoi();
 }
 
 void
@@ -101,8 +98,6 @@ ISR_irq(interrupt_frame frame)
             irq_enable();
             irq_handlers[frame.f_n]();
         }
-//        else
-//            kprintf("Spurious interrupt!\n");
     }
     splx(opl);  //jeśli wracamy do zera, to tu może nastąpić zmiana kontekstu
 }
@@ -153,7 +148,6 @@ void
 TRAP_pfault(interrupt_frame f)
 {
     vm_trap_frame_t vtf;
-//    vm_disable_paging();
     vtf.fault_addr = cpu_get_cr2();
     vtf.reason = (f.f_errno & PFE_PRESENT)?
              VM_PFAULT_NO_PERMISSION
@@ -172,12 +166,6 @@ print_frame(const char *name, interrupt_frame *f)
     kprintf("   #     = %u ", f->f_n);
     kprintf("   errno = %u\n", f->f_errno);
     kprintf("   preempted at %p\n", f->f_eip);
-/* malo potrzebne
-    kprintf("   %%eax = %p ", f->f_eax);
-    kprintf("   %%ebx = %p\n", f->f_ebx);
-    kprintf("   %%ecx = %p ", f->f_ecx);
-    kprintf("   %%edx = %p\n", f->f_edx);
-*/
     kprintf("   %%cs  = %p ", f->f_cs);
     kprintf("   %%ds  = %p\n", f->f_ds);
     kprintf("   %%es  = %p ", f->f_es);
