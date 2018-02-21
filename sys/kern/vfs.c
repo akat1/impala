@@ -89,7 +89,7 @@ vfs_getinfos(off_t off, struct mountinfo *tab, size_t n)
     return r;
 }
 
-void
+static void
 register_fss()
 {
     extern vfs_init_t *fstab[];
@@ -120,7 +120,7 @@ vfs_byname(const char *name)
     return c;
 }
 
-bool
+static bool
 is_this_fsname(const vfs_conf_t *conf, const char *known)
 {
     return (strcmp(conf->name,known)==0);
@@ -180,7 +180,7 @@ vfs_mount(const char *name, vnode_t *mpoint, devd_t *dev)
         return -ENOTDIR;
     vfs_create(&fs, name);
     if (!fs)
-        return -1;
+        return -EINVAL;
     fs->vfs_mdev = dev;
     vref(mpoint);   //niech mpoint będzie nasz
     fs->vfs_mpoint = mpoint;
