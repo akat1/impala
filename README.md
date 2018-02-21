@@ -37,7 +37,7 @@ User-space features
 - ported Almquist Shell (from the FreeBSD sources)
 - ported VTTEST program
 - ported minigzip program and libz library
-- tar (handles only USTAR archives) program which progress bar :-)
+- tar (handles only USTAR archives) program with progress bar :-)
 - ported nvi (from FreeBSD sources)
 
 Quality
