@@ -28,10 +28,10 @@ sc_mount(thread_t *t, syscall_result_t *r, mount_args_t *args)
     char target[PATH_MAX+1], device[PATH_MAX+1];
     int error = 0;
     vnode_t *target_node, *device_node;
-
+    
     if ((error = copyinstr(type, args->type, sizeof(type))))
         return error;
-
+    
     if ((error = copyinstr(target, args->target, sizeof(target))))
         return error;
 
@@ -50,7 +50,10 @@ sc_mount(thread_t *t, syscall_result_t *r, mount_args_t *args)
         goto out;
     }
 
-    vfs_mount(type, target_node, device_node->v_dev);
+    if ((error = vfs_mount(type, target_node, device_node->v_dev))) {
+        VOP_CLOSE(device_node);
+        goto out;
+    }
 
 out:
     vrele(target_node);
