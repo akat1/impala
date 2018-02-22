@@ -30,7 +30,7 @@
  * $Id$
  */
 
-/** @file parametry jądra
+/** @file kernel parameters
  */
 #ifndef __SYS_PARAM_H
 #define __SYS_PARAM_H
