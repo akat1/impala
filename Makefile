@@ -6,13 +6,9 @@ GDB?=gdb
 DISTDIR=output/dist
 SPECDIR=output/impala
 
-.PHONY: all build build-image run distribution
+.PHONY: all build distribution
 
 all: build
-
-build-image: ${IMAGE_FILE} build
-	cp -f sys/kern/impala.gz image/root/boot/
-	cd image && ./mtools.sh
 
 distribution: build
 	@DIST_PROFILE="${DIST_PROFILE}" sh tools/distribution.sh
