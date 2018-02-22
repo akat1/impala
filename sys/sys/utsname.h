@@ -32,7 +32,6 @@
 #ifndef __SYS_UTSNAME_H
 #define __SYS_UTSNAME_H
 
-/// nazwa systemu UNIX
 struct utsname {
     char sysname[20];
     char nodename[20];
@@ -41,9 +40,13 @@ struct utsname {
     char machine[20];
 };
 
+#ifdef __KERNEL
+extern char sysname[];
+extern char nodename[];
+#endif
+
 #ifndef __KERNEL
 int uname(struct utsname *name);
 #endif
 
 #endif
-

@@ -41,19 +41,21 @@ struct uname_args {
 
 int sc_uname(thread_t *p, syscall_result_t *r, uname_args_t *args);
 
+char sysname[] = "Impala";
+/* XXX: move to hostname related stuff */
+char nodename[] = "impala";
+
 int
 sc_uname(thread_t *t, syscall_result_t *r, uname_args_t *args)
 {
     struct utsname uname;
-    strcpy(uname.sysname, "Impala");
-    strcpy(uname.nodename, "");
+
+    memzero(&uname, sizeof(uname));
+    strcpy(uname.sysname, sysname);
+    strcpy(uname.nodename, nodename);
     strcpy(uname.release, IMPALA_RELEASE);
     strcpy(uname.version, IMPALA_VERSION);
     strcpy(uname.machine, IMPALA_MACHINE);
-    int err = copyout(args->name, &uname, sizeof(uname));
-    if(err < 0)
-        return err;
-    return 0;
+
+    return copyout(args->name, &uname, sizeof(uname));
 }
-
-

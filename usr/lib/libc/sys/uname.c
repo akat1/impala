@@ -21,6 +21,5 @@ int
 uname(struct utsname *un)
 {
 	syscall(SYS_uname, un);
-    strcat(un->nodename, "czarny_specjal");
     return 0;
 }
