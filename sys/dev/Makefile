@@ -3,6 +3,7 @@ CFLAGS=-D__KERNEL ${_K_FLAGS}
 
 SRCS=\
 	devtable.c\
+    eth/intel.c\
 	fdc/fdc.c\
 	md/md.c\
 	pata/pata.c\
