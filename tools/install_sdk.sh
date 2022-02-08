@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BINUTILS_VERSION="2.26"
+BINUTILS_VERSION="2.27"
 GCC_VERSION="4.3.4"
 SDK_PATH=${HOME}/ImpalaSDK
 MAKE=make
@@ -15,7 +15,7 @@ print_section () {
 
 prepare_binutils_src () {
     print_section "Downloading binutils-${BINUTILS_VERSION} sources"
-    wget -c http://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
+    wget -c https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
     echo -n "Extracting..."
     rm -rf binutils-${BINUTILS_VERSION}
     tar zxf binutils-${BINUTILS_VERSION}.tar.gz
@@ -24,7 +24,7 @@ prepare_binutils_src () {
 
 prepare_gcc_src () {
     print_section "Downloading gcc-core-${GCC_VERSION} sources"
-    wget -c http://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-core-${GCC_VERSION}.tar.bz2
+    wget -c https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-core-${GCC_VERSION}.tar.bz2
     echo -n "Extracting..."
     rm -rf gcc-${GCC_VERRSION}
     tar jxf gcc-core-${GCC_VERSION}.tar.bz2
