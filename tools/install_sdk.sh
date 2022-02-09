@@ -60,6 +60,7 @@ binutils_build_command () {
 
 gcc_build_command () {
     export PATH=${SDK_PATH}/bin:${PATH}
+    export CFLAGS="-fgnu89-inline"
     ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-quadmath --disable-libgomp
     ($MAKE && $MAKE install)
     if [ ! $? -eq 0 ]; then
