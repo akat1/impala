@@ -1,0 +1,15 @@
+default 0
+color black/light-gray light-gray/black
+timeout 5
+title Impala (with debug messages) (/boot/impala.gz)
+	root (fd0)
+	kernel /boot/impala.gz debug iobufs=1 init=/mnt/fd0/impala/preinit
+
+title Impala (/boot/impala.gz)
+    root (fd0)
+    kernel /boot/impala.gz init=/mnt/fd0/impala/preinit
+
+title GRUB2
+    root (fd0)
+    kernel /boot/grub2.img
+
