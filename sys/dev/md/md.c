@@ -155,7 +155,6 @@ md_is_this(const memdisk_t *md, uintptr_t unit)
 int
 md_create(int unit, void *data, size_t size)
 {
-    const char *_str_type;
     memdisk_t *md = NULL;
     bool findunit = (unit==-1);
     while ( (list_next(&memdisks, md)) ) {
@@ -174,11 +173,9 @@ md_create(int unit, void *data, size_t size)
     if (data == NULL) {
         md->data_type = MD_DATA_TYPE_ALLOCATED;
         md->data = kmem_alloc(size, KM_SLEEP);
-        _str_type = "alloc";
     } else {
         md->data_type = MD_DATA_TYPE_FOREIGN;
         md->data = data;
-        _str_type = "foreign";
     }
     list_insert_in_order(&memdisks, md, (list_less_f*) md_less);
     md->devd = devd_create(&md_devsw, "md", md->unit, md);
