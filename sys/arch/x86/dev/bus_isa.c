@@ -192,10 +192,6 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     enum {
         mode = ISA_DMA_SINGLE
     };
-    union {
-        uchar bytes[4];
-        vm_paddr_t buf;
-    } addr;
     uint8_t command;
     ch->mode = cmd;
     ch->req_addr = reqbuf;
@@ -203,7 +199,6 @@ bus_isa_dma_prepare(bus_isa_dma_t *ch, int cmd, void *reqbuf, size_t size)
     command = cmd|mode|_IDX(ch);
     if (size > ch->bufsize) return -1;
     size--;
-    addr.buf = ch->bufpaddr;
     int s = splhigh();
     io_out8(IO_CHMASK(ch),  _IDX(ch) | STCL);
     io_out8(IO_WORD(ch),    0xff);
