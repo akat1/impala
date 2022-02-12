@@ -417,7 +417,7 @@ mfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
     while(ch && first-- > 0)
         ch = ch->next;
     while(ch && count>0) {
-        dents->d_ino = (int)ch;
+        dents->d_ino = (ino_t)ch;
         strcpy(dents->d_name, ch->name);
         dents++;
         count--;
