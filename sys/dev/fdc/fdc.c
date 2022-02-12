@@ -332,23 +332,17 @@ fdinterrupt()
 void
 io_done(fdctrl_t *ctrl, iobuf_t *bp)
 {
-    uint8_t st0, st1, st2, track, head, secn, secs;
+    volatile uint8_t st0, st1, st2;
 
     st0 = rdfifo(ctrl);
     st1 = rdfifo(ctrl);
     st2 = rdfifo(ctrl);
-    track = rdfifo(ctrl);
-    head = rdfifo(ctrl);
-    secn = rdfifo(ctrl);
-    secs = rdfifo(ctrl);
+    /* track */ (void)rdfifo(ctrl);
+    /* head */ (void)rdfifo(ctrl);
+    /* secn */ (void)rdfifo(ctrl);
+    /* secs */ (void)rdfifo(ctrl);
 
     if (ST0_IC(st0)) {
-        const char *msg;
-        int ee =  ST0_IC(st0);
-        msg = (ee==ST0_ABNRM)? "abnormal termination"
-                : (ee==ST0_INVAL)? "invalid command"
-                : (ee==ST0_NREADY)? "not ready"
-                : "#!?#";
         if (ctrl->retry == MAX_RETRIES) {
             IDEBUGF("I/O error st0=%b(%x) st1=%b(%x) st2=%b(%x)",
                 st0,st0,st1,st1,st2,st2);
@@ -385,11 +379,11 @@ io_done(fdctrl_t *ctrl, iobuf_t *bp)
 void
 seek_done(fdctrl_t *ctrl, iobuf_t *bp)
 {
-    uint8_t st0, cyl;
+    uint8_t st0;
     if (!bp) return;
     wrfifo(ctrl, FDC_CHECKINTRPT);
     st0 = rdfifo(ctrl);
-    cyl = rdfifo(ctrl);
+    /* cyl */ (void)rdfifo(ctrl);
 
     if (st0 >> 6) {
         bio_error(bp, EIO);
