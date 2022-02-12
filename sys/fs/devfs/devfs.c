@@ -371,7 +371,7 @@ devfs_getdents(vnode_t *vn, dirent_t *dents, int first, int count)
     while(node && first-- > 0)
         node = node->i_next;
     while(node && count>0) {
-        dents->d_ino = (int)node;
+        dents->d_ino = (ino_t)node;
         strcpy(dents->d_name, node->i_name);
         dents++;
         count--;
