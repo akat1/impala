@@ -1,0 +1,1 @@
+../../x86/machine/pckbd_tables.h
