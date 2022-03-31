@@ -1,7 +1,7 @@
 #!/bin/sh
 
-BINUTILS_VERSION="2.27"
-GCC_VERSION="4.3.4"
+BINUTILS_VERSION="2.38"
+GCC_VERSION="10.3.0"
 SDK_PATH=${HOME}/ImpalaSDK
 MAKE=make
 
@@ -24,10 +24,13 @@ prepare_binutils_src () {
 
 prepare_gcc_src () {
     print_section "Downloading gcc-core-${GCC_VERSION} sources"
-    wget -c https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-core-${GCC_VERSION}.tar.bz2
+    wget -c https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz
     echo -n "Extracting..."
     rm -rf gcc-${GCC_VERRSION}
-    tar jxf gcc-core-${GCC_VERSION}.tar.bz2
+    tar zxf gcc-${GCC_VERSION}.tar.gz
+    cd gcc-${GCC_VERSION}
+    sh ./contrib/download_prerequisites
+    cd ..
     echo "DONE"
 }
 
@@ -48,7 +51,7 @@ in_gcc_obj () {
 }
 
 binutils_build_command () {
-    ./configure --prefix=${SDK_PATH} --target=$1
+    ./configure --prefix=${SDK_PATH} --target=$1 --disable-nls --with-sysroot
     # ugly hack to let it build on the FreeBSD
     rm gprof/*.m
     ($MAKE && $MAKE install)
@@ -60,8 +63,7 @@ binutils_build_command () {
 
 gcc_build_command () {
     export PATH=${SDK_PATH}/bin:${PATH}
-    export CFLAGS="-fgnu89-inline"
-    ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-quadmath --disable-libgomp
+    ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-quadmath --disable-libgomp --disable-nls --without-headers
     ($MAKE && $MAKE install)
     if [ ! $? -eq 0 ]; then
         exit 1
@@ -84,13 +86,13 @@ build_gcc_for_target ()
 }
 
 build_binutils () {
-    build_binutils_for_target "i386-aout"
-    build_binutils_for_target "i386-elf"
+#    build_binutils_for_target "i386-aout"
+    build_binutils_for_target "x86_64-elf"
 }
 
 build_gcc () {
-    build_gcc_for_target "i386-aout"
-    build_gcc_for_target "i386-elf"
+    build_gcc_for_target "x86_64-elf"
+    #build_gcc_for_target "x86_64-elf"
 }
 
 # Detect OS
