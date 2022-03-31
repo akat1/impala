@@ -54,7 +54,8 @@ typedef int key_t;
 typedef int gid_t;
 typedef int uid_t;
 typedef uint dev_t;
-typedef uint32_t ino_t;
+/* XXXamd64 */
+typedef uint64_t ino_t;
 typedef uint32_t blkno_t;
 typedef uint32_t blksize_t;
 typedef uint32_t blkcnt_t;
