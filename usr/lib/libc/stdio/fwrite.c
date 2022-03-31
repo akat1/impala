@@ -24,6 +24,7 @@ fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     __check_buf(stream);
     int res = __put_data(stream, ptr, size*nmemb);
     if(res>=0)
-        return res/size;
+        /* XXXamd64: volatile to avoid udivdi3 call */
+        return res/(volatile)size;
     return 0;
 }

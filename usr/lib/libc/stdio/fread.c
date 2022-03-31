@@ -26,7 +26,8 @@ fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
     fflush(stream);
     r = __get_data(stream, ptr, size*nmemb);
     if(r>0)
-        return r/size;
+        /* XXXamd64 - volatile used to avoid udivdi3 */
+        return r/(volatile)size;
     stream->err |= _FER_EOF;
     return 0;
     while( nmemb-- ) {
