@@ -1,5 +1,5 @@
 LIBRARY= libpthread
-PREFIX=${AOUT_PREFIX}
+PREFIX=${ELF_PREFIX}
 CFLAGS=${_U_FLAGS}
 INCDIR=-Iinclude -Iprivate
 SRCS=\

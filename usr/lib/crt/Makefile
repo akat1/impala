@@ -1,4 +1,4 @@
-PREFIX=${AOUT_PREFIX}
+PREFIX=${ELF_PREFIX}
 CFLAGS=${_U_FLAGS} -I${IMPALA_SRCROOT}/usr/lib/libc/private/
 include ${IMPALA_SRCROOT}/mk/build.mk
 SRCS=\
