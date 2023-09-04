@@ -1,5 +1,5 @@
-OUTPUT_FORMAT("a.out-i386")
-OUTPUT_ARCH(i386)
+OUTPUT_FORMAT("elf64-x86-64")
+OUTPUT_ARCH(i386:x86-64)
 ENTRY(__start)
 SEARCH_DIR("../../lib/crt") 
 INPUT(crt0.o -lgcc -lc)
