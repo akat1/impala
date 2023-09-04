@@ -13,7 +13,9 @@ __C_FLAGS=-std=c99 -ffreestanding -Wall -Wstrict-prototypes\
 # XXXamd64
 _K_FLAGS=-mcmodel=large -z max-page-size=0x1000 -mno-red-zone ${__C_FLAGS} -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow\
     -D__KERNEL -Werror -nostdinc -g -fno-inline  
-_U_FLAGS=-m32 ${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include\
+#_U_FLAGS=-m32 ${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include
+# XXXamd64
+_U_FLAGS=${__C_FLAGS} ${__INCDIR} -I${IMPALA_USR}/lib/libc/include\
         -I${IMPALA_USR}/lib/libpthread/include\
         -I${IMPALA_USR}/lib/libz/ 
 _U_LDFLAGS=-Wl,-e,__start -T${IMPALA_USR}/conf/user.ld -nostdlib\

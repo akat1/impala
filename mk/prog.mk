@@ -3,7 +3,7 @@ _PROG_CLEAN?= clean
 _PROG_DEPEND?= depend
 _PROG_CLEANDEPEND?= cleandepend
 _PROG_INSTALL?= install
-PREFIX=${AOUT_PREFIX}
+PREFIX=${ELF_PREFIX}
 _CFLAGS=${_U_FLAGS}
 PROG?= noname
 
