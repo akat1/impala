@@ -33,7 +33,9 @@
 #ifndef __MACHINE_CDEFS_H
 #define __MACHINE_CDEFS_H
 
+#ifdef __KERNEL
 typedef char *va_list;
+#endif
 
 #define VA_START(ap, s) ap = (char *) &s
 #define VA_END(ap)
@@ -44,4 +46,3 @@ typedef char *va_list;
 
 
 #endif
-
