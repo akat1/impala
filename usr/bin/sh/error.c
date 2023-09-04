@@ -64,7 +64,7 @@ struct jmploc *handler;
 volatile sig_atomic_t exception;
 volatile sig_atomic_t suppressint;
 volatile sig_atomic_t intpending;
-char *commandname;
+extern char *commandname;
 
 
 static void exverror(int, const char *, va_list) __printf0like(2, 0);

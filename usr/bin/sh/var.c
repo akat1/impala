@@ -77,6 +77,7 @@ struct varinit {
 	void (*func)(const char *);
 };
 
+struct localvar *localvars;
 
 #ifndef NO_HISTORY
 struct var vhistsize;

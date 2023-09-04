@@ -65,7 +65,7 @@ struct localvar {
 };
 
 
-struct localvar *localvars;
+extern struct localvar *localvars;
 
 extern struct var vifs;
 extern struct var vmail;
