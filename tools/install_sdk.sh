@@ -1,7 +1,7 @@
 #!/bin/sh
 
-BINUTILS_VERSION="2.38"
-GCC_VERSION="10.3.0"
+BINUTILS_VERSION="2.41"
+GCC_VERSION="13.2.0"
 SDK_PATH=${HOME}/ImpalaSDK
 MAKE=make
 
@@ -63,7 +63,7 @@ binutils_build_command () {
 
 gcc_build_command () {
     export PATH=${SDK_PATH}/bin:${PATH}
-    ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-quadmath --disable-libgomp --disable-nls --without-headers
+    ../gcc-${GCC_VERSION}/configure --prefix=${SDK_PATH} --target=$1 --enable-languages=c --disable-libssp --disable-threads --disable-tls  --disable-libquadmath --disable-libgomp --disable-nls --without-headers
     ($MAKE && $MAKE install)
     if [ ! $? -eq 0 ]; then
         exit 1
@@ -91,8 +91,8 @@ build_binutils () {
 }
 
 build_gcc () {
+    #build_gcc_for_target "i386-aout"
     build_gcc_for_target "x86_64-elf"
-    #build_gcc_for_target "x86_64-elf"
 }
 
 # Detect OS
