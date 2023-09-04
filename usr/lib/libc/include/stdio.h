@@ -16,6 +16,7 @@
 #define __STDIO_H
 
 #include <sys/types.h>
+#include <stdarg.h>
 
 typedef int fpos_t;
 
