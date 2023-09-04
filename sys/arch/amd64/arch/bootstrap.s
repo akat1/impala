@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Mateusz Kocielski
+ * Copyright (C) 2022, 2023 Mateusz Kocielski
  *
  * All rights reserved.
  *
@@ -332,7 +332,7 @@ enable_longmode:
     movl %eax, %cr0
     lgdt (gdt64ptr)
     # set data segs?
-    jmp $0x8,$trampoline
+    jmp $0x8, $trampoline
 
 trampoline:
 .code64
