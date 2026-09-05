@@ -69,25 +69,27 @@ enum {
     VM_SPACE_UDATA_E    = VM_SPACE_UDATA + VM_SPACE_UDATA_S,
 };
 #endif
-enum {
-    VM_SPACE_KERNEL         = 0xc0000000,
-    VM_SPACE_KERNEL_E       = 0xfffff000,
-    VM_SPACE_DATA_LIMIT     = 0x3ffff000,
-    VM_SPACE_KERNEL_PTABLES = 256,  // ilosc tablic stron 256*4MB = 1GB
-};
+#define VM_SPACE_USER_LIMIT     ((uintptr_t)0x00007ffffffff000ULL)
+#define VM_SPACE_KERNEL         ((uintptr_t)0x0000800000000000ULL)
+#define VM_SPACE_KERNEL_E       ((uintptr_t)0xfffffffffffff000ULL)
+#define VM_SPACE_DATA_LIMIT     ((uintptr_t)0xfffffffffff00000ULL)
+#define VM_SPACE_KERNEL_PTABLES 256
 
 
 #ifdef __KERNEL
-///@todo Lepiej nazwać i dorobić kilka makr jeszcze.
-
 /// Wyciąga z adresu przesunięcie na stronie.
 #define PAGE_OFF(p) (((uintptr_t)p) & 0xfff)
-/// Wyciąga z adresu indeks w katalogu stron.
-#define PAGE_DIR(p) (((uintptr_t)p) >> 22)
-/// Wyciąga z adresu indeks w tablicy stron.
-#define PAGE_TBL(p) ( (((uintptr_t)p) >> 12) & 0x3ff)
+/// Wyciąga indeks w tablicy PML4.
+#define PAGE_PML4(p) ((((uintptr_t)p) >> 39) & 0x1ff)
+/// Wyciąga indeks w tablicy PDPT.
+#define PAGE_PDPT(p) ((((uintptr_t)p) >> 30) & 0x1ff)
+/// Wyciąga indeks w tablicy PDE.
+#define PAGE_PDIR(p) ((((uintptr_t)p) >> 21) & 0x1ff)
+/// Wyciąga indeks w tablicy PTE.
+#define PAGE_TBL(p)  ((((uintptr_t)p) >> 12) & 0x1ff)
 #define PAGE_NUM(p) (((uintptr_t)p) >> PAGE_SHIFT)
-#define PTE_MASK 0xfffff000
+#define PTABLE_ENTRIES 512
+#define PTE_MASK 0x000ffffffffff000ULL
 #define PTE_ADDR(p) ((uintptr_t)p & PTE_MASK )
 #define PTE_FLAGS(p) ((uintptr_t)p & ~PTE_MASK)
 
@@ -182,14 +184,13 @@ struct vm_page {
 
 /// Tablica (katalog) stron.
 struct vm_ptable {
-    uintptr_t    table[1024];
+    uintptr_t    table[PTABLE_ENTRIES];
 };
 
 /// odwzorowanie stron.
 struct vm_pmap {
     vm_paddr_t      physdir;    ///< fizyczny adres katalogu stron.
     vm_ptable_t    *pdir;
-    uint16_t        pdircount[1024];
 };
 
 extern size_t vm_physmem_max;

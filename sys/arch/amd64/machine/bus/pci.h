@@ -78,8 +78,7 @@ void pci_map_range_mem(dev, vaddr, size_t)
 void pci_intr_register(...)
 */
 
-/* XXX: interrupts */
-/* XXX: maps */
+/* Interrupt and BAR mapping helpers are not implemented yet. */
 
 void bus_pci_init(void);
 

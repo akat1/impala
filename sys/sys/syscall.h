@@ -34,6 +34,7 @@
 #define __SYS_SYSCALL_H
 
 #include <sys/cdefs.h>
+#include <sys/types.h>
 
 #include <sys/systab.h>
 #ifdef __KERNEL
@@ -52,7 +53,7 @@ void syscall_raw(thread_t *t, uint n, syscall_result_t *r,
 
 typedef int  sc_handler_f(thread_t *t, syscall_result_t *r, va_list ap);
 #else
-int syscall(int sc,...);
+intptr_t syscall(int sc,...);
 #endif
 
 #endif

@@ -17,7 +17,7 @@
 
 #include <signal.h>
 
-int syscall(int sc,...);
+intptr_t syscall(int sc,...);
 void __sig_handler(int signum);
 
 extern sighandler_t __sig_handlers[NSIG+1];

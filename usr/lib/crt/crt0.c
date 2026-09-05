@@ -10,11 +10,11 @@
 #include <stdlib_private.h>
 #include <stdarg.h>
 
-int syscall(int SC, ...);
+intptr_t syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
 void _start(void);
 int errno = 0;
-static int retval=0;
+static intptr_t retval=0;
 FILE *_stdF[3]={NULL, NULL, NULL};
 list_t __open_files;
 sighandler_t __sig_handlers[NSIG+1];
@@ -24,7 +24,7 @@ list_t __mem_chunks;
 char **environ = NULL;
 #define MAX_ENV 256
 
-int
+intptr_t
 syscall(int SC, ...)
 {
     uintptr_t args[6] = {0, 0, 0, 0, 0, 0};

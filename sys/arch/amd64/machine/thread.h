@@ -56,7 +56,7 @@ struct thread_context {
     uint64_t c_cr3;
     uint64_t c_rip;
     struct interrupt_frame *c_frame;
-    ///@todo NOFPU
+    /* FPU state is not yet tracked in thread context. */
 };
 
 typedef struct signal_context signal_context;

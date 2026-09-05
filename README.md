@@ -71,14 +71,27 @@ Then in the distribution directory you will find those images:
 amd64 status
 ============
 
-The amd64 port is under active bring-up.
+The amd64 port is under active bring-up and is not marked complete yet.
 
-- amd64 build defaults now target 64-bit toolchains by default
-- amd64 trap/interrupt vectors are wired with 64-bit entry stubs
+Completion gate for amd64 support:
+
+- [ ] boot to multiuser shell from generated image
+- [ ] stable interrupts and scheduler under sustained load
+- [ ] syscall ABI correctness for integer and pointer-sized values
+- [ ] working filesystem, process, signal, and thread paths
+- [ ] reproducible clean build and run procedure
+
+Current implemented baseline:
+
+- amd64 build defaults target 64-bit ELF toolchains
+- amd64 trap/interrupt vectors use 64-bit entry stubs
 - amd64 syscall entry/return path is enabled
 - amd64 context switching and low-level CPU stubs use 64-bit registers
 - amd64 libc has architecture-specific setjmp/longjmp assembly
 
-This is still experimental and requires additional runtime validation.
+Known limitations still being audited:
+
+- runtime stress validation (interrupt, scheduler, and signal-heavy workloads)
+- full end-to-end boot/runtime regression matrix for amd64
      
 This repository was forked from https://bitbucket.org/wieczyk/impala/ in 2016. Now it lives it's own life...

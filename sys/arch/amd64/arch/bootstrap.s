@@ -123,7 +123,7 @@ boot_pdir: .space 4096,0
 boot_ptable0: .space 4096,0
 boot_ptable1: .space 4096,0
 
-# XXX: do we need different for kernel?
+# Dedicated kernel bootstrap paging tables.
 boot_pml4t: .space 4096,0
 
 boot_pdpt: .space 4096,0
@@ -195,7 +195,7 @@ check_cpuid:
     andl $EFLAGS_ID, %eax
     jz ccp.3
     jmp ccp.2
-ccp.1:    # sprawdzenie mo¿liwo¶ci czyszczenia bitu
+ccp.1:    # sprawdzenie moï¿½liwoï¿½ci czyszczenia bitu
     movl $EFLAGS_ID, %ebx
     notl %ebx
     andl %ebx, %eax
@@ -205,9 +205,9 @@ ccp.1:    # sprawdzenie mo¿liwo¶ci czyszczenia bitu
     popl %eax
     andl $EFLAGS_ID, %eax
     jnz ccp.3
-ccp.2:    # mo¿na modyfikowaæ bit ID
+ccp.2:    # moï¿½na modyfikowaï¿½ bit ID
     ret
-ccp.3:    # nie mo¿na modyfikowaæ bitu ID, to nie jest i586 nawet, zawieszamy siê
+ccp.3:    # nie moï¿½na modyfikowaï¿½ bitu ID, to nie jest i586 nawet, zawieszamy siï¿½
     # ERROR
     jmp .
 
@@ -233,7 +233,7 @@ check_longmode:
 no_longmode:
 	jmp .
 
-    # XXX: add information that something went wrong
+    # long mode unavailable: halt
 
 # void set_vmspace(void)
 
@@ -262,9 +262,13 @@ set_vmspace:
     movl $(1), %eax
     movl %ebx, boot_pdt(,%eax,8) 
 
-    # map first 4 MB
+    # map first 4 MB using two 2 MB page tables
     movl $0, %esi
     movl $boot_pt, %edi
+    call fill_ptable
+    addl $0x200000, %esi
+    movl $boot_pt, %edi
+    addl $0x1000, %edi
     call fill_ptable
 
     ## KERNEL
@@ -290,6 +294,10 @@ set_vmspace:
     movl $KERNEL_BOOTSTRAP, %esi
     movl $boot_kernel_pt, %edi
     call fill_ptable
+    addl $0x200000, %esi
+    movl $boot_kernel_pt, %edi
+    addl $0x1000, %edi
+    call fill_ptable
 
     # let cpu know where are mapping tables
     movl $boot_pml4t, %eax
@@ -310,9 +318,9 @@ tick:
 .global tick
 
 # void fill_ptable(ptable, paddr)
-# maps 4MB in two consequent page tables
+# maps 2MB in one page table
 fill_ptable:
-    movl $1024, %ecx
+    movl $512, %ecx
     orl $PTE_ATTR, %esi
 .2:
     movl %esi, (%edi)
