@@ -67,5 +67,18 @@ Then in the distribution directory you will find those images:
 
 - `distribution/default/floppy.img` - our system, with demos and all commands
 - `distribution/minimal/floppy.img` - contains only programs needed to run system
-    
+
+amd64 status
+============
+
+The amd64 port is under active bring-up.
+
+- amd64 build defaults now target 64-bit toolchains by default
+- amd64 trap/interrupt vectors are wired with 64-bit entry stubs
+- amd64 syscall entry/return path is enabled
+- amd64 context switching and low-level CPU stubs use 64-bit registers
+- amd64 libc has architecture-specific setjmp/longjmp assembly
+
+This is still experimental and requires additional runtime validation.
+     
 This repository was forked from https://bitbucket.org/wieczyk/impala/ in 2016. Now it lives it's own life...

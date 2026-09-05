@@ -54,7 +54,7 @@ typedef int key_t;
 typedef int gid_t;
 typedef int uid_t;
 typedef uint dev_t;
-/* XXXamd64 */
+/* 64-bit inode type used on amd64 builds */
 typedef uint64_t ino_t;
 typedef uint32_t blkno_t;
 typedef uint32_t blksize_t;

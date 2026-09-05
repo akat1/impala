@@ -61,8 +61,8 @@ struct cpu_info cpu_i;
 
 static void setgdt(int, uintptr_t, uint, uint, uint);
 static void setidt(int i, uint selector, uintptr_t offset, uint access);
-static descriptor_t p_gdt[SEL_MAX];
-static descriptor_t p_idt[0x100];
+static descriptor_t p_gdt[SEL_MAX + 1];
+static gate_descr_t p_idt[0x100];
 static task_state_segment p_tss0;
 static descriptor_register_t p_gdtr;
 static descriptor_register_t p_idtr;
@@ -197,16 +197,16 @@ init_x86(const char *karg)
     setgdt(SEL_DATA, 0x0, 0xfffff, data, attr);
     setgdt(SEL_UCODE, 0x0, 0xfffff, ucode, attr);
     setgdt(SEL_UDATA, 0x0, 0xfffff, udata, attr);
-    setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0), tss0, 0);
+    setgdt(SEL_TSS0, (uintptr_t)&p_tss0, sizeof(p_tss0)-1, tss0, 0);
     p_tss0.tss_io = 0;
-    p_tss0.tss_ss0 = 0x10;
+    p_tss0.tss_rsp0 = 0;
 //    p_tss0.tss_cs=0x8;
 //    p_tss0.tss_ds=p_tss0.tss_es=p_tss0.tss_fs=p_tss0.tss_gs=0x10;
 
     /* SETUP IDT */
 
     memzero(&p_gdtr, sizeof(p_gdtr));
-    p_gdtr.base = &p_gdt;
+    p_gdtr.base = (uintptr_t)p_gdt;
     p_gdtr.limit = sizeof(p_gdt) -1;
     cpu_gdt_load(&p_gdtr);
 
@@ -231,7 +231,7 @@ init_x86(const char *karg)
         (uintptr_t)_intrpt_syscall, intrpt_attr | GATE_DPL3);
 
     memzero(&p_idtr, sizeof(p_idtr));
-    p_idtr.base = &p_idt;
+    p_idtr.base = (uintptr_t)p_idt;
     p_idtr.limit = sizeof(p_idt)-1;
     cpu_idt_load(&p_idtr);
     i8259a_init();
@@ -249,7 +249,7 @@ init_x86(const char *karg)
 void
 setesp0(void *a)
 {
-     //XXXamd64 p_tss0.tss_esp0 = (uint32_t)a;
+    p_tss0.tss_rsp0 = (uintptr_t)a;
 }
 
 
@@ -258,13 +258,14 @@ void
 setidt(int i, uint selector, uintptr_t offset,
     uint access)
 {
-//     offset = offset - 0xc0000000 + 0x100000;
-    gate_descr_t *entry = &p_idt[i].gdescr;
-    entry->offset_low = (uint)offset & 0xffff;
-    entry->offset_high = ((uint)offset >> 16);
+    gate_descr_t *entry = &p_idt[i];
+    entry->offset_low = offset & 0xffff;
+    entry->offset_mid = (offset >> 16) & 0xffff;
+    entry->offset_high = (offset >> 32) & 0xffffffff;
     entry->selector = selector;
-    entry->notused = 0;
+    entry->ist = 0;
     entry->access = access;
+    entry->reserved = 0;
 }
 
 /// Ustawia wpis w tablicy deskryptorów GDT.
@@ -272,14 +273,24 @@ void
 setgdt(int i, uintptr_t base, uint limit,
     uint acc, uint atrib)
 {
-//     base = base - 0xc0000000 + 0x100000;
+    if ((acc & GATE_TYPE_TASK) == GATE_TYPE_TASK && (acc & GATE_PRESENT)) {
+        tss_descr_t entry;
+        memzero(&entry, sizeof(entry));
+        entry.limit_low = limit & 0xffff;
+        entry.base_low = base & 0xffff;
+        entry.base_mid1 = (base >> 16) & 0xff;
+        entry.access = acc;
+        entry.granularity = ((limit >> 16) & 0x0f) | (atrib & 0xf0);
+        entry.base_mid2 = (base >> 24) & 0xff;
+        entry.base_high = (base >> 32) & 0xffffffff;
+        memcpy(&p_gdt[i], &entry, sizeof(entry));
+        return;
+    }
     segment_descr_t *entry = &p_gdt[i].sdescr;
+    entry->limit_low = limit & 0xffff;
     entry->base_low = base & 0xffff;
     entry->base_mid = (base >> 16) & 0xff;
-    entry->base_high = (base >> 24);
-    entry->limit_low = limit & 0xffff;
-    entry->attr = (limit >> 16) & 0xff;
-    entry->attr |= atrib;
     entry->access = acc;
+    entry->attr = ((limit >> 16) & 0x0f) | (atrib & 0xf0);
+    entry->base_high = (base >> 24) & 0xff;
 }
-

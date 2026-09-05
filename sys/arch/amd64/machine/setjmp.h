@@ -36,9 +36,8 @@
 // piękny triczek aby typ jmp_buf był przekazyway przez referencję
 // a nie przez wartość.
 struct _jmp_buf {
-    int    env[10]; 
+    long env[10];
 };
 typedef struct _jmp_buf jmp_buf[1];
 
 #endif
-

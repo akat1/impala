@@ -46,6 +46,9 @@ struct syscall_result {
 typedef struct syscall_result syscall_result_t;
 
 void syscall(thread_t *t, uint n, syscall_result_t *r, va_list ap);
+void syscall_raw(thread_t *t, uint n, syscall_result_t *r,
+    uintptr_t arg0, uintptr_t arg1, uintptr_t arg2,
+    uintptr_t arg3, uintptr_t arg4, uintptr_t arg5);
 
 typedef int  sc_handler_f(thread_t *t, syscall_result_t *r, va_list ap);
 #else

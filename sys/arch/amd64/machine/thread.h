@@ -42,13 +42,20 @@ struct thread_context {
     uint64_t c_rdx;
     uint64_t c_rsi;
     uint64_t c_rdi;
+    uint64_t c_r8;
+    uint64_t c_r9;
+    uint64_t c_r10;
+    uint64_t c_r11;
+    uint64_t c_r12;
+    uint64_t c_r13;
+    uint64_t c_r14;
+    uint64_t c_r15;
     uint64_t c_rsp;
     uint64_t c_rbp;
     uint64_t c_rflags;
     uint64_t c_cr3;
     uint64_t c_rip;
     struct interrupt_frame *c_frame;
-    ///@todo amd64 registers
     ///@todo NOFPU
 };
 

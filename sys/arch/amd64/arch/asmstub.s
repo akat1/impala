@@ -1,50 +1,18 @@
 # Impala Operating System
-#
-# Copyright (C) 2009 University of Wroclaw. Department of Computer Science
-#    http://www.ii.uni.wroc.pl/
-# Copyright (C) 2009 Mateusz Kocielski, Artur Koninski, Pawel Wieczorek
-#    http://bitbucket.org/wieczyk/impala/
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#  notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#  notice, this list of conditions and the following disclaimer in the
-#  documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-#
-#  $Id$
-#
 
-.code32
+.code64
 
 .equ text_selector, 0x08
 .equ data_selector, 0x10
 
-.equ utext_selector, 0x18
-.equ udata_selector, 0x20
-.equ SEL_DPL3, 0x3
+.equ KSTACKSIZE, 0x16000
+.comm kstack, KSTACKSIZE, 32
 
 .global cpu_user_mode
 .global cpu_gdt_load
 .global cpu_ldt_load
 .global cpu_idt_load
 .global cpu_tr_load
-.global cpu_tss_save
 .global cpu_jmp_sel
 .global thread_context_store
 .global thread_context_load
@@ -61,219 +29,184 @@
 .global kstack
 .global cpu_resume
 
-.macro offset32 name, num
-.equ \name, \num*4
+.macro offset64 name, num
+.equ \name, \num*8
 .endm
 
-.equ KSTACKSIZE, 0x16000
-.comm kstack, KSTACKSIZE, 32
-
-
-offset32    CTX_EAX,    0
-offset32    CTX_EBX,    1
-offset32    CTX_ECX,    2
-offset32    CTX_EDX,    3
-offset32    CTX_ESI,    4
-offset32    CTX_EDI,    5
-offset32    CTX_ESP,    6
-offset32    CTX_EBP,    7
-offset32    CTX_EFLAGS, 8
-offset32    CTX_CR3,    9
-offset32    CTX_EIP,    10
-
-
-cmdline: .long 0
+offset64    CTX_RAX,    0
+offset64    CTX_RBX,    1
+offset64    CTX_RCX,    2
+offset64    CTX_RDX,    3
+offset64    CTX_RSI,    4
+offset64    CTX_RDI,    5
+offset64    CTX_R8,     6
+offset64    CTX_R9,     7
+offset64    CTX_R10,    8
+offset64    CTX_R11,    9
+offset64    CTX_R12,    10
+offset64    CTX_R13,    11
+offset64    CTX_R14,    12
+offset64    CTX_R15,    13
+offset64    CTX_RSP,    14
+offset64    CTX_RBP,    15
+offset64    CTX_RFLAGS, 16
+offset64    CTX_CR3,    17
+offset64    CTX_RIP,    18
 
 kernel_startup:
-    movl 4(%esp), %eax
-#    movl $(kstack + KSTACKSIZE-4), %esp
-    pushl %eax
+    movq 8(%rsp), %rdi
+    movq $(kstack + KSTACKSIZE-16), %rsp
     call init_x86
     call kmain
     jmp .
 
-
 cpu_user_mode:
     ret
-/*
-    movl %esp, %eax
-    pushl $udata_selector|SEL_DPL3
-    pushl %eax
-    pushf
-    popl %eax
-    or $0x200, %eax
-    pushl %eax
-    pushl $utext_selector|SEL_DPL3
-    pushl $1f
-    iret
-1:
-    mov $udata_selector|SEL_DPL3, %ax
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    ret
-*/
 
 # void cpu_resume(interrupt_frame *f);
 cpu_resume:
-    movl 4(%esp), %eax
-    movl %eax, %esp
-    pop %eax
-    popal
-    pop %gs
-    pop %fs
-    pop %es
-    pop %ds
-    add $4, %esp
-    add $4, %esp
+    movq %rdi, %rsp
+    popq %rax
+    movw %ax, %gs
+    popq %rax
+    movw %ax, %fs
+    popq %rax
+    movw %ax, %es
+    popq %rax
+    movw %ax, %ds
+    addq $8, %rsp
+    popq %r15
+    popq %r14
+    popq %r13
+    popq %r12
+    popq %r11
+    popq %r10
+    popq %r9
+    popq %r8
+    popq %rdi
+    popq %rsi
+    popq %rbp
+    popq %rbx
+    popq %rdx
+    popq %rcx
+    popq %rax
+    addq $16, %rsp
     sti
-    iret
-
-
-OLDthread_context_load:
-    enter $0, $0
-    movl 8(%ebp), %edi
-    pushl CTX_EFLAGS(%edi)
-    popfl
-    movl CTX_CR3(%edi), %eax
-    movl %eax, %cr3
-    movl CTX_ESP(%edi), %esp
-    movl CTX_EBP(%edi), %ebp
-    movl $0x0, %eax
-    leave
-    ret
-
-
-OLDthread_context_store:
-    enter $0, $0
-    movl 8(%ebp), %edi
-    pushfl
-    popl CTX_EFLAGS(%edi)
-    movl %ebp, CTX_EBP(%edi)
-    movl %esp, CTX_ESP(%edi)
-    movl %cr3, %eax
-    movl %eax, CTX_CR3(%edi)
-    movl $0x1, %eax
-    leave
-    ret
+    iretq
 
 thread_context_store:
-    movl 4(%esp), %eax
-    movl %ebx, CTX_EBX(%eax)
-    movl %ecx, CTX_ECX(%eax)
-    movl %edx, CTX_EDX(%eax)
-    movl %esi, CTX_ESI(%eax)
-    movl %edi, CTX_EDI(%eax)
-    movl %ebp, CTX_EBP(%eax)
-    movl %esp, CTX_ESP(%eax)
-    movl (%esp), %ebx
-    movl %ebx, CTX_EIP(%eax)
-    movl %cr3, %ebx
-    movl %ebx, CTX_CR3(%eax)
-    pushf
-    popl CTX_EFLAGS(%eax)
-    movl $1, %eax
+    movq %rbx, CTX_RBX(%rdi)
+    movq %rcx, CTX_RCX(%rdi)
+    movq %rdx, CTX_RDX(%rdi)
+    movq %rsi, CTX_RSI(%rdi)
+    movq %r8, CTX_R8(%rdi)
+    movq %r9, CTX_R9(%rdi)
+    movq %r10, CTX_R10(%rdi)
+    movq %r11, CTX_R11(%rdi)
+    movq %r12, CTX_R12(%rdi)
+    movq %r13, CTX_R13(%rdi)
+    movq %r14, CTX_R14(%rdi)
+    movq %r15, CTX_R15(%rdi)
+    movq %rbp, CTX_RBP(%rdi)
+    movq %rsp, CTX_RSP(%rdi)
+    movq (%rsp), %rax
+    movq %rax, CTX_RIP(%rdi)
+    movq %cr3, %rax
+    movq %rax, CTX_CR3(%rdi)
+    pushfq
+    popq CTX_RFLAGS(%rdi)
+    movq $1, %rax
     ret
 
 thread_context_load:
-    movl 4(%esp), %ebx
-    movl CTX_EDX(%ebx), %edx
-    movl CTX_ESI(%ebx), %esi
-    movl CTX_EDI(%ebx), %edi
-    movl CTX_EBP(%ebx), %ebp
-    movl CTX_ESP(%ebx), %esp
-    movl CTX_EIP(%ebx), %ecx
-    movl %ecx, (%esp)
-    movl CTX_ECX(%ebx), %ecx
-    pushl CTX_EFLAGS(%ebx)
-    popfl
-    movl CTX_CR3(%ebx), %eax
-    movl %eax, %cr3
-    movl CTX_EBX(%ebx), %ebx
-    movl $0, %eax
-
+    movq %rdi, %rbx
+    movq CTX_RDX(%rbx), %rdx
+    movq CTX_RSI(%rbx), %rsi
+    movq CTX_R8(%rbx), %r8
+    movq CTX_R9(%rbx), %r9
+    movq CTX_R10(%rbx), %r10
+    movq CTX_R11(%rbx), %r11
+    movq CTX_R12(%rbx), %r12
+    movq CTX_R13(%rbx), %r13
+    movq CTX_R14(%rbx), %r14
+    movq CTX_R15(%rbx), %r15
+    movq CTX_RBP(%rbx), %rbp
+    movq CTX_RSP(%rbx), %rsp
+    movq CTX_RIP(%rbx), %rcx
+    movq %rcx, (%rsp)
+    movq CTX_RCX(%rbx), %rcx
+    pushq CTX_RFLAGS(%rbx)
+    popfq
+    movq CTX_CR3(%rbx), %rax
+    movq %rax, %cr3
+    movq CTX_RBX(%rbx), %rbx
+    xorq %rax, %rax
     ret
 
 cpu_gdt_load:
-/*
-    enter $0,$0
-    movl 8(%ebp), %eax
-    lgdt (%eax)
-    movl $data_selector, %eax
-    movl %eax, %ds
-    movl %eax, %es
-    movl %eax, %fs
-    movl %eax, %gs
-    movl %eax, %ss
-    ljmp $text_selector, $gdt_load.1
-    movl %eax, %cr0
-    or $0x1, %eax
-    movl %cr0, %eax
-gdt_load.1:
-    leave
-*/
+    lgdt (%rdi)
+    movq $data_selector, %rax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw %ax, %ss
     ret
 
 cpu_ldt_load:
-    movl 4(%esp), %eax
-    lldt (%eax)
+    lldt (%rdi)
     ret
 
 cpu_idt_load:
-    movl 4(%esp), %eax
-    lidt (%eax)
+    lidt (%rdi)
     ret
 
 cpu_tr_load:
-    ltr 4(%esp)
+    ltr %di
     ret
 
 cpu_get_cr0:
-    movl %cr0, %eax
+    movq %cr0, %rax
     ret
 
 cpu_set_cr0:
-    movl 4(%esp), %eax
-    movl %eax, %cr0
+    movq %rdi, %cr0
     ret
 
 cpu_get_cr2:
-    movl %cr2, %eax
+    movq %cr2, %rax
     ret
 
 cpu_set_cr2:
-    movl 4(%esp), %eax
-    movl %eax, %cr2
+    movq %rdi, %cr2
     ret
 
 cpu_get_cr3:
-    movl %cr3, %eax
+    movq %cr3, %rax
     ret
 
 cpu_set_cr3:
-    movl 4(%esp), %eax
-    movl %eax, %cr3
+    movq %rdi, %cr3
     ret
 
 cpu_get_cr4:
-    movl %cr4, %eax
+    movq %cr4, %rax
     ret
 
 cpu_set_cr4:
-    movl 4(%esp), %eax
-    movl %eax, %cr4
+    movq %rdi, %cr4
     ret
 
 cpu_get_eflags:
-    pushf
-    popl %eax
+    pushfq
+    popq %rax
     ret
 
 cpu_jmp_sel:
-    movl 4(%esp), %eax
-    pushl $0x0
-    pushl %eax
-    ljmp *-4(%esp)
-    addl $8, %esp
+    movzwq %di, %rax
+    pushq %rax
+    leaq 1f(%rip), %rax
+    pushq %rax
+    lretq
+1:
     ret

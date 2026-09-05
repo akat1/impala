@@ -37,6 +37,16 @@
 
 #include "systab.c"
 
+static int
+syscall_invoke(thread_t *thr, syscall_result_t *r, sc_handler_f *handler, ...)
+{
+    va_list ap;
+    VA_START(ap, handler);
+    int err = handler(thr, r, ap);
+    VA_END(ap);
+    return err;
+}
+
 void
 syscall(thread_t *thr, uint n, syscall_result_t *r, va_list ap)
 {
@@ -51,3 +61,17 @@ syscall(thread_t *thr, uint n, syscall_result_t *r, va_list ap)
     return;
 }
 
+void
+syscall_raw(thread_t *thr, uint n, syscall_result_t *r,
+    uintptr_t arg0, uintptr_t arg1, uintptr_t arg2,
+    uintptr_t arg3, uintptr_t arg4, uintptr_t arg5)
+{
+    if (n < SYS_MAX) {
+        r->result = 0;
+        r->errno = -syscall_invoke(thr, r, syscall_table[n],
+            arg0, arg1, arg2, arg3, arg4, arg5);
+        if (r->errno) {
+            r->result = -1;
+        }
+    }
+}

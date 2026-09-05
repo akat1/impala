@@ -76,22 +76,26 @@ typedef bool irq_handler_f(void);
 
 typedef struct interrupt_frame interrupt_frame;
 struct interrupt_frame {
-    // pusha
+    uint64_t f_ds;
+    uint64_t f_es;
+    uint64_t f_fs;
+    uint64_t f_gs;
     uint64_t test;
+    uint64_t f_r15;
+    uint64_t f_r14;
+    uint64_t f_r13;
+    uint64_t f_r12;
+    uint64_t f_r11;
+    uint64_t f_r10;
+    uint64_t f_r9;
+    uint64_t f_r8;
     uint64_t f_rdi;
     uint64_t f_rsi;
     uint64_t f_rbp;
-    uint64_t f_isp;
     uint64_t f_rbx;
     uint64_t f_rdx;
     uint64_t f_rcx;
     uint64_t f_rax;
-
-    // recznie
-    uint64_t f_gs;
-    uint64_t f_fs;
-    uint64_t f_es;
-    uint64_t f_ds;
 
     uint64_t f_n;
     uint64_t f_errno;

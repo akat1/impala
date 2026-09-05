@@ -44,11 +44,11 @@
 #include <machine/cpu.h>
 
 
-void ISR_irq(interrupt_frame f);
-void ISR_syscall(interrupt_frame frame);
-void TRAP_unhandled(interrupt_frame fr);
-void TRAP_gfault(interrupt_frame fr);
-void TRAP_pfault(interrupt_frame fr);
+void ISR_irq(interrupt_frame *f);
+void ISR_syscall(interrupt_frame *frame);
+void TRAP_unhandled(interrupt_frame *fr);
+void TRAP_gfault(interrupt_frame *fr);
+void TRAP_pfault(interrupt_frame *fr);
 static void print_frame(const char *s, interrupt_frame *f);
 int volatile CIPL;    ///< current interrupt priority level
 
@@ -80,77 +80,81 @@ irq_free_handler(int irq)
 }
 
 void
-ISR_irq(interrupt_frame frame)
+ISR_irq(interrupt_frame *frame)
 {
     int opl=CIPL;
-    if (frame.f_n < MAX_IRQ) {
-        if(irq_handlers[frame.f_n] != NULL)
+    if (frame->f_n < MAX_IRQ) {
+        if(irq_handlers[frame->f_n] != NULL)
         {
-            CIPL = irq_priority[frame.f_n];
+            CIPL = irq_priority[frame->f_n];
             i8259a_reset_mask();
             irq_enable();
-            irq_handlers[frame.f_n]();
+            irq_handlers[frame->f_n]();
         }
     }
     splx(opl);  //jeśli wracamy do zera, to tu może nastąpić zmiana kontekstu
 }
 
-void
-ISR_syscall(interrupt_frame frame)
+static void
+_syscall_dispatch(thread_t *thisthr, uint n, syscall_result_t *result,
+    uintptr_t arg0, uintptr_t arg1, uintptr_t arg2,
+    uintptr_t arg3, uintptr_t arg4, uintptr_t arg5)
 {
-//XXXamd64
-#if 0
-    UPDATE(&frame);
-    va_list ap;
+    syscall_raw(thisthr, n, result, arg0, arg1, arg2, arg3, arg4, arg5);
+}
+
+void
+ISR_syscall(interrupt_frame *frame)
+{
     syscall_result_t result;
     thread_t *thisthr = curthread;
     irq_enable();
     
     memzero(&result, sizeof(result));
-    //XXXamd64ap = (va_list) (frame.f_esp + 16);
+    UPDATE(frame);
     thisthr->thr_flags |= THREAD_SYSCALL;
-    
 
-    syscall(thisthr, frame.f_eax, &result, ap);
+    _syscall_dispatch(thisthr, frame->f_rax, &result,
+        frame->f_rdi, frame->f_rsi, frame->f_rdx,
+        frame->f_r10, frame->f_r8, frame->f_r9);
     thisthr->thr_flags &= ~THREAD_SYSCALL;
 
     signal_handle(thisthr);
 
     // result
-    frame.f_eax = result.result;
-    frame.f_ecx = result.errno;
-#endif
+    frame->f_rax = result.result;
+    frame->f_rcx = result.errno;
 }
 
 void
-TRAP_unhandled(interrupt_frame f)
+TRAP_unhandled(interrupt_frame *f)
 {
     while(1) __asm__("hlt");
-    print_frame("unhandled exception", &f);
+    print_frame("unhandled exception", f);
     __asm__("hlt");
     while(1);
 }
 
 void
-TRAP_gfault(interrupt_frame f)
+TRAP_gfault(interrupt_frame *f)
 {
     //panic("General protection fault\n");
-    print_frame("general protection fault", &f);
+    print_frame("general protection fault", f);
     __asm__("hlt");
     while(1);
 }
 
 void
-TRAP_pfault(interrupt_frame f)
+TRAP_pfault(interrupt_frame *f)
 {
     vm_trap_frame_t vtf;
     vtf.fault_addr = cpu_get_cr2();
-    vtf.reason = (f.f_errno & PFE_PRESENT)?
+    vtf.reason = (f->f_errno & PFE_PRESENT)?
              VM_PFAULT_NO_PERMISSION
             : VM_PFAULT_NO_PRESENT;
-    vtf.in_kernel = !(f.f_errno & PFE_US);
-    vtf.operation = (f.f_errno & PFE_WR)? VM_WRITE : VM_READ;
-    vtf.preempted_addr = f.f_rip;
+    vtf.in_kernel = !(f->f_errno & PFE_US);
+    vtf.operation = (f->f_errno & PFE_WR)? VM_WRITE : VM_READ;
+    vtf.preempted_addr = f->f_rip;
     kprintf("CIPL: %i\n", CIPL);
     vm_trap_pfault(&vtf);
 }
@@ -252,6 +256,3 @@ splx(int pl)
         i8259a_reset_mask();    //CIPL już jest, tylko wyślij do PIC'a
     irq_enable();
 }
-
-
-

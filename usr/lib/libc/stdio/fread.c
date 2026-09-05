@@ -26,7 +26,7 @@ fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
     fflush(stream);
     r = __get_data(stream, ptr, size*nmemb);
     if(r>0)
-        /* XXXamd64 - volatile used to avoid udivdi3 */
+        /* volatile avoids compiler-emitted udivdi3 call */
         return r/(volatile)size;
     stream->err |= _FER_EOF;
     return 0;

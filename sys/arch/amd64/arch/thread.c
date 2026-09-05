@@ -133,7 +133,7 @@ thread_sigreturn(thread_t *t)
 void
 thread_prepare(thread_t *t, vm_addr_t av, vm_addr_t ev, vm_size_t off)
 {
-    uint32_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - 4 - off;
+    uintptr_t ESP = (uintptr_t)t->thr_stack + t->thr_stack_size - sizeof(void*) - off;
     interrupt_frame *frame = t->thr_context.c_frame;
     memzero(t->thr_kstack, t->thr_kstack_size);
     if (t->thr_flags & THREAD_USER) {
@@ -184,7 +184,7 @@ thread_switch(thread_t * volatile t_to, thread_t * volatile t_from)
 {
     if (t_from==NULL || thread_context_store(&t_from->thr_context)) {
         curthread = t_to;
-        setesp0(t_to->thr_kstack + t_to->thr_kstack_size -4);
+        setesp0(t_to->thr_kstack + t_to->thr_kstack_size - sizeof(void*));
         if (t_to->thr_flags & THREAD_NEW) {
             thread_resume(t_to);
             if (0) __thread_enter(t_to);
@@ -234,7 +234,7 @@ __thread_enter(thread_t *t_to)
     vm_pmap_switch(&t_to->vm_space->pmap);
     void *arg = t_to->thr_entry_arg;
     entry_point entry = (entry_point) t_to->thr_entry_point;
-    uint32_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - 4;
+    uintptr_t ESP = (uintptr_t)t_to->thr_stack + t_to->thr_stack_size - sizeof(void*);
 
     CIPL = 0;
     extern void i8259a_reset_mask(void);

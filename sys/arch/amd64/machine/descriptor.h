@@ -51,16 +51,30 @@ typedef struct gate_descr gate_descr_t;
 struct gate_descr {
     uint16_t    offset_low;
     uint16_t    selector;
-    uint8_t     notused;
+    uint8_t     ist;
     uint8_t     access;
-    uint16_t    offset_high;
+    uint16_t    offset_mid;
+    uint32_t    offset_high;
+    uint32_t    reserved;
+} __packed;
+
+typedef struct tss_descr tss_descr_t;
+struct tss_descr {
+    uint16_t limit_low;
+    uint16_t base_low;
+    uint8_t  base_mid1;
+    uint8_t  access;
+    uint8_t  granularity;
+    uint8_t  base_mid2;
+    uint32_t base_high;
+    uint32_t reserved;
 } __packed;
 
 typedef union descriptor descriptor_t;
 /// Deskryptor.
 union descriptor {
     segment_descr_t   sdescr;
-    gate_descr_t      gdescr;
+    uint64_t          raw;
 };
 
 /// Indeksy GDT.
@@ -87,7 +101,7 @@ typedef struct descriptor_register descriptor_register_t;
 /// Opis rejestrów GDT i LDT.
 struct descriptor_register {
   uint16_t  limit;
-  addr_t    base;
+  uintptr_t base;
 } __packed;
 
 #define SEL_MK(sel, flags) ((sel * 8) | flags)
@@ -144,8 +158,8 @@ enum {
 void cpu_gdt_load(descriptor_register_t *r);
 void cpu_ldt_load(descriptor_register_t *r);
 void cpu_idt_load(descriptor_register_t *r);
-void cpu_tr_load(uint32_t sel);
-void cpu_jmp_sel(uint32_t sel);
+void cpu_tr_load(uint16_t sel);
+void cpu_jmp_sel(uint16_t sel);
 #endif
 
 #endif

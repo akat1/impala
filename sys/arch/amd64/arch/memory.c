@@ -114,8 +114,8 @@ vm_enable_paging()
 void
 vm_enable_cache()
 {
-    uint32_t cr0 = cpu_get_cr0();
-    uint32_t cr4 = cpu_get_cr4();
+    uint64_t cr0 = cpu_get_cr0();
+    uint64_t cr4 = cpu_get_cr4();
     UNSET(cr0, CR0_CD|CR0_NW);
     SET(cr4, CR4_PGE);
     cpu_set_cr0(cr0);
@@ -126,8 +126,8 @@ vm_enable_cache()
 void
 vm_disable_cache()
 {
-    uint32_t cr0 = cpu_get_cr0();
-    uint32_t cr4 = cpu_get_cr4();
+    uint64_t cr0 = cpu_get_cr0();
+    uint64_t cr4 = cpu_get_cr4();
     SET(cr0, CR0_CD|CR0_NW);
     UNSET(cr4, CR4_PGE);
     cpu_set_cr0(cr0);

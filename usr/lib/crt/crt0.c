@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio_private.h>
 #include <stdlib_private.h>
+#include <stdarg.h>
 
 int syscall(int SC, ...);
 int main(int argc, char **argv, char **envp);
@@ -26,11 +27,24 @@ char **environ = NULL;
 int
 syscall(int SC, ...)
 {
-    __asm__ (
-        "movl %%ebx, %%eax;"
-        " int $0x80"
-        : "=a"(retval), "=c"(errno) 
-        : "b"(SC)
+    uintptr_t args[6] = {0, 0, 0, 0, 0, 0};
+    va_list ap;
+    va_start(ap, SC);
+    for (int i = 0; i < 6; i++)
+        args[i] = va_arg(ap, uintptr_t);
+    va_end(ap);
+
+    register uintptr_t reg_r10 __asm__("r10") = args[3];
+    register uintptr_t reg_r8 __asm__("r8") = args[4];
+    register uintptr_t reg_r9 __asm__("r9") = args[5];
+
+    __asm__ volatile (
+        "int $0x80"
+        : "=a"(retval), "=c"(errno)
+        : "a"((uintptr_t)SC),
+          "D"(args[0]), "S"(args[1]), "d"(args[2]),
+          "r"(reg_r10), "r"(reg_r8), "r"(reg_r9)
+        : "r11", "memory"
     );
     return retval;
 }
@@ -40,9 +54,9 @@ _start()
 {
     char **argv;
     char **envp;
-    __asm__(
-        "movl %%edi, %0;"
-        "movl %%esi, %1;"
+    __asm__ volatile(
+        "movq %%rdi, %0;"
+        "movq %%rsi, %1;"
         : "=m"(argv), "=m"(envp)
         :
     );
@@ -70,4 +84,3 @@ _start()
     exit(main(c, argv, environ));
     for (;;); 
 }
-
