@@ -63,6 +63,10 @@ To prepare floppy images you need to type this command:
 
 - `make distribution`
 
+Host prerequisites for distribution image generation:
+
+- `mtools` package (for `mcopy`)
+
 Then in the distribution directory you will find those images:
 
 - `distribution/default/floppy.img` - our system, with demos and all commands
